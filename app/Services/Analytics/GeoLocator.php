@@ -19,14 +19,14 @@ class GeoLocator
     public static function fromCache(string $ip): ?array
     {
         $row = DB::table('geoip_cache')->where('ip', $ip)->first();
-        return $row ? ['country' => $row->country, 'region' => $row->region, 'city' => $row->city] : null;
+        return $row ? ['country' => $row->country, 'country_code' => $row->country_code, 'region' => $row->region, 'city' => $row->city] : null;
     }
 
     /** Resolve with cache, falling back to a remote lookup and caching the result. */
     public static function resolve(string $ip): array
     {
         if (self::isPrivate($ip)) {
-            return self::cacheAndReturn($ip, ['country' => 'Local', 'region' => null, 'city' => null]);
+            return self::cacheAndReturn($ip, ['country' => 'Local', 'country_code' => null, 'region' => null, 'city' => null]);
         }
 
         $cached = self::fromCache($ip);
@@ -41,19 +41,20 @@ class GeoLocator
     {
         try {
             $resp = Http::timeout(4)->get("http://ip-api.com/json/{$ip}", [
-                'fields' => 'status,country,regionName,city',
+                'fields' => 'status,country,countryCode,regionName,city',
             ]);
             if ($resp->ok() && $resp->json('status') === 'success') {
                 return [
-                    'country' => $resp->json('country'),
-                    'region'  => $resp->json('regionName'),
-                    'city'    => $resp->json('city'),
+                    'country'      => $resp->json('country'),
+                    'country_code' => $resp->json('countryCode'),
+                    'region'       => $resp->json('regionName'),
+                    'city'         => $resp->json('city'),
                 ];
             }
         } catch (\Throwable $e) {
             // ignore — return unknowns below
         }
-        return ['country' => null, 'region' => null, 'city' => null];
+        return ['country' => null, 'country_code' => null, 'region' => null, 'city' => null];
     }
 
     protected static function cacheAndReturn(string $ip, array $geo): array
@@ -61,10 +62,11 @@ class GeoLocator
         DB::table('geoip_cache')->updateOrInsert(
             ['ip' => $ip],
             [
-                'country'     => $geo['country'] ?? null,
-                'region'      => $geo['region'] ?? null,
-                'city'        => $geo['city'] ?? null,
-                'resolved_at' => now(),
+                'country'      => $geo['country'] ?? null,
+                'country_code' => $geo['country_code'] ?? null,
+                'region'       => $geo['region'] ?? null,
+                'city'         => $geo['city'] ?? null,
+                'resolved_at'  => now(),
             ]
         );
         return $geo;

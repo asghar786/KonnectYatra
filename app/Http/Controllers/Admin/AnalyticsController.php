@@ -151,6 +151,19 @@ class AnalyticsController extends Controller
         $states = $b()->where('country', 'United States')->whereNotNull('region')
             ->select('region', DB::raw('COUNT(DISTINCT session_id) c'))->groupBy('region')->orderByDesc('c')->limit(15)->get();
 
+        // Map datasets + cities
+        $countryGeo = $b()->whereNotNull('country_code')->where('country_code', '<>', '')
+            ->select('country_code', DB::raw('COUNT(DISTINCT session_id) c'))->groupBy('country_code')->pluck('c', 'country_code');
+        $topCities = $b()->whereNotNull('city')->where('city', '<>', '')
+            ->select('city', 'region', DB::raw('COUNT(DISTINCT session_id) c'))
+            ->groupBy('city', 'region')->orderByDesc('c')->limit(15)->get();
+        // US state map keyed by jsVectorMap codes (US-CA, ...)
+        $stateGeo = [];
+        foreach ($states as $s) {
+            $code = self::stateCode($s->region);
+            if ($code) { $stateGeo[$code] = $s->c; }
+        }
+
         // Conversions
         $convByType = DB::table('conversions')->whereBetween('created_at', [$start, $end])
             ->select('type', DB::raw('COUNT(*) c'))->groupBy('type')->pluck('c', 'type');
@@ -165,8 +178,27 @@ class AnalyticsController extends Controller
             'bounceRate', 'avgDuration', 'daily', 'hourly', 'devices', 'browsers', 'platforms',
             'sources', 'topReferrers', 'campaigns', 'topPages', 'leastPages', 'entryPages',
             'exitPages', 'countries', 'states', 'convByType', 'totalConversions',
-            'conversionRate', 'convBySource'
+            'conversionRate', 'convBySource', 'countryGeo', 'topCities', 'stateGeo'
         );
+    }
+
+    /** US state full name -> jsVectorMap region code (US-XX). */
+    private static function stateCode(?string $name): ?string
+    {
+        static $map = [
+            'Alabama'=>'AL','Alaska'=>'AK','Arizona'=>'AZ','Arkansas'=>'AR','California'=>'CA',
+            'Colorado'=>'CO','Connecticut'=>'CT','Delaware'=>'DE','Florida'=>'FL','Georgia'=>'GA',
+            'Hawaii'=>'HI','Idaho'=>'ID','Illinois'=>'IL','Indiana'=>'IN','Iowa'=>'IA','Kansas'=>'KS',
+            'Kentucky'=>'KY','Louisiana'=>'LA','Maine'=>'ME','Maryland'=>'MD','Massachusetts'=>'MA',
+            'Michigan'=>'MI','Minnesota'=>'MN','Mississippi'=>'MS','Missouri'=>'MO','Montana'=>'MT',
+            'Nebraska'=>'NE','Nevada'=>'NV','New Hampshire'=>'NH','New Jersey'=>'NJ','New Mexico'=>'NM',
+            'New York'=>'NY','North Carolina'=>'NC','North Dakota'=>'ND','Ohio'=>'OH','Oklahoma'=>'OK',
+            'Oregon'=>'OR','Pennsylvania'=>'PA','Rhode Island'=>'RI','South Carolina'=>'SC',
+            'South Dakota'=>'SD','Tennessee'=>'TN','Texas'=>'TX','Utah'=>'UT','Vermont'=>'VT',
+            'Virginia'=>'VA','Washington'=>'WA','West Virginia'=>'WV','Wisconsin'=>'WI','Wyoming'=>'WY',
+            'District of Columbia'=>'DC',
+        ];
+        return isset($map[$name]) ? 'US-' . $map[$name] : null;
     }
 
     /** Entry (MIN id) or Exit (MAX id) pages per session. */

@@ -36,9 +36,10 @@ class ResolveVisitGeo extends Command
                 ->where('ip', $ip)
                 ->whereNull('country')
                 ->update([
-                    'country' => $geo['country'] ?? 'Unknown',
-                    'region'  => $geo['region'],
-                    'city'    => $geo['city'],
+                    'country'      => $geo['country'] ?? 'Unknown',
+                    'country_code' => $geo['country_code'] ?? null,
+                    'region'       => $geo['region'],
+                    'city'         => $geo['city'],
                 ]);
             $resolved++;
             // Respect ip-api free-tier rate limit (45/min) for public IPs.

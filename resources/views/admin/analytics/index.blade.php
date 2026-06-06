@@ -153,6 +153,29 @@
                 @endforeach
             </div>
 
+            <!-- Geography maps -->
+            <div class="row">
+                <div class="col-lg-7 mb-4">
+                    <div class="an-card"><h5>World — Sessions by Country</h5>
+                        <div id="worldMap" style="height:340px"></div>
+                    </div>
+                </div>
+                <div class="col-lg-5 mb-4">
+                    <div class="an-card"><h5>Top Cities</h5>
+                        <table class="an-table"><thead><tr><th>City</th><th>State/Region</th><th>Sessions</th></tr></thead><tbody>
+                        @forelse($topCities as $row)<tr><td>{{ $row->city }}</td><td>{{ $row->region ?: '—' }}</td><td>{{ $row->c }}</td></tr>@empty<tr><td colspan="3" class="text-muted">No city data yet (run analytics:resolve-geo)</td></tr>@endforelse
+                        </tbody></table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 mb-4">
+                    <div class="an-card"><h5>United States — Sessions by State</h5>
+                        <div id="usMap" style="height:380px"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Geo -->
             <div class="row">
                 <div class="col-lg-6 mb-4">
@@ -272,6 +295,34 @@
     }
     loadRealtime();
     setInterval(loadRealtime, 15000);
+})();
+</script>
+
+<!-- Interactive maps (jsVectorMap) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/us_aea_en.js"></script>
+<script>
+(function(){
+    var worldData = @json($countryGeo);
+    var usData = @json($stateGeo);
+    function drawMap(sel, mapName, values){
+        var el = document.querySelector(sel);
+        if(!el || typeof jsVectorMap === 'undefined') return;
+        try {
+            new jsVectorMap({
+                selector: sel, map: mapName, zoomButtons: true,
+                regionStyle:{ initial:{ fill:'#e6e6e6' }, hover:{ fill:'#f54e18' } },
+                series:{ regions:[{ attribute:'fill', scale:['#cfe2f3','#08519c'], normalizeFunction:'polynomial', values: values }] },
+                onRegionTooltipShow: function(event, tooltip, code){
+                    tooltip.text(tooltip.text() + ': ' + (values[code] || 0) + ' sessions', true);
+                }
+            });
+        } catch(e){ el.innerHTML = '<p class="text-muted">Map could not load.</p>'; }
+    }
+    drawMap('#worldMap', 'world', worldData);
+    drawMap('#usMap', 'us_aea_en', usData);
 })();
 </script>
 @endsection
