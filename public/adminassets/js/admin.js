@@ -176,5 +176,5 @@ Theme Version:	1.0.0
 		}(jQuery);
 		
 	/* jQuery ready  */	
-	jQuery(document).on('ready',function() {AdminBuilder.initialHelper();});
+	jQuery(function() {AdminBuilder.initialHelper();});
 })(jQuery);
