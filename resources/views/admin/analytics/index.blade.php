@@ -194,6 +194,62 @@
                 </div>
             </div>
 
+            <!-- Navigation flow + geo drill-down -->
+            @php $baseUrl = url('admin/analytics'); $qbase = ['range'=>$range,'from'=>$from,'to'=>$to]; @endphp
+            <div class="row">
+                <div class="col-lg-7 mb-4">
+                    <div class="an-card"><h5>Navigation Flow (top page transitions)</h5>
+                        @php $flowMax = $flow->max('count') ?: 1; @endphp
+                        <table class="an-table"><thead><tr><th>From → To</th><th>Sessions</th></tr></thead><tbody>
+                        @forelse($flow as $t)
+                            <tr>
+                                <td><span style="color:#666">{{ $t['from'] }}</span> <i class="fa fa-arrow-right" style="color:#f54e18;font-size:11px"></i> <strong>{{ $t['to'] }}</strong>
+                                    <div style="height:4px;background:#eee;border-radius:3px;margin-top:4px"><div style="height:4px;border-radius:3px;background:#4c1864;width:{{ round($t['count']/$flowMax*100) }}%"></div></div>
+                                </td>
+                                <td>{{ $t['count'] }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="text-muted">Not enough multi-page sessions yet.</td></tr>
+                        @endforelse
+                        </tbody></table>
+                    </div>
+                </div>
+                <div class="col-lg-5 mb-4">
+                    <div class="an-card">
+                        <h5>Geographic Drill-down</h5>
+                        {{-- Breadcrumb --}}
+                        <div style="font-size:13px;margin-bottom:10px">
+                            <a href="{{ $baseUrl }}?{{ http_build_query($qbase) }}">🌍 All Countries</a>
+                            @if(($drill['level'] ?? '') !== 'country')
+                                <span class="text-muted"> / </span>
+                                <a href="{{ $baseUrl }}?{{ http_build_query($qbase + ['drill_country'=>$drill['country']]) }}">{{ $drill['country'] }}</a>
+                            @endif
+                            @if(($drill['level'] ?? '') === 'city')
+                                <span class="text-muted"> / </span><strong>{{ $drill['state'] }}</strong>
+                            @endif
+                        </div>
+                        <table class="an-table"><thead><tr><th>{{ ucfirst($drill['level']) }}</th><th>Sessions</th></tr></thead><tbody>
+                        @forelse($drill['rows'] as $row)
+                            <tr>
+                                <td>
+                                    @if($drill['level'] === 'country')
+                                        <a href="{{ $baseUrl }}?{{ http_build_query($qbase + ['drill_country'=>$row->label]) }}">{{ $row->label }}</a>
+                                    @elseif($drill['level'] === 'state')
+                                        <a href="{{ $baseUrl }}?{{ http_build_query($qbase + ['drill_country'=>$drill['country'],'drill_state'=>$row->label]) }}">{{ $row->label }}</a>
+                                    @else
+                                        {{ $row->label }}
+                                    @endif
+                                </td>
+                                <td>{{ $row->c }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="2" class="text-muted">No data at this level.</td></tr>
+                        @endforelse
+                        </tbody></table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Sources detail + conversions -->
             <div class="row">
                 <div class="col-lg-4 mb-4">

@@ -13,6 +13,8 @@ class AnalyticsController extends Controller
     {
         [$start, $end, $rangeLabel] = $this->dateWindow($request);
         $data = $this->buildMetrics($start, $end);
+        $data['flow']        = $this->navigationFlow($start, $end);
+        $data['drill']       = $this->geoDrill($start, $end, $request);
         $data['range']       = $request->input('range', '30');
         $data['from']        = $start->toDateString();
         $data['to']          = $end->toDateString();
@@ -199,6 +201,56 @@ class AnalyticsController extends Controller
             'District of Columbia'=>'DC',
         ];
         return isset($map[$name]) ? 'US-' . $map[$name] : null;
+    }
+
+    /** Top page-to-page transitions within sessions (navigation flow). */
+    private function navigationFlow($start, $end)
+    {
+        $rows = DB::table('visits')->where('is_bot', 0)->whereBetween('created_at', [$start, $end])
+            ->orderBy('session_id')->orderBy('id')
+            ->select('session_id', 'url')->limit(20000)->get();
+
+        $trans = [];
+        $prevSession = null; $prevUrl = null;
+        foreach ($rows as $r) {
+            if ($r->session_id === $prevSession && $prevUrl !== null && $prevUrl !== $r->url) {
+                $key = $prevUrl . "\t" . $r->url;
+                $trans[$key] = ($trans[$key] ?? 0) + 1;
+            }
+            $prevSession = $r->session_id; $prevUrl = $r->url;
+        }
+        arsort($trans);
+        $out = [];
+        foreach (array_slice($trans, 0, 15, true) as $key => $count) {
+            [$from, $to] = explode("\t", $key);
+            $out[] = ['from' => $from, 'to' => $to, 'count' => $count];
+        }
+        return collect($out);
+    }
+
+    /** Geographic drill-down: country -> state -> city based on request params. */
+    private function geoDrill($start, $end, Request $request): array
+    {
+        $b = fn() => $this->base($start, $end);
+        $country = $request->input('drill_country');
+        $state   = $request->input('drill_state');
+
+        if ($state) {
+            $rows = $b()->where('region', $state)->whereNotNull('city')->where('city', '<>', '')
+                ->select('city as label', DB::raw('COUNT(DISTINCT session_id) c'))
+                ->groupBy('city')->orderByDesc('c')->limit(25)->get();
+            return ['level' => 'city', 'country' => $country, 'state' => $state, 'rows' => $rows];
+        }
+        if ($country) {
+            $rows = $b()->where('country', $country)->whereNotNull('region')->where('region', '<>', '')
+                ->select('region as label', DB::raw('COUNT(DISTINCT session_id) c'))
+                ->groupBy('region')->orderByDesc('c')->limit(40)->get();
+            return ['level' => 'state', 'country' => $country, 'rows' => $rows];
+        }
+        $rows = $b()->whereNotNull('country')->where('country', '<>', '')
+            ->select('country as label', DB::raw('COUNT(DISTINCT session_id) c'))
+            ->groupBy('country')->orderByDesc('c')->limit(40)->get();
+        return ['level' => 'country', 'rows' => $rows];
     }
 
     /** Entry (MIN id) or Exit (MAX id) pages per session. */
