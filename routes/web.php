@@ -30,6 +30,9 @@ use App\Http\Controllers\PassportInfoController;
 use App\Http\Controllers\Admin\AccountingController;
 use App\Http\Controllers\Admin\BalanceController;
 use App\Http\Controllers\Admin\ChargesController;
+use App\Http\Controllers\Admin\PageBannerController;
+use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\BlogController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -82,6 +85,9 @@ Route::get('/location-detail/{id}', [UserPackages::class, 'location_detail'])->n
 Route::get('/event-detail/{id}', [UserPackages::class, 'event_detail'])->name('event_detail');
 Route::get('/news-detail/{id}', [UserPackages::class, 'news_detail'])->name('news_detail');
 
+Route::get('/blogs', [BlogController::class, 'index'])->name('blogs');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog_detail');
+
 Route::post('/save-info', [UserPackages::class, 'save_info'])->name('save_info');
 
 // Admin Part //
@@ -133,6 +139,18 @@ Route::group(['prefix' => 'admin',
     Route::get('/news/edit/{id}',[PackagesController::class, 'edit_news'])->name('edit_news');
     Route::post('/news/edit/{id}',[PackagesController::class, 'edit_news'])->name('edit_news');
     Route::get('/news/delete/{id}',[PackagesController::class, 'delete_news'])->name('delete_news');
+
+    // Page banners
+    Route::get('/page-banners',[PageBannerController::class, 'index'])->name('page_banners');
+    Route::post('/page-banners/{id}',[PageBannerController::class, 'update'])->name('page_banners_update');
+
+    // Blogs
+    Route::get('/blogs',[AdminBlogController::class, 'index'])->name('blogs_admin');
+    Route::get('/blogs/create',[AdminBlogController::class, 'create'])->name('create_blog');
+    Route::post('/blogs/create',[AdminBlogController::class, 'create']);
+    Route::get('/blogs/edit/{id}',[AdminBlogController::class, 'edit'])->name('edit_blog');
+    Route::post('/blogs/edit/{id}',[AdminBlogController::class, 'edit']);
+    Route::get('/blogs/delete/{id}',[AdminBlogController::class, 'delete'])->name('delete_blog');
 
     Route::get('/ids',[PackagesController::class, 'ids'])->name('ids');
     Route::get('/ids/create',[PackagesController::class, 'create_ids'])->name('create_ids');

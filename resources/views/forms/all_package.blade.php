@@ -127,7 +127,7 @@ a{
 
   <section class="inner-banner-wrap pb-0">
     <div class="inner-baner-container" 
-    style="background-image: url(public/assets/images2/Inner-banner-01.png);background-position: center !important;">
+    style="background-image: url('{{ \App\Models\PageBanner::url('all-packages', asset('assets/images2/Inner-banner-01.png')) }}');background-position: center !important;">
     <div class="container">
     <div class="inner-banner-content">
        <h1 class="inner-title" style="font-size:65px !important;">PACKAGES</h1>

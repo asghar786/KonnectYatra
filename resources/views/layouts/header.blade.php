@@ -141,6 +141,7 @@
 								<li><a href="{{route('itinerary')}}">Airline Tickets <i class="#"></i></a></li>
 								<li><a href="{{route('gurdwaras')}}">Gurdwaras</a></li>
 								<li><a href="{{route('aboutus')}}">About<i class="#"></i></a></li>
+								<li><a href="{{route('blogs')}}">Blogs<i class="#"></i></a></li>
 								<li><a href="{{route('contactus')}}">Contact Us<i class="#"></i></a></li>
 							</ul>
 						</nav>

@@ -95,6 +95,18 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{route('blogs_admin')}}" class="ttr-material-button">
+                        <span class="ttr-icon"><i class="fas fa-blog text-success"></i></span>
+                        <span class="ttr-label">Blogs</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('page_banners')}}" class="ttr-material-button">
+                        <span class="ttr-icon"><i class="fas fa-image text-primary"></i></span>
+                        <span class="ttr-label">Page Banners</span>
+                    </a>
+                </li>
+                <li>
                     <a href="{{route('apply_packages')}}" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-book text-primary"></i></span>
                         <span class="ttr-label">Packages</span>

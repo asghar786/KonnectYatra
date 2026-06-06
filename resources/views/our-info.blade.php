@@ -3,7 +3,7 @@
 
 <main id="content" class="site-main">
     <section class="inner-banner-wrap">
-        <div class="inner-baner-container" style="background-image: url(public/assets/images2/Inner-banner-01.png); background-position:center;">
+        <div class="inner-baner-container" style="background-image: url('{{ \App\Models\PageBanner::url('our-info', asset('assets/images2/Inner-banner-01.png')) }}'); background-position:center;">
             <div class="container">
                 <div class="inner-banner-content">
                     <h1 class="inner-title" style="font-size:65px !important;">OUR INFO</h1>

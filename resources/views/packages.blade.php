@@ -17,7 +17,7 @@
     <!-- Content -->
     <div class="page-content bg-white">
         <!-- inner page banner -->
-        <div class="page-banner ovbl-light" style="background-image:url({{ asset('assets/images2/Inner-banner-01.png') }});">
+        <div class="page-banner ovbl-light" style="background-image:url('{{ \App\Models\PageBanner::url('packages', asset('assets/images2/Inner-banner-01.png')) }}');">
             <div class="container">
                 <div class="page-banner-entry">
                     <h1 class="text-white">Packages <i class="fa fa-plane"></i></h1>

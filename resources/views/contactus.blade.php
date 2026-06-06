@@ -4,7 +4,7 @@
 <main id="content" class="site-main">
    <!-- Inner Banner html start-->
    <section class="inner-banner-wrap">
-      <div class="inner-baner-container" style="background-image: url(public/assets/images2/newbanner1.jpg);     background-position: center !important;">
+      <div class="inner-baner-container" style="background-image: url('{{ \App\Models\PageBanner::url('contactus', asset('assets/images2/newbanner1.jpg')) }}');     background-position: center !important;">
          <div class="container">
             <div class="inner-banner-content">
                <h1 class="inner-title" style="font-size:65px !important;">CONTACT US</h1>

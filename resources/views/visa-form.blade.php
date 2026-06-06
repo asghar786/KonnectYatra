@@ -99,7 +99,7 @@
 
 <div class="page-content">
     <!-- Page Heading Box ==== -->
-    <div class="page-banner ovbl-light" style="background-image:url({{ asset('assets/images2/Inner-banner-01.png') }});">
+    <div class="page-banner ovbl-light" style="background-image:url('{{ \App\Models\PageBanner::url('visa-form', asset('assets/images2/Inner-banner-01.png')) }}');">
         <div class="container">
             <div class="page-banner-entry">
                 <h1 class="text-white">Visa Form</h1>
