@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\ReminderEmail::class,
-        Commands\PassportReminder::class
+        Commands\PassportReminder::class,
+        Commands\ResolveVisitGeo::class,
     ];
 
     /**
@@ -27,6 +28,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('expire:notification')->daily();
         $schedule->command('passport:notification')->everyMinute();
+        $schedule->command('analytics:resolve-geo')->everyTenMinutes()->withoutOverlapping();
     }
 
     /**

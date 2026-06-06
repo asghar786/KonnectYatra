@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\AccountingController;
 use App\Http\Controllers\Admin\BalanceController;
 use App\Http\Controllers\Admin\ChargesController;
 use App\Http\Controllers\Admin\PageBannerController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\BlogController;
 /*
@@ -139,6 +140,10 @@ Route::group(['prefix' => 'admin',
     Route::get('/news/edit/{id}',[PackagesController::class, 'edit_news'])->name('edit_news');
     Route::post('/news/edit/{id}',[PackagesController::class, 'edit_news'])->name('edit_news');
     Route::get('/news/delete/{id}',[PackagesController::class, 'delete_news'])->name('delete_news');
+
+    // Analytics
+    Route::get('/analytics',[AnalyticsController::class, 'index'])->name('analytics');
+    Route::get('/analytics/export',[AnalyticsController::class, 'export'])->name('analytics_export');
 
     // Page banners
     Route::get('/page-banners',[PageBannerController::class, 'index'])->name('page_banners');

@@ -13,6 +13,7 @@ use App\Models\Events;
 use App\Models\Locations;
 use App\Models\News;
 use App\Models\InitialInfo;
+use App\Models\Conversion;
 use Illuminate\Support\Facades\Cookie;
 
 class PackagesController extends Controller
@@ -554,6 +555,8 @@ class PackagesController extends Controller
         $yatri_visa->payment_status = "pending";
         $yatri_visa->save();
 
+        Conversion::log('booking_request', $request, $yatri_visa->id);
+
         return redirect(url("all-packages/payment", $yatri_visa->id));
     }
 
@@ -685,6 +688,8 @@ class PackagesController extends Controller
                 $yatri_visa->save();
             }
         }
+
+        Conversion::log('special_booking', $request);
 
         return redirect(url("thank-you"));
     }

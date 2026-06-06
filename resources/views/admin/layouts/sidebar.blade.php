@@ -35,6 +35,14 @@
                     </a>
                 </li>
 
+                <!-- Analytics -->
+                <li class="{{ $isCur(route('analytics')) ? 'show' : '' }}">
+                    <a href="{{route('analytics')}}" class="ttr-material-button">
+                        <span class="ttr-icon"><i class="fas fa-chart-line text-success"></i></span>
+                        <span class="ttr-label">Analytics</span>
+                    </a>
+                </li>
+
                 <!-- Bookings & Yatris -->
                 @php $open = $groupOpen([route('yatri-visa'), route('visa'), route('ids'), route('airline-list'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
