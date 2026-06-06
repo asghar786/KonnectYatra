@@ -17,6 +17,14 @@
         border-bottom: 3px solid #f54e18;
         color: #f54e18;
     }
+    /* Hide inactive tab content before JS runs to avoid the flash (FOUC).
+       The first tab (Yatri Ids) is shown by default; TabsManager toggles the rest. */
+    .tabs-content__text{
+        display: none;
+    }
+    .tabs-content__text:first-child{
+        display: block;
+    }
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
