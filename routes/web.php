@@ -143,6 +143,7 @@ Route::group(['prefix' => 'admin',
 
     // Analytics
     Route::get('/analytics',[AnalyticsController::class, 'index'])->name('analytics');
+    Route::get('/analytics/realtime',[AnalyticsController::class, 'realtime'])->name('analytics_realtime');
     Route::get('/analytics/export',[AnalyticsController::class, 'export'])->name('analytics_export');
 
     // Page banners

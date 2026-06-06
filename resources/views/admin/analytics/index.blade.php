@@ -18,6 +18,8 @@
     .g-bg-4{background:linear-gradient(135deg,#f7971e,#ffd200);color:#333!important}
     .g-bg-5{background:linear-gradient(135deg,#ee0979,#ff6a00)}
     .g-bg-6{background:linear-gradient(135deg,#373B44,#4286f4)}
+    .live-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#11998e;margin-right:6px;animation:livePulse 1.4s infinite}
+    @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(17,153,142,.6)}70%{box-shadow:0 0 0 8px rgba(17,153,142,0)}100%{box-shadow:0 0 0 0 rgba(17,153,142,0)}}
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -51,6 +53,28 @@
                         <span class="text-muted mr-2">{{ $range_label }}</span>
                         <a href="{{ url('admin/analytics/export') }}?range={{ $range }}&from={{ $from }}&to={{ $to }}&format=csv" class="btn btn-sm btn-success"><i class="fa fa-file-csv"></i> CSV</a>
                         <a href="{{ url('admin/analytics/export') }}?range={{ $range }}&from={{ $from }}&to={{ $to }}&format=pdf" class="btn btn-sm btn-danger"><i class="fa fa-file-pdf"></i> PDF</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time live panel -->
+            <div class="row">
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <div class="an-card" style="text-align:center">
+                        <h5><span class="live-dot"></span> Live Now</h5>
+                        <div style="font-size:42px;font-weight:700;color:#11998e" id="rtActive">0</div>
+                        <div class="text-muted" style="font-size:13px">active visitors (last 5 min)</div>
+                        <hr>
+                        <div><strong id="rtViews30">0</strong> <span class="text-muted" style="font-size:12px">page views in last 30 min</span></div>
+                        <div class="text-muted mt-1" style="font-size:11px">updated <span id="rtTime">—</span></div>
+                    </div>
+                </div>
+                <div class="col-lg-9 col-md-8 mb-4">
+                    <div class="an-card">
+                        <h5>Active Pages (last 30 min)</h5>
+                        <table class="an-table"><thead><tr><th>Page</th><th>Views</th></tr></thead>
+                            <tbody id="rtPages"><tr><td class="text-muted">Loading…</td><td>—</td></tr></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -231,6 +255,23 @@
         data:{ labels:dLabels, datasets:[{data:dVals, backgroundColor:['#4c1864','#f7971e','#11998e']}]},
         options:{responsive:true, plugins:{legend:{position:'bottom'}}}
     });
+
+    // Real-time polling
+    function loadRealtime(){
+        fetch('{{ url('admin/analytics/realtime') }}', {headers:{'X-Requested-With':'XMLHttpRequest'}})
+            .then(function(r){return r.json();})
+            .then(function(d){
+                document.getElementById('rtActive').textContent = d.active;
+                document.getElementById('rtViews30').textContent = d.views30;
+                document.getElementById('rtTime').textContent = d.time;
+                var tb = document.getElementById('rtPages');
+                if(d.pages && d.pages.length){
+                    tb.innerHTML = d.pages.map(function(p){return '<tr><td>'+p.url+'</td><td>'+p.c+'</td></tr>';}).join('');
+                } else { tb.innerHTML = '<tr><td class="text-muted">No activity in the last 30 minutes</td><td>0</td></tr>'; }
+            }).catch(function(){});
+    }
+    loadRealtime();
+    setInterval(loadRealtime, 15000);
 })();
 </script>
 @endsection

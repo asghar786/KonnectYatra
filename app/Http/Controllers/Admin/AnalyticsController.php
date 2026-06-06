@@ -20,6 +20,32 @@ class AnalyticsController extends Controller
         return view('admin.analytics.index', $data);
     }
 
+    /** Live activity JSON (polled by the dashboard). */
+    public function realtime()
+    {
+        $active5  = DB::table('visits')->where('is_bot', 0)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(5))
+            ->distinct('session_id')->count('session_id');
+        $views30  = DB::table('visits')->where('is_bot', 0)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(30))->count();
+        $pages = DB::table('visits')->where('is_bot', 0)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(30))
+            ->select('url', DB::raw('COUNT(*) c'))->groupBy('url')->orderByDesc('c')->limit(8)->get();
+        // Per-minute pageviews for the last 30 minutes (sparkline).
+        $perMin = DB::table('visits')->where('is_bot', 0)
+            ->where('created_at', '>=', Carbon::now()->subMinutes(30))
+            ->selectRaw("DATE_FORMAT(created_at, '%H:%i') m, COUNT(*) c")
+            ->groupBy('m')->orderBy('m')->pluck('c', 'm');
+
+        return response()->json([
+            'active'  => $active5,
+            'views30' => $views30,
+            'pages'   => $pages,
+            'spark'   => $perMin,
+            'time'    => now()->format('H:i:s'),
+        ]);
+    }
+
     public function export(Request $request)
     {
         [$start, $end, $rangeLabel] = $this->dateWindow($request);
