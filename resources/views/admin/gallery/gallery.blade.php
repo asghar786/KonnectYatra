@@ -11,7 +11,14 @@
     .gl-search input:focus{border-color:#f54e18;box-shadow:0 0 0 3px rgba(245,78,24,.12)}
     .gl-card{background:#fff;border:1px solid #eee;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07);height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
     .gl-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
-    .gl-photo{height:190px;background:#f3f4f6;overflow:hidden;position:relative}
+    .gl-photo{height:190px;background:#f3f4f6;overflow:hidden;position:relative;cursor:zoom-in}
+    .gl-photo::after{content:"\f00e";font-family:"Font Awesome 5 Free";font-weight:900;position:absolute;top:10px;left:10px;background:rgba(0,0,0,.45);color:#fff;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;opacity:0;transition:.15s}
+    .gl-card:hover .gl-photo::after{opacity:1}
+    /* Lightbox */
+    #glLightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:99999;padding:30px}
+    #glLightbox img{max-width:95%;max-height:90%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+    #glLightbox .gl-cap{position:absolute;bottom:22px;left:0;right:0;text-align:center;color:#fff;font-size:15px}
+    #glLightbox .gl-close{position:absolute;top:18px;right:26px;color:#fff;font-size:34px;cursor:pointer;line-height:1}
     .gl-photo img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
     .gl-card:hover .gl-photo img{transform:scale(1.05)}
     .gl-body{padding:14px 16px;flex:1}
@@ -50,7 +57,7 @@
                 @forelse($gallery as $value)
                 <div class="col-xl-3 col-lg-4 col-md-6 mb-4 gl-item" data-search="{{ strtolower(trim($value->caption.' '.$value->note)) }}">
                     <div class="gl-card">
-                        <div class="gl-photo">
+                        <div class="gl-photo gl-zoom" data-full="{{ asset('gallery/'.$value->image) }}" data-cap="{{ $value->caption }}">
                             <img src="{{ asset('gallery/'.$value->image) }}" alt="{{ $value->caption }}" style="object-position:{{ $value->focus_x ?? 50 }}% {{ $value->focus_y ?? 50 }}%" onerror="this.style.opacity=.3">
                         </div>
                         <div class="gl-body">
@@ -77,6 +84,14 @@
         </div>
     </div>
 </main>
+
+<!-- Full-size lightbox -->
+<div id="glLightbox">
+    <span class="gl-close">&times;</span>
+    <img id="glLightboxImg" src="" alt="">
+    <div class="gl-cap" id="glLightboxCap"></div>
+</div>
+
 <div class="ttr-overlay"></div>
 @endsection
 @section('js')
@@ -95,6 +110,30 @@
                 if (match) visible++;
             });
             noResults.style.display = (visible === 0 && items.length) ? 'block' : 'none';
+        });
+    })();
+
+    // Full-size lightbox (view the original uncropped picture)
+    (function () {
+        var box = document.getElementById('glLightbox');
+        var boxImg = document.getElementById('glLightboxImg');
+        var boxCap = document.getElementById('glLightboxCap');
+        if (!box) return;
+        document.addEventListener('click', function (e) {
+            var zoom = e.target.closest('.gl-zoom');
+            if (zoom) {
+                boxImg.src = zoom.getAttribute('data-full');
+                boxCap.textContent = zoom.getAttribute('data-cap') || '';
+                box.style.display = 'flex';
+                return;
+            }
+            if (e.target.closest('#glLightbox')) {
+                box.style.display = 'none';
+                boxImg.src = '';
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { box.style.display = 'none'; boxImg.src = ''; }
         });
     })();
 </script>
