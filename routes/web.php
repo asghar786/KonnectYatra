@@ -261,6 +261,7 @@ Route::group(['prefix' => 'admin',
     Route::post('/profile',[PackagesController::class, 'profile'])->name('profile');
 
     Route::get('/itenaries',[ItenariesController::class, 'index'])->name('itenaries');
+    Route::get('/itenaries/export/pdf',[ItenariesController::class, 'export_pdf'])->name('itenaries_export_pdf');
     Route::get('/itenaries/delete/{id}',[ItenariesController::class,'delete'])->name('itenaries-delete');
     Route::get('/itenaries/ticket/{id}',[ItenaryTicketDetailsController::class, 'index'])->name('ticket');
     Route::get('/iternaries-list',[ItenariesController::class, 'iternaries_list'])->name('iternaries-list');

@@ -40,6 +40,7 @@ class IternaryController extends Controller
         'email'=>$req->email,
         'contact'=>$req->contact,
         'passengers'=>$req->passengers,
+        'ip'=>$req->ip(),
         // 'firstnamea'=>$req->fnamea,
         // 'lastnamea'=>$req->lnamea,
         // 'doba'=>$req->doba,

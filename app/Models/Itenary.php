@@ -20,6 +20,9 @@ class Itenary extends Model
         'email',
         'contact',
         'passengers',
+        'ip',
+        'city',
+        'country',
     ];
 
     public function getitenaryadult()
