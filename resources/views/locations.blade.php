@@ -24,7 +24,7 @@
 <main id="content" class="site-main loc">
     <section class="inner-banner-wrap pb-0">
         <div class="inner-baner-container"
-            style="background-image: url('{{ \App\Models\PageBanner::url('all-packages', asset('assets/images2/Inner-banner-01.png')) }}');background-position:center !important;">
+            style="background-image: url('{{ \App\Models\PageBanner::url('popular-locations', asset('assets/images2/Inner-banner-01.png')) }}');background-position:center !important;">
             <div class="container">
                 <div class="inner-banner-content">
                     <h1 class="inner-title" style="font-size:60px !important;">POPULAR LOCATIONS</h1>
