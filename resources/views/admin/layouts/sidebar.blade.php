@@ -44,7 +44,7 @@
                 </li>
 
                 <!-- Bookings & Yatris -->
-                @php $open = $groupOpen([route('yatri-visa'), route('visa'), route('ids'), route('airline-list'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
+                @php $open = $groupOpen([route('yatri-visa'), route('visa'), route('ids'), route('airline-list'), route('itenaries'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-users text-success"></i></span>
@@ -56,6 +56,7 @@
                         <li class="{{ $isCur(route('visa')) ? 'show' : '' }}"><a href="{{route('visa')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user-group text-warning"></i></span><span class="ttr-label">Visa List</span></a></li>
                         <li class="{{ $isCur(route('ids')) ? 'show' : '' }}"><a href="{{route('ids')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-id-card text-info"></i></span><span class="ttr-label">Yatri IDs</span></a></li>
                         <li class="{{ $isCur(route('airline-list')) ? 'show' : '' }}"><a href="{{route('airline-list')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-bars text-success"></i></span><span class="ttr-label">Airline List</span></a></li>
+                        <li class="{{ $isCur(route('itenaries')) ? 'show' : '' }}"><a href="{{route('itenaries')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-plane-departure text-info"></i></span><span class="ttr-label">Itinerary Requests</span></a></li>
                         <li class="{{ $isCur(route('invitation-detail')) ? 'show' : '' }}"><a href="{{route('invitation-detail')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-bars text-primary"></i></span><span class="ttr-label">ETPB List</span></a></li>
                         <li class="{{ $isCur(route('undertaking')) ? 'show' : '' }}"><a href="{{route('undertaking')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-newspaper text-dark"></i></span><span class="ttr-label">Undertaking Form</span></a></li>
                         <li class="{{ $isCur(url('admin/reports')) ? 'show' : '' }}"><a href="{{url('admin/reports')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-book text-info"></i></span><span class="ttr-label">Reports</span></a></li>
