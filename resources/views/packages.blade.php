@@ -12,10 +12,36 @@
         .btn.dropdown-toggle.btn-default {
             color: #000 !important;
         }
+        /* ===== Professional package detail ===== */
+        .pkgx{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
+        .pkgx-blessing{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:26px 0 8px}
+        .pkgx-blessing span{color:var(--brand);font-weight:600;font-size:15px;white-space:nowrap}
+        .pkgx-fcfs{display:inline-block;background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:30px;padding:6px 22px;font-weight:700;font-size:15px;letter-spacing:.02em}
+        .pkgx-title{text-align:center;color:var(--ink);font-weight:700;font-size:26px;line-height:1.3;max-width:880px;margin:18px auto 6px}
+        .pkgx-month{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border-radius:30px;padding:7px 20px;font-weight:600;font-size:15px}
+        .pkgx-card{background:#fff;border:1px solid #eef0f4;border-radius:18px;box-shadow:0 10px 30px rgba(28,37,65,.08);overflow:hidden}
+        .pkgx-flyer{background:#f3f4f6;display:flex;align-items:center;justify-content:center;min-height:100%;padding:14px}
+        .pkgx-flyer img{max-width:100%;height:auto;border-radius:12px;display:block}
+        .pkgx-flyer .pkgx-noimg{color:#b8bcc6;text-align:center;font-size:14px;padding:60px 10px}
+        .pkgx-pad{padding:28px 30px}
+        .pkgx-sec-label{text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px}
+        .pkgx-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px}
+        .pkgx-price{border:1px solid #eef0f4;border-radius:14px;text-align:center;padding:18px 10px;transition:transform .15s,box-shadow .15s,border-color .15s}
+        .pkgx-price:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(245,78,24,.12);border-color:#ffd9c9}
+        .pkgx-price .occ{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:8px}
+        .pkgx-price .amt{font-size:24px;font-weight:800;color:var(--ink);line-height:1.1}
+        .pkgx-price .amt small{font-size:14px;font-weight:700;color:var(--brand);vertical-align:top}
+        .pkgx-price .call{font-size:15px;font-weight:700;color:var(--brand)}
+        .pkgx-desc{color:#374151;font-size:15px;line-height:1.7}
+        .pkgx-notes{background:#fafbfc;border:1px solid #eef0f4;border-left:4px solid var(--brand);border-radius:10px;padding:16px 18px;margin-top:18px}
+        .pkgx-notes p{margin:0 0 10px;font-size:14px;color:#374151;line-height:1.6}
+        .pkgx-notes p:last-child{margin-bottom:0}
+        .pkgx-cta{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:16px;padding:13px 34px;border-radius:30px;box-shadow:0 8px 18px rgba(245,78,24,.3)}
+        @media (max-width:575px){.pkgx-prices{grid-template-columns:1fr}.pkgx-title{font-size:21px}}
     </style>
 
     <!-- Content -->
-    <div class="page-content bg-white">
+    <div class="page-content bg-white pkgx">
         <!-- inner page banner -->
         <div class="page-banner ovbl-light" style="background-image:url('{{ \App\Models\PageBanner::url('packages', asset('assets/images2/Inner-banner-01.png')) }}');">
             <div class="container">
@@ -34,9 +60,9 @@
             </div>
         </div>
         <!-- Breadcrumb row END -->
-        <div class="container">
+        <div class="container section-sp2">
             <div class="row">
-                <div class="col-12 mt-4">
+                <div class="col-12">
                     @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('success') }}
@@ -44,87 +70,84 @@
                     @endif
                 </div>
             </div>
-            <div class="row" style="margin-top: 20px;">
-                <div class="col-4">
-                    <h6 class="text-center">Wahe Guru Ji ka Khalsa</h6>
-                </div>
-                <div class="col-4">
-                    <h3 class="text-center">(First Come First Serve)</h3>
-                </div>
-                <div class="col-4">
-                    <h6 class="text-center">Wahe Guru Ji ki Fateh</h6>
-                </div>
+
+            @php
+                $hasMonth = !empty(@$packages->month_year) && strtotime($packages->month_year) > 0;
+                $monthLabel = $hasMonth ? date('F Y', strtotime($packages->month_year)) : null;
+                $fmt = function ($v) {
+                    return ($v !== null && $v !== '' && (float) $v > 0)
+                        ? '<span class="amt"><small>$</small>'.number_format((float) $v).'</span>'
+                        : '<span class="call">Call for Price</span>';
+                };
+            @endphp
+
+            <!-- Blessing + First Come First Serve -->
+            <div class="pkgx-blessing">
+                <span>Wahe Guru Ji ka Khalsa</span>
+                <span class="pkgx-fcfs">First Come First Serve</span>
+                <span>Wahe Guru Ji ki Fateh</span>
             </div>
-        </div>
-        <!-- inner page banner -->
-        <div class="page-banner contact-page section-sp2" style="margin-top: -80px;">
-            <div class="container">
-                <div class="row mt-4">
+
+            <h2 class="pkgx-title">Holy Yatra Tour to Nanakana Sahib – Panja Sahib – Kartarpur Sahib and other Gurdwaras in Pakistan</h2>
+
+            @if($hasMonth)
+            <div class="text-center mb-4">
+                <span class="pkgx-month"><i class="fa fa-calendar"></i> {{ $monthLabel }}</span>
+            </div>
+            @endif
+
+            <!-- Main card -->
+            <div class="pkgx-card mt-2">
+                <div class="row g-0">
+                    @if(!empty(@$packages->image))
+                    <div class="col-lg-5">
+                        <div class="pkgx-flyer">
+                            <img src="{{ asset('assets/flyers/'.$packages->image) }}" alt="{{ $packages->name }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                    @else
                     <div class="col-12">
-                        <h6 class="mb-4 text-center"> Holy Yatra Tour to Nanakana Sahib – Panja Sahib – Kartarpur Sahib and other Gurdwaras in Pakistan </h6>
-                        <div class="row g-3">
-                            @php
-                                $timestamp = strtotime(@$packages->month_year);
-                                $new_date_format = date('F Y', $timestamp);
-                            @endphp
-                            <div class="col-lg-12 col-md-12 col-sm-12 text-center mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" name="package_id" type="hidden" value="{{ $packages->id }}" id="package_1">
-                                    <label class="form-check-label" for="flexCheckDefault" style="font-size: 22px;">
-                                        {{ $new_date_format }}
-                                    </label>
-                                    <div class="valid-feedback">
-                                        Looks good!
-                                    </div>
+                    @endif
+                        <div class="pkgx-pad">
+                            <input name="package_id" type="hidden" value="{{ $packages->id }}">
+
+                            <p class="pkgx-sec-label">Package Pricing</p>
+                            <div class="pkgx-prices">
+                                <div class="pkgx-price">
+                                    <div class="occ">Single Occupancy</div>
+                                    {!! $fmt(@$packages->single_price) !!}
+                                </div>
+                                <div class="pkgx-price">
+                                    <div class="occ">Double Occupancy</div>
+                                    {!! $fmt(@$packages->double_price) !!}
+                                </div>
+                                <div class="pkgx-price">
+                                    <div class="occ">Triple Occupancy</div>
+                                    {!! $fmt(@$packages->triple_price) !!}
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12 text-center mb-3" style="border: 1px solid black; border-right: 0px;">
-                                <div class="form-check p-2" style="border-bottom: 1px solid black;">
-                                    {{-- <input class="form-check-input" type="radio" name="package_type" value="Single ${{ $packages->single_price }}" id="package_type_1"> --}}
-                                    <label class="form-check-label" for="package_type_1"> Single Occupancy </label>
-                                </div>
-                                <div class="form-check p-2">
-                                    {{-- <input class="form-check-input" type="radio" name="package_type" value="Single ${{ $packages->single_price }}" id="package_type_1"> --}}
-                                    <label class="form-check-label" for="package_type_1"> ${{ $packages->single_price }} </label>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12 text-center mb-3" style="border: 1px solid black;">
-                                <div class="form-check p-2" style="border-bottom: 1px solid black;">
-                                    {{-- <input class="form-check-input" type="radio" name="package_type" value="Single ${{ $packages->single_price }}" id="package_type_1"> --}}
-                                    <label class="form-check-label" for="package_type_1"> Double Occupancy </label>
-                                </div>
-                                <div class="form-check p-2">
-                                    {{-- <input class="form-check-input" type="radio" name="package_type" value="Double ${{ $packages->double_price }}" id="package_type_2"> --}}
-                                    <label class="form-check-label" for="package_type_2"> ${{ $packages->double_price }} </label>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12 text-center mb-3" style="border: 1px solid black; border-left: 0px;">
-                                <div class="form-check p-2" style="border-bottom: 1px solid black;">
-                                    {{-- <input class="form-check-input" type="radio" name="package_type" value="Single ${{ $packages->single_price }}" id="package_type_1"> --}}
-                                    <label class="form-check-label" for="package_type_1"> Triple Occupancy </label>
-                                </div>
-                                <div class="form-check p-2">
-                                    {{-- <input class="form-check-input" type="radio" name="package_type" value="Triple ${{ $packages->triple_price }}" id="package_type_3"> --}}
-                                    <label class="form-check-label" for="package_type_3"> ${{ $packages->triple_price }} </label>
-                                </div>
-                            </div>
-                            <div class="col-12 mt-2">
+
+                            @if(!empty(@$packages->description))
+                            <div class="pkgx-desc mt-4">
                                 {!! $packages->description !!}
                             </div>
-                            <div class="col-12">
-                                <p><b>Note</b>: Above price is valid for New York residents, for all other states please
-                                    call for the price. <b>IAD PAX add $50</b> in the package price</p>
-                                <p>For Business Class prices please call <b style="font-size: 16px;">RASHAD MAHMOOD @ +1
-                                        718-908-9464 </b></p>
-                                <p>Cancellation of Trip: Airline applicable cancellation charges and $100 service charges
-                                    applies. </p>
+                            @endif
+
+                            <div class="pkgx-notes">
+                                <p><b>Note:</b> Above price is valid for New York residents; for all other states please call for the price. <b>IAD PAX add $50</b> in the package price.</p>
+                                <p>For Business Class prices please call <b>RASHAD MAHMOOD @ +1 718-908-9464</b>.</p>
+                                <p><b>Cancellation of Trip:</b> Airline applicable cancellation charges and $100 service charges applies.</p>
                             </div>
-                            <div class="col-12">
-                                <a class="btn" href="{{ url('packages/apply', $packages->id) }}">Book Now</a>
+
+                            <div class="mt-4">
+                                <a class="btn pkgx-cta" href="{{ url('packages/apply', $packages->id) }}"><i class="fa fa-plane"></i> Book Now</a>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
                 {{-- <div class="row">
                 @foreach ($packages as $package)
                 <div class="col-lg-6">
@@ -231,8 +254,6 @@
                 </div>
                 @endforeach
             </div> --}}
-            </div>
-        </div>
         <!-- inner page banner END -->
     </div>
     <!-- Content END-->
