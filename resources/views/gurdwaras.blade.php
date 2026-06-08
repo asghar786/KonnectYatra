@@ -92,9 +92,9 @@
             <!-- State filters -->
             @if(count(@$gurdwaras) > 0)
             <div class="gw-filters">
-                <button class="gw-filter active" data-state="all">All States</button>
+                <button type="button" class="gw-filter active" data-state="all">All States</button>
                 @foreach($gurdwaras as $value)
-                <button class="gw-filter" data-state="{{ \Illuminate\Support\Str::slug($value['state']) }}">{{ $value['state'] }}</button>
+                <button type="button" class="gw-filter" data-state="{{ \Illuminate\Support\Str::slug($value['state']) }}">{{ $value['state'] }}</button>
                 @endforeach
             </div>
 
@@ -146,25 +146,18 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
-// --- State filter (independent so a map error can never break it) ---
-(function () {
-    function bindFilters() {
-        var filters = document.querySelectorAll('.gw-filter');
-        var blocks = document.querySelectorAll('.gw-state-block');
-        filters.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var s = this.getAttribute('data-state');
-                filters.forEach(function (b) { b.classList.remove('active'); });
-                this.classList.add('active');
-                blocks.forEach(function (blk) {
-                    blk.style.display = (s === 'all' || blk.getAttribute('data-state') === s) ? '' : 'none';
-                });
-            });
-        });
-    }
-    if (document.readyState !== 'loading') bindFilters();
-    else document.addEventListener('DOMContentLoaded', bindFilters);
-})();
+// --- State filter (event delegation: immune to load timing / re-renders) ---
+document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.gw-filter');
+    if (!btn) return;
+    e.preventDefault();
+    var s = btn.getAttribute('data-state');
+    document.querySelectorAll('.gw-filter').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('.gw-state-block').forEach(function (blk) {
+        blk.style.display = (s === 'all' || blk.getAttribute('data-state') === s) ? '' : 'none';
+    });
+});
 
 // --- Sikh communities US choropleth (D3 + us-atlas) ---
 window.addEventListener('load', function () {
