@@ -97,7 +97,7 @@
                 </li>
 
                 <!-- Website Content -->
-                @php $open = $groupOpen([url('admin/news'), route('blogs_admin'), route('page_banners'), url('admin/gallery'), url('admin/events')]); @endphp
+                @php $open = $groupOpen([url('admin/news'), route('blogs_admin'), route('page_banners'), route('home_slider'), url('admin/gallery'), url('admin/events')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-newspaper text-primary"></i></span>
@@ -108,6 +108,7 @@
                         <li class="{{ $isCur(url('admin/news')) ? 'show' : '' }}"><a href="{{url('admin/news')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-newspaper text-primary"></i></span><span class="ttr-label">News</span></a></li>
                         <li class="{{ $isCur(route('blogs_admin')) ? 'show' : '' }}"><a href="{{route('blogs_admin')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-blog text-success"></i></span><span class="ttr-label">Blogs</span></a></li>
                         <li class="{{ $isCur(route('page_banners')) ? 'show' : '' }}"><a href="{{route('page_banners')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-image text-primary"></i></span><span class="ttr-label">Page Banners</span></a></li>
+                        <li class="{{ $isCur(route('home_slider')) ? 'show' : '' }}"><a href="{{route('home_slider')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-images text-warning"></i></span><span class="ttr-label">Home Slider</span></a></li>
                         <li class="{{ $isCur(url('admin/gallery')) ? 'show' : '' }}"><a href="{{url('admin/gallery')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-image text-success"></i></span><span class="ttr-label">Gallery</span></a></li>
                         <li class="{{ $isCur(url('admin/events')) ? 'show' : '' }}"><a href="{{url('admin/events')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-calendar text-primary"></i></span><span class="ttr-label">Upcoming Events</span></a></li>
                     </ul>

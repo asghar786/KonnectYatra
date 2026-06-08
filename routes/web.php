@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\AccountingController;
 use App\Http\Controllers\Admin\BalanceController;
 use App\Http\Controllers\Admin\ChargesController;
 use App\Http\Controllers\Admin\PageBannerController;
+use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
@@ -163,6 +164,14 @@ Route::group(['prefix' => 'admin',
     // Page banners
     Route::get('/page-banners',[PageBannerController::class, 'index'])->name('page_banners');
     Route::post('/page-banners/{id}',[PageBannerController::class, 'update'])->name('page_banners_update');
+
+    // Home hero slider
+    Route::get('/home-slider',[HeroSlideController::class, 'index'])->name('home_slider');
+    Route::get('/home-slider/create',[HeroSlideController::class, 'create'])->name('home_slider_create');
+    Route::post('/home-slider',[HeroSlideController::class, 'store'])->name('home_slider_store');
+    Route::get('/home-slider/edit/{id}',[HeroSlideController::class, 'edit'])->name('home_slider_edit');
+    Route::post('/home-slider/edit/{id}',[HeroSlideController::class, 'update'])->name('home_slider_update');
+    Route::get('/home-slider/delete/{id}',[HeroSlideController::class, 'destroy'])->name('home_slider_delete');
 
     // Blogs
     Route::get('/blogs',[AdminBlogController::class, 'index'])->name('blogs_admin');

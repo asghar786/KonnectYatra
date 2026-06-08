@@ -82,7 +82,31 @@ h4.destination {
 <main id="content" class="site-main">
 	<!-- Home slider html start -->
 	<section class="home-slider-section">
+		@php
+			$heroLink = function ($link) {
+				$link = trim((string) $link);
+				if ($link === '') return '#';
+				return \Illuminate\Support\Str::startsWith($link, ['http://', 'https://', '#']) ? $link : url($link);
+			};
+		@endphp
 		<div class="home-slider">
+			@forelse(@$heroSlides as $slide)
+			<div class="home-banner-items">
+				<div class="banner-inner-wrap" style="background-image: url({{ asset($slide->image) }});"></div>
+				<div class="banner-content-wrap">
+					<div class="container">
+						<div class="banner-content text-center">
+							@if($slide->eyebrow)<p class="" style="font-size:30px;">{{ $slide->eyebrow }}</p>@endif
+							<h2 class="banner-title">{{ $slide->title }}</h2>
+							@if($slide->description)<p>{{ $slide->description }}</p>@endif
+							@if($slide->btn1_text)<a href="{{ $heroLink($slide->btn1_link) }}" class="button-primary">{{ $slide->btn1_text }}</a>@endif
+							@if($slide->btn2_text)<a href="{{ $heroLink($slide->btn2_link) }}" class="button-primary">{{ $slide->btn2_text }}</a>@endif
+						</div>
+					</div>
+				</div>
+				<div class="overlay"></div>
+			</div>
+			@empty
 			<div class="home-banner-items">
 				<div class="banner-inner-wrap" style="background-image: url({{asset('assets/images2/96.jpg')}});"></div>
 				<div class="banner-content-wrap">
@@ -98,36 +122,7 @@ h4.destination {
 				</div>
 				<div class="overlay"></div>
 			</div>
-			<div class="home-banner-items">
-				<div class="banner-inner-wrap" style="background-image: url({{asset('assets/images2/44.jpg')}});"></div>
-				<div class="banner-content-wrap">
-					<div class="container">
-						<div class="banner-content text-center">
-							<p class="" style="font-size:30px;">A Holy Journey To</p>
-							<h2 class="banner-title">KARTARPUR SAHIB</h2>
-							<p>Konnect Yatra is proud to be part of seva for Sikh pilgrims to Nankana Sahib yatra and other sacred Gurdwaras in Pakistan.</p>
-							<a href="{{url('all-packages')}}" class="button-primary">BOOK NOW</a>
-							<a href="{{ url('our-info') }}" class="button-primary">READ MORE</a>
-						</div>
-					</div>
-				</div>
-				<div class="overlay"></div>
-			</div>
-			<div class="home-banner-items">
-				<div class="banner-inner-wrap" style="background-image: url({{asset('assets/images2/88.jpg')}});"></div>
-				<div class="banner-content-wrap">
-					<div class="container">
-						<div class="banner-content text-center">
-							<p class="" style="font-size:30px;">A Holy Journey To</p>
-							<h2 class="banner-title">PANJA SAHIB</h2>
-							<p>Konnect Yatra is proud to be part of seva for Sikh pilgrims to Nankana Sahib yatra and other sacred Gurdwaras in Pakistan.</p>
-							<a href="{{url('all-packages')}}" class="button-primary">BOOK NOW</a>
-							<a href="{{ url('our-info') }}" class="button-primary">READ MORE</a>
-						</div>
-					</div>
-				</div>
-				<div class="overlay"></div>
-			</div>
+			@endforelse
 		</div>
 	</section>
 	<!-- slider html start -->

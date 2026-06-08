@@ -38,6 +38,7 @@ class HomeController extends Controller
         $data['events'] = Events::all();
         $data['locations'] = Locations::all();
         $data['gallery'] = Gallery::orderBy("id", "DESC")->get();
+        $data['heroSlides'] = \App\Models\HeroSlide::where('is_active', 1)->orderBy('sort_order')->orderBy('id')->get();
         return view('home', $data);
     }
 
