@@ -70,8 +70,8 @@ input[list] + div[list] span:hover {
 .itin-wrap .input-form > div{margin-bottom:12px}
 .itin-wrap .addcity{color:var(--brand) !important;font-weight:600;cursor:pointer}
 .itin-wrap .removecity{cursor:pointer;font-weight:600}
-.itin-wrap #passengers-detail{background:var(--brand) !important;color:#fff !important;border:0;border-radius:30px;font-weight:700;font-size:15px;padding:13px 46px !important;box-shadow:0 8px 18px rgba(245,78,24,.3);transition:transform .15s}
-.itin-wrap #passengers-detail:hover{transform:translateY(-2px)}
+.itin-wrap #passengers-detail,.itin-wrap #submit-booking{background:var(--brand) !important;color:#fff !important;border:0;border-radius:30px;font-weight:700;font-size:15px;padding:13px 46px !important;box-shadow:0 8px 18px rgba(245,78,24,.3);transition:transform .15s;cursor:pointer}
+.itin-wrap #passengers-detail:hover,.itin-wrap #submit-booking:hover{transform:translateY(-2px)}
 .itin-head{margin-bottom:22px}
 .itin-head h5{color:var(--brand)}
 .itin-head h2{font-weight:700;color:var(--ink)}
@@ -128,7 +128,7 @@ input[list] + div[list] span:hover {
 
                 <div class="tab-content mt-3">
                     <div class="tab-pane active" id="roundTrip" role="tabpanel" aria-labelledby="chicken-tab">
-                        
+                        <div id="step-1">
                         <div class="row input-form">
                           <div class=" autocomplete col-6 mt-2">
                             <label>From <span class="text-danger"> *</span>
@@ -220,7 +220,15 @@ input[list] + div[list] span:hover {
                   </div>
               </div>
           </div>
-          <input type="button" value="Next" class="btn btn-sm float-right my-4 mr-4 passengers-detail" id="passengers-detail" />
+          <input type="button" value="Next" class="btn float-right my-4 passengers-detail" id="passengers-detail" />
+          </div><!-- /#step-1 -->
+
+          <div id="step-2" style="display:none;">
+              <div id="adultt"></div>
+              <div class="text-right mt-3" style="clear:both;">
+                  <input type="submit" value="Submit Booking" class="btn" id="submit-booking" />
+              </div>
+          </div>
 
       </div>
       <!-- Tab 2 -->
