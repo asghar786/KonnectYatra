@@ -183,7 +183,7 @@
 						</div>
 					</li> --}}
 					<li>
-						<a href="#" class="ttr-material-button ttr-submenu-toggle"><span class="ttr-user-avatar"><img alt="" src="{{asset('assets2/images/pp.jpg')}}" width="32" height="32"></span></a>
+						<a href="#" class="ttr-material-button ttr-submenu-toggle"><span class="ttr-user-avatar"><img alt="" src="{{ !empty(optional(auth()->user())->avatar) ? asset(auth()->user()->avatar) : asset('assets2/images/pp.jpg') }}" onerror="this.src='{{ asset('assets2/images/pp.jpg') }}'" width="32" height="32" style="object-fit:cover;border-radius:50%;height:32px;"></span></a>
 						<div class="ttr-header-submenu">
 							<ul>
 								<li><a href="{{ url("admin/profile") }}">My profile</a></li>

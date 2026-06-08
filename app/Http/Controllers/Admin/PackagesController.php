@@ -432,21 +432,38 @@ class PackagesController extends Controller
 
   public function profile(Request $request)
   {
-    if($request->isMethod('post')){
-      $data = $request->all();
-      if (!empty($data['password'])) {
-        $data['password'] = \Hash::make($data['password']);
-      } else {
-        unset($data['password']);
+    $user = User::find(\Auth::user()->id);
+
+    if ($request->isMethod('post')) {
+      $request->validate([
+        'name'         => ['required', 'string', 'max:191'],
+        'avatar'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        'new_password' => ['nullable', 'string', 'min:8', 'confirmed'],
+      ], [
+        'new_password.confirmed' => 'The new password and confirmation do not match.',
+        'new_password.min'       => 'The new password must be at least 8 characters.',
+      ]);
+
+      // Changing the password requires the correct current password.
+      if ($request->filled('new_password')) {
+        if (!\Hash::check((string) $request->current_password, $user->password)) {
+          return back()->withErrors(['current_password' => 'Your current password is incorrect.'])->withInput();
+        }
+        $user->password = \Hash::make($request->new_password);
       }
-      $Obj = User::find(\Auth::user()->id);
-      $Obj->update($data);
-      $response = array('status'=>'1', 'message'=>'Profile is updated sucessfully.', 'action'=>'reload');
-      echo json_encode($response); return;
+
+      $user->name = $request->name;
+
+      if ($request->file('avatar')) {
+        $user->avatar = 'avatars/' . \App\Support\ImageHelper::save($request->file('avatar'), 'avatars', ['width' => 400, 'height' => 400, 'mode' => 'cover', 'quality' => 90]);
+      }
+
+      $user->save();
+
+      return back()->with('success', 'Your profile has been updated successfully.');
     }
 
-    $data["user"] = User::where('id', \Auth::user()->id)->first();
-    return view('admin.profile', $data);
+    return view('admin.profile', ['user' => $user]);
   }
 
   public function edit_yatri_package($id)
