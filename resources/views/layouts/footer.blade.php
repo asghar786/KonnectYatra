@@ -154,7 +154,7 @@
     <div class="top-footer " style="margin-top:80px;">
         <div class="container">
             <div class="row">
-               <div class="col-lg-6 col-md-12">
+               <div class="col-lg-3 col-md-12">
                  <aside class="widget widget_newslatter">
                   <h3 class="widget-title">Sign Up For A Newsletter</h3>
                   <div class="widget-text">
@@ -197,6 +197,18 @@
                     <li><a href="{{ url('/packages') }}">Packages</a></li>
                     <li><a href="{{ url('/itinerary') }}">Itinerary</a></li>
                     <li><a href="{{ url('/gurdwaras') }}">Gurdwaras</a></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+    <div class="col-lg-3 col-md-6 d-flex justify-content-center">
+        <aside class="widget widget_text">
+            <h3 class="widget-title">Useful Links</h3>
+            <div class="textwidget widget-text">
+                <ul>
+                    <li><a href="{{ route('gallery_page') }}">Gallery</a></li>
+                    <li><a href="{{ url('/blogs') }}">Blogs</a></li>
+                    <li><a href="{{ url('/itinerary') }}">Airline Tickets</a></li>
                 </ul>
             </div>
         </aside>

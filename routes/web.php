@@ -90,6 +90,7 @@ Route::get('/location-detail/{id}', [UserPackages::class, 'location_detail'])->n
 Route::get('/event-detail/{id}', [UserPackages::class, 'event_detail'])->name('event_detail');
 Route::get('/news-detail/{id}', [UserPackages::class, 'news_detail'])->name('news_detail');
 
+Route::get('/tour-gallery', [HomeController::class, 'gallery_page'])->name('gallery_page');
 Route::get('/blogs', [BlogController::class, 'index'])->name('blogs');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog_detail');
 

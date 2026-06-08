@@ -42,6 +42,13 @@ class HomeController extends Controller
         return view('home', $data);
     }
 
+    public function gallery_page()
+    {
+        $data['all_packages'] = Package::all();
+        $data['gallery'] = Gallery::orderBy('id', 'DESC')->get();
+        return view('gallery', $data);
+    }
+
     public function our_info()
     {
         $data['all_packages'] = Package::all();
