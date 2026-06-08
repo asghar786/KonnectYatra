@@ -197,7 +197,7 @@ h4.destination {
 						<div class="col-md-6 col-sm-6 col-6 destinations-grids text-center mb-4">
                             <h4 class="destination mb-3">{{ $value->name }}</h4>
                             <div class="image-position position-relative">
-                                <img src="{{ asset('gallery/'.$value->image) }}" style="width: 100%; height: 400px;" class="img-fluid">
+                                <img src="{{ asset('gallery/'.$value->image) }}" style="width: 100%; height: 400px; object-fit: cover; object-position: {{ $value->focus_x ?? 50 }}% {{ $value->focus_y ?? 50 }}%;" class="img-fluid">
                             </div>
                             <div class="destinations-info">
                                 <div class="caption mb-lg-3">

@@ -13,5 +13,7 @@ class Gallery extends Model
         'caption',
         'note',
         'image',
+        'focus_x',
+        'focus_y',
     ];
 }

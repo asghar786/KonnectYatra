@@ -51,7 +51,7 @@
                 <div class="col-xl-3 col-lg-4 col-md-6 mb-4 gl-item" data-search="{{ strtolower(trim($value->caption.' '.$value->note)) }}">
                     <div class="gl-card">
                         <div class="gl-photo">
-                            <img src="{{ asset('gallery/'.$value->image) }}" alt="{{ $value->caption }}" onerror="this.style.opacity=.3">
+                            <img src="{{ asset('gallery/'.$value->image) }}" alt="{{ $value->caption }}" style="object-position:{{ $value->focus_x ?? 50 }}% {{ $value->focus_y ?? 50 }}%" onerror="this.style.opacity=.3">
                         </div>
                         <div class="gl-body">
                             <p>{{ $value->caption ?: '—' }}</p>
