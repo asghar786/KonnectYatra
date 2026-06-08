@@ -66,6 +66,34 @@
                             </form>
                         </div>
                     </div>
+
+                    <div class="card mt-4" style="border-radius:14px">
+                        <div class="card-body">
+                            <h5 style="font-weight:700"><i class="fas fa-share-nodes text-primary"></i> Social Media Links</h5>
+                            <p class="text-muted">Paste the full URLs of your social profiles. These power the social icons in the website header and footer. Leave a field empty to keep that icon as a placeholder (it will link to <code>#</code> until you add the URL).</p>
+
+                            <form method="POST" action="{{ url('admin/integrations') }}">
+                                @csrf
+                                <div class="form-group">
+                                    <label class="form_label_color"><i class="fab fa-facebook-f" style="color:#1877F2"></i> Facebook URL</label>
+                                    <input type="url" name="facebook_url" class="form-control" placeholder="https://facebook.com/yourpage" value="{{ $facebook_url }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color"><i class="fab fa-twitter" style="color:#1DA1F2"></i> Twitter / X URL</label>
+                                    <input type="url" name="twitter_url" class="form-control" placeholder="https://twitter.com/yourhandle" value="{{ $twitter_url }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color"><i class="fab fa-instagram" style="color:#E4405F"></i> Instagram URL</label>
+                                    <input type="url" name="instagram_url" class="form-control" placeholder="https://instagram.com/yourhandle" value="{{ $instagram_url }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color"><i class="fab fa-linkedin" style="color:#0A66C2"></i> LinkedIn URL</label>
+                                    <input type="url" name="linkedin_url" class="form-control" placeholder="https://linkedin.com/company/yourcompany" value="{{ $linkedin_url }}">
+                                </div>
+                                <button class="btn btn-primary">Save</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="card" style="border-radius:14px;background:#f8f9fb">

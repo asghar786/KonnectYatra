@@ -90,10 +90,10 @@
                      <div class="contct-social social-links">
                         <h3>Follow us on social media..</h3>
                         <ul>
-                           <li><a href="#"><i class="fab fa-facebook-f" aria-hidden="true"></i></a></li>
-                           <li><a href="#"><i class="fab fa-twitter" aria-hidden="true"></i></a></li>
-                           <li><a href="#"><i class="fab fa-instagram" aria-hidden="true"></i></a></li>
-                           <li><a href="#"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li>
+                           <li><a href="{{ \App\Models\SiteSetting::get('facebook_url') ?: '#' }}" target="_blank" rel="noopener"><i class="fab fa-facebook-f" aria-hidden="true"></i></a></li>
+                           <li><a href="{{ \App\Models\SiteSetting::get('twitter_url') ?: '#' }}" target="_blank" rel="noopener"><i class="fab fa-twitter" aria-hidden="true"></i></a></li>
+                           <li><a href="{{ \App\Models\SiteSetting::get('instagram_url') ?: '#' }}" target="_blank" rel="noopener"><i class="fab fa-instagram" aria-hidden="true"></i></a></li>
+                           <li><a href="{{ \App\Models\SiteSetting::get('linkedin_url') ?: '#' }}" target="_blank" rel="noopener"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li>
                         </ul>
                      </div>
                   </div>
