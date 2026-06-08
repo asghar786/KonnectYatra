@@ -81,7 +81,7 @@
             <h3 class="widget-title">About</h3>
             <div class="textwidget widget-text">
                 <ul>
-                    <li><a href="{{ url('/packages') }}">Packages</a></li>
+                    <li><a href="{{ route('all_package') }}">Packages</a></li>
                     <li><a href="{{ url('/itinerary') }}">Itinerary</a></li>
                     <li><a href="{{ url('/gurdwaras') }}">Gurdwaras</a></li>
                 </ul>
