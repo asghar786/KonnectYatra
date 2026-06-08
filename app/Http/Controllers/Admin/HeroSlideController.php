@@ -78,9 +78,6 @@ class HeroSlideController extends Controller
 
     private function uploadImage(Request $request): string
     {
-        $file = $request->file('image');
-        $fileName = uniqid() . '_' . preg_replace('/\s+/', '-', $file->getClientOriginalName());
-        $file->move(public_path('slider'), $fileName);
-        return 'slider/' . $fileName;
+        return 'slider/' . \App\Support\ImageHelper::save($request->file('image'), 'slider', ['width' => 1920, 'height' => 900, 'mode' => 'cover', 'quality' => 90]);
     }
 }

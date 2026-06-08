@@ -198,10 +198,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('assets/flyers');
-        $file->move($destinationPath,$fileName);
+        $fileName = \App\Support\ImageHelper::save($request->file('image'), 'assets/flyers', ['width' => 1200, 'mode' => 'max', 'quality' => 90]);
       }
       // dd($data['sdescription']);
       $package = new Package;
@@ -317,10 +314,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('assets/flyers');
-        $file->move($destinationPath,$fileName);
+        $fileName = \App\Support\ImageHelper::save($request->file('image'), 'assets/flyers', ['width' => 1200, 'mode' => 'max', 'quality' => 90]);
       }
 
       $package = [
@@ -661,11 +655,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('news_and_events');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+        $data['image'] = \App\Support\ImageHelper::save($request->file('image'), 'news_and_events', ['width' => 1280, 'height' => 720, 'mode' => 'cover', 'quality' => 90]);
       }
 
       Events::create($data);
@@ -686,11 +676,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('news_and_events');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+        $data['image'] = \App\Support\ImageHelper::save($request->file('image'), 'news_and_events', ['width' => 1280, 'height' => 720, 'mode' => 'cover', 'quality' => 90]);
       }
 
       unset($data['_token']);
@@ -844,11 +830,9 @@ class PackagesController extends Controller
     return $data;
   }
 
-  private function uploadHotelFile($file): string
+  private function uploadHotelFile($file, array $opts = ['width' => 1280, 'height' => 850, 'mode' => 'cover', 'quality' => 90]): string
   {
-    $fileName = uniqid() . $file->getClientOriginalName();
-    $file->move(public_path('hotels'), $fileName);
-    return $fileName;
+    return \App\Support\ImageHelper::save($file, 'hotels', $opts);
   }
 
   /** Store any additional gallery images uploaded for a hotel. */
@@ -859,7 +843,7 @@ class PackagesController extends Controller
         if (!$file) continue;
         \App\Models\HotelImage::create([
           'hotel_id' => $hotelId,
-          'image'    => $this->uploadHotelFile($file),
+          'image'    => $this->uploadHotelFile($file, ['width' => 1600, 'height' => 1200, 'mode' => 'max', 'quality' => 90]),
         ]);
       }
     }
@@ -893,11 +877,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('file')) {   
-        $file = $request->file('file');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('bus');
-        $file->move($destinationPath,$fileName);
-        $data['file'] = $fileName;
+        $data['file'] = \App\Support\ImageHelper::save($request->file('file'), 'bus', ['width' => 1200, 'height' => 800, 'mode' => 'cover', 'quality' => 90]);
       }
 
       Bus::create($data);
@@ -918,11 +898,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('file')) {   
-        $file = $request->file('file');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('bus');
-        $file->move($destinationPath,$fileName);
-        $data['file'] = $fileName;
+        $data['file'] = \App\Support\ImageHelper::save($request->file('file'), 'bus', ['width' => 1200, 'height' => 800, 'mode' => 'cover', 'quality' => 90]);
       }
 
       unset($data['_token']);
@@ -1081,11 +1057,9 @@ class PackagesController extends Controller
     return $data;
   }
 
-  private function uploadLocationFile($file): string
+  private function uploadLocationFile($file, array $opts = ['width' => 1280, 'height' => 850, 'mode' => 'cover', 'quality' => 90]): string
   {
-    $fileName = uniqid() . $file->getClientOriginalName();
-    $file->move(public_path('locations'), $fileName);
-    return $fileName;
+    return \App\Support\ImageHelper::save($file, 'locations', $opts);
   }
 
   private function saveLocationGalleryImages(Request $request, $locationId): void
@@ -1095,7 +1069,7 @@ class PackagesController extends Controller
         if (!$file) continue;
         \App\Models\LocationImage::create([
           'location_id' => $locationId,
-          'image'       => $this->uploadLocationFile($file),
+          'image'       => $this->uploadLocationFile($file, ['width' => 1600, 'height' => 1200, 'mode' => 'max', 'quality' => 90]),
         ]);
       }
     }
@@ -1140,11 +1114,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('gallery');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+        $data['image'] = \App\Support\ImageHelper::save($request->file('image'), 'gallery', ['width' => 1920, 'height' => 1920, 'mode' => 'max', 'quality' => 90]);
       }
 
       Gallery::create($data);
@@ -1165,11 +1135,7 @@ class PackagesController extends Controller
       $data = $request->all();
 
       if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('gallery');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+        $data['image'] = \App\Support\ImageHelper::save($request->file('image'), 'gallery', ['width' => 1920, 'height' => 1920, 'mode' => 'max', 'quality' => 90]);
       }
 
       unset($data['_token']);

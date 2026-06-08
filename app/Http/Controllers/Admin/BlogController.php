@@ -59,10 +59,7 @@ class BlogController extends Controller
 
         foreach (['image', 'featured_image'] as $field) {
             if ($request->file($field)) {
-                $file = $request->file($field);
-                $fileName = uniqid() . $file->getClientOriginalName();
-                $file->move(public_path('blog_images'), $fileName);
-                $data[$field] = $fileName;
+                $data[$field] = \App\Support\ImageHelper::save($request->file($field), 'blog_images', ['width' => 1280, 'height' => 720, 'mode' => 'cover', 'quality' => 90]);
             } elseif (isset($existing[$field])) {
                 $data[$field] = $existing[$field];
             }

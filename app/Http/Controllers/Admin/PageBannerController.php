@@ -19,11 +19,7 @@ class PageBannerController extends Controller
         $banner = PageBanner::findOrFail($id);
 
         if ($request->file('image')) {
-            $file = $request->file('image');
-            $fileName = uniqid() . $file->getClientOriginalName();
-            $destinationPath = public_path('banners');
-            $file->move($destinationPath, $fileName);
-            $banner->image = $fileName;
+            $banner->image = \App\Support\ImageHelper::save($request->file('image'), 'banners', ['width' => 1920, 'height' => 600, 'mode' => 'cover', 'quality' => 90]);
             $banner->save();
         }
 

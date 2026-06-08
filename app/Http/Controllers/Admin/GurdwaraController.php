@@ -53,11 +53,7 @@ class GurdwaraController extends Controller
         $gurdwara = new Gurdwara();
         if($file=$request->hasfile('gurdwara_image'))
         {
-            $file=$request->file('gurdwara_image');
-            $fileName=uniqid().$file->getClientOriginalName();
-            $destinationPath=public_path().'/gurdwara_images/';
-            $file->move($destinationPath,$fileName);
-            $request->gurdwara_image = $fileName;
+            $request->gurdwara_image = \App\Support\ImageHelper::save($request->file('gurdwara_image'), 'gurdwara_images', ['width' => 1280, 'height' => 850, 'mode' => 'cover', 'quality' => 90]);
         }
         $gurdwara ->create([
             'pardan_name' => $request->pardan_name,
@@ -115,11 +111,7 @@ class GurdwaraController extends Controller
         {
             if($file=$request->hasfile('gurdwara_image'))
             {
-                $file=$request->file('gurdwara_image');
-                $fileName=uniqid().$file->getClientOriginalName();
-                $destinationPath=public_path().'/gurdwara_images/';
-                $file->move($destinationPath,$fileName);
-                $request->gurdwara_image = $fileName;
+                $request->gurdwara_image = \App\Support\ImageHelper::save($request->file('gurdwara_image'), 'gurdwara_images', ['width' => 1280, 'height' => 850, 'mode' => 'cover', 'quality' => 90]);
                 $gurdwara->gurdwara_image = $request->gurdwara_image;
             }
             $gurdwara->pardan_name = $request->pardan_name;
