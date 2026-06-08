@@ -141,7 +141,7 @@
                             </div>
 
                             <div class="mt-4">
-                                <a class="btn pkgx-cta" href="{{ url('packages/apply', $packages->id) }}"><i class="fa fa-plane"></i> Book Now</a>
+                                <a class="btn pkgx-cta" href="{{ route('package-apply', $packages->id) }}"><i class="fa fa-plane"></i> Book Now</a>
                             </div>
                         </div>
                     </div>
