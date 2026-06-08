@@ -240,6 +240,8 @@ Route::group(['prefix' => 'admin',
     Route::get('/locations/edit/{id}',[PackagesController::class, 'edit_locations'])->name('edit_locations');
     Route::post('/locations/edit/{id}',[PackagesController::class, 'edit_locations'])->name('edit_locations');
     Route::get('/locations/delete/{id}',[PackagesController::class, 'delete_locations'])->name('delete_locations');
+    Route::get('/locations/image-delete/{id}',[PackagesController::class, 'delete_location_image'])->name('delete_location_image');
+    Route::get('/locations/set-feature/{id}',[PackagesController::class, 'set_location_feature'])->name('set_location_feature');
     
     Route::post('/assign-hotel',[PackagesController::class, 'assign_hotel'])->name('assign-hotel');
     Route::post('/assign-bus',[PackagesController::class, 'assign_bus'])->name('assign-bus');

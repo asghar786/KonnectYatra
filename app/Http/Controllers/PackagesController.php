@@ -218,7 +218,7 @@ class PackagesController extends Controller
 
     public function location_detail($id)
     {
-        $data['location'] = Locations::where("id", $id)->first();
+        $data['location'] = Locations::with('images')->where("id", $id)->first();
         return view('details.location_detail', $data);
     }
 

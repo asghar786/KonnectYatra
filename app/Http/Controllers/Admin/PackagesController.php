@@ -1023,29 +1023,30 @@ class PackagesController extends Controller
 
   public function locations()
   {
-    $data = Locations::all();
+    $data = Locations::with('images')->get();
     return view('admin.locations.locations',['locations'=>$data]);
   }
 
   public function create_locations(Request $request)
   {
     if($request->isMethod('post')){
-      $data = $request->all();
+      $data = $this->cleanLocationData($request);
 
-      if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('locations');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+      if ($request->file('image')) {
+        $data['image'] = $this->uploadLocationFile($request->file('image'));
       }
-      Locations::create($data);
+      $location = Locations::create($data);
+      $this->saveLocationGalleryImages($request, $location->id);
+      // If no feature image was uploaded but gallery photos were, use the first one.
+      if (empty($location->image)) {
+        $first = \App\Models\LocationImage::where('location_id', $location->id)->first();
+        if ($first) { $location->update(['image' => $first->image]); }
+      }
 
-      // $response = array('status'=>'1','message'=>'News is added sucessfully.','action'=>'reload');
-      // echo json_encode($response); return;
       return redirect(url('admin/locations'))->with("success", "Location added successfully!");
     }
 
+    $data['locations'] = null;
     $data['action'] = url('/admin/locations/create');
     $data['btn_text'] = "Create";
     return view('admin.locations.create_edit', $data);
@@ -1054,27 +1055,67 @@ class PackagesController extends Controller
   public function edit_locations(Request $request, $id)
   {
     if($request->isMethod('post')){
-      $data = $request->all();
+      $data = $this->cleanLocationData($request);
 
-      if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('locations');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+      if ($request->file('image')) {
+        $data['image'] = $this->uploadLocationFile($request->file('image'));
       }
-      unset($data['_token']);
       Locations::where("id", $id)->update($data);
+      $this->saveLocationGalleryImages($request, $id);
 
-      // $response = array('status'=>'1','message'=>'Event is updated sucessfully.','action'=>'reload');
-      // echo json_encode($response); return;
       return redirect(url('admin/locations'))->with("success", "Location updated successfully!");
     }
 
-    $data['locations'] = Locations::where("id", $id)->first();
+    $data['locations'] = Locations::with('images')->where("id", $id)->first();
     $data['action'] = url('/admin/locations/edit', $id);
     $data['btn_text'] = "Update";
     return view('admin.locations.create_edit', $data);
+  }
+
+  private function cleanLocationData(Request $request): array
+  {
+    $data = $request->only(['name', 'city', 'state', 'latitude', 'longitude', 'description']);
+    foreach (['latitude', 'longitude'] as $k) {
+      $data[$k] = ($data[$k] ?? '') === '' ? null : $data[$k];
+    }
+    return $data;
+  }
+
+  private function uploadLocationFile($file): string
+  {
+    $fileName = uniqid() . $file->getClientOriginalName();
+    $file->move(public_path('locations'), $fileName);
+    return $fileName;
+  }
+
+  private function saveLocationGalleryImages(Request $request, $locationId): void
+  {
+    if ($request->hasFile('images')) {
+      foreach ($request->file('images') as $file) {
+        if (!$file) continue;
+        \App\Models\LocationImage::create([
+          'location_id' => $locationId,
+          'image'       => $this->uploadLocationFile($file),
+        ]);
+      }
+    }
+  }
+
+  public function delete_location_image($id)
+  {
+    \App\Models\LocationImage::where('id', $id)->delete();
+    return back()->with('success', 'Location image removed.');
+  }
+
+  /** Tag a gallery image as the location's feature image. */
+  public function set_location_feature($imageId)
+  {
+    $img = \App\Models\LocationImage::find($imageId);
+    if ($img) {
+      Locations::where('id', $img->location_id)->update(['image' => $img->image]);
+      return back()->with('success', 'Feature image updated.');
+    }
+    return back();
   }
 
   public function delete_locations($id)

@@ -10,4 +10,9 @@ class Locations extends Model
     use HasFactory;
     protected $table='locations';
     protected $guarded = [];
+
+    public function images()
+    {
+        return $this->hasMany(LocationImage::class, 'location_id');
+    }
 }
