@@ -188,14 +188,26 @@ window.addEventListener('load', function () {
             .attr('d', path)
             .attr('stroke', '#ffffff').attr('stroke-width', 1)
             .attr('fill', function (d) { var c = counts[d.properties.name] || 0; return c > 0 ? color(c) : '#eef0f4'; })
+            .style('cursor', function (d) { return (counts[d.properties.name] || 0) > 0 ? 'pointer' : 'default'; })
             .on('mousemove', function (event, d) {
                 var c = counts[d.properties.name] || 0;
-                tip.html('<b>' + d.properties.name + '</b> — ' + c + ' Gurdwara' + (c === 1 ? '' : 's'))
+                tip.html('<b>' + d.properties.name + '</b> — ' + c + ' Gurdwara' + (c === 1 ? '' : 's') + (c > 0 ? ' &middot; click to view' : ''))
                    .style('left', (event.clientX + 14) + 'px')
                    .style('top', (event.clientY + 14) + 'px')
                    .style('opacity', 1);
             })
-            .on('mouseout', function () { tip.style('opacity', 0); });
+            .on('mouseout', function () { tip.style('opacity', 0); })
+            .on('click', function (event, d) {
+                if ((counts[d.properties.name] || 0) <= 0) return; // no gurdwaras → ignore
+                var slug = d.properties.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                var pill = document.querySelector('.gw-filter[data-state="' + slug + '"]');
+                if (pill) {
+                    pill.click(); // reuse the same filter logic as the pills
+                    tip.style('opacity', 0);
+                    var block = document.querySelector('.gw-state-block[data-state="' + slug + '"]');
+                    if (block) block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
     }).catch(function (e) {
         console.error('Sikh map failed:', e);
         el.innerHTML = '<p class="text-muted text-center" style="padding:210px 0 0">Map could not load. Use the state filters below.</p>';
