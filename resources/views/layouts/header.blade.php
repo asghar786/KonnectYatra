@@ -15,21 +15,48 @@
 	</script>
 	@endif
 
+	@php
+		$seoTitle = \App\Models\SiteSetting::get('seo_title');
+		$seoDesc  = \App\Models\SiteSetting::get('seo_description');
+		$seoKeys  = \App\Models\SiteSetting::get('seo_keywords');
+		$seoOg    = \App\Models\SiteSetting::get('seo_og_image');
+		$gsv      = \App\Models\SiteSetting::get('google_site_verification');
+		$clarity  = \App\Models\SiteSetting::get('clarity_project_id');
+		$ogImage  = !empty($seoOg) ? asset($seoOg) : asset('assets/images2/newlogo11.png');
+		$metaDesc = $seoDesc ?: 'Konnect Yatra — holy yatra tours to Nankana Sahib, Panja Sahib and Kartarpur Sahib, Pakistan.';
+	@endphp
+	@if(!empty($gsv))<meta name="google-site-verification" content="{{ $gsv }}" />@endif
+	@if(!empty($clarity))
+	<!-- Microsoft Clarity (managed via Admin > Settings > Integrations) -->
+	<script type="text/javascript">
+		(function(c,l,a,r,i,t,y){
+			c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+			t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+			y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+		})(window, document, "clarity", "script", "{{ $clarity }}");
+	</script>
+	@endif
+
 	<!-- META ============================================= -->
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="keywords" content="" />
+	<meta name="keywords" content="{{ $seoKeys }}" />
 	<meta name="author" content="" />
-	<meta name="robots" content="" />
+	<meta name="robots" content="index, follow" />
 	<!-- DESCRIPTION -->
-	<meta name="description" content="Lms-E-Learning" />
+	<meta name="description" content="{{ $metaDesc }}" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.css" integrity="sha512-nNlU0WK2QfKsuEmdcTwkeh+lhGs6uyOxuUs+n+0oXSYDok5qy0EI0lt01ZynHq6+p/tbgpZ7P+yUb+r71wqdXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 	<!-- OG -->
-	<meta property="og:title" content="Konnect Yatra" />
-	<meta property="og:description" content="Konnect Yatra a holy journy" />
-	<meta property="og:image" content="" />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="{{ $seoTitle ?: 'Konnect Yatra' }}" />
+	<meta property="og:description" content="{{ $metaDesc }}" />
+	<meta property="og:image" content="{{ $ogImage }}" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="{{ $seoTitle ?: 'Konnect Yatra' }}" />
+	<meta name="twitter:description" content="{{ $metaDesc }}" />
+	<meta name="twitter:image" content="{{ $ogImage }}" />
 	<meta name="format-detection" content="telephone=no">
 	<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.css'>
 	<!-- FAVICONS ICON ============================================= -->
@@ -38,7 +65,7 @@
 
   	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"/>
 	<!-- PAGE TITLE HERE ============================================= -->
-	<title>@yield('titlename')KONNECT YATRA</title>
+	<title>@yield('titlename', !empty($seoTitle) ? $seoTitle.' | ' : '')KONNECT YATRA</title>
 	<script src="https://kit.fontawesome.com/f5eb8f10bc.js" crossorigin="anonymous"></script>
 	<!-- MOBILE SPECIFIC ============================================= -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">

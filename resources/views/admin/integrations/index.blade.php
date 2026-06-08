@@ -94,6 +94,28 @@
                             </form>
                         </div>
                     </div>
+
+                    <div class="card mt-4" style="border-radius:14px">
+                        <div class="card-body">
+                            <h5 style="font-weight:700"><i class="fas fa-magnifying-glass-chart text-success"></i> Search Console &amp; Clarity</h5>
+                            <p class="text-muted">Verify your site with Google Search Console and add Microsoft Clarity for free heatmaps &amp; session recordings. Both are injected into every page automatically once saved.</p>
+
+                            <form method="POST" action="{{ url('admin/integrations') }}">
+                                @csrf
+                                <div class="form-group">
+                                    <label class="form_label_color"><i class="fab fa-google text-danger"></i> Google Search Console — Verification Code</label>
+                                    <input type="text" name="google_site_verification" class="form-control" placeholder="content value of the google-site-verification meta tag" value="{{ $google_site_verification }}">
+                                    <small class="text-muted">In Search Console choose the <b>HTML tag</b> method and paste only the <code>content="..."</code> value here (not the whole tag).</small>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color"><i class="fab fa-microsoft" style="color:#3C3C3C"></i> Microsoft Clarity — Project ID</label>
+                                    <input type="text" name="clarity_project_id" class="form-control" placeholder="e.g. abcdef1234" value="{{ $clarity_project_id }}">
+                                    <small class="text-muted">From Clarity → Settings → Setup, copy the Project ID (the short code in <code>clarity.ms/tag/<b>XXXX</b></code>).</small>
+                                </div>
+                                <button class="btn btn-primary">Save</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="card" style="border-radius:14px;background:#f8f9fb">

@@ -160,6 +160,10 @@ Route::group(['prefix' => 'admin',
     Route::get('/integrations',[IntegrationController::class, 'index'])->name('integrations');
     Route::post('/integrations',[IntegrationController::class, 'update'])->name('integrations_update');
 
+    // SEO settings
+    Route::get('/seo',[\App\Http\Controllers\Admin\SeoController::class, 'index'])->name('seo');
+    Route::post('/seo',[\App\Http\Controllers\Admin\SeoController::class, 'update'])->name('seo_update');
+
     // Newsletter subscribers
     Route::get('/subscribers',[SubscriberController::class, 'index'])->name('subscribers');
     Route::get('/subscribers/delete/{id}',[SubscriberController::class, 'destroy'])->name('subscribers_delete');
