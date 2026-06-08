@@ -212,7 +212,11 @@ h4.destination {
 					{{-- small screen carousal --}}
 
 
-					<div id="carouselExampleControls" class="carousel slide" data-ride="carousel" style="display:none">
+					<div class="d-flex justify-content-center w-100 btn-wrap mt-5">
+						<a href="{{ route('gallery_page') }}" class="button-text width-6 btn-slider mt-0">View Full Gallery <i class="fas fa-arrow-right ml-2"></i></a>
+					</div>
+
+						<div id="carouselExampleControls" class="carousel slide" data-ride="carousel" style="display:none">
 						<div class="carousel-inner">
 							@if(count($gallery) > 0)
 							@foreach($gallery as $key => $value)
