@@ -206,7 +206,7 @@
 </a>
 <style>
     #whatsappFloat{
-        position:fixed;right:15px;bottom:100px;z-index:99;
+        position:fixed;right:15px;bottom:160px;z-index:99;
         width:52px;height:52px;border-radius:50%;
         background:#25D366;color:#fff !important;
         display:flex;align-items:center;justify-content:center;
