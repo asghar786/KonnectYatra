@@ -114,7 +114,7 @@
                 </li>
 
                 <!-- Settings -->
-                @php $open = $groupOpen([url('admin/users'), url('/admin/profile'), route('integrations')]); @endphp
+                @php $open = $groupOpen([url('admin/users'), url('/admin/profile'), route('integrations'), route('subscribers')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-cog text-secondary"></i></span>
@@ -124,6 +124,7 @@
                     <ul @if($open) style="display:block;" @endif>
                         <li class="{{ $isCur(url('admin/users')) ? 'show' : '' }}"><a href="{{url('admin/users')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-dark"></i></span><span class="ttr-label">Users</span></a></li>
                         <li class="{{ $isCur(route('integrations')) ? 'show' : '' }}"><a href="{{ route('integrations') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-plug text-info"></i></span><span class="ttr-label">Integrations</span></a></li>
+                        <li class="{{ $isCur(route('subscribers')) ? 'show' : '' }}"><a href="{{ route('subscribers') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-envelope text-success"></i></span><span class="ttr-label">Subscribers</span></a></li>
                         <li class="{{ $isCur(url('/admin/profile')) ? 'show' : '' }}"><a href="{{ url('/admin/profile') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-warning"></i></span><span class="ttr-label">My Profile</span></a></li>
                     </ul>
                 </li>

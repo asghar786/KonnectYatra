@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\SubscriberController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -91,6 +92,9 @@ Route::get('/blogs', [BlogController::class, 'index'])->name('blogs');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog_detail');
 
 Route::post('/save-info', [UserPackages::class, 'save_info'])->name('save_info');
+
+// Newsletter subscription (public)
+Route::post('/subscribe', [SubscriberController::class, 'store'])->name('subscribe');
 
 // Admin Part //
 Route::get('/admin_login',[AdminLoginController::class, 'index'])->name('admin_login');
@@ -150,6 +154,10 @@ Route::group(['prefix' => 'admin',
     // Integrations (GA4 etc.)
     Route::get('/integrations',[IntegrationController::class, 'index'])->name('integrations');
     Route::post('/integrations',[IntegrationController::class, 'update'])->name('integrations_update');
+
+    // Newsletter subscribers
+    Route::get('/subscribers',[SubscriberController::class, 'index'])->name('subscribers');
+    Route::get('/subscribers/delete/{id}',[SubscriberController::class, 'destroy'])->name('subscribers_delete');
 
     // Page banners
     Route::get('/page-banners',[PageBannerController::class, 'index'])->name('page_banners');

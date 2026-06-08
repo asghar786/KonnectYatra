@@ -15,9 +15,16 @@
     <img class="content-image" src="https://dixeam.com/pr/bespecialtours/public//images/surfing/shipwrecks.png" alt="">
     <div class="content-details fadeIn-bottom subscrib-3e" style="width: 75%;">
         <h3 class="content-title ">LET'S JOIN US FOR MORE UPDATE !!</h3>
-        <form action="https://dixeam.com/pr/bespecialtours/Subscriber" method="POST" class="input-group mb-3 mt-4">
-            <input type="hidden" name="_token"  value="7xgsLn0gSDU34N1qm95ZJG2RPFjZdWbjqNoGT2BE"> <input type="text" name="email" class="form-control input-radis" placeholder="Enter email" aria-label="Recipient's username" fdprocessedid="qmqxu" style="border-radius: 20px 0px 0px 20px !important; padding: 28px 20px !important;">
-            <button class=" button-primary border-rad btn-subs" style="border-radius: 0px 20px 20px 0px !important;" type="submit" fdprocessedid="gb3pfb">Subscribe</button>
+        @if(session('subscribe_status'))
+            <div class="alert alert-success mt-3 mb-0" style="border-radius:12px;">{{ session('subscribe_status') }}</div>
+        @elseif($errors->has('email'))
+            <div class="alert alert-danger mt-3 mb-0" style="border-radius:12px;">{{ $errors->first('email') }}</div>
+        @endif
+        <form action="{{ route('subscribe') }}" method="POST" class="input-group mb-3 mt-4">
+            @csrf
+            <input type="hidden" name="source" value="join-us-banner">
+            <input type="email" name="email" required class="form-control input-radis" placeholder="Enter email" aria-label="Email address" style="border-radius: 20px 0px 0px 20px !important; padding: 28px 20px !important;">
+            <button class=" button-primary border-rad btn-subs" style="border-radius: 0px 20px 20px 0px !important;" type="submit">Subscribe</button>
         </form>
     </div>
 </div>
@@ -154,12 +161,13 @@
                     Let's join us for more updates !!
                 </div>
 
-                <form class="newslatter-form">
-
+                <form class="newslatter-form" action="{{ route('subscribe') }}" method="POST">
+                   @csrf
+                   <input type="hidden" name="source" value="footer">
                    <div class="input-group">
                     <input name="email" required="required" style="padding: 26px!important;border-radius: 10px 0px 0px 10px;"  class="form-control" placeholder="Your Email Address" type="email">
                     <span class="input-group-btn">
-                        <button name="submit" value="Submit" type="submit" class="btn button-primary"><i class="fa fa-arrow-right"></i></button>
+                        <button type="submit" class="btn button-primary"><i class="fa fa-arrow-right"></i></button>
                     </span>
                 </div>
 
