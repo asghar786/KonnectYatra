@@ -1,489 +1,235 @@
 @extends('layouts.app')
 @section('content')
 <style type="text/css">
-  .bg-blue{
-    background: #f54e18;
-    border-radius: 10px;
-    padding: 15px 0px;
-    color: white;
-  }
-  .pricing-content{position:relative;}
-  .pricing_design{
-    position: relative;
-/*        margin: 0px 15px;*/
-}
-.pricing_design .single-pricing{
-  background:#f54e18;
-  padding: 60px 40px;
-  border-radius:30px;
-  box-shadow: 0 10px 40px -10px rgba(0,64,128,.2);
-  position: relative;
-  z-index: 1;
-}
-.pdsi{
-  margin-left: 30px !important;
-}
-.pricing_design .single-pricing:before{
-  content: "";
-  background-color: #fff;
-  width: 100%;
-  height: 100%;
-  border-radius: 18px 18px 190px 18px;
-  border: 1px solid #eee;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  z-index: -1;
-}
-.price-head{}
-.price-head h2 {
-  margin-bottom: 20px;
-  font-size: 26px;
-  font-weight: 600;
-}
-.price-head h1 {
-  font-weight: 600;
-  margin-top: 30px;
-  margin-bottom: 5px;
-}
-.single-pricing ul{
-  list-style: none !important;
-      margin-top: 15px !important;
-}
-.pdfa{
-	margin-top: 15px !important;
-	margin-left: 15px !important;
-	margin-bottom: 0px!important;
-}
-.price-head span{}
-
-.single-pricing ul{list-style:;margin-top: 30px;}
-.single-pricing ul li {
-  line-height: 30px;
-
-}
-.single-pricing ul li i {
-  background: #554c86;
-  color: #fff;
-  width: 20px;
-  height: 20px;
-  border-radius: 30px;
-  font-size: 11px;
-  text-align: left;
-  line-height: 20px;
-  margin-right: 9px;
-}
-.pricing-price{}
-
-.price_btn {
-  background: #f54e18;
-  padding: 10px 30px;
-  color: #fff;
-  display: inline-block;
-  margin-top: 20px;
-  border-radius: 2px;
-  -webkit-transition: 0.3s;
-  transition: 0.3s;
-}
-.price_btn:hover{
-  background:#f54e18;
-  color: white !important;
-  text-decoration: none;
-}
-a{
-  text-decoration:none;    
-}
-.tab-content ul li {
-    list-style: disc !important;
-    margin-bottom: 3px !important;
-    margin-left: 30px !important;
-}
-.section-title {
-  margin-bottom: 60px;
-}
-.text-center {
-  text-align: center!important;
-}
-
-.section-title h2 {
-  font-size: 45px;
-  font-weight: 600;
-  margin-top: 0;
-  position: relative;
-  text-transform: capitalize;
-}
-
-.package-main{
-	max-width: 1250px !important;
-}
-
-.bootstrap-select {
-    display: none;
-}
-
+  .apkg{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
+  /* Blessing header */
+  .apkg-blessing{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:6px 0 30px}
+  .apkg-blessing span{color:var(--brand);font-weight:600;font-size:16px;white-space:nowrap}
+  .apkg-fcfs{display:inline-block;background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:30px;padding:7px 24px;font-weight:700;font-size:16px}
+  /* Tabs */
+  .apkg-tabs{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;border:0;margin-bottom:36px}
+  .apkg-tabs .nav-item{margin:0}
+  .apkg-tabs .nav-link{border:1px solid #e7e9ef !important;border-radius:30px;color:var(--ink) !important;font-weight:600;font-size:16px;padding:11px 28px;background:#fff;transition:.15s}
+  .apkg-tabs .nav-link:hover{border-color:var(--brand) !important;color:var(--brand) !important}
+  .apkg-tabs .nav-link.active{background:var(--brand) !important;border-color:var(--brand) !important;color:#fff !important;box-shadow:0 8px 18px rgba(245,78,24,.28)}
+  /* State selector */
+  .apkg-state-pick{max-width:360px;margin:0 auto 34px}
+  .apkg-state-pick label{font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
+  .apkg-state-pick select{border:1px solid #e2e4ea;border-radius:30px;padding:11px 18px;height:auto;font-size:15px}
+  .apkg-state-pick select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+  /* Pricing card */
+  .apkg-card{background:#fff;border:1px solid #eef0f4;border-radius:20px;box-shadow:0 14px 40px rgba(28,37,65,.08);overflow:hidden;height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+  .apkg-card:hover{transform:translateY(-4px);box-shadow:0 20px 46px rgba(28,37,65,.14)}
+  .apkg-card-head{background:linear-gradient(135deg,#2d1b69,#5b2a9e);color:#fff;padding:24px 26px;text-align:center}
+  .apkg-card-head h3{margin:0;font-size:21px;font-weight:700;color:#fff;line-height:1.3}
+  .apkg-card-head .apkg-state{display:inline-block;margin-top:10px;background:rgba(255,255,255,.18);padding:3px 14px;border-radius:20px;font-size:13px;font-weight:600}
+  .apkg-card-body{padding:24px 26px;flex:1}
+  .apkg-tier{margin-bottom:18px}
+  .apkg-tier:last-of-type{margin-bottom:0}
+  .apkg-tier-title{background:var(--brand);color:#fff;border-radius:10px;text-align:center;padding:9px 12px;font-weight:700;font-size:15px}
+  .apkg-tier-title small{font-weight:500;opacity:.9}
+  .apkg-price-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .apkg-price{text-align:center;border:1px solid #eef0f4;border-radius:14px;padding:14px 8px}
+  .apkg-price span{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:4px}
+  .apkg-price b{font-size:22px;font-weight:800;color:var(--ink)}
+  .apkg-price b small{font-size:14px;color:var(--brand);vertical-align:top}
+  .apkg-price .call{font-size:15px;font-weight:700;color:var(--brand)}
+  .apkg-card-foot{padding:6px 26px 26px;text-align:center}
+  .apkg-btn{display:inline-flex;align-items:center;gap:9px;background:var(--brand);color:#fff !important;font-weight:700;font-size:16px;padding:13px 44px;border-radius:30px;box-shadow:0 8px 18px rgba(245,78,24,.3);transition:.15s}
+  .apkg-btn:hover{transform:translateY(-2px);text-decoration:none;color:#fff}
+  .apkg-empty{padding:50px 20px;text-align:center;color:#9aa0ac;font-size:17px;width:100%}
+  .apkg-desc{margin-top:14px;color:#4b5563;font-size:14px;line-height:1.6}
+  @media (max-width:575px){.apkg-price-row{grid-template-columns:1fr}.apkg-card-head h3{font-size:19px}}
 </style>
 
-<main id="content" class="site-main">
-
+<main id="content" class="site-main apkg">
   <section class="inner-banner-wrap pb-0">
-    <div class="inner-baner-container" 
-    style="background-image: url('{{ \App\Models\PageBanner::url('all-packages', asset('assets/images2/Inner-banner-01.png')) }}');background-position: center !important;">
-    <div class="container">
-    <div class="inner-banner-content">
-       <h1 class="inner-title" style="font-size:65px !important;">PACKAGES</h1>
-     </div>
-   </div>
-</div>
-</section>
-<section class="package-section">
-  <div class="container">
+    <div class="inner-baner-container"
+      style="background-image: url('{{ \App\Models\PageBanner::url('all-packages', asset('assets/images2/Inner-banner-01.png')) }}');background-position: center !important;">
+      <div class="container">
+        <div class="inner-banner-content">
+          <h1 class="inner-title" style="font-size:65px !important;">PACKAGES</h1>
+        </div>
+      </div>
+    </div>
+    <div class="inner-shape"></div>
+  </section>
 
-    <div class="col-12 mt-4">
+  <section class="package-section section-sp2">
+    <div class="container">
       @if(session('success'))
       <div class="alert alert-success alert-dismissible fade show" role="alert">
         {{ session('success') }}
       </div>
       @endif
-    </div>
-    <div class="row py-5">
-      <div class="col-4">
-          <h3 class="text-center">Wahe Guru Ji ka Khalsa</h3>
+
+      <!-- Blessing -->
+      <div class="apkg-blessing">
+        <span>Wahe Guru Ji ka Khalsa</span>
+        <span class="apkg-fcfs">First Come First Serve</span>
+        <span>Wahe Guru Ji ki Fateh</span>
       </div>
-      <div class="col-4">
-          <h4 class="text-center mt-2">(First Come First Serve)</h4>
-      </div>
-      <div class="col-4">
-          <h3 class="text-center">Wahe Guru Ji ki Fateh</h3>
-      </div>
-    </div>
-    <div class="package-inner">
-      <div class="row">
-        <!-- @if(count(@$all_packages) > 0)
-        @foreach(@$all_packages as $key => $val)
-        <div class="col-lg-4 col-md-6 mb-5">
-          <div class="package-wrap">
-            <figure class="feature-image m-0">
-              <a href="">
-                <img src="{{ asset('assets/flyers/'.@$val['image']) }}" style="width: 100%; border-radius: 30px; height: 500px !important;" alt="">
-              </a>
-            </figure>
-            <div class="package-content-wrap">
-              <div class="package-content" style="padding: 0 11px 0;">
-                
+
+      @php
+        $fmtPrice = function ($v) {
+            return ($v !== null && $v !== '' && (float) $v > 0)
+                ? '<b><small>$</small>'.number_format((float) $v).'</b>'
+                : '<span class="call">Call for Price</span>';
+        };
+      @endphp
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs apkg-tabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#vaisakhi" role="tab" aria-selected="true">Vaisakhi Packages</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#birthday" role="tab" aria-selected="false">Gurpurab Packages</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#vip" role="tab" aria-selected="false">VIP Packages</a>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- ============ VAISAKHI ============ -->
+        <div class="tab-pane active" id="vaisakhi" role="tabpanel">
+          <div class="row justify-content-center">
+            @forelse(@$all_packages as $val)
+            <div class="col-lg-6 col-md-8 mb-4">
+              <div class="apkg-card">
+                <div class="apkg-card-head">
+                  <h3>{{ @$val->name }}</h3>
+                  @if(!empty(@$val->state))<span class="apkg-state">{{ $val->state }}</span>@endif
+                </div>
+                <div class="apkg-card-body">
+                  <div class="apkg-tier">
+                    <div class="apkg-tier-title">5&#9733; Hotel Package <small>(per person)</small></div>
+                    <div class="apkg-price-row">
+                      <div class="apkg-price"><span>Round Trip</span>{!! $fmtPrice(@$val->five_star_round_price) !!}</div>
+                      <div class="apkg-price"><span>One Way</span>{!! $fmtPrice(@$val->five_star_single_price) !!}</div>
+                    </div>
+                  </div>
+                  <div class="apkg-tier">
+                    <div class="apkg-tier-title">4&#9733; Hotel Package <small>(per person)</small></div>
+                    <div class="apkg-price-row">
+                      <div class="apkg-price"><span>Round Trip</span>{!! $fmtPrice(@$val->four_star_round_price) !!}</div>
+                      <div class="apkg-price"><span>One Way</span>{!! $fmtPrice(@$val->four_star_single_price) !!}</div>
+                    </div>
+                  </div>
+                  @if(!empty(@$val->sdescription))<div class="apkg-desc">{!! $val->sdescription !!}</div>@endif
+                </div>
+                <div class="apkg-card-foot">
+                  <a href="{{ url('all-packages', @$val->id) }}" class="apkg-btn"><i class="fa fa-plane"></i> Book Now</a>
+                </div>
               </div>
             </div>
-
-          </div>
-          <div class="btn-wrap d-flex justify-content-center ">
-            <a href="{{ url("all-packages", @$val->id) }}" class="button-text  width-6 btn-slider mt-0" style="    padding: 13px 50px !important;">Book Now</a>
+            @empty
+            <div class="apkg-empty">No Vaisakhi packages available at the moment.</div>
+            @endforelse
           </div>
         </div>
-        @endforeach
-        @endif -->
-        {{-- <div class="col-12">
-          <h2 class="text-center" style="margin-top: 90px;">Vaisakhi Package to Nankana Sahib, Pakistan<br>
-            <span class="" style="font-size: 25px;"> Leaving 08 April and Returning 20 April, 2024</span></h2>
-          </div>
 
-        </div> --}}
+        <!-- ============ GURPURAB ============ -->
+        <div class="tab-pane" id="birthday" role="tabpanel">
+          @if(count(@$all_packages1) > 0)
+          <div class="apkg-state-pick">
+            <label><i class="fa fa-map-marker-alt"></i> Select Your State</label>
+            <select class="form-control" id="state">
+              <option value="13">New York</option>
+              <option value="14">Washington Dulles</option>
+              <option value="15">Los Angeles</option>
+              <option value="17">Chicago</option>
+              <option value="16">Seattle</option>
+              <option value="18">Toronto</option>
+            </select>
+          </div>
+          <div class="row justify-content-center">
+            @foreach(@$all_packages1 as $key => $val)
+            <div class="col-lg-6 col-md-8 mb-4 all_states state_{{ $val->id }}" @if($key !== 0) style="display:none;" @endif>
+              <div class="apkg-card">
+                <div class="apkg-card-head">
+                  <h3>{{ @$val->name }}</h3>
+                  @if(!empty(@$val->state))<span class="apkg-state">{{ $val->state }}</span>@endif
+                </div>
+                <div class="apkg-card-body">
+                  <div class="apkg-tier">
+                    <div class="apkg-tier-title">5&#9733; Hotel Package <small>(per person)</small></div>
+                    <div class="apkg-price-row">
+                      <div class="apkg-price"><span>Round Trip</span>{!! $fmtPrice(@$val->five_star_round_price) !!}</div>
+                      <div class="apkg-price"><span>One Way</span>{!! $fmtPrice(@$val->five_star_single_price) !!}</div>
+                    </div>
+                  </div>
+                  <div class="apkg-tier">
+                    <div class="apkg-tier-title">4&#9733; Hotel Package <small>(per person)</small></div>
+                    <div class="apkg-price-row">
+                      <div class="apkg-price"><span>Round Trip</span>{!! $fmtPrice(@$val->four_star_round_price) !!}</div>
+                      <div class="apkg-price"><span>One Way</span>{!! $fmtPrice(@$val->four_star_single_price) !!}</div>
+                    </div>
+                  </div>
+                  @if(!empty(@$val->sdescription))<div class="apkg-desc">{!! $val->sdescription !!}</div>@endif
+                </div>
+                <div class="apkg-card-foot">
+                  <a href="{{ url('all-packages', @$val->id) }}" class="apkg-btn"><i class="fa fa-plane"></i> Book Now</a>
+                </div>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="row"><div class="apkg-empty">No Gurpurab packages available at the moment.</div></div>
+          @endif
+        </div>
+
+        <!-- ============ VIP ============ -->
+        <div class="tab-pane" id="vip" role="tabpanel">
+          <div class="row justify-content-center">
+            @if(count(@$all_packages2) > 0)
+            <div class="col-lg-6 col-md-8 mb-4">
+              <div class="apkg-card">
+                <div class="apkg-card-head">
+                  <h3>Special Land Package</h3>
+                  <span class="apkg-state">VIP</span>
+                </div>
+                <div class="apkg-card-body">
+                  <div class="apkg-tier">
+                    <div class="apkg-tier-title">5&#9733; Hotel Package <small>(per person)</small></div>
+                    <div class="apkg-price-row">
+                      <div class="apkg-price" style="grid-column:1 / -1">
+                        <span>5 Nights &amp; 6 Days — starting from</span><b><small>$</small>950</b>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="apkg-tier">
+                    <div class="apkg-tier-title">4&#9733; Hotel Package <small>(per person)</small></div>
+                    <div class="apkg-price-row">
+                      <div class="apkg-price" style="grid-column:1 / -1">
+                        <span>5 Nights &amp; 6 Days — starting from</span><b><small>$</small>750</b>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="apkg-card-foot">
+                  <a href="{{ url('special-package') }}" class="apkg-btn"><i class="fa fa-plane"></i> Book Now</a>
+                </div>
+              </div>
+            </div>
+            @else
+            <div class="apkg-empty">No VIP packages available at the moment.</div>
+            @endif
+          </div>
+        </div>
       </div>
     </div>
   </section>
-  <section id="pricing" class="pricing-content section-padding container package-main">                              
-    
-  <div class="row">
-  <div class="col-12 col-md-12 col-lg-12">
-  <ul class="nav nav-tabs nav-justified" role="tablist">
-    <li class="nav-item" id="rounddtrip">
-      <a class="nav-link active" style="font-size: 20px;" data-toggle="tab" href="#vaisakhi" role="tab" aria-controls="vaisakhi" aria-selected="false">Vaisakhi Packages</a>
-    </li>
-    <li class="nav-item" id="oneeside">
-      <a class="nav-link" style="font-size: 20px;" data-toggle="tab" href="#birthday" role="tab" aria-controls="birthday" aria-selected="true">GURPURAB Packages</a>
-    </li>
-    <li class="nav-item" id="vipside">
-      <a class="nav-link" style="font-size: 20px;" data-toggle="tab" href="#vip" role="tab" aria-controls="vip" aria-selected="true">VIP Packages</a>
-    </li>
-  </ul>
-
-  <div class="tab-content mt-3">
-    <div class="tab-pane active" id="vaisakhi" role="tabpanel" aria-labelledby="chicken-tab">
-      <div class="row "> 
-        <div class="col-lg-12 d-flex justify-content-center">
-          <p>No package found</p>
-        </div>
-    <!-- @if(count(@$all_packages) > 0)-->
-    <!-- @foreach(@$all_packages as $key => $val)                    -->
-    <!-- <div class="col-lg-6 col-sm-12 mt-5">-->
-    <!--  <div class="pricing_design">-->
-    <!--    <div class="single-pricing">-->
-    <!--      <h3 class="text-center mb-5">-->
-    <!--        {{ @$val->name }}-->
-    <!--      </h3>-->
-    <!--      <div class="price-head ">       -->
-    <!--        <h5 class="text-center bg-blue">-->
-    <!--          {{ @$val->state }} 5* Hotel package <span style="font-size: 15px;">(per person)</span>-->
-    <!--        </h5>-->
-    <!--        <div class="row">-->
-    <!--          <div class="col-md-6 text-center">-->
-    <!--            <p class="text-center mt-3">-->
-    <!--              Round trip -->
-    <!--            </p>-->
-    <!--            <h4 style="margin-top: -15px;"><sub><del style="font-size: 14px; color: red;">$3300</del></sub> ${{ @$val->five_star_round_price }}</h4>-->
-    <!--            <p style="color: green; font-size: 14px; margin-top: -7px;">Special Discount</p>-->
-    <!--          </div>-->
-    <!--          <div class="col-md-6 text-center">-->
-    <!--            <p class="text-center mt-3">One Way</p>-->
-    <!--            <h4 style="margin-top: -15px;"><sub><del style="font-size: 14px; color: red;">$2700</del></sub> ${{ @$val->five_star_single_price }}</h4>-->
-    <!--            <p style="color: green; font-size: 14px; margin-top: -7px;">Special Discount</p>-->
-    <!--          </div>  -->
-    <!--        </div>-->
-            <!--<h5 class="text-center mt-4 bg-blue">-->
-            <!--  {{ @$val->state }} 4* Hotel package <span style="font-size: 15px;">(per person)</span>-->
-            <!--</h5>-->
-    <!--        <div class="row">-->
-            <!--  <div class="col-md-6 text-center">-->
-            <!--    <p class="text-center mt-3">-->
-            <!--      Round trip -->
-            <!--    </p>-->
-            <!--    <h4 style="margin-top: -15px;">${{ @$val->four_star_round_price }}</h4>-->
-            <!--  </div>-->
-
-            <!--  <div class="col-md-6 text-center">-->
-            <!--    <p class="text-center mt-3">One Way</p>-->
-            <!--    <h4 style="margin-top: -15px;">${{ @$val->four_star_single_price }}</h4>-->
-            <!--  </div>  -->
-    <!--          {!! @$val->sdescription !!}-->
-    <!--        </div>-->
-            
-    <!--        <div class="pricing-price pt-5">-->
-    <!--          <a href="{{ url("agreement", @$val->id) }}" class="button-text  width-6 btn-slider mt-0" style="    padding: 13px 50px !important;">Book Now</a>-->
-    <!--        </div>-->
-    <!--      </div>-->
-    <!--    </div>-->
-    <!--  </div>-->
-    <!--</div>-->
-    <!--@endforeach-->
-    <!--@else-->
-    <!--<div class="col-lg-12 d-flex justify-content-center">-->
-    <!--  <p>No package found</p>-->
-    <!--</div>-->
-    <!--@endif-->
-  </div>
-    </div>
-    <div class="tab-pane" id="birthday" role="tabpanel" aria-labelledby="duck-tab">
-      <div class="row">
-     @if(count(@$all_packages1) > 0)
-     <div class="col-lg-6 col-sm-12 mb-5">
-      <div class="pricing_design">
-        <div class="single-pricing">
-          <div class="state mb-5">
-             <label><b>Select State</b></label>
-             <select class="form-control" id="state">
-                 <option value="13">New York</option>
-                 <option value="14">Washington Dulles</option>
-                 <option value="15">Los Angeles</option>
-                 <option value="17">Chicago</option>
-                 <option value="16">Seattle</option>
-                 <option value="18">Toronto</option>
-             </select>
-          </div>
-          @foreach(@$all_packages1 as $key => $val)
-          <div class="all_states state_{{ $val->id }}" @if($key !== 0) style="display: none;" @endif>
-              <h3 class="text-center mb-5">
-                {{ @$val->name }}
-              </h3>
-              <div class="price-head ">       
-                <h5 class="text-center bg-blue">
-                  {{ @$val->state }} 5* Hotel package <span style="font-size: 15px;">(per person)</span>
-                </h5>
-                <div class="row">
-                  <div class="col-md-6 text-center">
-                    <p class="text-center mt-3">
-                      Round trip 
-                    </p>
-                    <h4 style="margin-top: -15px;">${{ @$val->five_star_round_price }}</h4>
-                  </div>
-                  <div class="col-md-6 text-center">
-                    <p class="text-center mt-3">One Way</p>
-                    <h4 style="margin-top: -15px;">${{ @$val->five_star_single_price }}</h4>
-                  </div>  
-                </div>
-                <h5 class="text-center mt-4 bg-blue">
-                  {{ @$val->state }} 4* Hotel package <span style="font-size: 15px;">(per person)</span>
-                </h5>
-                <div class="row">
-                  <div class="col-md-6 text-center">
-                    <p class="text-center mt-3">
-                      Round trip 
-                    </p>
-                    <h4 style="margin-top: -15px;">${{ @$val->four_star_round_price }}</h4>
-                  </div>
-    
-                  <div class="col-md-6 text-center">
-                    <p class="text-center mt-3">One Way</p>
-                    <h4 style="margin-top: -15px;">${{ @$val->four_star_single_price }}</h4>
-                  </div>  
-                  {!! @$val->sdescription !!}
-                </div>
-                
-                <div class="pricing-price pt-5">
-                  <a href="{{ url("all-packages", @$val->id) }}" class="button-text  width-6 btn-slider mt-0" style="    padding: 13px 50px !important;">Book Now</a>
-                </div>
-              </div>
-            </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
-    @else
-    <div class="col-lg-12 d-flex justify-content-center">
-      <p>No package found</p>
-    </div>
-    @endif
-  </div>
-    </div>
-    <div class="tab-pane" id="vip" role="tabpanel" aria-labelledby="duck-tab">
-      <div class="row ">  
-     @if(count(@$all_packages2) > 0)
-     <!--@foreach(@$all_packages2 as $key => $val)                    -->
-     <div class="col-lg-6 col-sm-12 mb-5">
-      <div class="pricing_design">
-        <div class="single-pricing">
-          <h3 class="text-center mb-5">
-            SPECIAL LAND PACKAGE
-          </h3>
-          <div class="price-head ">       
-            <h5 class="text-center bg-blue">
-              5* Hotel package <span style="font-size: 15px;">(per person)</span>
-            </h5>
-            <div class="row">
-              <div class="col-md-12 text-center">
-                <p class="text-center mt-3">
-                  Starting from <b style="font-size: 20px;">$950</b> for <b style="font-size: 16px;">5</b> Nights & <b style="font-size: 16px;">6</b> Days
-                </p>
-              </div>
-            </div>
-            <h5 class="text-center mt-4 bg-blue">
-              4* Hotel package <span style="font-size: 15px;">(per person)</span>
-            </h5>
-            <div class="row">
-              <div class="col-md-12 text-center">
-                <p class="text-center mt-3">
-                  Starting from <b style="font-size: 20px;">$750</b> for <b style="font-size: 16px;">5</b> Nights & <b style="font-size: 16px;">6</b> Days
-                </p>
-              </div>
-              {!! @$val->sdescription !!}
-            </div>
-            
-            <div class="pricing-price pt-5">
-              <a href="{{ url("special-package") }}" class="button-text width-6 btn-slider mt-0" style="padding: 13px 50px !important;">Book Now</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    <!--</div>-->
-    @endforeach
-    @else
-    <div class="col-lg-12 d-flex justify-content-center">
-      <p>No package found</p>
-    </div>
-    @endif
-  </div>
-    </div>
-  </div>
-  
-</div>
-</div>
-</section>
-
-
-
 </main>
 
 <script>
-  (function() {
-    'use strict';
-
-    var forms = document.querySelectorAll('.needs-validation');
-
-    Array.prototype.slice.call(forms).forEach(function(form) {
-      form.addEventListener('submit', function(event) {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-          var firstInvalidElement = form.querySelector(':invalid');
-          firstInvalidElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-        }
-
-        form.classList.add('was-validated');
-      }, false);
-    });
-  })();
-</script>
-<script>
   $(document).ready(function() {
     $(document).on("change", "#state", function () {
-        var selected = $(this).find("option:selected").val();
-        $(".all_states").fadeOut();
-        $(".state_"+selected).fadeIn();
-    });
-    
-      // Attach click event listener to each checkbox
-    $("#package_1, #package_2, #package_3").click(function() {
-        // If a checkbox is checked, enable the other two
-      if ($(this).is(":checked")) {
-        $("#package_1, #package_2, #package_3").not(this).prop("disabled", true);
-      }
-        // If a checkbox is unchecked, enable the other two
-      else {
-        $("#package_1, #package_2, #package_3").prop("disabled", false);
-      }
-    });
-  });
-</script>
-<script>
-    // Add event listeners to all the package checkboxes
-  $("input[type='checkbox']").change(function() {
-    var checked = $(this).is(":checked");
-    var container = $(this).closest(".col-lg-4");
-    container.find("input[type='radio']").prop("disabled", !checked);
-    container.find("input[type='radio']").prop("required", true);
-  });
-</script>
-<script>
-  $(document).ready(function() {
-      // Attach click event listener to radio buttons
-    $('input[name="first_visit"]').on('click', function() {
-        // If yes is selected, show the div
-      if ($(this).val() === 'yes') {
-        $('#previous-visit').prop('required', false);
-        $('#entry-port').prop('required', false);
-        $('#first-visit').hide();
-      }
-        // If no is selected, hide the div
-      else {
-        $('#previous-visit').prop('required', true);
-        $('#entry-port').prop('required', true);
-        $('#first-visit').show();
-      }
-    });
-  });
-</script>
-<script>
-  $(document).ready(function() {
-      // Attach click event listener to radio buttons
-    $('input[name="us_passport"]').on('click', function() {
-        // If yes is selected, show the div
-      if ($(this).val() === 'yes') {
-        $('#green-card').prop('required', true);
-      }
-        // If no is selected, hide the div
-      else {
-        $('#green-card').prop('required', false);
-      }
+      var selected = $(this).find("option:selected").val();
+      $(".all_states").fadeOut();
+      $(".state_" + selected).fadeIn();
     });
   });
 </script>
