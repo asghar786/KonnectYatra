@@ -43,23 +43,23 @@
     <!-- Content -->
     <div class="page-content bg-white pkgx">
         <!-- inner page banner -->
-        <div class="page-banner ovbl-light" style="background-image:url('{{ \App\Models\PageBanner::url('packages', asset('assets/images2/Inner-banner-01.png')) }}');">
-            <div class="container">
-                <div class="page-banner-entry">
-                    <h1 class="text-white">Packages <i class="fa fa-plane"></i></h1>
+        <section class="inner-banner-wrap">
+            <div class="inner-baner-container" style="background-image: url('{{ \App\Models\PageBanner::url('packages', asset('assets/images2/Inner-banner-01.png')) }}'); background-position:center;">
+                <div class="container">
+                    <div class="inner-banner-content">
+                        <h1 class="inner-title">PACKAGES <i class="fa fa-plane"></i></h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Packages</li>
+                            </ol>
+                        </nav>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Breadcrumb row -->
-        <div class="breadcrumb-row">
-            <div class="container">
-                <ul class="list-inline">
-                    <li><a href="{{ route('home') }}">Home</a></li>
-                    <li>Packages</li>
-                </ul>
-            </div>
-        </div>
-        <!-- Breadcrumb row END -->
+            <div class="inner-shape"></div>
+        </section>
+        <!-- inner page banner END -->
         <div class="container section-sp2">
             <div class="row">
                 <div class="col-12">
