@@ -152,7 +152,7 @@ h4.destination {
 					<div class="guide-content-wrap text-center">
 						<figure class="guide-image m-0">
 							<a href="{{ route('gurdwara_detail', @$value->id) }}">
-								<img style="height: 280px; width: 100%; object-fit: cover;" src="{{asset('gurdwara_images/'.@$value->gurdwara_image)}}" alt="{{ @$value->gurdwara_name }}">
+								<img style="height: 280px; width: 100%; object-fit: cover; border-radius: 20px;" src="{{asset('gurdwara_images/'.@$value->gurdwara_image)}}" alt="{{ @$value->gurdwara_name }}">
 							</a>
 						</figure>
 						<div class="guide-content mt-0 mx-0" style="">
@@ -197,7 +197,7 @@ h4.destination {
 						<div class="col-md-6 col-sm-6 col-6 destinations-grids text-center mb-4">
                             <h4 class="destination mb-3">{{ $value->name }}</h4>
                             <div class="image-position position-relative">
-                                <img src="{{ asset('gallery/'.$value->image) }}" style="width: 100%; height: 400px; object-fit: cover; object-position: {{ $value->focus_x ?? 50 }}% {{ $value->focus_y ?? 50 }}%;" class="img-fluid">
+                                <img src="{{ asset('gallery/'.$value->image) }}" style="width: 100%; height: 400px; object-fit: cover; object-position: {{ $value->focus_x ?? 50 }}% {{ $value->focus_y ?? 50 }}%; border-radius: 20px;" class="img-fluid">
                             </div>
                             <div class="destinations-info">
                                 <div class="caption mb-lg-3">
@@ -262,7 +262,7 @@ h4.destination {
 						<div class="package-wrap">
 							<figure class="feature-image mx-0">
 								<a href="{{ url('/hotel-detail', @$value->id) }}">
-									<img src="{{asset('hotels/'.@$value->image)}}" style="width: 100%; border-radius: 30px; height: 220px !important;" alt="">
+									<img src="{{asset('hotels/'.@$value->image)}}" style="width: 100%; border-radius: 20px; height: 220px !important; object-fit: cover;" alt="">
 								</a>
 							</figure>
 							<div class="package-content-wrap">
