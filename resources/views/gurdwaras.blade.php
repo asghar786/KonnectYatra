@@ -1,51 +1,188 @@
 @extends('layouts.app')
 @section('content')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
+<style type="text/css">
+    .gw{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
+    /* Stats */
+    .gw-stats{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:36px 0 10px}
+    .gw-stat{background:#fff;border:1px solid #eef0f4;border-radius:16px;box-shadow:0 8px 24px rgba(28,37,65,.07);padding:18px 30px;text-align:center;min-width:160px}
+    .gw-stat b{display:block;font-size:34px;font-weight:800;color:var(--brand);line-height:1}
+    .gw-stat span{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+    /* Map */
+    .gw-map-wrap{background:#fff;border:1px solid #eef0f4;border-radius:20px;box-shadow:0 14px 40px rgba(28,37,65,.08);padding:22px;margin-top:30px}
+    #sikhMap{width:100%;height:480px}
+    .gw-legend{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--muted)}
+    .gw-legend i{display:inline-block;width:16px;height:16px;border-radius:4px;margin-right:6px;vertical-align:middle}
+    /* State filter pills */
+    .gw-filters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:40px 0 10px}
+    .gw-filter{border:1px solid #e7e9ef;background:#fff;border-radius:30px;color:var(--ink);font-weight:600;font-size:14px;padding:9px 20px;cursor:pointer;transition:.15s}
+    .gw-filter:hover{border-color:var(--brand);color:var(--brand)}
+    .gw-filter.active{background:var(--brand);border-color:var(--brand);color:#fff}
+    /* State heading */
+    .gw-state-head{display:flex;align-items:center;gap:14px;margin:46px 0 22px}
+    .gw-state-head h2{margin:0;font-size:28px;font-weight:700;color:var(--ink)}
+    .gw-state-head .count{background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:20px;font-size:13px;font-weight:700;padding:3px 14px}
+    .gw-state-head .line{flex:1;height:1px;background:#eceef3}
+    /* Card */
+    .gw-card{background:#fff;border:1px solid #eef0f4;border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(28,37,65,.07);height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+    .gw-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(28,37,65,.14)}
+    .gw-photo{height:210px;background:#f1f2f6;overflow:hidden;position:relative}
+    .gw-photo img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+    .gw-card:hover .gw-photo img{transform:scale(1.05)}
+    .gw-photo .gw-sangat{position:absolute;top:12px;right:12px;background:rgba(45,27,105,.92);color:#fff;font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px}
+    .gw-body{padding:20px 22px;flex:1}
+    .gw-body h5{margin:0 0 8px;font-size:17px;font-weight:700;color:var(--ink);line-height:1.35}
+    .gw-meta{list-style:none;padding:0;margin:0}
+    .gw-meta li{display:flex;gap:10px;font-size:13.5px;color:#4b5563;padding:4px 0;line-height:1.5}
+    .gw-meta li i{color:var(--brand);width:16px;text-align:center;margin-top:3px}
+    .gw-foot{padding:0 22px 22px}
+    .gw-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--brand);color:#fff !important;font-weight:700;font-size:14.5px;padding:12px;border-radius:30px;text-decoration:none;transition:.15s}
+    .gw-btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(245,78,24,.3);color:#fff}
+    @media (max-width:575px){#sikhMap{height:320px}.gw-state-head h2{font-size:22px}}
+</style>
 
-<main id="content" class="site-main">
-
+<main id="content" class="site-main gw">
     <section class="inner-banner-wrap pb-0">
-      <div class="inner-baner-container" 
-      style="background-image: url('{{ \App\Models\PageBanner::url('gurdwaras', asset('assets/images2/News-04.png')) }}');background-position: center !important;">
-      <div class="container">
-        <div class="inner-banner-content">
-           <h1 class="inner-title" style="font-size:65px !important;">GURDWARAS</h1>
-       </div>
-   </div>
-</div>
-</section>
-<section class="package-section" style="margin-top:100px !important;">
-    <div class="container">
-        <div class="package-inner">
-            <div class="row">
-                @if(count(@$gurdwaras) > 0)
-                @foreach(@$gurdwaras as $key => $value)
-                <div class="col-lg-8 offset-lg-2 section-heading text-center">
-                    <div class="">
-                        <h2 style="margin-top:100px !important; font-size: 38px !important;">Gurdwaras of {{ $value['state'] }}</h2>
-                    </div>
-                </div>
-                @foreach(@$value['gurdwaras'] as $k => $v)
-                <div class="col-lg-4 col-md-6">
-                    <div class="guide-content-wrap text-center">
-                        <figure class="feature-image m-0">
-                            <a href="">
-                                <img src="{{ asset('gurdwara_images/'.@$v['gurdwara_image']) }}" style="height: 250px !important; width: 100%;" alt="">
-                            </a>
-                        </figure>
-                        <div class="guide-content mt-0 mx-0" style="background-color: #ffffff; box-shadow: 0px 0px 35px 0px rgba(0, 0, 0, 0.05); padding: 30px;">
-                            <h5 class="text-dark text-uppercase" style="font-weight: 700;">{{ @$v['gurdwara_name'] }}</h5>
-                            <p>
-                                {{ @$v['address'].', '.@$v['city'].', '.@$v['state'] }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-                @endforeach
-                @endif
+        <div class="inner-baner-container"
+            style="background-image: url('{{ \App\Models\PageBanner::url('gurdwaras', asset('assets/images2/News-04.png')) }}');background-position: center !important;">
+            <div class="container">
+                <div class="inner-banner-content">
+                    <h1 class="inner-title" style="font-size:65px !important;">GURDWARAS</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Gurdwaras</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
+        <div class="inner-shape"></div>
+    </section>
+
+    <section class="package-section section-sp2">
+        <div class="container">
+
+            <!-- Stats -->
+            <div class="gw-stats">
+                <div class="gw-stat"><b>{{ $totalGurdwaras }}</b><span>Gurdwaras</span></div>
+                <div class="gw-stat"><b>{{ $totalStates }}</b><span>US States</span></div>
+            </div>
+
+            <!-- Geo Location for Sikh Communities -->
+            <div class="section-heading text-center" style="margin-top:30px">
+                <h5 class="dash-style" style="color:var(--brand)">EXPLORE BY LOCATION</h5>
+                <h2 style="font-weight:700;color:var(--ink)">Geo Location for Sikh Communities</h2>
+                <p class="text-muted" style="max-width:680px;margin:8px auto 0">
+                    Sikh communities and Gurdwaras across the United States. Hover over a state to see how many Gurdwaras are listed there.
+                </p>
+            </div>
+            <div class="gw-map-wrap">
+                <div id="sikhMap"></div>
+                <div class="gw-legend">
+                    <span><i style="background:#ffd9c9"></i> Fewer Gurdwaras</span>
+                    <span><i style="background:#f54e18"></i> More Gurdwaras</span>
+                    <span><i style="background:#eef0f4"></i> None listed</span>
+                </div>
+            </div>
+
+            <!-- State filters -->
+            @if(count(@$gurdwaras) > 0)
+            <div class="gw-filters">
+                <button class="gw-filter active" data-state="all">All States</button>
+                @foreach($gurdwaras as $value)
+                <button class="gw-filter" data-state="{{ \Illuminate\Support\Str::slug($value['state']) }}">{{ $value['state'] }}</button>
+                @endforeach
+            </div>
+
+            <!-- Listing grouped by state -->
+            @foreach($gurdwaras as $value)
+            <div class="gw-state-block" data-state="{{ \Illuminate\Support\Str::slug($value['state']) }}">
+                <div class="gw-state-head">
+                    <h2><i class="fa fa-map-marker-alt" style="color:var(--brand)"></i> {{ $value['state'] }}</h2>
+                    <span class="count">{{ count($value['gurdwaras']) }} {{ \Illuminate\Support\Str::plural('Gurdwara', count($value['gurdwaras'])) }}</span>
+                    <span class="line"></span>
+                </div>
+                <div class="row">
+                    @foreach($value['gurdwaras'] as $v)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="gw-card">
+                            <a href="{{ route('gurdwara_detail', $v['id']) }}" class="gw-photo">
+                                <img src="{{ asset('gurdwara_images/'.@$v['gurdwara_image']) }}" alt="{{ @$v['gurdwara_name'] }}"
+                                     onerror="this.src='{{ asset('assets/images2/News-04.png') }}'">
+                                @if(!empty($v['sangat']))<span class="gw-sangat">{{ $v['sangat'] }} Sangat</span>@endif
+                            </a>
+                            <div class="gw-body">
+                                <h5>{{ @$v['gurdwara_name'] }}</h5>
+                                <ul class="gw-meta">
+                                    <li><i class="fa fa-location-dot"></i><span>{{ trim(collect([@$v['address'], @$v['city'], @$v['state'], @$v['zip']])->filter()->implode(', ')) }}</span></li>
+                                    @if(!empty($v['phone_no']))<li><i class="fa fa-phone"></i><span>{{ $v['phone_no'] }}</span></li>@endif
+                                </ul>
+                            </div>
+                            <div class="gw-foot">
+                                <a href="{{ route('gurdwara_detail', $v['id']) }}" class="gw-btn">View Details <i class="fa fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
+            @else
+            <div class="text-center text-muted" style="padding:60px 0;font-size:18px">No Gurdwaras listed yet.</div>
+            @endif
+        </div>
     </section>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/us_aea_en.js"></script>
+<script>
+(function () {
+    var counts = @json($stateCounts);
+    var maxVal = 0;
+    Object.keys(counts).forEach(function (k) { if (counts[k] > maxVal) maxVal = counts[k]; });
+
+    if (window.jsVectorMap && document.getElementById('sikhMap')) {
+        new jsVectorMap({
+            selector: '#sikhMap',
+            map: 'us_aea_en',
+            zoomButtons: true,
+            regionStyle: {
+                initial: { fill: '#eef0f4', stroke: '#ffffff', strokeWidth: 0.6 },
+                hover: { fillOpacity: 0.85, cursor: 'pointer' }
+            },
+            series: {
+                regions: [{
+                    attribute: 'fill',
+                    values: counts,
+                    scale: ['#ffd9c9', '#f54e18'],
+                    normalizeFunction: 'polynomial'
+                }]
+            },
+            onRegionTooltipShow: function (event, tooltip, code) {
+                var n = counts[code] || 0;
+                tooltip.text(
+                    tooltip.text() + ' — ' + n + ' Gurdwara' + (n === 1 ? '' : 's'),
+                    true
+                );
+            }
+        });
+    }
+
+    // State filter
+    var filters = document.querySelectorAll('.gw-filter');
+    var blocks = document.querySelectorAll('.gw-state-block');
+    filters.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var s = this.getAttribute('data-state');
+            filters.forEach(function (b) { b.classList.remove('active'); });
+            this.classList.add('active');
+            blocks.forEach(function (blk) {
+                blk.style.display = (s === 'all' || blk.getAttribute('data-state') === s) ? '' : 'none';
+            });
+        });
+    });
+})();
+</script>
 @endsection

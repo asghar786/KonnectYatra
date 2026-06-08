@@ -156,16 +156,18 @@ h4.destination {
 				<div class="col-lg-3 col-md-6">
 					<div class="guide-content-wrap text-center">
 						<figure class="guide-image m-0">
-							<img style="height: 200px;" src="{{asset('gurdwara_images/'.@$value->gurdwara_image)}}" alt="">
+							<a href="{{ route('gurdwara_detail', @$value->id) }}">
+								<img style="height: 200px;" src="{{asset('gurdwara_images/'.@$value->gurdwara_image)}}" alt="{{ @$value->gurdwara_name }}">
+							</a>
 						</figure>
 						<div class="guide-content mt-0 mx-0" style="">
-							<h5 class="text-dark text-uppercase">{{ @$value->gurdwara_name }}</h5>
+							<h5 class="text-dark text-uppercase"><a href="{{ route('gurdwara_detail', @$value->id) }}" class="text-dark">{{ @$value->gurdwara_name }}</a></h5>
 							<p>
 								{{ @$value->address.', '.@$value->city.', '.@$value->state }}
 							</p>
-							{{-- <div class="btn-wrap mt-4">
-								<a href="#" class="button-text width-6 btn-slider1 mt-2" previewlistener="true">Explore More</a>
-							</div> --}}
+							<div class="btn-wrap mt-4">
+								<a href="{{ route('gurdwara_detail', @$value->id) }}" class="button-text width-6 btn-slider1 mt-2">Explore More</a>
+							</div>
 						</div>
 					</div>
 				</div>

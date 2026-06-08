@@ -54,6 +54,7 @@ Route::get('/our-info',[HomeController::class, 'our_info'])->name('our_info');
 Route::get('/home',[HomeController::class,'index'])->name('home');
 Route::get('/visa-form',[HomeController::class,'visa_form'])->name('visa-form');
 Route::get('/gurdwaras',[HomeController::class,'gurdwaras'])->name('gurdwaras');
+Route::get('/gurdwaras/{id}',[HomeController::class,'gurdwara_detail'])->name('gurdwara_detail');
 Route::get('/visa',[VisaController::class, 'index'])->name('visa');
 Route::get('/contactus',[ContactUsController::class, 'index'])->name('contactus');
 Route::post('/contactus',[ContactUsController::class, 'index'])->name('contactus');
