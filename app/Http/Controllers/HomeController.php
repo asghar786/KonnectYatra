@@ -104,43 +104,42 @@ class HomeController extends Controller
     public function gurdwaras()
     {
         $data['all_packages'] = Package::all();
-        $gurdwaras = Gurdwara::orderBy('state')->orderBy('gurdwara_name')->get();
+        $gurdwaras = Gurdwara::orderBy('gurdwara_name')->get();
 
-        // Group by state (sorted) for the listing.
-        $all_data = [];
-        $all_state = [];
-        foreach ($gurdwaras as $value) {
-            if (!empty($value->state)) {
-                $all_state[] = $value->state;
-            }
+        // The state column is stored inconsistently (e.g. "NY" and "New York"),
+        // so normalise to a canonical full name before grouping/counting.
+        foreach ($gurdwaras as $g) {
+            $g->state = $this->canonicalState($g->state);
         }
-        $all_state = array_values(array_unique($all_state));
-        sort($all_state);
+
+        // Group by canonical state (sorted).
+        $all_state = $gurdwaras->pluck('state')->filter()->unique()->sort()->values();
+        $all_data = [];
         foreach ($all_state as $value) {
             $all_data[] = [
                 'state'     => $value,
                 'gurdwaras' => $gurdwaras->where('state', $value)->values(),
             ];
         }
-        $data['gurdwaras'] = $all_data;
-
-        // Geo data for the "Sikh Communities" map (jsvectormap US choropleth).
-        $codes = $this->usStateCodes();
-        $stateCounts = [];
-        foreach ($gurdwaras as $g) {
-            $name = trim((string) $g->state);
-            if ($name === '') continue;
-            $code = $codes[strtolower($name)] ?? null;
-            if ($code) {
-                $key = 'US-' . $code;
-                $stateCounts[$key] = ($stateCounts[$key] ?? 0) + 1;
-            }
-        }
-        $data['stateCounts']     = $stateCounts;
-        $data['totalGurdwaras']  = $gurdwaras->count();
-        $data['totalStates']     = count($all_state);
+        $data['gurdwaras']      = $all_data;
+        $data['totalGurdwaras'] = $gurdwaras->count();
+        $data['totalStates']    = $all_state->count();
 
         return view('gurdwaras', $data);
+    }
+
+    /** Normalise a raw state value (code or name) to a canonical full state name. */
+    private function canonicalState($raw): string
+    {
+        $raw = trim((string) $raw);
+        if ($raw === '') return '';
+        $states = $this->usStates();              // CODE => Full Name
+        $upper = strtoupper($raw);
+        if (isset($states[$upper])) return $states[$upper];        // "NY" -> "New York"
+        $lowerToProper = array_change_key_case(array_flip($states), CASE_LOWER); // "new york" => "NY"
+        $lower = strtolower($raw);
+        if (isset($lowerToProper[$lower])) return $states[$lowerToProper[$lower]]; // proper-case it
+        return $raw;                              // unknown — keep as entered
     }
 
     public function gurdwara_detail($id)
@@ -154,25 +153,23 @@ class HomeController extends Controller
         return view('gurdwara-detail', $data);
     }
 
-    /**
-     * Lower-cased US state/territory name => 2-letter postal code.
-     */
-    private function usStateCodes(): array
+    /** 2-letter postal code => full US state/territory name. */
+    private function usStates(): array
     {
         return [
-            'alabama' => 'AL', 'alaska' => 'AK', 'arizona' => 'AZ', 'arkansas' => 'AR',
-            'california' => 'CA', 'colorado' => 'CO', 'connecticut' => 'CT', 'delaware' => 'DE',
-            'florida' => 'FL', 'georgia' => 'GA', 'hawaii' => 'HI', 'idaho' => 'ID',
-            'illinois' => 'IL', 'indiana' => 'IN', 'iowa' => 'IA', 'kansas' => 'KS',
-            'kentucky' => 'KY', 'louisiana' => 'LA', 'maine' => 'ME', 'maryland' => 'MD',
-            'massachusetts' => 'MA', 'michigan' => 'MI', 'minnesota' => 'MN', 'mississippi' => 'MS',
-            'missouri' => 'MO', 'montana' => 'MT', 'nebraska' => 'NE', 'nevada' => 'NV',
-            'new hampshire' => 'NH', 'new jersey' => 'NJ', 'new mexico' => 'NM', 'new york' => 'NY',
-            'north carolina' => 'NC', 'north dakota' => 'ND', 'ohio' => 'OH', 'oklahoma' => 'OK',
-            'oregon' => 'OR', 'pennsylvania' => 'PA', 'rhode island' => 'RI', 'south carolina' => 'SC',
-            'south dakota' => 'SD', 'tennessee' => 'TN', 'texas' => 'TX', 'utah' => 'UT',
-            'vermont' => 'VT', 'virginia' => 'VA', 'washington' => 'WA', 'west virginia' => 'WV',
-            'wisconsin' => 'WI', 'wyoming' => 'WY', 'district of columbia' => 'DC',
+            'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas',
+            'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware',
+            'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho',
+            'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas',
+            'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland',
+            'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi',
+            'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
+            'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York',
+            'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma',
+            'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina',
+            'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah',
+            'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia',
+            'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia',
         ];
     }
 }

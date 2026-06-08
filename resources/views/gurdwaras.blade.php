@@ -1,7 +1,10 @@
 @extends('layouts.app')
 @section('content')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
 <style type="text/css">
+    .gw-tip{position:fixed;pointer-events:none;background:#1c2541;color:#fff;font-size:13px;padding:7px 12px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;opacity:0;transition:opacity .12s;white-space:nowrap}
+    .gw-tip b{color:#ffb499}
+    #sikhMap svg path{transition:fill .15s}
+    #sikhMap svg path.state:hover{fill-opacity:.85;cursor:pointer}
     .gw{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
     /* Stats */
     .gw-stats{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:36px 0 10px}
@@ -135,54 +138,73 @@
     </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/us_aea_en.js"></script>
+@php
+    // Gurdwara count keyed by full state name (for the D3 choropleth).
+    $byName = [];
+    foreach ($gurdwaras as $g) { $byName[$g['state']] = count($g['gurdwaras']); }
+@endphp
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
+// --- State filter (independent so a map error can never break it) ---
 (function () {
-    var counts = @json($stateCounts);
-    var maxVal = 0;
-    Object.keys(counts).forEach(function (k) { if (counts[k] > maxVal) maxVal = counts[k]; });
-
-    if (window.jsVectorMap && document.getElementById('sikhMap')) {
-        new jsVectorMap({
-            selector: '#sikhMap',
-            map: 'us_aea_en',
-            zoomButtons: true,
-            regionStyle: {
-                initial: { fill: '#eef0f4', stroke: '#ffffff', strokeWidth: 0.6 },
-                hover: { fillOpacity: 0.85, cursor: 'pointer' }
-            },
-            series: {
-                regions: [{
-                    attribute: 'fill',
-                    values: counts,
-                    scale: ['#ffd9c9', '#f54e18'],
-                    normalizeFunction: 'polynomial'
-                }]
-            },
-            onRegionTooltipShow: function (event, tooltip, code) {
-                var n = counts[code] || 0;
-                tooltip.text(
-                    tooltip.text() + ' — ' + n + ' Gurdwara' + (n === 1 ? '' : 's'),
-                    true
-                );
-            }
-        });
-    }
-
-    // State filter
-    var filters = document.querySelectorAll('.gw-filter');
-    var blocks = document.querySelectorAll('.gw-state-block');
-    filters.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var s = this.getAttribute('data-state');
-            filters.forEach(function (b) { b.classList.remove('active'); });
-            this.classList.add('active');
-            blocks.forEach(function (blk) {
-                blk.style.display = (s === 'all' || blk.getAttribute('data-state') === s) ? '' : 'none';
+    function bindFilters() {
+        var filters = document.querySelectorAll('.gw-filter');
+        var blocks = document.querySelectorAll('.gw-state-block');
+        filters.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var s = this.getAttribute('data-state');
+                filters.forEach(function (b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                blocks.forEach(function (blk) {
+                    blk.style.display = (s === 'all' || blk.getAttribute('data-state') === s) ? '' : 'none';
+                });
             });
         });
-    });
+    }
+    if (document.readyState !== 'loading') bindFilters();
+    else document.addEventListener('DOMContentLoaded', bindFilters);
 })();
+
+// --- Sikh communities US choropleth (D3 + us-atlas) ---
+window.addEventListener('load', function () {
+    var el = document.getElementById('sikhMap');
+    if (!el) return;
+    var counts = @json($byName);
+    if (typeof d3 === 'undefined' || typeof topojson === 'undefined') {
+        el.innerHTML = '<p class="text-muted text-center" style="padding:210px 0 0">Map could not load. Use the state filters below.</p>';
+        return;
+    }
+    var maxVal = 1;
+    Object.keys(counts).forEach(function (k) { if (counts[k] > maxVal) maxVal = counts[k]; });
+    var color = d3.scaleLinear().domain([0, maxVal]).range(['#ffd9c9', '#f54e18']);
+
+    var tip = d3.select('body').append('div').attr('class', 'gw-tip');
+    var svg = d3.select('#sikhMap').append('svg')
+        .attr('viewBox', '0 0 975 610')
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .style('width', '100%').style('height', '100%');
+    var path = d3.geoPath();
+
+    d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(function (us) {
+        var states = topojson.feature(us, us.objects.states).features;
+        svg.append('g').selectAll('path').data(states).join('path')
+            .attr('class', 'state')
+            .attr('d', path)
+            .attr('stroke', '#ffffff').attr('stroke-width', 1)
+            .attr('fill', function (d) { var c = counts[d.properties.name] || 0; return c > 0 ? color(c) : '#eef0f4'; })
+            .on('mousemove', function (event, d) {
+                var c = counts[d.properties.name] || 0;
+                tip.html('<b>' + d.properties.name + '</b> — ' + c + ' Gurdwara' + (c === 1 ? '' : 's'))
+                   .style('left', (event.clientX + 14) + 'px')
+                   .style('top', (event.clientY + 14) + 'px')
+                   .style('opacity', 1);
+            })
+            .on('mouseout', function () { tip.style('opacity', 0); });
+    }).catch(function (e) {
+        console.error('Sikh map failed:', e);
+        el.innerHTML = '<p class="text-muted text-center" style="padding:210px 0 0">Map could not load. Use the state filters below.</p>';
+    });
+});
 </script>
 @endsection
