@@ -787,29 +787,25 @@ class PackagesController extends Controller
 
   public function hotels()
   {
-    $data = Hotels::all();
+    $data = Hotels::with('images')->get();
     return view('admin.hotels.hotels',['hotels'=>$data]);
   }
 
   public function create_hotels(Request $request)
   {
     if($request->isMethod('post')){
-      $data = $request->all();
+      $data = $this->cleanHotelData($request);
 
-      if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('hotels');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+      if ($request->file('image')) {
+        $data['image'] = $this->uploadHotelFile($request->file('image'));
       }
-      Hotels::create($data);
+      $hotel = Hotels::create($data);
+      $this->saveHotelGalleryImages($request, $hotel->id);
 
-      // $response = array('status'=>'1','message'=>'News is added sucessfully.','action'=>'reload');
-      // echo json_encode($response); return;
       return redirect(url('admin/hotels'))->with("success", "Hotel added successfully!");
     }
 
+    $data['hotels'] = null;
     $data['action'] = url('/admin/hotels/create');
     $data['btn_text'] = "Create";
     return view('admin.hotels.create_edit', $data);
@@ -818,27 +814,61 @@ class PackagesController extends Controller
   public function edit_hotels(Request $request, $id)
   {
     if($request->isMethod('post')){
-      $data = $request->all();
+      $data = $this->cleanHotelData($request);
 
-      if ($request->file('image')) {   
-        $file = $request->file('image');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('hotels');
-        $file->move($destinationPath,$fileName);
-        $data['image'] = $fileName;
+      if ($request->file('image')) {
+        $data['image'] = $this->uploadHotelFile($request->file('image'));
       }
-      unset($data['_token']);
-      Hotels::where("id", $id)->update($data);
+      \App\Models\Hotels::where("id", $id)->update($data);
+      $this->saveHotelGalleryImages($request, $id);
 
-      // $response = array('status'=>'1','message'=>'Event is updated sucessfully.','action'=>'reload');
-      // echo json_encode($response); return;
       return redirect(url('admin/hotels'))->with("success", "Hotel updated successfully!");
     }
 
-    $data['hotels'] = Hotels::where("id", $id)->first();
+    $data['hotels'] = Hotels::with('images')->where("id", $id)->first();
     $data['action'] = url('/admin/hotels/edit', $id);
     $data['btn_text'] = "Update";
     return view('admin.hotels.create_edit', $data);
+  }
+
+  /** Sanitised, column-safe hotel attributes (no _token/files; empty geo -> null). */
+  private function cleanHotelData(Request $request): array
+  {
+    $data = $request->only([
+      'name', 'price', 'phone', 'address', 'state', 'city', 'zip',
+      'latitude', 'longitude', 'description',
+    ]);
+    foreach (['latitude', 'longitude'] as $k) {
+      $data[$k] = ($data[$k] ?? '') === '' ? null : $data[$k];
+    }
+    return $data;
+  }
+
+  private function uploadHotelFile($file): string
+  {
+    $fileName = uniqid() . $file->getClientOriginalName();
+    $file->move(public_path('hotels'), $fileName);
+    return $fileName;
+  }
+
+  /** Store any additional gallery images uploaded for a hotel. */
+  private function saveHotelGalleryImages(Request $request, $hotelId): void
+  {
+    if ($request->hasFile('images')) {
+      foreach ($request->file('images') as $file) {
+        if (!$file) continue;
+        \App\Models\HotelImage::create([
+          'hotel_id' => $hotelId,
+          'image'    => $this->uploadHotelFile($file),
+        ]);
+      }
+    }
+  }
+
+  public function delete_hotel_image($id)
+  {
+    \App\Models\HotelImage::where('id', $id)->delete();
+    return back()->with('success', 'Hotel image removed.');
   }
 
   public function delete_hotels($id)

@@ -212,7 +212,7 @@ class PackagesController extends Controller
 
     public function hotel_detail($id)
     {
-        $data['hotel'] = Hotels::where("id", $id)->first();
+        $data['hotel'] = Hotels::with('images')->where("id", $id)->first();
         return view('details.hotel_detail', $data);
     }
 

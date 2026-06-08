@@ -209,6 +209,7 @@ Route::group(['prefix' => 'admin',
     Route::get('/hotels/edit/{id}',[PackagesController::class, 'edit_hotels'])->name('edit_hotels');
     Route::post('/hotels/edit/{id}',[PackagesController::class, 'edit_hotels'])->name('edit_hotels');
     Route::get('/hotels/delete/{id}',[PackagesController::class, 'delete_hotels'])->name('delete_hotels');
+    Route::get('/hotels/image-delete/{id}',[PackagesController::class, 'delete_hotel_image'])->name('delete_hotel_image');
 
     Route::get('/bus',[PackagesController::class, 'bus'])->name('bus');
     Route::get('/bus/create',[PackagesController::class, 'create_bus'])->name('create_bus');
