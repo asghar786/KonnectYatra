@@ -1295,10 +1295,19 @@ class PackagesController extends Controller
     return view('admin.ids.yatri_id', $all_data);
   }
 
-  public function back_view()
+  public function back_view($id = 1)
   {
-
-    $data['back_ids'] = YatriIdsBack::first();
+    // Render one back per crew member on the same page as the front, so the
+    // front and back print-outs line up card-for-card for cutting.
+    $query = YatriIds::where('type', 'Crew Member');
+    if ((int)$id <= 1) {
+      $query = $query->limit(8);
+    } else {
+      $query = $query->offset(((int)$id - 1) * 8)->limit(8);
+    }
+    $data['staff_ids'] = $query->get();
+    $data['page']      = (int)$id;
+    $data['back_ids']  = YatriIdsBack::first();
     return view('admin.ids.back_view', $data);
   }
   public function foreigners_registration($id)
@@ -1318,6 +1327,7 @@ class PackagesController extends Controller
     }
     $data = $data->where('type', 'Crew Member')->get();
     $all_data['staff_ids'] = $data;
+    $all_data['page'] = (int)$id;
     $all_data['next'] = (int)$id + 1;
     $all_data['prev'] = (int)$id - 1;
     return view('admin.ids.staff_id_1', $all_data);

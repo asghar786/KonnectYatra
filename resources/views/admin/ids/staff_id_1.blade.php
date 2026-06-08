@@ -57,7 +57,7 @@
             </ul>
             <div class="w-75 d-flex justify-content-end">
                 <button class="btn btn-success" type="button" onclick="printDiv('idDeck')">Print</button>
-                <a class="btn btn-info ml-2" href="{{ url('admin/back-view') }}">Back View</a>
+                <a class="btn btn-info ml-2" href="{{ url('admin/back-view', $page ?? 1) }}">Back View</a>
             </div>
         </div>
         <div class="main-body pt-3 idcards">
