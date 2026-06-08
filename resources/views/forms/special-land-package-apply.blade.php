@@ -262,7 +262,7 @@
                 <label>Religion <span class="text-danger">*</span></label>
                 <select class="form-control select2js" name="religion_{{ $i+1 }}" required>
                     <option value="">Select</option>
-                    <option value="Sikhism">Sikhism</option>
+                    <option value="Sikhism" selected>Sikhism</option>
                     <option value="Islam">Islam</option>
                     <option value="Christianity">Christianity</option>
                     <option value="Hinduism">Hinduism</option>
@@ -297,7 +297,7 @@
                 <label class="w-100">Nationality <span class="text-danger">*</span></label>
                 <select class="form-control select2js" name="father_nationality_{{ $i+1 }}" required>
                   @foreach(@$countries as $key => $val)
-                  <option value="{{ @$val['nicename'] }}">{{ @$val['nicename'] }}</option>
+                  <option value="{{ @$val['nicename'] }}" @if(@$val['nicename'] == 'India') selected @endif>{{ @$val['nicename'] }}</option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback">
@@ -315,7 +315,7 @@
                 <label class="w-100">Nationality <span class="text-danger">*</span></label>
                 <select class="form-control select2js" name="mother_nationality_{{ $i+1 }}" required>
                   @foreach(@$countries as $key => $val)
-                  <option value="{{ @$val['nicename'] }}">{{ @$val['nicename'] }}</option>
+                  <option value="{{ @$val['nicename'] }}" @if(@$val['nicename'] == 'India') selected @endif>{{ @$val['nicename'] }}</option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback">
