@@ -14,8 +14,10 @@
     .gl-photo{height:190px;background:#f3f4f6;overflow:hidden;position:relative}
     .gl-photo img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
     .gl-card:hover .gl-photo img{transform:scale(1.05)}
-    .gl-body{padding:14px 16px;flex:1;display:flex;align-items:center}
-    .gl-body p{margin:0;font-size:14px;color:#333;line-height:1.45}
+    .gl-body{padding:14px 16px;flex:1}
+    .gl-body p{margin:0;font-size:14px;color:#333;line-height:1.45;font-weight:600}
+    .gl-note{margin:8px 0 0;font-size:12.5px;color:#777;line-height:1.45;display:flex;gap:6px}
+    .gl-note i{color:#f5a623;margin-top:2px}
     .gl-actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #f3f3f3}
     .gl-actions .btn{flex:1;text-align:center}
     .gl-actions form{margin:0;flex:1}
@@ -46,13 +48,16 @@
 
             <div class="row mt-4" id="glGrid">
                 @forelse($gallery as $value)
-                <div class="col-xl-3 col-lg-4 col-md-6 mb-4 gl-item" data-search="{{ strtolower(trim($value->caption)) }}">
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4 gl-item" data-search="{{ strtolower(trim($value->caption.' '.$value->note)) }}">
                     <div class="gl-card">
                         <div class="gl-photo">
                             <img src="{{ asset('gallery/'.$value->image) }}" alt="{{ $value->caption }}" onerror="this.style.opacity=.3">
                         </div>
                         <div class="gl-body">
                             <p>{{ $value->caption ?: '—' }}</p>
+                            @if(!empty($value->note))
+                            <p class="gl-note"><i class="fa fa-sticky-note"></i> <span>{{ $value->note }}</span></p>
+                            @endif
                         </div>
                         <div class="gl-actions">
                             <a href="{{ url('admin/gallery/edit', $value->id) }}" class="btn btn-info btn-sm"><i class="fa fa-edit"></i> Edit</a>

@@ -24,6 +24,10 @@
                                 <label class="form_label_color">Image</label>
                                 <input type="file" class="form-control require" name="image" @if(empty(@$gallery->image)) required="" @endif />
                             </div>
+                            <div class="col-lg-12 form-group">
+                                <label class="form_label_color">Note <span class="text-muted">(internal — not shown on the website)</span></label>
+                                <textarea class="form-control" name="note" rows="3" placeholder="e.g. names of people in the photo, event date, where it was taken…">{{ @$gallery->note }}</textarea>
+                            </div>
                             @if(!empty(@$gallery->image))
                             <div class="form-group col-md-6">
                                 <img src="{{ asset('gallery/'.@$gallery->image) }}" height="300" width="300">
