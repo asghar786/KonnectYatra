@@ -1,6 +1,8 @@
 @extends('admin.layouts.app')
 @section('content')
 <style type="text/css">
+    /* Hide any DataTables export buttons that may be injected globally on this page */
+    .dt-buttons{display:none !important;}
     /* Card view for Packages */
     .pkg-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
     .pkg-search{position:relative;flex:1;min-width:240px;max-width:420px}
@@ -9,20 +11,23 @@
     .pkg-search input:focus{border-color:#f54e18;box-shadow:0 0 0 3px rgba(245,78,24,.12)}
     .pkg-card{background:#fff;border:1px solid #eee;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07);height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
     .pkg-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
-    .pkg-card-head{padding:16px 18px;background:linear-gradient(135deg,#2d1b69,#5b2a9e);color:#fff;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .pkg-card-head h5{margin:0;font-size:15px;font-weight:700;line-height:1.35;color:#fff}
-    .pkg-type{flex:none;background:rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
-    .pkg-card-body{padding:14px 18px;flex:1}
-    .pkg-tier{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#f54e18;margin:0 0 6px}
+    /* Trip banner — show the whole image, zoomed out (no cropping) */
+    .pkg-banner{position:relative;height:170px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .pkg-banner img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+    .pkg-banner .pkg-noimg{color:#bbb;font-size:13px;text-align:center}
+    .pkg-type{position:absolute;top:10px;right:10px;background:rgba(45,27,105,.9);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+    .pkg-card-head{padding:14px 18px 4px}
+    .pkg-card-head h5{margin:0;font-size:15px;font-weight:700;line-height:1.35;color:#222}
+    .pkg-card-body{padding:8px 18px 14px;flex:1}
+    .pkg-tier{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#f54e18;margin:10px 0 6px}
     .pkg-tier.four{color:#5b2a9e}
-    .pkg-prices{list-style:none;padding:0;margin:0 0 12px}
+    .pkg-prices{list-style:none;padding:0;margin:0}
     .pkg-prices li{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px dashed #f0f0f0}
     .pkg-prices li:last-child{border-bottom:none}
     .pkg-prices li span{color:#999}
     .pkg-prices li b{color:#222;text-align:right}
     .pkg-card-actions{display:flex;gap:8px;padding:12px 18px;border-top:1px solid #f3f3f3}
-    .pkg-card-actions .btn{flex:1;text-align:center}
-    .pkg-card-actions form{margin:0;flex:1}
+    .pkg-card-actions > .btn,.pkg-card-actions form{flex:1 1 0;margin:0;min-width:0}
     .pkg-card-actions form .btn{width:100%}
     .pkg-empty{padding:40px;text-align:center;color:#999;font-size:16px}
 </style>
@@ -49,9 +54,16 @@
                 @forelse($yatri_package as $yatri)
                 <div class="col-xl-4 col-lg-6 col-md-6 mb-4 pkg-item" data-search="{{ strtolower(trim($yatri->name.' '.$yatri->package_type)) }}">
                     <div class="pkg-card">
+                        <div class="pkg-banner">
+                            @if(!empty($yatri->image))
+                            <img src="{{ asset('assets/flyers/'.$yatri->image) }}" alt="{{ $yatri->name }}">
+                            @else
+                            <span class="pkg-noimg"><i class="fa fa-image fa-2x d-block mb-2"></i>No banner</span>
+                            @endif
+                            <span class="pkg-type">{{ $yatri->package_type ?: '—' }}</span>
+                        </div>
                         <div class="pkg-card-head">
                             <h5>{{ $yatri->name }}</h5>
-                            <span class="pkg-type">{{ $yatri->package_type ?: '—' }}</span>
                         </div>
                         <div class="pkg-card-body">
                             <p class="pkg-tier"><i class="fa fa-star"></i> 5 Star</p>
@@ -69,6 +81,7 @@
                         </div>
                         <div class="pkg-card-actions">
                             <a href="{{ url('admin/apply_packages/edit', $yatri->id) }}" class="btn btn-info btn-sm"><i class="fa fa-edit"></i> Edit</a>
+                            <a href="{{ url('packages', $yatri->id) }}" target="_blank" class="btn btn-success btn-sm"><i class="fa fa-eye"></i> View</a>
                             <form method="POST" action="{{ url('/admin/apply_packages/delete', $yatri->id) }}">
                                 @csrf
                                 <input name="_method" type="hidden" value="GET">
