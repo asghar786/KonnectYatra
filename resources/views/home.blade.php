@@ -148,11 +148,11 @@ h4.destination {
 			<div class="row">
 				@if(!empty(@$gurdwaras) > 0)
 				@foreach(@$gurdwaras as $key => $value)
-				<div class="col-lg-3 col-md-6">
+				<div class="col-lg-4 col-md-6 mb-4">
 					<div class="guide-content-wrap text-center">
 						<figure class="guide-image m-0">
 							<a href="{{ route('gurdwara_detail', @$value->id) }}">
-								<img style="height: 200px;" src="{{asset('gurdwara_images/'.@$value->gurdwara_image)}}" alt="{{ @$value->gurdwara_name }}">
+								<img style="height: 280px; width: 100%; object-fit: cover;" src="{{asset('gurdwara_images/'.@$value->gurdwara_image)}}" alt="{{ @$value->gurdwara_name }}">
 							</a>
 						</figure>
 						<div class="guide-content mt-0 mx-0" style="">

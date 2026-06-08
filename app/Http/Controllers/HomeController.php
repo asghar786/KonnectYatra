@@ -32,7 +32,7 @@ class HomeController extends Controller
     public function index()
     {
         $data['all_packages'] = Package::all();
-        $data['gurdwaras'] = Gurdwara::take(8)->get();
+        $data['gurdwaras'] = Gurdwara::take(6)->get();
         $data['hotels'] = Hotels::all();
         $data['news'] = News::all();
         $data['events'] = Events::all();
