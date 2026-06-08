@@ -184,11 +184,13 @@ window.addEventListener('load', function () {
         .attr('viewBox', '0 0 975 610')
         .attr('preserveAspectRatio', 'xMidYMid meet')
         .style('width', '100%').style('height', '100%');
-    var path = d3.geoPath();
 
     d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(function (us) {
-        var states = topojson.feature(us, us.objects.states).features;
-        svg.append('g').selectAll('path').data(states).join('path')
+        var fc = topojson.feature(us, us.objects.states);
+        // us-atlas states-10m is raw lon/lat, so project it (Albers USA handles AK/HI).
+        var projection = d3.geoAlbersUsa().fitSize([975, 610], fc);
+        var path = d3.geoPath(projection);
+        svg.append('g').selectAll('path').data(fc.features).join('path')
             .attr('class', 'state')
             .attr('d', path)
             .attr('stroke', '#ffffff').attr('stroke-width', 1)
