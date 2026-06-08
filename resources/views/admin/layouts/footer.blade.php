@@ -65,21 +65,23 @@
     });
 </script> --}}
 <script type="text/javascript">
-    $('.show_confirm').click(function(event) {
-        var form =  $(this).closest("form");
-        var name = $(this).data("name");
+    $(document).on('click', '.show_confirm', function(event) {
+        var $el = $(this);
+        var form = $el.closest("form");
+        var href = $el.attr('href');
         event.preventDefault();
         swal({
-            title: `Are you sure you want to delete this record?`,
-            text: "If you delete this, it will be gone forever.",
+            title: $el.data('confirm-title') || 'Are you sure you want to delete this record?',
+            text: $el.data('confirm-text') || 'If you delete this, it will be gone forever.',
             icon: "warning",
             buttons: true,
             dangerMode: true,
         })
         .then((willDelete) => {
-        if (willDelete) {
-            form.submit();
-        }
+            if (willDelete) {
+                if (form.length) { form.submit(); }
+                else if (href && href !== '#') { window.location.href = href; }
+            }
         });
     });
 </script>

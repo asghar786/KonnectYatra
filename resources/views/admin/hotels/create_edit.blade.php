@@ -120,7 +120,7 @@
                                     @foreach($hotels->images as $img)
                                     <div class="hf-thumb">
                                         <img src="{{ asset('hotels/'.$img->image) }}" alt="">
-                                        <a href="{{ url('admin/hotels/image-delete', $img->id) }}" class="show_confirm" title="Remove"><i class="fa fa-times"></i></a>
+                                        <a href="{{ url('admin/hotels/image-delete', $img->id) }}" class="show_confirm" title="Remove" data-confirm-title="Delete this photo?" data-confirm-text="This photo will be removed from the hotel gallery. The hotel itself stays."><i class="fa fa-times"></i></a>
                                     </div>
                                     @endforeach
                                 </div>

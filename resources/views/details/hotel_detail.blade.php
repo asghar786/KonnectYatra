@@ -110,6 +110,35 @@
                     </div>
                 </div>
             </div>
+
+            @if(isset($related) && $related->count())
+            <div class="mt-3">
+                <div class="d-flex align-items-center" style="gap:14px;margin:30px 0 22px">
+                    <h3 style="margin:0;font-size:24px;font-weight:700;color:var(--ink)"><i class="fa fa-hotel" style="color:var(--brand)"></i> More Hotels in {{ $hotel->city }}</h3>
+                    <span style="flex:1;height:1px;background:#eceef3"></span>
+                    <a href="{{ route('pakistan_hotels') }}" style="color:var(--brand);font-weight:600;font-size:14px;white-space:nowrap">View all <i class="fa fa-arrow-right"></i></a>
+                </div>
+                <div class="row">
+                    @foreach($related as $r)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="hd2-card" style="height:100%;display:flex;flex-direction:column">
+                            <a href="{{ url('/hotel-detail', $r->id) }}" style="display:block;height:180px;overflow:hidden">
+                                <img src="{{ asset('hotels/'.$r->image) }}" alt="{{ $r->name }}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.opacity=.3">
+                            </a>
+                            <div style="padding:16px 18px;flex:1">
+                                <h5 style="margin:0 0 6px;font-size:16px;font-weight:700;color:var(--ink)"><a href="{{ url('/hotel-detail', $r->id) }}" style="color:var(--ink)">{{ $r->name }}</a></h5>
+                                <p style="margin:0;font-size:13px;color:var(--muted)"><i class="fa fa-location-dot" style="color:var(--brand);margin-right:6px"></i>{{ trim(collect([$r->city, $r->state])->filter()->implode(', ')) }}</p>
+                            </div>
+                            <div style="padding:0 18px 18px;display:flex;align-items:center;justify-content:space-between">
+                                @if(!empty($r->price))<span style="color:var(--brand);font-weight:700;font-size:14px">${{ $r->price }}/night</span>@else<span></span>@endif
+                                <a href="{{ url('/hotel-detail', $r->id) }}" style="color:var(--brand);font-weight:600;font-size:13px">View <i class="fa fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
     </section>
 </main>

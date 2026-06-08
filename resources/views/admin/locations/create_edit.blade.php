@@ -99,7 +99,7 @@
                                         <img src="{{ asset('locations/'.$img->image) }}" alt="">
                                         <div class="acts">
                                             <a class="feat" href="{{ url('admin/locations/set-feature', $img->id) }}" title="Set as feature"><i class="fa fa-star"></i></a>
-                                            <a class="del show_confirm" href="{{ url('admin/locations/image-delete', $img->id) }}" title="Remove"><i class="fa fa-times"></i></a>
+                                            <a class="del show_confirm" href="{{ url('admin/locations/image-delete', $img->id) }}" title="Remove" data-confirm-title="Delete this photo?" data-confirm-text="This photo will be removed from the location gallery. The location itself stays."><i class="fa fa-times"></i></a>
                                         </div>
                                         @if($img->image === $locations->image)<span class="badge-feat">Feature</span>@endif
                                     </div>

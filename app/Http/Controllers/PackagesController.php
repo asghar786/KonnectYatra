@@ -213,6 +213,12 @@ class PackagesController extends Controller
     public function hotel_detail($id)
     {
         $data['hotel'] = Hotels::with('images')->where("id", $id)->first();
+        $data['related'] = collect();
+        if ($data['hotel'] && !empty($data['hotel']->city)) {
+            $data['related'] = Hotels::where('city', $data['hotel']->city)
+                ->where('id', '!=', $id)
+                ->take(6)->get();
+        }
         return view('details.hotel_detail', $data);
     }
 
