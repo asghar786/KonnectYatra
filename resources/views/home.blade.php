@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('content')
 <!-- Content -->
 <style>
@@ -294,7 +294,8 @@ h4.destination {
 				</div>
 			</div>
 		</div>
-	</section>
+					<div class="d-flex justify-content-center w-100 btn-wrap mt-5"><a href="{{ route('pakistan_hotels') }}" class="button-text width-6 btn-slider mt-0">View All Hotels <i class="fas fa-arrow-right ml-2"></i></a></div>
+		</section>
 
 	<section class="package-section" style="margin-top:100px !important;">
 		<div class="container">
@@ -339,6 +340,7 @@ h4.destination {
 					</div>
 					@endforeach
 					@endif
+						<div class="d-flex justify-content-center w-100 btn-wrap mt-5"><a href="{{ route('popular_locations') }}" class="button-text width-6 btn-slider mt-0">View All Locations <i class="fas fa-arrow-right ml-2"></i></a></div>
 				</div>
 			</div>
 		</div>

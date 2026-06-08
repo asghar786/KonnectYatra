@@ -207,8 +207,8 @@
             <div class="textwidget widget-text">
                 <ul>
                     <li><a href="{{ route('gallery_page') }}">Gallery</a></li>
-                    <li><a href="{{ url('/blogs') }}">Blogs</a></li>
-                    <li><a href="{{ url('/itinerary') }}">Airline Tickets</a></li>
+                    <li><a href="{{ route('pakistan_hotels') }}">Popular Hotels</a></li>
+                    <li><a href="{{ route('popular_locations') }}">Popular Locations</a></li>
                 </ul>
             </div>
         </aside>

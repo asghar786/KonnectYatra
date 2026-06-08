@@ -91,6 +91,8 @@ Route::get('/event-detail/{id}', [UserPackages::class, 'event_detail'])->name('e
 Route::get('/news-detail/{id}', [UserPackages::class, 'news_detail'])->name('news_detail');
 
 Route::get('/tour-gallery', [HomeController::class, 'gallery_page'])->name('gallery_page');
+Route::get('/pakistan-hotels', [HomeController::class, 'pakistan_hotels'])->name('pakistan_hotels');
+Route::get('/popular-locations', [HomeController::class, 'popular_locations'])->name('popular_locations');
 Route::get('/blogs', [BlogController::class, 'index'])->name('blogs');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog_detail');
 

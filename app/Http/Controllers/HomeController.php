@@ -33,10 +33,10 @@ class HomeController extends Controller
     {
         $data['all_packages'] = Package::all();
         $data['gurdwaras'] = Gurdwara::take(6)->get();
-        $data['hotels'] = Hotels::all();
+        $data['hotels'] = Hotels::take(6)->get();
         $data['news'] = News::all();
         $data['events'] = Events::all();
-        $data['locations'] = Locations::all();
+        $data['locations'] = Locations::take(6)->get();
         $data['gallery'] = Gallery::orderBy("id", "DESC")->get();
         $data['heroSlides'] = \App\Models\HeroSlide::where('is_active', 1)->orderBy('sort_order')->orderBy('id')->get();
         return view('home', $data);
@@ -47,6 +47,66 @@ class HomeController extends Controller
         $data['all_packages'] = Package::all();
         $data['gallery'] = Gallery::orderBy('id', 'DESC')->get();
         return view('gallery', $data);
+    }
+
+    public function pakistan_hotels()
+    {
+        $data['all_packages'] = Package::all();
+        $hotels = Hotels::orderBy('name')->get();
+
+        // City values are entered inconsistently; normalise before grouping.
+        foreach ($hotels as $h) {
+            $h->city = ucwords(strtolower(trim((string) $h->city)));
+        }
+
+        $cities = $hotels->pluck('city')->filter()->unique()->sort()->values();
+        $grouped = [];
+        foreach ($cities as $city) {
+            $grouped[] = ['city' => $city, 'hotels' => $hotels->where('city', $city)->values()];
+        }
+        $data['hotels']      = $grouped;
+        $data['totalHotels'] = $hotels->count();
+        $data['totalCities'] = $cities->count();
+
+        // Map markers for cities we have coordinates for.
+        $coords = $this->pkCityCoords();
+        $markers = [];
+        foreach ($cities as $city) {
+            $key = strtolower($city);
+            if (isset($coords[$key])) {
+                $markers[] = [
+                    'city'  => $city,
+                    'count' => $hotels->where('city', $city)->count(),
+                    'lat'   => $coords[$key][0],
+                    'lng'   => $coords[$key][1],
+                ];
+            }
+        }
+        $data['cityMarkers'] = $markers;
+
+        return view('hotels', $data);
+    }
+
+    /** Lower-cased Pakistani city => [lat, lng] for map markers. */
+    private function pkCityCoords(): array
+    {
+        return [
+            'islamabad' => [33.6844, 73.0479], 'rawalpindi' => [33.5651, 73.0169],
+            'lahore' => [31.5497, 74.3436], 'gujranwala' => [32.1877, 74.1945],
+            'karachi' => [24.8607, 67.0011], 'multan' => [30.1575, 71.5249],
+            'faisalabad' => [31.4504, 73.1350], 'peshawar' => [34.0151, 71.5805],
+            'quetta' => [30.1798, 66.9750], 'murree' => [33.9070, 73.3943],
+            'sialkot' => [32.4945, 74.5229], 'bahawalpur' => [29.3956, 71.6836],
+            'abbottabad' => [34.1688, 73.2215], 'sargodha' => [32.0836, 72.6711],
+            'sukkur' => [27.7052, 68.8574], 'hyderabad' => [25.3960, 68.3578],
+        ];
+    }
+
+    public function popular_locations()
+    {
+        $data['all_packages'] = Package::all();
+        $data['locations'] = Locations::orderBy('name')->get();
+        return view('locations', $data);
     }
 
     public function our_info()
