@@ -3,6 +3,18 @@
 
 <head>
 
+	@php $ga4 = \App\Models\SiteSetting::get('ga4_measurement_id'); @endphp
+	@if(!empty($ga4))
+	<!-- Google Analytics 4 (managed via Admin > Settings > Integrations) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id={{ $ga4 }}"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', '{{ $ga4 }}');
+	</script>
+	@endif
+
 	<!-- META ============================================= -->
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">

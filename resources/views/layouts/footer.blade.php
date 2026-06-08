@@ -199,6 +199,27 @@
 </div>
 
 </footer>
+@php $whatsappNumber = \App\Models\SiteSetting::get('whatsapp_number'); @endphp
+@if(!empty($whatsappNumber))
+<a id="whatsappFloat" href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $whatsappNumber) }}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp" title="Chat on WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+</a>
+<style>
+    #whatsappFloat{
+        position:fixed;right:15px;bottom:70px;z-index:99;
+        width:52px;height:52px;border-radius:50%;
+        background:#25D366;color:#fff !important;
+        display:flex;align-items:center;justify-content:center;
+        font-size:28px;text-decoration:none;
+        box-shadow:0 6px 18px rgba(37,211,102,.45);
+        transition:transform .15s,box-shadow .15s;
+    }
+    #whatsappFloat:hover{transform:scale(1.08);color:#fff !important;box-shadow:0 8px 22px rgba(37,211,102,.6);}
+    @media screen and (max-width:575px){
+        #whatsappFloat{width:46px;height:46px;font-size:24px;right:10px;bottom:45px;}
+    }
+</style>
+@endif
 <a id="backTotop" href="#" class="to-top-icon mb-5" style="display: block;background: #f54e18 !important;">
     <i class="fas fa-chevron-up" aria-hidden="true"></i>
 </a>

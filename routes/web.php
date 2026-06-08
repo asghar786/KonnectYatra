@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\BalanceController;
 use App\Http\Controllers\Admin\ChargesController;
 use App\Http\Controllers\Admin\PageBannerController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\BlogController;
 /*
@@ -145,6 +146,10 @@ Route::group(['prefix' => 'admin',
     Route::get('/analytics',[AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/analytics/realtime',[AnalyticsController::class, 'realtime'])->name('analytics_realtime');
     Route::get('/analytics/export',[AnalyticsController::class, 'export'])->name('analytics_export');
+
+    // Integrations (GA4 etc.)
+    Route::get('/integrations',[IntegrationController::class, 'index'])->name('integrations');
+    Route::post('/integrations',[IntegrationController::class, 'update'])->name('integrations_update');
 
     // Page banners
     Route::get('/page-banners',[PageBannerController::class, 'index'])->name('page_banners');
