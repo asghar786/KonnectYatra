@@ -35,6 +35,7 @@
                                     <option value="Seattle" @if(@$charge->state == "Seattle") selected @endif>Seattle</option>
                                     <option value="Houston" @if(@$charge->state == "Houston") selected @endif>Houston</option>
                                     <option value="Toronto" @if(@$charge->state == "Toronto") selected @endif>Toronto</option>
+                                    <option value="Atlanta" @if(@$charge->state == "Atlanta") selected @endif>Atlanta</option>
                                 </select>
                             </div>
                         </div>

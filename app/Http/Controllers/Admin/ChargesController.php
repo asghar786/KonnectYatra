@@ -32,7 +32,8 @@ class ChargesController extends Controller
 		$data['seattle'] = Charge::where("state", "Seattle")->get();
 		$data['houston'] = Charge::where("state", "Houston")->get();
 		$data['torronto'] = Charge::where("state", "Toronto")->get();
-		
+		$data['atlanta'] = Charge::where("state", "Atlanta")->get();
+
     	return view("admin.charges.view", $data);
     }
 
