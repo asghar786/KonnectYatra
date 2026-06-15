@@ -107,7 +107,7 @@
         $(document).on("change", "#state,#color", function() {
             var state = $("#state").find("option:selected").val();
             var color = $("#color").find("option:selected").val();
-            window.location.href = "https://konnectyatra.org/admin/admin_gurdwaras?state=" + state + "&color=" + color;
+            window.location.href = "{{ route('admin_gurdwaras') }}?state=" + state + "&color=" + color;
         });
         
         // Initialize Dropify
