@@ -592,6 +592,21 @@
 // Инициализация объекта TabsManager
 var tabsManager = new TabsManager(".tabs");
 
+// Make each tab's "Add Expense" button pre-select that tab's city
+(function () {
+	var tags = document.querySelectorAll('.tabs .tabs-tags__tag');
+	var panels = document.querySelectorAll('.tabs .tabs-content__text');
+	panels.forEach(function (panel, i) {
+		if (!tags[i]) return;
+		var state = tags[i].textContent.trim();
+		var btn = panel.querySelector('a.btn-primary');
+		if (btn) {
+			var base = btn.getAttribute('href').split('?')[0];
+			btn.setAttribute('href', base + '?state=' + encodeURIComponent(state));
+		}
+	});
+})();
+
 </script>
 
 <script type="text/javascript">

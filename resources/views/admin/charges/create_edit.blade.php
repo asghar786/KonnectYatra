@@ -26,16 +26,11 @@
                             </div>
                             <div class="col-lg-12 form-group">
                                 <label class="form_label_color">State</label>
+                                @php $selectedState = old('state', @$charge->state ?: request('state')); @endphp
                                 <select class="form-control require" name="state">
-                                    <option value="New York" @if(@$charge->state == "New York") selected @endif>New York</option>
-                                    <option value="Washington" @if(@$charge->state == "Washington") selected @endif>Washington</option>
-                                    <option value="Los Angeles" @if(@$charge->state == "Los Angeles") selected @endif>Los Angeles</option>
-                                    <option value="Chicago" @if(@$charge->state == "Chicago") selected @endif>Chicago</option>
-                                    <option value="Miami" @if(@$charge->state == "Miami") selected @endif>Miami</option>
-                                    <option value="Seattle" @if(@$charge->state == "Seattle") selected @endif>Seattle</option>
-                                    <option value="Houston" @if(@$charge->state == "Houston") selected @endif>Houston</option>
-                                    <option value="Toronto" @if(@$charge->state == "Toronto") selected @endif>Toronto</option>
-                                    <option value="Atlanta" @if(@$charge->state == "Atlanta") selected @endif>Atlanta</option>
+                                    @foreach(['New York','Washington','Los Angeles','Chicago','Miami','Seattle','Houston','Toronto','Atlanta'] as $st)
+                                        <option value="{{ $st }}" @if($selectedState == $st) selected @endif>{{ $st }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
