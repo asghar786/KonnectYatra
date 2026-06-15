@@ -944,7 +944,7 @@ class PackagesController extends Controller
 
   public function seasons()
   {
-    $data = Season::all();
+    $data = Season::orderBy('id', 'DESC')->get();
     return view('admin.seasons.seasons',['seasons'=>$data]);
   }
 
