@@ -90,13 +90,115 @@
         $(document).on("change", ".season", function () {
             $(".season_form").submit();
         });
+
+        /* ---- Professional PDF export (logo + header/footer) ---- */
+        window.__kyPdfLogo = null;
+        (function preloadKyLogo() {
+            var img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function () {
+                try {
+                    var c = document.createElement('canvas');
+                    c.width = img.naturalWidth; c.height = img.naturalHeight;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    window.__kyPdfLogo = { dataUrl: c.toDataURL('image/png'), w: img.naturalWidth, h: img.naturalHeight };
+                } catch (e) { /* tainted canvas — skip logo */ }
+            };
+            img.src = "{{ asset('assets/images2/newlogo11.png') }}";
+        })();
+
+        function kyPdfTitle() {
+            var t = $('.breadcrumb-title').first().text().trim();
+            return t || 'Report';
+        }
+
+        function kyPdfCustomize(doc) {
+            var logo = window.__kyPdfLogo;
+            var logoW = 130, logoH = logo ? Math.round(130 * (logo.h / logo.w)) : 0;
+
+            doc.pageMargins = [30, logo ? 95 : 80, 30, 45];
+            doc.defaultStyle.fontSize = 9;
+
+            // Repeating header: logo (left) + company block (right)
+            doc.header = function () {
+                return {
+                    margin: [30, 18, 30, 0],
+                    columns: [
+                        logo
+                            ? { image: logo.dataUrl, width: logoW }
+                            : { text: 'KONNECT.US INC.', bold: true, fontSize: 16, color: '#2c3e50' },
+                        {
+                            stack: [
+                                { text: 'KONNECT.US INC.', bold: true, fontSize: 12, color: '#2c3e50' },
+                                { text: '18502 Hillside Avenue, Jamaica, NY 11432', fontSize: 8, color: '#666' },
+                                { text: 'www.konnectyatra.org  ·  rm@konnectyatra.org', fontSize: 8, color: '#666' }
+                            ],
+                            alignment: 'right'
+                        }
+                    ]
+                };
+            };
+
+            // Repeating footer: generated date + page numbers
+            doc.footer = function (currentPage, pageCount) {
+                return {
+                    margin: [30, 8, 30, 0],
+                    columns: [
+                        { text: 'Generated: ' + new Date().toLocaleString(), fontSize: 7, color: '#999' },
+                        { text: 'Page ' + currentPage + ' of ' + pageCount, alignment: 'right', fontSize: 7, color: '#999' }
+                    ]
+                };
+            };
+
+            // Report title styling (content[0] is the title text node)
+            if (doc.content[0]) {
+                doc.content[0].alignment = 'center';
+                doc.content[0].fontSize = 15;
+                doc.content[0].bold = true;
+                doc.content[0].color = '#2c3e50';
+                doc.content[0].margin = [0, 0, 0, 2];
+            }
+            // Table styling: dark header, zebra rows, light borders
+            var tableNode = doc.content.filter(function (c) { return c.table; })[0];
+
+            // Sub-line under the title (record count)
+            var recordCount = tableNode ? (tableNode.table.body.length - 1) : 0;
+            doc.content.splice(1, 0, {
+                text: 'Total records: ' + recordCount,
+                alignment: 'center', fontSize: 8, color: '#888', margin: [0, 0, 0, 10]
+            });
+
+            if (tableNode) {
+                tableNode.layout = {
+                    fillColor: function (rowIndex) {
+                        if (rowIndex === 0) return '#2c3e50';
+                        return (rowIndex % 2 === 0) ? '#f4f6f8' : null;
+                    },
+                    hLineWidth: function () { return 0.5; },
+                    vLineWidth: function () { return 0.5; },
+                    hLineColor: function () { return '#dfe3e8'; },
+                    vLineColor: function () { return '#dfe3e8'; },
+                    paddingTop: function () { return 5; },
+                    paddingBottom: function () { return 5; },
+                    paddingLeft: function () { return 7; },
+                    paddingRight: function () { return 7; }
+                };
+                if (Array.isArray(tableNode.table.widths)) {
+                    tableNode.table.widths = tableNode.table.widths.map(function () { return '*'; });
+                }
+            }
+            doc.styles.tableHeader = { color: '#ffffff', bold: true, fontSize: 9, alignment: 'left', margin: [0, 2, 0, 2] };
+        }
+
         $('#myTables').DataTable({
             dom: "Blfrtip",
             buttons: [{
                     extend: 'pdfHtml5',
                     text: '<button  class="btn  btn-primary w-100 px-3 "><i class="fa fa-file-pdf-o mr-1 "></i> PDF</button>',
-
-                    title: 'pdf',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    title: kyPdfTitle,
+                    customize: kyPdfCustomize,
                     exportOptions: {
                         columns: ':visible:not(.not-export)'
                     }
@@ -136,8 +238,10 @@
             buttons: [{
                     extend: 'pdfHtml5',
                     text: '<button  class="btn  btn-primary w-100 px-3 "><i class="fa fa-file-pdf-o mr-1 "></i> PDF</button>',
-
-                    title: 'pdf',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    title: kyPdfTitle,
+                    customize: kyPdfCustomize,
                     exportOptions: {
                         columns: ':visible:not(.not-export)'
                     }
