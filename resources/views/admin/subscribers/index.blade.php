@@ -67,7 +67,7 @@
                         @forelse($subscribers as $i => $sub)
                         <tr class="sb-row" data-search="{{ strtolower(trim($sub->email.' '.$sub->source)) }}">
                             <td class="tc"><span class="sb-idx">{{ $i + 1 }}</span></td>
-                            <td class="sb-email"><i class="fa fa-envelope"></i> <a href="mailto:{{ $sub->email }}">{{ $sub->email }}</a></td>
+                            <td><span class="sb-email"><i class="fa fa-envelope"></i> <a href="mailto:{{ $sub->email }}">{{ $sub->email }}</a></span></td>
                             <td>@if($sub->source)<span class="sb-badge">{{ $sub->source }}</span>@else <span class="sb-sub">—</span> @endif</td>
                             <td><span class="sb-sub">{{ optional($sub->created_at)->format('d M Y, h:i A') ?: '—' }}</span></td>
                             <td class="tc">

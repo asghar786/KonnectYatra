@@ -41,6 +41,13 @@ class PackagesController extends Controller
     return view('admin.users',['packages'=>$data],['users'=>$users]);
   }
 
+  public function view_user($id)
+  {
+    $user = User::findOrFail($id);
+    $bookings = YatriVisa::with('package')->where('user_id', $id)->orderBy('id', 'DESC')->get();
+    return view('admin.user-detail', ['user' => $user, 'bookings' => $bookings]);
+  }
+
   public function booking_detail($id)
   {
     $data['yatri'] = YatriVisa::with("package", "gurdwara", "hotel", "bus")->where('id',$id)->first();

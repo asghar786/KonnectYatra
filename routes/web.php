@@ -136,6 +136,7 @@ Route::group(['prefix' => 'admin',
     Route::post('/yatri-visa-update/{id}',[PackagesController::class, 'yatri_visa_update'])->name('yatri_visa_update');
     Route::get('/reports',[PackagesController::class, 'passenger_list'])->name('reports');
     Route::get('/users',[PackagesController::class, 'users'])->name('users');
+    Route::get('/users/view/{id}',[PackagesController::class, 'view_user'])->name('view-user');
     Route::get('/users/delete/{id}',[PackagesController::class, 'delete_users'])->name('delete-users');
 
     Route::get('/payment/{id}',[PackagesController::class, 'payment'])->name('admin_payment');

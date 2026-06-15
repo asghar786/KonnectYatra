@@ -22,6 +22,8 @@
     .us-actions form{margin:0;display:inline}
     .us-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:transform .12s,box-shadow .12s,background .12s;text-decoration:none}
     .us-btn:hover{transform:translateY(-2px)}
+    .us-btn.view{background:#eaf2ff;color:#1a73e8}
+    .us-btn.view:hover{background:#1a73e8;color:#fff;box-shadow:0 6px 14px rgba(26,115,232,.3)}
     .us-btn.del{background:#feeceb;color:#e23b2e}
     .us-btn.del:hover{background:#e23b2e;color:#fff;box-shadow:0 6px 14px rgba(226,59,46,.3)}
     .us-empty{padding:40px;text-align:center;color:#999;font-size:15px}
@@ -78,6 +80,7 @@
                             <td>@if(@$user->role)<span class="us-badge {{ $roleClass }}">{{ $user->role }}</span>@else <span class="us-badge other">—</span> @endif</td>
                             <td class="tc">
                                 <div class="us-actions">
+                                    <a href="{{ url('admin/users/view', $user->id) }}" class="us-btn view" title="View Details"><i class="fa fa-eye"></i></a>
                                     <form method="POST" action="{{ url('admin/users/delete', $user->id) }}">
                                         @csrf
                                         <input name="_method" type="hidden" value="GET">
