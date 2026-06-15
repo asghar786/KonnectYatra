@@ -22,6 +22,17 @@
     .wlc_shafiq { font-family: 'Poppins', sans-serif !important; font-weight: 600; letter-spacing: .2px; }
     label { font-weight: 600; }
     .see, .btn { font-weight: 600; }
+
+    /* Vertically center the form content */
+    .contact100-form {
+      min-height: 100vh;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 55px;
+    }
+    .login100-site-logo { text-align: center; margin-bottom: 10px; }
+    .login100-site-logo img { max-width: 220px; height: auto; }
   </style>
 </head>
 <body>
@@ -29,7 +40,10 @@
 		<div class="wrap-contact100">
 			<form class="contact100-form validate-form" method="POST" action="{{ route('admin_login') }}">
                 @csrf
-				<span class="contact100-form-title" style="margin-top: -20%;">
+				<div class="login100-site-logo">
+					<img src="{{ asset('assets/images2/newlogo11.png') }}" alt="Konnect Yatra">
+				</div>
+				<span class="contact100-form-title">
 					<p class="wlc_shafiq">Welcome To Konnect Yatra</p>
 				</span>
 
