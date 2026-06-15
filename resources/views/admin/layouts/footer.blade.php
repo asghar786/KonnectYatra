@@ -183,8 +183,11 @@
                     paddingLeft: function () { return 7; },
                     paddingRight: function () { return 7; }
                 };
-                if (Array.isArray(tableNode.table.widths)) {
-                    tableNode.table.widths = tableNode.table.widths.map(function () { return '*'; });
+                // Force the table to span the full page width
+                var colCount = (tableNode.table.body[0] || []).length;
+                if (colCount > 0) {
+                    tableNode.table.widths = [];
+                    for (var i = 0; i < colCount; i++) { tableNode.table.widths.push('*'); }
                 }
             }
             doc.styles.tableHeader = { color: '#ffffff', bold: true, fontSize: 9, alignment: 'left', margin: [0, 2, 0, 2] };
@@ -195,7 +198,7 @@
             buttons: [{
                     extend: 'pdfHtml5',
                     text: '<button  class="btn  btn-primary w-100 px-3 "><i class="fa fa-file-pdf-o mr-1 "></i> PDF</button>',
-                    orientation: 'landscape',
+                    orientation: 'portrait',
                     pageSize: 'A4',
                     title: kyPdfTitle,
                     customize: kyPdfCustomize,
@@ -238,7 +241,7 @@
             buttons: [{
                     extend: 'pdfHtml5',
                     text: '<button  class="btn  btn-primary w-100 px-3 "><i class="fa fa-file-pdf-o mr-1 "></i> PDF</button>',
-                    orientation: 'landscape',
+                    orientation: 'portrait',
                     pageSize: 'A4',
                     title: kyPdfTitle,
                     customize: kyPdfCustomize,
