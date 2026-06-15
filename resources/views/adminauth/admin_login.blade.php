@@ -11,6 +11,18 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="{{asset('assets2\css\style.css')}}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body, .contact100-form, .input100, .form-control, label,
+    .wlc_shafiq, .see, .btn, .form-check-label {
+      font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    .wlc_shafiq { font-family: 'Poppins', sans-serif !important; font-weight: 600; letter-spacing: .2px; }
+    label { font-weight: 600; }
+    .see, .btn { font-weight: 600; }
+  </style>
 </head>
 <body>
     <div class="container-contact100">
