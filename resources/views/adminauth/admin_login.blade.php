@@ -33,6 +33,13 @@
     }
     .login100-site-logo { text-align: center; margin-bottom: 10px; }
     .login100-site-logo img { max-width: 220px; height: auto; }
+    .login100-footer {
+      margin-top: auto;
+      padding-top: 30px;
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+    }
   </style>
 </head>
 <body>
@@ -123,6 +130,8 @@
 						<i class="fa fa-linkedin" aria-hidden="true"></i>
 					</a>
 				</div>
+
+				<p class="login100-footer">All rights reserved {{ date('Y') }} Copyright KONNECT US INC.</p>
 			</form>
 
 			<div class="contact100-more flex-col-c-m" style="background-image: url({{ asset('assets2/images/bg-01.jpg') }});">
