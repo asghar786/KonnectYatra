@@ -1,5 +1,30 @@
 @extends('admin.layouts.app')
 @section('content')
+<style type="text/css">
+    .gl-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
+    .gl-search{position:relative;flex:1;min-width:240px;max-width:420px}
+    .gl-search i{position:absolute;top:50%;left:14px;transform:translateY(-50%);color:#aaa;font-size:14px}
+    .gl-search input{width:100%;padding:11px 14px 11px 38px;border:1px solid #e2e2e2;border-radius:30px;font-size:14px;outline:none;transition:.15s}
+    .gl-search input:focus{border-color:#f54e18;box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+    .gl-card{background:#fff;border:1px solid #eee;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07);height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+    .gl-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
+    .gl-card.c-green{border-top:4px solid #2fbf4f}
+    .gl-card.c-yellow{border-top:4px solid #e8c220}
+    .gl-card.c-red{border-top:4px solid #e94e35}
+    .gl-photo{height:180px;background:#f3f4f6;overflow:hidden;position:relative}
+    .gl-photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .gl-sangat{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+    .gl-body{padding:14px 16px;flex:1}
+    .gl-body h5{margin:0 0 8px;font-size:15.5px;font-weight:700;color:#222;line-height:1.3}
+    .gl-meta{list-style:none;padding:0;margin:0}
+    .gl-meta li{display:flex;gap:8px;font-size:12.5px;color:#555;padding:3px 0;word-break:break-word}
+    .gl-meta li i{color:#f54e18;width:14px;text-align:center;margin-top:2px;flex-shrink:0}
+    .gl-actions{display:flex;gap:8px;padding:10px 15px;border-top:1px solid #f3f3f3}
+    .gl-actions .btn{flex:1;text-align:center}
+    .gl-actions form{margin:0;flex:1}
+    .gl-actions form .btn{width:100%}
+    .gl-empty{padding:40px;text-align:center;color:#999;font-size:16px}
+</style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
         <div class="db-breadcrumb">
@@ -10,203 +35,69 @@
             </ul>
         </div>
         <div class="main-body">
-            <a href="{{ route("create-gurdwara") }}" class="btn btn-primary">
-                Add Gurdwara <i class="fa fa-plus"></i>
-            </a>
-            <div class="row mt-3 justify-content-center">
-                <div class="col-lg-12">
-                    <div class="collapse" id="collapseExample">
-                        <div class="card">
-                            <div class="card-body">
-                                <form method="POST" action="{{route('admin_gurdwara')}}" enctype="multipart/form-data" class="admin_form">
-                                    @csrf
-                                    <div class="row">
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Name of Gurdwara</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Gurdwara Name" name="gurdwara_name" required/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Address</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Street Address" name="address" required/>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">City</label>
-                                            <input type="text" class="form-control require" placeholder="Enter City" name="city" required/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">State</label>
-                                            <input type="text" class="form-control require" placeholder="Enter State" name="state" required/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Zip</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Zip" name="zip" required/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Country</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Country" name="country" required/>
-                                        </div>
-                                        <div class=" col-lg-6 form-group">
-                                            <label class="form_label_color">Email Address</label>
-                                            <input type="email" class="form-control require" placeholder="Enter Email Address"  name="email_address" required/>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Name of Pardan</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Pardan Name" name="pardan_name"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Phone Number</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Pardan Phone Number" name="phone_no"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Name of Secretary</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Secretary Name" name="secretary_name"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Phone Number</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Secretary Phone Number" name="secretary_phone_no"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Name of Head Garanti</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Head Garanti Name" name="head_garanti_name"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Phone Number</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Head Garanti Phone Number" name="head_garanti_phone_no"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Name of Chairman</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Chairman Name" name="chairman_name"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Phone Number</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Chairman Phone Number" name="chairman_phone_no"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Name of Manager</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Manager Name" name="manager_name"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Phone Number</label>
-                                            <input type="text" class="form-control require" placeholder="Enter Manager Phone Number" name="manager_phone_no"/>
-                                        </div>
-                                        <div class="col-lg-6 form-group">
-                                            <label class="form_label_color">Sangat</label><br>
-                                            <input type="radio" value="Large" name="sangat" id="large" checked />
-                                            <label for="large">Large</label>
-                                            <input type="radio" value="Medium" name="sangat" id="medium" />
-                                            <label for="medium">Medium</label>
-                                            <input type="radio" value="Small" name="sangat" id="small" />
-                                            <label for="small">Small</label>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="form-group col-md-6">
-                                            <label class="form_label_color">Upload Photo</label>
-                                            <input type="file" name="gurdwara_image" class="dropify" id="dropify-img" data-height="100" />
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary" style="float: right;">Submit</button>
-                                        <div class="response"></div>
-                                </form>
-                                </div>
-                            </div>
+            <div class="gl-toolbar">
+                <a href="{{ route('create-gurdwara') }}" class="btn btn-primary">Add Gurdwara <i class="fa fa-plus"></i></a>
+                <div class="gl-search">
+                    <i class="fa fa-search"></i>
+                    <input type="text" id="glSearch" placeholder="Search by name, city or state…" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="row mt-4" id="glGrid">
+                @forelse($gurdwaras as $gurdwara)
+                @php
+                    $colorClass = $gurdwara->color == 'Green' ? 'c-green' : ($gurdwara->color == 'Yellow' ? 'c-yellow' : ($gurdwara->color == 'Red' ? 'c-red' : ''));
+                @endphp
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4 gl-item" data-search="{{ strtolower(trim($gurdwara->gurdwara_name.' '.$gurdwara->city.' '.$gurdwara->state.' '.$gurdwara->address)) }}">
+                    <div class="gl-card {{ $colorClass }}">
+                        <div class="gl-photo">
+                            <img src="{{ asset('gurdwara_images/'.$gurdwara->gurdwara_image) }}" alt="{{ $gurdwara->gurdwara_name }}" onerror="this.src='{{ asset('assets/images2/News-04.png') }}'">
+                            @if(!empty($gurdwara->sangat))<span class="gl-sangat">{{ $gurdwara->sangat }} Sangat</span>@endif
+                        </div>
+                        <div class="gl-body">
+                            <h5>{{ $gurdwara->gurdwara_name }}</h5>
+                            <ul class="gl-meta">
+                                <li><i class="fa fa-location-dot"></i><span>{{ trim(collect([$gurdwara->address, $gurdwara->city, $gurdwara->state, $gurdwara->country])->filter()->implode(', ')) ?: '—' }}</span></li>
+                                @if(!empty($gurdwara->phone_no))<li><i class="fa fa-phone"></i><span>{{ $gurdwara->phone_no }}</span></li>@endif
+                                @if(!empty($gurdwara->email_address))<li><i class="fa fa-envelope"></i><span>{{ $gurdwara->email_address }}</span></li>@endif
+                            </ul>
+                        </div>
+                        <div class="gl-actions">
+                            <a href="{{ route('edit-gurdwara', $gurdwara->id) }}" class="btn btn-info btn-sm"><i class="fa fa-edit"></i> Edit</a>
+                            <form method="POST" action="{{ route('delete-gurdwara', $gurdwara->id) }}">
+                                @csrf
+                                <input name="_method" type="hidden" value="GET">
+                                <button type="submit" class="btn btn-danger btn-sm show_confirm" title="Delete"><i class="fa fa-trash"></i> Delete</button>
+                            </form>
                         </div>
                     </div>
                 </div>
+                @empty
+                <div class="col-12"><div class="gl-empty">No gurdwaras added yet.</div></div>
+                @endforelse
             </div>
-            <div class="row">
-                <div class="col-lg-12 pb-5">
-                    <table class="table table-striped dataTable" id="myTables"  cellspacing="0" role="grid" aria-describedby="dataTable_info" style="width: 100%;">
-                        <thead  bgcolor="#4c1864" >
-                            <tr role="row">
-                                <th class="sorting_asc" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-sort="ascending"
-                                    aria-label="Name: activate to sort column descending"
-                                    style="width: 80px;">Image
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Position: activate to sort column ascending"
-                                    style="width: 220px;">Gurdwara
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Age: activate to sort column ascending"
-                                    style="width: 150px;">Address
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Start date: activate to sort column ascending"
-                                    style="width: 120px;">City 
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Start date: activate to sort column ascending"
-                                    style="width: 40px;">State 
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Start date: activate to sort column ascending"
-                                    style="width: 80px;">Country 
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Start date: activate to sort column ascending"
-                                    style="width: 100px;">Phone 
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Start date: activate to sort column ascending"
-                                    style="width: 150px;">Email 
-                                </th>
-                                <th class="sorting" tabindex="0" aria-controls="dataTable" rowspan="1"
-                                    colspan="1" aria-label="Start date: activate to sort column ascending"
-                                    style="width: 50px;">Action 
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($gurdwaras as $gurdwara)
-                            <tr role="row" @if($gurdwara->color == "Green") style="background: #35e93559 !important;" @elseif($gurdwara->color == "Yellow") style="background: #e6e93559 !important;" @elseif($gurdwara->color == "Red") style="background: #e94e3559 !important;" @endif>
-                                <td><img src="{{ asset("gurdwara_images/".$gurdwara->gurdwara_image) }}" style="width: 100px; height: 100px;"></td>
-                                <td>{{$gurdwara->gurdwara_name}}</td>
-                                <td>{{$gurdwara->address}}</td>
-                                <td>{{$gurdwara->city}}</td>
-                                <td>{{$gurdwara->state}}</td>
-                                <td>{{$gurdwara->country}}</td>
-                                <td>{{$gurdwara->phone_no}}</td>
-                                <td>{{$gurdwara->email_address}}</td>
-                                <td>
-                                    <span style="display: flex;"> 
-                                        <a href="{{route('edit-gurdwara',$gurdwara->id)}}" class="btn bg-warning" title='edit' style="padding:11px;"><i class=" text-white fa fa-edit"></i></a>&nbsp;
-                                        <form method="POST" action="{{ route('delete-gurdwara', $gurdwara->id) }}">
-                                            @csrf
-                                            <input name="_method" type="hidden" value="GET">
-                                            <button type="submit" class="btn bg-danger show_confirm"  title='Delete' style="padding: 11px;"><i class=" text-white fa fa-trash"></i></button>
-                                        </form>
-                                    </span>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        
-                    </table>
-                </div>
-            </div>
-		</div>
+            <div class="gl-empty" id="glNoResults" style="display:none;">No gurdwaras match your search.</div>
+        </div>
     </div>
 </main>
 <div class="ttr-overlay"></div>
 @endsection
 @section('js')
 <script>
-    $(document).ready(function () {
-        // Initialize Dropify
-        $('.dropify').dropify();
-        // Get the original file name on file upload
-        $('.dropify').on('change', function () {
-            var input = $(this);
-            var file_name = input[0].files[0].name;
-            // $('#selected-image').val(file_name);
-            // alert('Original file name: ' + file_name);
+    (function () {
+        var input = document.getElementById('glSearch');
+        var items = Array.prototype.slice.call(document.querySelectorAll('.gl-item'));
+        var noRes = document.getElementById('glNoResults');
+        if (!input) return;
+        input.addEventListener('input', function () {
+            var q = this.value.toLowerCase().trim(), visible = 0;
+            items.forEach(function (el) {
+                var m = el.getAttribute('data-search').indexOf(q) !== -1;
+                el.style.display = m ? '' : 'none';
+                if (m) visible++;
+            });
+            noRes.style.display = (visible === 0 && items.length) ? 'block' : 'none';
         });
-    });
+    })();
 </script>
 @endsection
