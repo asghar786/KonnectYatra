@@ -22,7 +22,7 @@
 				</span>
 
 				<span class="login100-form-avatar">
-					<img src="{{ asset('assets2/images/pp.jpg') }}" alt="AVATAR" style="height: 28%; width:30%; border-radius: 50%; margin-left: 35%; margin-top: -40px;">
+					<img src="{{ asset('assets2/images/pp.jpg') }}" alt="AVATAR" style="height: 130px; width: 130px; object-fit: cover; border-radius: 50%; display: block; margin: -40px auto 0; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
 				</span>
 
 				<div class="wrap-input100 validate-input" data-validate="Email is required">
