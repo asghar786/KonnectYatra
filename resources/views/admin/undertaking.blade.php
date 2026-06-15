@@ -65,10 +65,16 @@
 
   @media print{
     @page{size:Letter;margin:0;}
-    body{background:#fff;}
-    .utk{background:#fff;padding:0;}
-    .utk .page{box-shadow:none;margin:0 auto;break-after:page;}
-    .utk .page:last-of-type{break-after:auto;}
+    html,body{background:#fff !important;margin:0 !important;padding:0 !important;}
+    /* Hide all admin chrome, show only the form (keeps <style> & fonts intact) */
+    body * { visibility:hidden !important; }
+    #utkPrint, #utkPrint * { visibility:visible !important; }
+    #utkPrint{position:absolute;left:0;top:0;width:100%;margin:0;padding:0;}
+    .utk{background:#fff !important;padding:0;}
+    .utk .page{box-shadow:none;margin:0 auto;break-after:page;page-break-after:always;}
+    .utk .page:last-of-type{break-after:auto;page-break-after:auto;}
+    /* Make sure browsers print the navy/orange accents and shaded boxes */
+    .utk *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
   }
 </style>
 <main class="ttr-wrapper">
@@ -206,16 +212,13 @@
 @section('js')
 <script type="text/javascript">
     function printUndertaking() {
-        // Persist typed values into the DOM so they survive the print swap.
+        // Persist typed values into the HTML so the print engine renders them.
         document.querySelectorAll('#utkPrint input').forEach(function (i) {
             if (i.value) i.setAttribute('value', i.value); else i.removeAttribute('value');
         });
-        var printContents = document.getElementById('utkPrint').innerHTML;
-        var originalContents = document.body.innerHTML;
-        document.body.innerHTML = printContents;
+        // Print in place — the @media print rules show only #utkPrint while
+        // keeping the page's <style> and fonts intact (no DOM swap).
         window.print();
-        document.body.innerHTML = originalContents;
-        location.reload();
     }
 </script>
 @endsection
