@@ -84,11 +84,14 @@
 
                             @php
                                 $people = collect([
-                                    ['Pardhan', $gurdwara->pardan_name, null],
-                                    ['Secretary', $gurdwara->secretary_name, $gurdwara->secretary_phone_no],
-                                    ['Head Granthi', $gurdwara->head_garanti_name, $gurdwara->head_garanti_phone_no],
-                                    ['Chairman', $gurdwara->chairman_name, $gurdwara->chairman_phone_no],
-                                    ['Manager', $gurdwara->manager_name, $gurdwara->manager_phone_no],
+                                    ['Chairman', $gurdwara->chairman_name, $gurdwara->chairman_phone_no, $gurdwara->chairman_email],
+                                    ['Pardhan', $gurdwara->pardan_name, $gurdwara->phone_no, $gurdwara->pardan_email],
+                                    ['Secretary', $gurdwara->secretary_name, $gurdwara->secretary_phone_no, $gurdwara->secretary_email],
+                                    ['Office Manager', $gurdwara->manager_name, $gurdwara->manager_phone_no, $gurdwara->manager_email],
+                                    ['Granthi', $gurdwara->granthi_name, null, $gurdwara->granthi_email],
+                                    ['Head Granthi', $gurdwara->head_garanti_name, $gurdwara->head_garanti_phone_no, null],
+                                    ['Ragi', $gurdwara->ragi_name, null, null],
+                                    ['Senior Board Member', $gurdwara->senior_board_member, null, null],
                                 ])->filter(fn($p) => !empty($p[1]));
                             @endphp
                             @if($people->count())
@@ -98,10 +101,16 @@
                                 <div class="gd-person">
                                     <div class="role">{{ $p[0] }}</div>
                                     <div class="name">{{ $p[1] }}</div>
-                                    @if(!empty($p[2]))<div class="ph"><i class="fa fa-phone"></i> {{ $p[2] }}</div>@endif
+                                    @if(!empty($p[2]))<div class="ph"><i class="fa fa-phone"></i> <a href="tel:{{ $p[2] }}">{{ $p[2] }}</a></div>@endif
+                                    @if(!empty($p[3]))<div class="ph"><i class="fa fa-envelope"></i> <a href="mailto:{{ $p[3] }}">{{ $p[3] }}</a></div>@endif
                                 </div>
                                 @endforeach
                             </div>
+                            @endif
+
+                            @if(!empty($gurdwara->notes))
+                            <p class="gd-sec-label">Notes</p>
+                            <p style="color:var(--ink);font-size:14.5px;line-height:1.6;white-space:pre-line;margin:0">{{ $gurdwara->notes }}</p>
                             @endif
 
                             <div class="gd-actions">

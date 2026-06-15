@@ -66,45 +66,93 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Name of Pardan</label>
-                                <input type="text" class="form-control require" placeholder="Enter Pardan Name" value="{{@$gurdwara->pardan_name}}" name="pardan_name"/>
-                            </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Phone Number</label>
-                                <input type="text" class="form-control require" placeholder="Enter Pardan Phone Number" value="{{@$gurdwara->phone_no}}" name="phone_no"/>
-                            </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Name of Secretary</label>
-                                <input type="text" class="form-control require" placeholder="Enter Secretary Name" value="{{@$gurdwara->secretary_name}}" name="secretary_name"/>
-                            </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Phone Number</label>
-                                <input type="text" class="form-control require" placeholder="Enter Secretary Phone Number" value="{{@$gurdwara->secretary_phone_no}}" name="secretary_phone_no"/>
-                            </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Name of Head Garanti</label>
-                                <input type="text" class="form-control require" placeholder="Enter Head Garanti Name" value="{{@$gurdwara->head_garanti_name}}" name="head_garanti_name"/>
-                            </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Phone Number</label>
-                                <input type="text" class="form-control require" placeholder="Enter Head Garanti Phone Number" value="{{@$gurdwara->head_garanti_phone_no}}" name="head_garanti_phone_no"/>
-                            </div>
-                            <div class="col-lg-6 form-group">
+                            <div class="col-lg-12"><h6 class="form_label_color mb-2" style="font-weight:600;">Office Bearers</h6></div>
+
+                            <div class="col-lg-4 form-group">
                                 <label class="form_label_color">Name of Chairman</label>
-                                <input type="text" class="form-control require" placeholder="Enter Chairman Name" value="{{@$gurdwara->chairman_name}}" name="chairman_name"/>
+                                <input type="text" class="form-control" placeholder="Enter Chairman Name" value="{{@$gurdwara->chairman_name}}" name="chairman_name"/>
                             </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Phone Number</label>
-                                <input type="text" class="form-control require" placeholder="Enter Chairman Phone Number" value="{{@$gurdwara->chairman_phone_no}}" name="chairman_phone_no"/>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Chairman Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Enter Chairman Phone Number" value="{{@$gurdwara->chairman_phone_no}}" name="chairman_phone_no"/>
                             </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Name of Manager</label>
-                                <input type="text" class="form-control require" placeholder="Enter Manager Name" value="{{@$gurdwara->manager_name}}" name="manager_name"/>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Chairman Email Address</label>
+                                <input type="email" class="form-control" placeholder="Enter Chairman Email" value="{{@$gurdwara->chairman_email}}" name="chairman_email"/>
                             </div>
-                            <div class="col-lg-6 form-group">
-                                <label class="form_label_color">Phone Number</label>
-                                <input type="text" class="form-control require" placeholder="Enter Manager Phone Number" value="{{@$gurdwara->manager_phone_no}}" name="manager_phone_no"/>
+
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Name of Pardan</label>
+                                <input type="text" class="form-control" placeholder="Enter Pardan Name" value="{{@$gurdwara->pardan_name}}" name="pardan_name"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Pardan Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Enter Pardan Phone Number" value="{{@$gurdwara->phone_no}}" name="phone_no"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Pardan Email Address</label>
+                                <input type="email" class="form-control" placeholder="Enter Pardan Email" value="{{@$gurdwara->pardan_email}}" name="pardan_email"/>
+                            </div>
+
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Name of Secretary</label>
+                                <input type="text" class="form-control" placeholder="Enter Secretary Name" value="{{@$gurdwara->secretary_name}}" name="secretary_name"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Secretary Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Enter Secretary Phone Number" value="{{@$gurdwara->secretary_phone_no}}" name="secretary_phone_no"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Secretary Email Address</label>
+                                <input type="email" class="form-control" placeholder="Enter Secretary Email" value="{{@$gurdwara->secretary_email}}" name="secretary_email"/>
+                            </div>
+
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Name of Office Manager</label>
+                                <input type="text" class="form-control" placeholder="Enter Office Manager Name" value="{{@$gurdwara->manager_name}}" name="manager_name"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Office Manager Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Enter Office Manager Phone Number" value="{{@$gurdwara->manager_phone_no}}" name="manager_phone_no"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Office Manager Email Address</label>
+                                <input type="email" class="form-control" placeholder="Enter Office Manager Email" value="{{@$gurdwara->manager_email}}" name="manager_email"/>
+                            </div>
+
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Name of Granthi</label>
+                                <input type="text" class="form-control" placeholder="Enter Granthi Name" value="{{@$gurdwara->granthi_name}}" name="granthi_name"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Granthi Email Address</label>
+                                <input type="email" class="form-control" placeholder="Enter Granthi Email" value="{{@$gurdwara->granthi_email}}" name="granthi_email"/>
+                            </div>
+                            <div class="col-lg-4 form-group"></div>
+
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Name of Head Granthi</label>
+                                <input type="text" class="form-control" placeholder="Enter Head Granthi Name" value="{{@$gurdwara->head_garanti_name}}" name="head_garanti_name"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Head Granthi Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Enter Head Granthi Phone Number" value="{{@$gurdwara->head_garanti_phone_no}}" name="head_garanti_phone_no"/>
+                            </div>
+                            <div class="col-lg-4 form-group"></div>
+
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Ragi</label>
+                                <input type="text" class="form-control" placeholder="Enter Ragi Name" value="{{@$gurdwara->ragi_name}}" name="ragi_name"/>
+                            </div>
+                            <div class="col-lg-4 form-group">
+                                <label class="form_label_color">Name of Senior Board Member</label>
+                                <input type="text" class="form-control" placeholder="Enter Senior Board Member Name" value="{{@$gurdwara->senior_board_member}}" name="senior_board_member"/>
+                            </div>
+                            <div class="col-lg-4 form-group"></div>
+
+                            <div class="col-lg-12 form-group">
+                                <label class="form_label_color">Notes</label>
+                                <textarea class="form-control" rows="3" placeholder="Enter any additional notes" name="notes">{{@$gurdwara->notes}}</textarea>
                             </div>
                         </div>
                         <div class="row">
