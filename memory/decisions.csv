@@ -1,1 +1,2 @@
 date,decision,reasoning,expected_outcome,review_date,status
+"2026-06-16","Deploy KonnectYatra to production at konnectyatra.org using a symlinked public_html -> ~/konnectyatra/public, with GitHub Actions SSH auto-deploy on push to main","Main-domain docroot is locked to public_html; symlink keeps app code out of the web root and URLs clean. Host has SSH+Composer, so Actions-over-SSH gives true push-to-deploy without exposing tokens in the repo.","Pushing to main updates the live site in ~30s with no manual steps; data seeded from local XAMPP dump","2026-07-16",""
