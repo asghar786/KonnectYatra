@@ -26,12 +26,22 @@ jobs:
           script: |
             set -euo pipefail
 
-            # --- adjust these two if your paths differ -----------------------
+            # --- adjust if your paths differ ---------------------------------
             APP_DIR="$HOME/konnectyatra"          # where the repo is cloned
-            PHP="/opt/cpanel/ea-php80/root/usr/bin/php"   # PHP 8.0 CLI on cPanel
             # -----------------------------------------------------------------
 
-            # Resolve composer (full path is safest under non-interactive SSH)
+            # Resolve a PHP 8 CLI (account default is PHP 8.1 on this server)
+            if command -v php >/dev/null 2>&1; then
+              PHP="php"
+            elif [ -x /opt/cpanel/ea-php81/root/usr/bin/php ]; then
+              PHP="/opt/cpanel/ea-php81/root/usr/bin/php"
+            elif [ -x /opt/cpanel/ea-php80/root/usr/bin/php ]; then
+              PHP="/opt/cpanel/ea-php80/root/usr/bin/php"
+            else
+              echo "php CLI not found"; exit 1
+            fi
+
+            # Resolve composer
             if command -v composer >/dev/null 2>&1; then
               COMPOSER="composer"
             elif [ -f "$HOME/composer.phar" ]; then
@@ -49,10 +59,11 @@ jobs:
             $COMPOSER install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
             echo "==> Rebuilding Laravel caches"
-            $PHP artisan config:clear
+            $PHP artisan optimize:clear
             $PHP artisan config:cache
-            $PHP artisan route:cache
-            $PHP artisan view:cache
+            # route/view cache are best-effort (won't fail the deploy)
+            $PHP artisan route:cache || true
+            $PHP artisan view:cache || true
 
             # storage symlink (no-op if it already exists)
             $PHP artisan storage:link || true
