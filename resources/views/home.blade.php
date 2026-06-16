@@ -502,68 +502,71 @@ h4.destination {
 					</div>
 				</div>
 			</section>
-			<!-- Home contact details section html start -->
-			<section class="contact-section" style="margin-top: 130px;">
+			<!-- President's message section -->
+			<section class="ky-president" id="president-message">
+				<style>
+					.ky-president{padding:90px 0;background:#f6f7f9;}
+					.ky-president__card{display:flex;flex-wrap:wrap;align-items:stretch;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(15,23,42,.10);}
+					.ky-president__media{flex:1 1 360px;position:relative;min-height:360px;background:#0f1c30;}
+					.ky-president__media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+					.ky-president__badge{position:absolute;left:22px;bottom:22px;display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:40px;background:rgba(255,255,255,.92);color:#0f1c30;font-size:13px;font-weight:700;letter-spacing:.02em;backdrop-filter:blur(4px);}
+					.ky-president__badge svg{width:16px;height:16px;color:#ef6a2e;}
+					.ky-president__content{flex:1 1 480px;padding:54px 48px;}
+					.ky-president__eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#ef6a2e;margin-bottom:14px;}
+					.ky-president__title{font-size:30px;line-height:1.22;font-weight:800;color:#15213a;margin:0 0 16px;}
+					.ky-president__text{font-size:16px;line-height:1.75;color:#5b6472;margin:0 0 28px;max-width:560px;}
+					.ky-president__audio{margin:0 0 34px;}
+					.ky-president__audio audio{width:100%;max-width:540px;height:48px;}
+					.ky-president__contacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;border-top:1px solid #edeff3;padding-top:30px;}
+					.ky-contact{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;}
+					.ky-contact__icon{flex:none;width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:#fff1ea;color:#ef6a2e;transition:.2s;}
+					.ky-contact__icon svg{width:22px;height:22px;}
+					.ky-contact__meta{display:flex;flex-direction:column;line-height:1.4;min-width:0;}
+					.ky-contact__label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#9aa1ad;font-weight:700;}
+					.ky-contact__value{font-size:15px;color:#15213a;font-weight:600;word-break:break-word;}
+					.ky-contact[href]:hover .ky-contact__icon{background:#ef6a2e;color:#fff;}
+					.ky-contact[href]:hover .ky-contact__value{color:#ef6a2e;}
+					@media (max-width:991px){.ky-president{padding:60px 0;}.ky-president__content{padding:38px 30px;}.ky-president__media{min-height:280px;flex-basis:100%;}.ky-president__title{font-size:26px;}}
+					@media (max-width:575px){.ky-president__content{padding:30px 22px;}.ky-president__title{font-size:23px;}}
+				</style>
 				<div class="container">
-					<div class="row">
-						<div class="col-lg-4">
-							<div class="contact-img" style="background-image: url({{ asset('assets/images2/z3.jpg') }});">
-							</div>
+					<div class="ky-president__card">
+						<div class="ky-president__media">
+							<img src="{{ asset('assets/images2/z3.jpg') }}" alt="Konnect Yatra — Dhan Guru Nanak Dev Ji" loading="lazy">
+							<span class="ky-president__badge">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+								Audio message
+							</span>
 						</div>
-						<div class="col-lg-8">
-							<div class="contact-details-wrap">
-								<div class="row">
-									<div class="col-sm-4">
-										<div class="contact-details">
-											<div class="contact-icon">
-												<img src="assets/images/icon12.png" alt="">
-											</div>
-											<ul>
-												<li>
-													<a href="#"><span class="">rm@konnectyatra.org</span></a>
-												</li>
-
-											</ul>
-										</div>
-									</div>
-									<div class="col-sm-4">
-										<div class="contact-details">
-											<div class="contact-icon">
-												<img src="assets/images/icon13.png" alt="">
-											</div>
-											<ul>
-												<li>
-													<a href="#">+1 718-908-9464</a>
-												</li>
-
-											</ul>
-										</div>
-									</div>
-									<div class="col-sm-4">
-										<div class="contact-details">
-											<div class="contact-icon">
-												<img src="assets/images/icon14.png" alt="">
-											</div>
-											<ul>
-												<li>
-													18502 Hillside Avenue, Jamaica, NY 11432
-												</li>
-											</ul>
-										</div>
-									</div>
-								</div>
+						<div class="ky-president__content">
+							<span class="ky-president__eyebrow">A Special Message</span>
+							<h2 class="ky-president__title">A Message from Our President</h2>
+							<p class="ky-president__text">Listen to a personal audio message from our President on our mission to connect pilgrims with the sacred Gurdwaras and make every yatra seamless, safe, and memorable.</p>
+							<div class="ky-president__audio">
+								<audio controls preload="none">
+									<source src="{{ asset('assets/message.MP3') }}" type="audio/mpeg">
+									Your browser does not support the audio element.
+								</audio>
 							</div>
-							<div class="contact-btn-wrap d-flex justify-content-center">
-								<audio controls>
-									<source src="horse.ogg" type="audio/ogg">
-										<source src="{{ asset('assets/message.MP3')}}" type="audio/mpeg">
-										</audio>
-									</div>
+							<div class="ky-president__contacts">
+								<a class="ky-contact" href="mailto:rm@konnectyatra.org">
+									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Email</span><span class="ky-contact__value">rm@konnectyatra.org</span></span>
+								</a>
+								<a class="ky-contact" href="tel:+17189089464">
+									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Call us</span><span class="ky-contact__value">+1 718-908-9464</span></span>
+								</a>
+								<div class="ky-contact">
+									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Visit us</span><span class="ky-contact__value">18502 Hillside Avenue, Jamaica, NY 11432</span></span>
 								</div>
 							</div>
 						</div>
-					</section>
-					<!--  contact details html end -->
+					</div>
+				</div>
+			</section>
+			<!-- President's message section end -->
 				</main>
 
 				<!-- Content END-->
