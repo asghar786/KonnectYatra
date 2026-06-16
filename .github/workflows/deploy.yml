@@ -1,0 +1,65 @@
+name: Deploy to cPanel
+
+# Auto-deploys to the live server on every push to main.
+# You can also run it manually from the Actions tab (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            # --- adjust these two if your paths differ -----------------------
+            APP_DIR="$HOME/konnectyatra"          # where the repo is cloned
+            PHP="/opt/cpanel/ea-php80/root/usr/bin/php"   # PHP 8.0 CLI on cPanel
+            # -----------------------------------------------------------------
+
+            # Resolve composer (full path is safest under non-interactive SSH)
+            if command -v composer >/dev/null 2>&1; then
+              COMPOSER="composer"
+            elif [ -f "$HOME/composer.phar" ]; then
+              COMPOSER="$PHP $HOME/composer.phar"
+            else
+              echo "composer not found; install it or set the path"; exit 1
+            fi
+
+            cd "$APP_DIR"
+            echo "==> Pulling latest code"
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "==> Installing PHP dependencies"
+            $COMPOSER install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+            echo "==> Rebuilding Laravel caches"
+            $PHP artisan config:clear
+            $PHP artisan config:cache
+            $PHP artisan route:cache
+            $PHP artisan view:cache
+
+            # storage symlink (no-op if it already exists)
+            $PHP artisan storage:link || true
+
+            # NOTE: migrations are intentionally NOT run automatically.
+            # This app's DB was seeded from a SQL dump and 8 legacy migrations
+            # collide with `artisan migrate`. Run new migrations manually with
+            # `php artisan migrate --path=...` when you add one. See DEPLOY.md.
+
+            echo "==> Deploy complete"
