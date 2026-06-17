@@ -136,7 +136,7 @@
 
                             <div class="pkgx-notes">
                                 <p><b>Note:</b> Above price is valid for New York residents; for all other states please call for the price. <b>IAD PAX add $50</b> in the package price.</p>
-                                <p>For Business Class prices please call <b>RASHAD MAHMOOD @ +1 718-908-9464</b>.</p>
+                                <p>For Business Class prices please call <b>RASHAD MAHMOOD @ +1 (718) 908-9464</b>.</p>
                                 <p><b>Cancellation of Trip:</b> Airline applicable cancellation charges and $100 service charges applies.</p>
                             </div>
 

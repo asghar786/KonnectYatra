@@ -5,7 +5,7 @@
             <a href="{{url('contactus')}}" class="button-primary" previewlistener="true">Contact Us</a>
         </div>
         <a href="tel:+43 6601007999">
-            <p class="mt-4 text-center">Or contact our team directly today at <b>+1 718-908-9464</b></p>
+            <p class="mt-4 text-center">Or contact our team directly today at <b>+1 (718) 908-9464</b></p>
         </a>
 
     </div>

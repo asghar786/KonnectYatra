@@ -46,7 +46,7 @@
 	                    <span>konnect yatra.US INC.</span><br>
 	                    <span class="pb-0 mb-0">18502 Hillside Avenue</span><br>
 	                    <span>Jamaica, NY 11432</span><br>
-	                    <span>+1 718-908-9464</span><br>
+	                    <span>+1 (718) 908-9464</span><br>
             		</td>
             		<td>
             			<span><b>To:</b></span><br>

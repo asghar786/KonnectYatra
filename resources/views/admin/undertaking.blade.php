@@ -101,7 +101,7 @@
                                 <div class="co">KONNECT.US INC.</div>
                                 <div>18502 Hillside Avenue</div>
                                 <div>Jamaica, NY 11432 · USA</div>
-                                <div>Tel +1 718-908-9464</div>
+                                <div>Tel +1 (718) 908-9464</div>
                                 <div>rm@konnectyatra.org &middot; www.konnectyatra.org</div>
                             </div>
                         </header>

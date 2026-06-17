@@ -651,7 +651,7 @@
                                     <li>Yatris must follow the group rules and regulation. No private tour is allowed due to security reason</li>
                                     <li>This application is valid till October 31, 2023.</li>
                                     <li>(Double occupancy $100 discount only for one person if wife and husband traveling together. Note: JFK-ISB-LHE-JFK (One way passengers will pay $600 less from the above package price)</li>
-                                    <li>For Business Class prices please call <b>RASHAD MAHMOOD @ +1 718-908-9464</b></li>
+                                    <li>For Business Class prices please call <b>RASHAD MAHMOOD @ +1 (718) 908-9464</b></li>
                                     <li><b>Cancellation of Trip: Airline applicable cancellation charges and $100 service charges applies.</b></li>
                                 </ul>
                             </div>

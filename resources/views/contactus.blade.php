@@ -82,7 +82,7 @@
                               </span>
                               <div class="details-content">
                                  <h4>Phone Number</h4>
-                                 <span>+1 718-908-9464</span>
+                                 <span>+1 (718) 908-9464</span>
                               </div>
                            </li>
                         </ul>

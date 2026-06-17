@@ -133,7 +133,7 @@
 							<div class="header-contact-info">
 								<ul>
 									<li>
-										<a href="#"><i class="fas fa-phone"></i> +1 718-908-9464</a>
+										<a href="#"><i class="fas fa-phone"></i> +1 (718) 908-9464</a>
 									</li>
 									<li>
 										<a href="mailto:rm@konnectyatra.org"><i class="fas fa-envelope"></i> <span class="__cf_email__">rm@konnectyatra.org</span></a>

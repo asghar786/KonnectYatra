@@ -167,7 +167,7 @@
               <div class="col-8 mt-3 mb-4">
                 {!! @$packages->description !!}
                 <div class="mt-4">
-                  <p class="text-center mb-1">For further information please call at <b>718-908-9464</b> or book now at </p>
+                  <p class="text-center mb-1">For further information please call at <b>(718) 908-9464</b> or book now at </p>
                   <h5 class="text-center"><a href="{{ url('/') }}">konnectyatra.org</a></h5>
                   <p class="mt-5">Konnect.us, Inc. presents Konnect Yatra Holy Package to Nankana Sahib</p>
                   <p>Check payable to Konnect us, Inc. 18502 Hillside Ave, Jamaica, NY 11432</p>
