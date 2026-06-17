@@ -544,7 +544,7 @@ h4.destination {
 							<p class="ky-president__text">Listen to a personal audio message from our President on our mission to connect pilgrims with the sacred Gurdwaras and make every yatra seamless, safe, and memorable.</p>
 							<div class="ky-president__audio">
 								<audio controls preload="none">
-									<source src="{{ asset('assets/message.MP3') }}" type="audio/mpeg">
+									<source src="{{ asset('assets/message.mp3') }}" type="audio/mpeg">
 									Your browser does not support the audio element.
 								</audio>
 							</div>
