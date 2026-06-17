@@ -506,6 +506,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.22.1/ckeditor.js" integrity="sha512-F8fV4+wpHYl9zul08Soff9H9fCx6OMIFfgbQcy+2v2gV7PdbT0OgM1LFwujQmwlLGWWKNbOFZ13uWP+Cbe0Ngw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript">
+    CKEDITOR.config.versionCheck = false;
     CKEDITOR.replace('description', {
             /*
              * Ensure that htmlwriter plugin, which is required for this sample, is loaded.
