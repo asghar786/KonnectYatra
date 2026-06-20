@@ -25,7 +25,7 @@ class UserDashboardController extends Controller
 
     public function all_package(Request $request)
     {
-        $data['all_packages'] = Package::all();
+        $data['all_packages'] = Package::where('status', 1)->get();
         return view('users.forms.all_package', $data);
     }
 

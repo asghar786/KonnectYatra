@@ -17,6 +17,17 @@
   .apkg-state-pick label{font-weight:700;color:var(--ink);margin-bottom:8px;display:block}
   .apkg-state-pick select{border:1px solid #e2e4ea;border-radius:30px;padding:11px 18px;height:auto;font-size:15px}
   .apkg-state-pick select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+  /* Origin selector (cascading: country -> state -> airport) */
+  .apkg-origin-pick{max-width:780px;margin:0 auto 34px;text-align:center}
+  .apkg-origin-label{font-weight:700;color:var(--ink);margin-bottom:14px;font-size:18px}
+  .apkg-origin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .apkg-origin-field{text-align:left}
+  .apkg-origin-field label{font-weight:600;color:var(--ink);margin-bottom:6px;display:block;font-size:14px}
+  .apkg-origin-field select{border:1px solid #e2e4ea;border-radius:30px;padding:11px 18px;height:auto;font-size:15px;width:100%}
+  .apkg-origin-field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+  .apkg-origin-field select:disabled{background:#f6f7f9;color:#9aa0ac;cursor:not-allowed}
+  .apkg-origin-hint{text-align:center;color:#9aa0ac;font-size:16px;padding:30px 20px;margin:0}
+  @media (max-width:575px){.apkg-origin-grid{grid-template-columns:1fr}}
   /* Pricing card */
   .apkg-card{background:#fff;border:1px solid #eef0f4;border-radius:20px;box-shadow:0 14px 40px rgba(28,37,65,.08);overflow:hidden;height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
   .apkg-card:hover{transform:translateY(-4px);box-shadow:0 20px 46px rgba(28,37,65,.14)}
@@ -133,20 +144,33 @@
         <!-- ============ GURPURAB ============ -->
         <div class="tab-pane" id="birthday" role="tabpanel">
           @if(count(@$all_packages1) > 0)
-          <div class="apkg-state-pick">
-            <label><i class="fa fa-map-marker-alt"></i> Select Your State</label>
-            <select class="form-control" id="state">
-              <option value="13">New York</option>
-              <option value="14">Washington Dulles</option>
-              <option value="15">Los Angeles</option>
-              <option value="17">Chicago</option>
-              <option value="16">Seattle</option>
-              <option value="18">Toronto</option>
-            </select>
+          <div class="apkg-origin-pick">
+            <p class="apkg-origin-label"><i class="fa fa-map-marker-alt"></i> Select your origin</p>
+            <div class="apkg-origin-grid">
+              <div class="apkg-origin-field">
+                <label>Country</label>
+                <select class="form-control no-selectpicker" id="origin_country">
+                  <option value="">— Choose country —</option>
+                </select>
+              </div>
+              <div class="apkg-origin-field">
+                <label>State / City</label>
+                <select class="form-control no-selectpicker" id="origin_state" disabled>
+                  <option value="">— Choose state —</option>
+                </select>
+              </div>
+              <div class="apkg-origin-field">
+                <label>Departure Airport</label>
+                <select class="form-control no-selectpicker" id="origin_airport" disabled>
+                  <option value="">— Choose airport —</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="row justify-content-center">
+          <p class="apkg-origin-hint" id="apkg_hint">Please choose your country above to see available packages.</p>
+          <div class="row justify-content-center" id="apkg_cards">
             @foreach(@$all_packages1 as $key => $val)
-            <div class="col-lg-6 col-md-8 mb-4 all_states state_{{ $val->id }}" @if($key !== 0) style="display:none;" @endif>
+            <div class="col-lg-6 col-md-8 mb-4 apkg-pkg" data-code="{{ $val->state_code }}" style="display:none;">
               <div class="apkg-card">
                 <div class="apkg-card-head">
                   <h3>{{ @$val->name }}</h3>
@@ -225,11 +249,96 @@
 </main>
 
 <script>
-  $(document).ready(function() {
-    $(document).on("change", "#state", function () {
-      var selected = $(this).find("option:selected").val();
-      $(".all_states").fadeOut();
-      $(".state_" + selected).fadeIn();
+  // Origin data: Country -> State/City -> [{ name, code }]  (source: airport pricing sheet)
+  const APKG_ORIGINS = {
+    "USA": {
+      "New York (NY · NJ · CT)":        [{ name: "John F. Kennedy Intl", code: "JFK" }],
+      "Pennsylvania":                   [{ name: "Philadelphia Intl", code: "PHL" }],
+      "Massachusetts":                  [{ name: "Boston Logan Intl", code: "BOS" }],
+      "Illinois (IN · OH)":             [{ name: "Chicago O'Hare Intl", code: "ORD" }],
+      "Florida":                        [{ name: "Miami Intl", code: "MIA" }],
+      "Georgia":                        [{ name: "Hartsfield–Jackson Atlanta", code: "ATL" }],
+      "Texas":                          [{ name: "Dallas/Fort Worth Intl", code: "DFW" }, { name: "Houston (Hobby)", code: "HOU" }],
+      "Washington DC (DE · MD · VA)":   [{ name: "Washington Dulles Intl", code: "IAD" }],
+      "California":                     [{ name: "Los Angeles Intl", code: "LAX" }, { name: "San Francisco Intl", code: "SFO" }],
+      "Washington":                     [{ name: "Seattle–Tacoma Intl", code: "SEA" }]
+    },
+    "Canada": {
+      "Ontario":            [{ name: "Toronto Pearson Intl", code: "YYZ" }],
+      "British Columbia":   [{ name: "Vancouver Intl", code: "YVR" }]
+    },
+    "Singapore": { "Singapore":     [{ name: "Singapore Changi", code: "SIN" }] },
+    "Malaysia":  { "Kuala Lumpur":  [{ name: "Kuala Lumpur Intl", code: "KUL" }] },
+    "Germany":   { "Munich":        [{ name: "Munich Airport", code: "MUN" }],
+                   "Frankfurt":     [{ name: "Frankfurt Airport", code: "FRA" }] },
+    "Thailand":  { "Bangkok":       [{ name: "Suvarnabhumi (Bangkok)", code: "BKK" }] }
+  };
+
+  // Collect all airport codes under a country (across all its states).
+  function codesForCountry(c) {
+    var codes = [];
+    if (!c || !APKG_ORIGINS[c]) return codes;
+    Object.keys(APKG_ORIGINS[c]).forEach(function (st) {
+      APKG_ORIGINS[c][st].forEach(function (ap) { codes.push(ap.code); });
+    });
+    return codes;
+  }
+
+  // Collect airport codes under a single state.
+  function codesForState(c, st) {
+    var codes = [];
+    if (!c || !st || !APKG_ORIGINS[c] || !APKG_ORIGINS[c][st]) return codes;
+    APKG_ORIGINS[c][st].forEach(function (ap) { codes.push(ap.code); });
+    return codes;
+  }
+
+  // Show only the package cards whose code is in `codes`; empty => show none + hint.
+  function filterCards(codes) {
+    $('#apkg_cards .apkg-pkg').each(function () {
+      var code = String($(this).data('code') || '');
+      $(this).toggle(codes.indexOf(code) !== -1);
+    });
+    $('#apkg_hint').toggle(codes.length === 0);
+  }
+
+  $(function () {
+    var $country = $('#origin_country'),
+        $state   = $('#origin_state'),
+        $airport = $('#origin_airport');
+
+    Object.keys(APKG_ORIGINS).forEach(function (c) {
+      $country.append(new Option(c, c));
+    });
+
+    // Nothing chosen yet -> no cards.
+    filterCards([]);
+
+    $country.on('change', function () {
+      var c = this.value;
+      $state.html('<option value="">— Choose state —</option>').prop('disabled', !c);
+      $airport.html('<option value="">— Choose airport —</option>').prop('disabled', true);
+      if (c) {
+        Object.keys(APKG_ORIGINS[c]).forEach(function (st) {
+          $state.append(new Option(st, st));
+        });
+      }
+      filterCards(codesForCountry(c));
+    });
+
+    $state.on('change', function () {
+      var c = $country.val(), st = this.value;
+      $airport.html('<option value="">— Choose airport —</option>').prop('disabled', !st);
+      if (st) {
+        APKG_ORIGINS[c][st].forEach(function (ap) {
+          $airport.append(new Option(ap.name + ' (' + ap.code + ')', ap.code));
+        });
+      }
+      filterCards(st ? codesForState(c, st) : codesForCountry(c));
+    });
+
+    $airport.on('change', function () {
+      var code = this.value;
+      filterCards(code ? [code] : codesForState($country.val(), $state.val()));
     });
   });
 </script>

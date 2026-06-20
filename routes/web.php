@@ -102,6 +102,7 @@ Route::post('/save-info', [UserPackages::class, 'save_info'])->name('save_info')
 Route::post('/subscribe', [SubscriberController::class, 'store'])->name('subscribe');
 
 // Admin Part //
+Route::redirect('/admin', '/admin_login');
 Route::get('/admin_login',[AdminLoginController::class, 'index'])->name('admin_login');
 Route::post('/admin_login',[AdminLoginController::class, 'store']);
 Route::get('/admin_logout',[AdminLogoutController::class, 'index'])->name('admin_logout');
@@ -164,6 +165,16 @@ Route::group(['prefix' => 'admin',
     // SEO settings
     Route::get('/seo',[\App\Http\Controllers\Admin\SeoController::class, 'index'])->name('seo');
     Route::post('/seo',[\App\Http\Controllers\Admin\SeoController::class, 'update'])->name('seo_update');
+
+    // Payment settings (bank/check/cash instructions shown on the payment page)
+    Route::get('/payment-settings',[\App\Http\Controllers\Admin\PaymentSettingController::class, 'index'])->name('payment_settings');
+    Route::post('/payment-settings',[\App\Http\Controllers\Admin\PaymentSettingController::class, 'update'])->name('payment_settings_update');
+
+    // Yatri booking form — form-only download (A), PDF export (B), PDF + raw documents (C)
+    Route::get('/yatri-form/download/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'downloadForm'])->name('yatri-form-download');
+    Route::get('/yatri-form/pdf/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportPdf'])->name('yatri-form-pdf');
+    Route::get('/yatri-form/pdf-docs/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportPdfWithDocs'])->name('yatri-form-pdf-docs');
+    Route::get('/yatri-form/form-c/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportFormC'])->name('yatri-form-c'); // Form 'C' — Foreigners Registration
 
     // Newsletter subscribers
     Route::get('/subscribers',[SubscriberController::class, 'index'])->name('subscribers');

@@ -125,7 +125,7 @@
               <div id="faq1" class="collapse show" aria-labelledby="faqhead1" data-parent="#faq">
                 <div class="card-body row">
                   <input class="form-check-input" name="package_id" type="hidden" value="{{ @$id }}" id="package_1">
-                  <input type="hidden" id="selected_package_type" name="ticket_type" value="round_trip">
+                  <input type="hidden" id="selected_package_type" name="ticket_type" value="{{ @$cookie['ticket_type'] ?: 'round_trip' }}">
 
                   {{-- <h4 class="col-lg-12 text-center mt-4" style="font-size: 20px; color: #000;">Ticket Type</h4>
                   <div class="col-lg-6 form-check p-2 text-center mb-3">
@@ -188,46 +188,48 @@
                         </tr>
                       </tbody>
                     </table>
-                    <!--<table class="w-100" style="background-color: #fff;">-->
-                    <!--  <thead>-->
-                    <!--    <tr>-->
-                    <!--      <td colspan="3" class="text-center p-2"><b style="color: #fff !important;">{{ @$packages->state }} 4* Hotel package (per person)</b></td>-->
-                    <!--    </tr>-->
-                    <!--  </thead>-->
-                    <!--  <tbody>-->
-                    <!--    <tr>-->
-                    <!--      @if(!empty(@$packages->four_star_round_price))-->
-                    <!--      <td class="text-center p-2 text-dark"><b>Round trip</b></td>-->
-                    <!--      @endif-->
-                    <!--      @if(!empty(@$packages->four_star_single_price))-->
-                    <!--      <td class="text-center p-2 text-dark"><b>One Way</b></td>-->
-                    <!--      @endif-->
-                    <!--      @if(!empty(@$packages->four_star_land_price))-->
-                    <!--      <td class="text-center p-2 text-dark"><b>Land Package</b></td>-->
-                    <!--      @endif-->
-                    <!--    </tr>-->
-                    <!--    <tr>-->
-                    <!--      @if(!empty(@$packages->four_star_round_price))-->
-                    <!--      <td style="width: 33.33%;" class="text-center p-2">-->
-                    <!--        <input class="form-check-input mt-2" type="radio" name="package_type" data-type="round_trip" value="${{ @$packages->four_star_round_price }}" id="package_type_4" @if(@$cookie['package_type'] == '$'.@$packages->four_star_round_price) checked @endif>-->
-                    <!--        <label class="form-check-label package_type_4 text-dark" for="package_type_4"> ${{ @$packages->four_star_round_price }} </label>-->
-                    <!--      </td>-->
-                    <!--      @endif-->
-                    <!--      @if(!empty(@$packages->four_star_single_price))-->
-                    <!--      <td style="width: 33.33%;" class="text-center p-2">-->
-                    <!--        <input class="form-check-input mt-2" type="radio" name="package_type" data-type="one_way" value="${{ @$packages->four_star_single_price }}" id="package_type_5" @if(@$cookie['package_type'] == '$'.@$packages->four_star_single_price) checked @endif>-->
-                    <!--        <label class="form-check-label package_type_5 text-dark" for="package_type_5"> ${{ @$packages->four_star_single_price }}</label>-->
-                    <!--      </td>-->
-                    <!--      @endif-->
-                    <!--      @if(!empty(@$packages->four_star_land_price))-->
-                    <!--      <td style="width: 33.33%;" class="text-center p-2">-->
-                    <!--        <input class="form-check-input mt-2" type="radio" name="package_type" data-type="land_package" value="${{ @$packages->four_star_land_price }}" id="package_type_6" @if(@$cookie['package_type'] == '$'.@$packages->four_star_land_price) checked @endif>-->
-                    <!--        <label class="form-check-label package_type_6 text-dark" for="package_type_6"> ${{ @$packages->four_star_land_price }}</label>-->
-                    <!--      </td>-->
-                    <!--      @endif-->
-                    <!--    </tr>-->
-                    <!--  </tbody>-->
-                    <!--</table>-->
+                    @if(!empty(@$packages->four_star_round_price) || !empty(@$packages->four_star_single_price) || !empty(@$packages->four_star_land_price))
+                    <table class="w-100 mt-4" style="background-color: #fff;">
+                      <thead>
+                        <tr>
+                          <td colspan="3" class="text-center p-2"><b style="color: #fff !important;">{{ @$packages->state }} 4* Hotel package (per person)</b></td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          @if(!empty(@$packages->four_star_round_price))
+                          <td class="text-center p-2 text-dark"><b>Round trip</b></td>
+                          @endif
+                          @if(!empty(@$packages->four_star_single_price))
+                          <td class="text-center p-2 text-dark"><b>One Way</b></td>
+                          @endif
+                          @if(!empty(@$packages->four_star_land_price))
+                          <td class="text-center p-2 text-dark"><b>Land Package</b></td>
+                          @endif
+                        </tr>
+                        <tr>
+                          @if(!empty(@$packages->four_star_round_price))
+                          <td style="width: 33.33%;" class="text-center p-2">
+                            <input class="form-check-input mt-2" type="radio" name="package_type" data-type="round_trip" value="${{ @$packages->four_star_round_price }}" id="package_type_4" @if(@$cookie['package_type'] == '$'.@$packages->four_star_round_price) checked @endif>
+                            <label class="form-check-label package_type_4 text-dark" for="package_type_4"> ${{ @$packages->four_star_round_price }} </label>
+                          </td>
+                          @endif
+                          @if(!empty(@$packages->four_star_single_price))
+                          <td style="width: 33.33%;" class="text-center p-2">
+                            <input class="form-check-input mt-2" type="radio" name="package_type" data-type="one_way" value="${{ @$packages->four_star_single_price }}" id="package_type_5" @if(@$cookie['package_type'] == '$'.@$packages->four_star_single_price) checked @endif>
+                            <label class="form-check-label package_type_5 text-dark" for="package_type_5"> ${{ @$packages->four_star_single_price }}</label>
+                          </td>
+                          @endif
+                          @if(!empty(@$packages->four_star_land_price))
+                          <td style="width: 33.33%;" class="text-center p-2">
+                            <input class="form-check-input mt-2" type="radio" name="package_type" data-type="land_package" value="${{ @$packages->four_star_land_price }}" id="package_type_6" @if(@$cookie['package_type'] == '$'.@$packages->four_star_land_price) checked @endif>
+                            <label class="form-check-label package_type_6 text-dark" for="package_type_6"> ${{ @$packages->four_star_land_price }}</label>
+                          </td>
+                          @endif
+                        </tr>
+                      </tbody>
+                    </table>
+                    @endif
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Passport No <span class="text-danger">*</span></label>
@@ -239,15 +241,28 @@
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Passport Type <span class="text-danger">*</span></label>
                     <select class="form-control select2js" name="passport_type" required>
-                      <option value="Ordinary">Ordinary</option>
-                      {{-- <option value="Official">Official</option>
-                      <option value="Diplomatic">Diplomatic</option>
-                      <option value="UN Travel Document">UN Travel Document</option>
-                      <option value="UNLP">UNLP</option>
-                      <option value="Travel/Asylum/Temporary">Travel/Asylum/Temporary</option> --}}
+                      <option value="Ordinary" @if(@$cookie['passport_type'] == 'Ordinary') selected @endif>Ordinary Passport</option>
+                      <option value="Official" @if(@$cookie['passport_type'] == 'Official') selected @endif>Official Passport</option>
+                      <option value="Diplomatic" @if(@$cookie['passport_type'] == 'Diplomatic') selected @endif>Diplomatic Passport</option>
+                      <option value="Emergency Travel Document" @if(@$cookie['passport_type'] == 'Emergency Travel Document') selected @endif>Emergency Travel Document</option>
                     </select>
                     <div class="invalid-feedback">
                       Please select passport type.
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <label>Traveller Nationality <span class="text-danger">*</span></label>
+                    <select class="form-control select2js" name="nationality" required>
+                      @foreach(@$countries as $key => $val)
+                      @if(empty(@$cookie['nationality']) && @$val['nicename'] == "United States")
+                      <option value="{{ @$val['nicename'] }}" selected>{{ @$val['nicename'] }}</option>
+                      @else
+                      <option value="{{ @$val['nicename'] }}" @if(@$cookie['nationality'] == @$val['nicename']) selected @endif>{{ @$val['nicename'] }}</option>
+                      @endif
+                      @endforeach
+                    </select>
+                    <div class="invalid-feedback">
+                      Please select traveller nationality.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
@@ -349,8 +364,7 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Date of Birth <span class="text-danger">*</span></label>
-                    <input class="form-control datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="dd-mm-yyyy" value=""
-                      min="1997-01-01" max="2030-12-31" required>
+                    <input class="form-control dob-datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="dd-mm-yyyy" required>
                     <div class="invalid-feedback">
                       Please provide date of birth.
                     </div>
@@ -412,7 +426,7 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                    <label for="email" class="form-label">Primary Email Address <span class="text-danger">*</span></label>
                     <input type="email" class="form-control" name="email" value="{{ @$cookie['email'] }}" id="email" placeholder="Enter Email Address" required>
                     <div class="invalid-feedback">
                       Please provide email address.
@@ -426,7 +440,7 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label for="phone" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                    <label for="phone" class="form-label">Primary Mobile Number <span class="text-danger">*</span></label>
                     <input type="tel" class="form-control phone_us" maxlength="12" value="{{ @$cookie['phone'] }}" name="phone" placeholder="Enter mobile number" id="phone" required>
                     <div class="invalid-feedback">
                       Please provide your mobile number.
@@ -454,14 +468,14 @@
               <div id="faq3" class="collapse @if(@$cookie['next3']) show @endif" aria-labelledby="faqhead3" data-parent="#faq">
                 <div class="card-body row pt-3">
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label for="father_name" class="form-label">Father Name <span class="text-danger">*</span></label>
+                    <label for="father_name" class="form-label">Traveller's Father Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="father_name" id="father_name" placeholder="Enter Father Name" value="{{ @$cookie['father_name'] }}" onkeydown="return /[a-z ]/i.test(event.key)" required>
                     <div class="invalid-feedback">
                       Please provide father name.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label class="w-100">Nationality <span class="text-danger">*</span></label>
+                    <label class="w-100">Traveller's Father Nationality <span class="text-danger">*</span></label>
                     <select class="form-control select2js" name="father_nationality" required>
                       @foreach(@$countries as $key => $val)
                       @if(empty(@$cookie['father_nationality']) && @$val['nicename'] == "United States")
@@ -476,14 +490,14 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label for="mother_name" class="form-label">Mother Name <span class="text-danger">*</span></label>
+                    <label for="mother_name" class="form-label">Traveller's Mother Name <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="mother_name" id="mother_name" placeholder="Enter Mother Name" value="{{ @$cookie['mother_name'] }}" onkeydown="return /[a-z ]/i.test(event.key)" required>
                     <div class="invalid-feedback">
                       Please provide mother name.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label class="w-100">Nationality <span class="text-danger">*</span></label>
+                    <label class="w-100">Traveller's Mother Nationality <span class="text-danger">*</span></label>
                     <select class="form-control select2js" name="mother_nationality" required>
                       @foreach(@$countries as $key => $val)
                       @if(empty(@$cookie['mother_nationality']) && @$val['nicename'] == "United States")
@@ -556,7 +570,7 @@
               <div id="faq4" class="collapse @if(@$cookie['next4']) show @endif" aria-labelledby="faqhead4" data-parent="#faq">
                 <div class="card-body row pt-3">
                   <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                    <label for="profession" class="form-label">Profession <span class="text-danger">*</span></label>
+                    <label for="profession" class="form-label">Traveller's Profession <span class="text-danger">*</span></label>
                     <input type="text" class="form-control w-50" value="{{ @$cookie['profession'] }}" name="profession" id="profession" placeholder="Enter Profession" onkeydown="return /[a-z ]/i.test(event.key)" required>
                     <div class="invalid-feedback">
                       Please provide profession.
@@ -711,7 +725,7 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label>Name of Secretary Gurdwara</label>
+                    <label>Name of Secretary/Pardan Gurdwara</label>
                     <input class="form-control" type="text" value="{{ @$cookie['secetary_name'] }}" name="secetary_name" placeholder="Enter name of secetary gurdwara" onkeydown="return /[a-z ]/i.test(event.key)">
                     <div class="invalid-feedback">
                       Please provide name of secretary.
@@ -780,6 +794,16 @@
                     <div class="invalid-feedback">
                       Please upload valid green card.
                     </div>
+                  </div>
+
+                  <!-- Additional documents (added dynamically) -->
+                  <div class="col-12" id="extra_docs"></div>
+
+                  <div class="col-12 mb-2">
+                    <button type="button" class="btn btn-outline-secondary" id="add_more_doc">
+                      <i class="fa fa-plus"></i> Add More Documents
+                    </button>
+                    <small class="d-block text-muted mt-2">Accepted: PDF, JPG, JPEG, PNG, GIF. Images are stored as optimized WebP.</small>
                   </div>
                 </div>
               </div>
@@ -890,6 +914,11 @@ td {
         // Update the value of the hidden input field with the selected data-type
       $('#selected_package_type').val($(this).data('type'));
     });
+      // Sync the hidden ticket_type with the pre-checked price radio (carried from the detail page).
+    var $checked = $('input[name="package_type"]:checked');
+    if ($checked.length) {
+      $('#selected_package_type').val($checked.data('type'));
+    }
   });
 
 
@@ -1095,9 +1124,7 @@ td {
       $('html, body').animate({
         scrollTop: next.offset().top - 100
       }, 2000);
-      if ($("#faq6").hasClass("show")) {
-        $("#submit_btn").attr("disabled", false);
-      }
+      if (typeof refreshProceedBtn === 'function') { refreshProceedBtn(); }
         // $(this).parent().parent().parent().parent().next().find(".collapse").prev().children().removeClass("collapsed");
         // $(this).parent().parent().parent().parent().next().find(".collapse").prev().children().click();
         // $(this).parent().parent().parent().prev().children().click();
@@ -1195,5 +1222,50 @@ $(document).on('change', '.passenger_passport', function() {
   }
 });
 });
+</script>
+<script>
+  // Additional documents: add/remove rows (Name of Document + file upload).
+  $(document).ready(function () {
+    $('#add_more_doc').on('click', function () {
+      var row =
+        '<div class="row extra-doc-row mb-2 align-items-end">' +
+          '<div class="col-lg-6 col-md-6 col-sm-12 mb-2">' +
+            '<label class="form-label">Name of Document</label>' +
+            '<input class="form-control" type="text" name="doc_name[]" placeholder="e.g. Marriage Certificate, Old Visa">' +
+          '</div>' +
+          '<div class="col-lg-5 col-md-5 col-sm-10 mb-2">' +
+            '<label class="form-label">Upload Document</label>' +
+            '<input class="form-control" type="file" name="doc_file[]" accept=".pdf,.jpg,.jpeg,.png,.gif">' +
+          '</div>' +
+          '<div class="col-lg-1 col-md-1 col-sm-2 mb-2">' +
+            '<button type="button" class="btn btn-outline-danger remove-doc" title="Remove">&times;</button>' +
+          '</div>' +
+        '</div>';
+      $('#extra_docs').append(row);
+    });
+
+    $('#extra_docs').on('click', '.remove-doc', function () {
+      $(this).closest('.extra-doc-row').remove();
+    });
+  });
+
+  // Enable "Proceed to Payment" only when every mandatory field is valid
+  // AND both agreement checkboxes are checked (both are `required`, so the
+  // form's native validity already covers them along with all other required fields).
+  var refreshProceedBtn = function () {
+    var form = document.querySelector('form[action*="store-yatri-visa"]');
+    var btn = document.getElementById('submit_btn');
+    if (!form || !btn) return;
+    btn.disabled = !form.checkValidity();
+  };
+
+  $(document).ready(function () {
+    var form = document.querySelector('form[action*="store-yatri-visa"]');
+    if (form) {
+      $(form).on('input change keyup', 'input, select, textarea', refreshProceedBtn);
+      $(form).on('click', '#add_more_doc, .remove-doc', function () { setTimeout(refreshProceedBtn, 50); });
+    }
+    refreshProceedBtn();
+  });
 </script>
 @endsection

@@ -28,4 +28,8 @@ class YatriVisa extends Model
     public function bus(){
         return $this->belongsTo('App\Models\Bus', 'bus_id');
     }
+
+    public function documents(){
+        return $this->hasMany('App\Models\YatriDocument', 'yatri_visa_id');
+    }
 }

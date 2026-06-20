@@ -347,8 +347,8 @@ Theme Version:	1.0.0
 				
 				/* Set Bootstrap Drop Down */
 				var setBootstrapDropDown = function(){
-					if(!checkSelectorExistence('select')){return;}	
-					jQuery('select').selectpicker();
+					if(!checkSelectorExistence('select')){return;}
+					jQuery('select:not(.no-selectpicker):not(.select2js)').selectpicker();
 				}
 				
 				/* set Countdown */

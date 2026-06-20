@@ -46,6 +46,20 @@
                     <div class="col-12">
                         <h2 class="text-center" style="margin-top: 90px;">Thank You for the booking.</h2>
                     </div>
+                    @if(session('paylater'))
+                    @php $pl = session('paylater'); @endphp
+                    <div class="col-lg-8 offset-lg-2">
+                        <div class="p-4 mt-3" style="background:#fff4ef;border:1px solid #ffd9c9;border-radius:12px;text-align:center;">
+                            <p style="font-size:18px;margin-bottom:8px;">Your Order Number: <b style="color:#f54e18;">{{ $pl['order_no'] }}</b></p>
+                            @if(!empty($pl['email_sent']) && !empty($pl['email']))
+                            <p style="margin-bottom:8px;">Your booking and payment details have been sent to your primary email: <b>{{ $pl['email'] }}</b>.</p>
+                            @elseif(!empty($pl['email']))
+                            <p style="margin-bottom:8px;">Your booking is confirmed against <b>{{ $pl['email'] }}</b>. (We couldn't send the email right now — please contact us if you don't receive it.)</p>
+                            @endif
+                            <p style="margin-bottom:0;">This booking is valid for <b>30 days</b> for payment (pay before <b>{{ $pl['valid_until'] }}</b>).</p>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

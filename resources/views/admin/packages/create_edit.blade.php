@@ -34,6 +34,7 @@
                                             <option value="Illinois" @if(@$package->state == 'Illinois') selected @endif>Illinois</option>
                                             <option value="Indiana" @if(@$package->state == 'Indiana') selected @endif>Indiana</option>
                                             <option value="Maryland" @if(@$package->state == 'Maryland') selected @endif>Maryland</option>
+                                            <option value="Massachusetts" @if(@$package->state == 'Massachusetts') selected @endif>Massachusetts</option>
                                             <option value="Michigan" @if(@$package->state == 'Michigan') selected @endif>Michigan</option>
                                             <option value="New Jersey" @if(@$package->state == 'New Jersey') selected @endif>New Jersey</option>
                                             <option value="New York" @if(@$package->state == 'New York') selected @endif>New York</option>
@@ -42,6 +43,15 @@
                                             <option value="Texas" @if(@$package->state == 'Texas') selected @endif>Texas</option>
                                             <option value="Virginia" @if(@$package->state == 'Virginia') selected @endif>Virginia</option>
                                             <option value="Washington DC" @if(@$package->state == 'Washington DC') selected @endif>Washington DC</option>
+                                            <option value="Washington" @if(@$package->state == 'Washington') selected @endif>Washington (State)</option>
+                                            <optgroup label="International / Other Origins">
+                                                <option value="Ontario, Canada" @if(@$package->state == 'Ontario, Canada') selected @endif>Ontario, Canada</option>
+                                                <option value="British Columbia, Canada" @if(@$package->state == 'British Columbia, Canada') selected @endif>British Columbia, Canada</option>
+                                                <option value="Singapore" @if(@$package->state == 'Singapore') selected @endif>Singapore</option>
+                                                <option value="Malaysia" @if(@$package->state == 'Malaysia') selected @endif>Malaysia</option>
+                                                <option value="Germany" @if(@$package->state == 'Germany') selected @endif>Germany</option>
+                                                <option value="Thailand" @if(@$package->state == 'Thailand') selected @endif>Thailand</option>
+                                            </optgroup>
                                         </select>
                                         {{-- <input type="text" class="form-control require" id="state" name="state" value="{{ @$package->state }}" required /> --}}
                                     </div>

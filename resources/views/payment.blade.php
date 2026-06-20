@@ -15,6 +15,14 @@
     form button:hover {
         background-color: #000 !important;
     }
+    .pay-card-head {
+        background: #f54e18;
+        color: #fff;
+        font-weight: 700;
+        margin: -1.25rem -1.25rem 1rem;
+        padding: 14px 20px;
+        border-radius: 12px 12px 0 0;
+    }
 </style>
 
 <!-- Content -->
@@ -69,47 +77,127 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Amount due (taken from the selected package price) -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="p-3" style="background:#fff4ef;border:1px solid #ffd9c9;border-radius:12px;">
+                                    <span style="font-size:18px;color:#1c2541;font-weight:600;">Amount Due (per person): </span>
+                                    <span style="font-size:24px;font-weight:800;color:#f54e18;">${{ number_format(@$amount) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="amount" value="{{ @$amount }}">
+
+                        @php $payEmpty = '<span class="text-muted">Payment details will be shared shortly. Please call (718) 908-9464.</span>'; @endphp
+
+                        <!-- Bank Wire Transfer -->
                         <div class="row my-3" id="wire_transfer_div">
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label>Routing Number <span class="text-danger">*</span></label>
-                                <input class="form-control" type="text" name="routing_number" id="routing_number" placeholder="Enter Routing Number">
-                                <div class="invalid-feedback">
-                                    Please provide routing number.
-                                </div>
-                            </div>
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label>Account Number <span class="text-danger">*</span></label>
-                                <input class="form-control" type="text" name="account_number" id="account_number" placeholder="Enter Account Number">
-                                <div class="invalid-feedback">
-                                    Please provide account number.
-                                </div>
-                            </div>
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label>Amount <span class="text-danger">*</span></label>
-                                <input class="form-control" type="number" name="amount" id="amount" placeholder="Enter Amount">
-                                <div class="invalid-feedback">
-                                    Please provide amount.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row my-3" id="check_div" style="display: none;">
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label>Check Number <span class="text-danger">*</span></label>
-                                <input class="form-control" type="text" name="check_number" id="check_number" placeholder="Enter Check Number">
-                                <div class="invalid-feedback">
-                                    Please provide check number.
-                                </div>
-                            </div>
-                            <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                <label>Date of Check <span class="text-danger">*</span></label>
-                                <input class="form-control" type="date" name="date_of_check" id="date_of_check">
-                                <div class="invalid-feedback">
-                                    Please provide account number.
+                            <div class="col-12">
+                                <div class="card" style="border:1px solid #eef0f4;border-radius:12px;">
+                                    <div class="card-body">
+                                        <h5 class="pay-card-head"><i class="fas fa-building-columns"></i> Bank Wire Transfer Details</h5>
+                                        @if(!empty(@$pay['bank_name']) || !empty(@$pay['bank_account']))
+                                        <table class="w-100" style="border:0;">
+                                            @if(!empty(@$pay['bank_name']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Bank Name</b></td><td style="border:0;text-align:left;">{{ $pay['bank_name'] }}</td></tr>@endif
+                                            @if(!empty(@$pay['bank_title']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Title</b></td><td style="border:0;text-align:left;">{{ $pay['bank_title'] }}</td></tr>@endif
+                                            @if(!empty(@$pay['bank_routing']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Routing Number</b></td><td style="border:0;text-align:left;">{{ $pay['bank_routing'] }}</td></tr>@endif
+                                            @if(!empty(@$pay['bank_account']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Number</b></td><td style="border:0;text-align:left;">{{ $pay['bank_account'] }}</td></tr>@endif
+                                            <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
+                                        </table>
+                                        @if(!empty(@$pay['bank_note']))<p class="mt-2 mb-0 text-muted">{!! nl2br(e($pay['bank_note'])) !!}</p>@endif
+                                        @else
+                                        {!! $payEmpty !!}
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Check -->
+                        <div class="row my-3" id="check_div" style="display:none;">
+                            <div class="col-12">
+                                <div class="card" style="border:1px solid #eef0f4;border-radius:12px;">
+                                    <div class="card-body">
+                                        <h5 class="pay-card-head"><i class="fas fa-money-check"></i> Pay by Check</h5>
+                                        @if(!empty(@$pay['check_payable_to']) || !empty(@$pay['check_address']))
+                                        <table class="w-100" style="border:0;">
+                                            @if(!empty(@$pay['check_payable_to']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Make Check Payable To</b></td><td style="border:0;text-align:left;">{{ $pay['check_payable_to'] }}</td></tr>@endif
+                                            @if(!empty(@$pay['check_account']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Number</b></td><td style="border:0;text-align:left;">{{ $pay['check_account'] }}</td></tr>@endif
+                                            @if(!empty(@$pay['check_address']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;vertical-align:top;"><b>Mail To</b></td><td style="border:0;text-align:left;">{!! nl2br(e($pay['check_address'])) !!}</td></tr>@endif
+                                            <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
+                                        </table>
+                                        @if(!empty(@$pay['check_note']))<p class="mt-2 text-muted">{!! nl2br(e($pay['check_note'])) !!}</p>@endif
+                                        @else
+                                        {!! $payEmpty !!}
+                                        @endif
+                                        <div class="row mt-3">
+                                            <div class="col-lg-6 mb-2">
+                                                <label>Check Number <span class="text-muted">(optional)</span></label>
+                                                <input class="form-control" type="text" name="check_number" id="check_number" placeholder="Enter Check Number">
+                                            </div>
+                                            <div class="col-lg-6 mb-2">
+                                                <label>Date of Check <span class="text-muted">(optional)</span></label>
+                                                <input class="form-control" type="date" name="date_of_check" id="date_of_check">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash -->
+                        <div class="row my-3" id="cash_div" style="display:none;">
+                            <div class="col-12">
+                                <div class="card" style="border:1px solid #eef0f4;border-radius:12px;">
+                                    <div class="card-body">
+                                        <h5 class="pay-card-head"><i class="fas fa-money-bill-wave"></i> Pay by Cash — Visit Our Office</h5>
+                                        @if(!empty(@$pay['cash_address']))
+                                        @php
+                                            $cashAddr = $pay['cash_address'];
+                                            $mapEmbed = 'https://www.google.com/maps?q=' . urlencode($cashAddr) . '&output=embed';
+                                            $mapLink  = !empty($pay['cash_map_url']) ? $pay['cash_map_url'] : ('https://www.google.com/maps/search/?api=1&query=' . urlencode($cashAddr));
+                                        @endphp
+                                        <div class="row">
+                                            <div class="col-lg-6 col-md-6">
+                                                <p class="mb-1"><b>Office Address:</b></p>
+                                                <p class="mb-2">{!! nl2br(e($cashAddr)) !!}</p>
+                                                @if(!empty(@$pay['cash_note']))<p class="text-muted mb-2">{!! nl2br(e($pay['cash_note'])) !!}</p>@endif
+                                                <p class="mb-3"><b>Amount:</b> <b style="color:#f54e18;">${{ number_format(@$amount) }}</b></p>
+                                                <a href="{{ $mapLink }}" target="_blank" rel="noopener" class="btn" style="background-color:#f54e18;color:#fff;border-radius:30px;">
+                                                    <i class="fas fa-location-arrow"></i> Get Directions on Google Maps
+                                                </a>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 mt-3 mt-md-0">
+                                                <a href="{{ $mapLink }}" target="_blank" rel="noopener" title="Open in Google Maps">
+                                                    <iframe src="{{ $mapEmbed }}" width="100%" height="240" style="border:0;border-radius:12px;pointer-events:none;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        @else
+                                        {!! $payEmpty !!}
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pay Later -->
                         <div class="row my-3" id="note" style="display: none;">
-                            <p class="col-lg-12 col-md-12 col-sm-12 mb-3"><b>Note: </b>You have to pay this amount until <b>1 MONTH</b> of this yatra. Otherwise your booking will be <span style="color: red;">FAILED!</span></p>
+                            <div class="col-12">
+                                <div class="card" style="border:1px solid #eef0f4;border-radius:12px;">
+                                    <div class="card-body">
+                                        <h5 class="pay-card-head"><i class="fas fa-clock"></i> Pay Later</h5>
+                                        @if(!empty(@$order_no))
+                                        <p class="mb-2"><b>Your Order Number:</b> <b style="color:#f54e18;">{{ $order_no }}</b></p>
+                                        @endif
+                                        <p class="mb-2"><b>Amount:</b> <b style="color:#f54e18;">${{ number_format(@$amount) }}</b></p>
+                                        @if(!empty(@$yatri_visa->email))
+                                        <p class="mb-2">On submitting, your booking and payment instructions will be sent to your primary email: <b>{{ $yatri_visa->email }}</b>.</p>
+                                        @endif
+                                        <p class="mb-0"><b>Note:</b> This booking is valid for <b>30 days</b> (pay before <b>{{ @$valid_until }}</b>). Otherwise your booking will be <span style="color: red;">CANCELLED!</span></p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-12 d-flex justify-content-center pt-3">
@@ -290,41 +378,15 @@
         });
 
         $(document).on("click", ".payment_type", function () {
-            if ($(this).val() == "Bank Wire Transfer") {
-                $("#routing_number").attr("required", true);
-                $("#account_number").attr("required", true);
-                $("#amount").attr("required", true);
-                $("#check_number").attr("required", false);
-                $("#date_of_check").attr("required", false);
-                $("#check_div").fadeOut();
+            var v = $(this).val();
+            $("#wire_transfer_div, #check_div, #cash_div, #note").hide();
+            if (v == "Bank Wire Transfer") {
                 $("#wire_transfer_div").fadeIn();
-                $("#note").fadeOut();
-            } else if ($(this).val() == "Check") {
-                $("#routing_number").attr("required", false);
-                $("#account_number").attr("required", false);
-                $("#amount").attr("required", false);
-                $("#check_number").attr("required", true);
-                $("#date_of_check").attr("required", true);
+            } else if (v == "Check") {
                 $("#check_div").fadeIn();
-                $("#wire_transfer_div").fadeOut();
-                $("#note").fadeOut();
-            } else if ($(this).val() == "Cash") {
-                $("#routing_number").attr("required", false);
-                $("#account_number").attr("required", false);
-                $("#amount").attr("required", false);
-                $("#check_number").attr("required", false);
-                $("#date_of_check").attr("required", false);
-                $("#check_div").fadeOut();
-                $("#wire_transfer_div").fadeOut();
-                $("#note").fadeOut();
+            } else if (v == "Cash") {
+                $("#cash_div").fadeIn();
             } else {
-                $("#routing_number").attr("required", false);
-                $("#account_number").attr("required", false);
-                $("#amount").attr("required", false);
-                $("#check_number").attr("required", false);
-                $("#date_of_check").attr("required", false);
-                $("#check_div").fadeOut();
-                $("#wire_transfer_div").fadeOut();
                 $("#note").fadeIn();
             }
         });

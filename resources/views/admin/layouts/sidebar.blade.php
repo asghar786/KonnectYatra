@@ -44,7 +44,7 @@
                 </li>
 
                 <!-- Bookings & Yatris -->
-                @php $open = $groupOpen([route('yatri-visa'), route('visa'), route('ids'), route('airline-list'), route('itenaries'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
+                @php $open = $groupOpen([route('yatri-visa'), url('admin/booking-detail'), route('visa'), route('ids'), route('airline-list'), route('itenaries'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-users text-success"></i></span>
@@ -52,7 +52,7 @@
                         <span class="ttr-arrow-icon"><i class="fa fa-angle-down"></i></span>
                     </a>
                     <ul @if($open) style="display:block;" @endif>
-                        <li class="{{ $isCur(route('yatri-visa')) ? 'show' : '' }}"><a href="{{route('yatri-visa')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-success"></i></span><span class="ttr-label">Yatri Bookings</span></a></li>
+                        <li class="{{ $isCur(route('yatri-visa')) || $isCur(url('admin/booking-detail')) ? 'show' : '' }}"><a href="{{route('yatri-visa')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-success"></i></span><span class="ttr-label">Yatri Bookings</span></a></li>
                         <li class="{{ $isCur(route('visa')) ? 'show' : '' }}"><a href="{{route('visa')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user-group text-warning"></i></span><span class="ttr-label">Visa List</span></a></li>
                         <li class="{{ $isCur(route('ids')) ? 'show' : '' }}"><a href="{{route('ids')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-id-card text-info"></i></span><span class="ttr-label">Yatri IDs</span></a></li>
                         <li class="{{ $isCur(route('airline-list')) ? 'show' : '' }}"><a href="{{route('airline-list')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-bars text-success"></i></span><span class="ttr-label">Airline List</span></a></li>
@@ -116,7 +116,7 @@
                 </li>
 
                 <!-- Settings -->
-                @php $open = $groupOpen([url('admin/users'), url('/admin/profile'), route('integrations'), route('subscribers'), route('seo')]); @endphp
+                @php $open = $groupOpen([url('admin/users'), url('/admin/profile'), route('integrations'), route('subscribers'), route('seo'), route('payment_settings')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-cog text-secondary"></i></span>
@@ -127,6 +127,7 @@
                         <li class="{{ $isCur(url('admin/users')) ? 'show' : '' }}"><a href="{{url('admin/users')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-dark"></i></span><span class="ttr-label">Users</span></a></li>
                         <li class="{{ $isCur(route('integrations')) ? 'show' : '' }}"><a href="{{ route('integrations') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-plug text-info"></i></span><span class="ttr-label">Integrations</span></a></li>
                         <li class="{{ $isCur(route('seo')) ? 'show' : '' }}"><a href="{{ route('seo') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-magnifying-glass-chart text-success"></i></span><span class="ttr-label">SEO Settings</span></a></li>
+                        <li class="{{ $isCur(route('payment_settings')) ? 'show' : '' }}"><a href="{{ route('payment_settings') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-money-check-dollar text-success"></i></span><span class="ttr-label">Payment Settings</span></a></li>
                         <li class="{{ $isCur(route('subscribers')) ? 'show' : '' }}"><a href="{{ route('subscribers') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-envelope text-success"></i></span><span class="ttr-label">Subscribers</span></a></li>
                         <li class="{{ $isCur(url('/admin/profile')) ? 'show' : '' }}"><a href="{{ url('/admin/profile') }}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-warning"></i></span><span class="ttr-label">My Profile</span></a></li>
                     </ul>

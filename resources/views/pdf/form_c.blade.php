@@ -1,0 +1,102 @@
+@php
+    // Fill-in helper: shows the value over an underline, or a blank underline if empty.
+    $fill = function ($val, $minWidth = 60) {
+        $val = ($val !== null && $val !== '') ? e($val) : '';
+        return '<span class="fl" style="min-width:' . $minWidth . 'px">' . $val . '</span>';
+    };
+
+    $fullName = trim(($yatri->first_name ?? '') . ' ' . ($yatri->middle_name ?? '') . ' ' . ($yatri->last_name ?? ''));
+    $nationality = $yatri->nationality ?: $yatri->passport_country;
+    $passportNo  = $yatri->passport;
+    $issuedAt    = $yatri->issuing_authority ?: $yatri->passport_country;
+    $year        = now()->format('Y');
+
+    // Residential address in Pakistan = hotel (fall back to gurdwara / city).
+    $hotelName = optional($yatri->hotel)->name;
+    $residence = $hotelName ?: ($yatri->gurdwara->gurdwara_name ?? $yatri->gurdwara_name ?? '');
+    $address   = optional($yatri->hotel)->address ?: trim(($yatri->city ?? '') . ' ' . ($yatri->state ?? ''));
+@endphp
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page { margin: 70px 60px; }
+    * { box-sizing: border-box; }
+    body { font-family: "DejaVu Serif", Georgia, "Times New Roman", serif; color: #000; font-size: 12.5px; line-height: 1.9; }
+    .center { text-align: center; }
+    .title { font-weight: bold; font-size: 15px; }
+    .sub   { font-size: 12.5px; }
+    p { margin: 0 0 4px; }
+    .block { text-align: justify; }
+    .para  { margin-top: 14px; text-align: justify; }
+    ul.notes { margin: 10px 0 0; padding-left: 22px; }
+    ul.notes li { text-align: justify; margin-bottom: 8px; }
+    /* Inline fill-in: value sits on an underline */
+    .fl { display: inline-block; border-bottom: 1px solid #000; text-align: center;
+          padding: 0 4px; line-height: 1.2; font-weight: bold; }
+    .sign { margin-top: 60px; }
+    .sign .line { border-top: 1px solid #000; width: 280px; padding-top: 3px; }
+    .ml { display: inline-block; min-width: 200px; border-bottom: 1px solid #000; }
+    u { text-decoration: underline; }
+    .footer { position: fixed; bottom: -48px; left: 0; right: 0; text-align: center;
+              font-size: 8px; color: #555; font-family: Arial, sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="center">
+    <p class="title">Form &lsquo;C&rsquo;</p>
+    <p class="sub">The Registration of Foreigners Rules, 1966 (See rule)</p>
+    <p class="sub">Temporary Certificate of Registration</p>
+    <p class="sub">Serial No.<span class="fl" style="min-width:80px">&nbsp;</span>/{{ $year }}</p>
+</div>
+
+<div class="block" style="margin-top:22px;">
+    <p>Miss /Mr. {!! $fill($fullName, 300) !!} Foreigner of {!! $fill($nationality, 150) !!}</p>
+    <p>Nationality holding Passport No. {!! $fill($passportNo, 150) !!} issued at {!! $fill($issuedAt, 200) !!}</p>
+    <p>Arrived Pakistan on {!! $fill('', 90) !!}, {{ $year }} by flight No.{!! $fill('', 100) !!}(Mode of transport) is proceeding to</p>
+    <p>{!! $fill('ISLAMABAD', 150) !!} where her/his residential address would be:{!! $fill($residence, 160) !!}</p>
+    <p>{!! $fill('', 200) !!}Address:{!! $fill($address, 320) !!}</p>
+</div>
+
+<p class="para">
+    She/he has been temporarily registered at <u>IIAP ISLAMABAD FIA CHECK POST</u>, <u>IIAP ISB.</u>, and is
+    directed to report (place of arrival) the Registration Officer at <u>DPO/CPO OFFICE</u> as soon as possible after
+    his / her arrival at the place of stay but within <u>24hrs / 07</u> days of the date of issue of her / his certificate of
+    the purpose of receiving her / his certificate of Registration in part-II of from &ldquo;B&rdquo;.
+</p>
+
+<ul class="notes">
+    <li>For a period of <u>24hrs / 07</u> days from the date of issue of this certificate or until the report
+        prescribed above has been made whichever, is less, this Form will be deemed to be a
+        Certificate of Registration Officer, Magistrate or Police Officer not below the rank of Head
+        Constable.</li>
+    <li>If for any reason the report prescribed in the paragraph (1) cannot be made within 24hrs /07
+        days as required by paragraph (2) above, the holder of this from is directed to report in person
+        at the office of the undersigned or the nearest Registration Office and to comply with such
+        direction as to Registration as may then be given.</li>
+    <li>The contents of this Form have been explained to the holder, thereof.</li>
+</ul>
+
+<table class="sign" style="width:100%; border-collapse:collapse;">
+    <tr>
+        <td style="width:50%; vertical-align:bottom;">
+            <p>Place:&nbsp;&nbsp;Islamabad International Airport</p>
+            <p style="margin-top:18px;">Dated:&nbsp;<span class="ml">&nbsp;</span></p>
+        </td>
+        <td style="width:50%; vertical-align:bottom; text-align:left;">
+            <div class="line">Seal &amp; Signature of Registration Officer</div>
+        </td>
+    </tr>
+</table>
+
+<div class="footer">
+    Generated by KONNECT.US INC. — Booking ID {{ $yatri->yatri_id }} · This is a system-generated draft of Form &lsquo;C&rsquo;.
+</div>
+
+@if(!empty($autoprint))
+<script>window.onload = function () { window.print(); };</script>
+@endif
+</body>
+</html>

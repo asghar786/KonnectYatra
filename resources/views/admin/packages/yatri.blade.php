@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 @section('content')
 <style type="text/css">
-    .yt-card{background:#fff;border:1px solid #eef0f4;border-radius:16px;box-shadow:0 8px 28px rgba(28,37,65,.07);overflow:hidden;padding:8px}
+    .yt-card{background:#fff;border:1px solid #eef0f4;border-radius:16px;box-shadow:0 8px 28px rgba(28,37,65,.07);overflow:visible;padding:8px}
     #myTables{width:100%;border-collapse:separate;border-spacing:0}
     #myTables thead th{background:#1f2a44;color:#fff;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:14px 14px;border:0;white-space:nowrap}
     #myTables tbody td{padding:13px 14px;font-size:13.5px;color:#2c3446;border-bottom:1px solid #f0f2f6;vertical-align:middle}
@@ -93,7 +93,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button class="yt-action-btn dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <button class="yt-action-btn dropdown-toggle" type="button" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
                                         <i class="fa fa-bolt"></i> Action
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-right yt-menu">

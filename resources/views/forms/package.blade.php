@@ -70,60 +70,80 @@
                 </thead>
                 <tbody>
                   <tr>
-                    @if(!empty(@$packages->five_star_single_price))                          
+                    @if(!empty(@$packages->five_star_round_price))
                     <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>Round trip</b></td>
                     @endif
-                    @if(!empty(@$packages->five_star_round_price))                          
+                    @if(!empty(@$packages->five_star_single_price))
                     <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>One Way</b></td>
                     @endif
-                    @if(!empty(@$packages->five_star_land_price))                          
+                    @if(!empty(@$packages->five_star_land_price))
                     <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>Land Package</b></td>
                     @endif
                   </tr>
                   <tr>
-                    @if(!empty(@$packages->five_star_round_price))                          
-                    <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>${{ @$packages->five_star_round_price }}</b></td>
+                    @if(!empty(@$packages->five_star_round_price))
+                    <td style="width: 33.33%;" class="text-center p-2">
+                      <input class="form-check-input pkg-opt" type="radio" name="package_type" id="opt_5_rt" value="${{ @$packages->five_star_round_price }}" data-type="round_trip">
+                      <label class="form-check-label text-dark" for="opt_5_rt" style="cursor:pointer;"><b>${{ @$packages->five_star_round_price }}</b></label>
+                    </td>
                     @endif
-                    @if(!empty(@$packages->five_star_single_price))                          
-                    <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>${{ @$packages->five_star_single_price }}</b></td>
+                    @if(!empty(@$packages->five_star_single_price))
+                    <td style="width: 33.33%;" class="text-center p-2">
+                      <input class="form-check-input pkg-opt" type="radio" name="package_type" id="opt_5_ow" value="${{ @$packages->five_star_single_price }}" data-type="one_way">
+                      <label class="form-check-label text-dark" for="opt_5_ow" style="cursor:pointer;"><b>${{ @$packages->five_star_single_price }}</b></label>
+                    </td>
                     @endif
                     @if(!empty(@$packages->five_star_land_price))
-                    <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>${{ @$packages->five_star_land_price }}</b></td>
+                    <td style="width: 33.33%;" class="text-center p-2">
+                      <input class="form-check-input pkg-opt" type="radio" name="package_type" id="opt_5_land" value="${{ @$packages->five_star_land_price }}" data-type="land_package">
+                      <label class="form-check-label text-dark" for="opt_5_land" style="cursor:pointer;"><b>${{ @$packages->five_star_land_price }}</b></label>
+                    </td>
                     @endif
                   </tr>
                 </tbody>
               </table>
-              <!--<table class="w-100" style="background-color: #fff;">-->
-              <!--  <thead>-->
-              <!--    <tr>-->
-              <!--      <td colspan="3" class="text-center p-2"><b style="color: #fff;">{{ @$packages->state }} 4* Hotel package (per person)</b></td>-->
-              <!--    </tr>-->
-              <!--  </thead>-->
-              <!--  <tbody>-->
-              <!--    <tr>-->
-              <!--      @if(!empty(@$packages->four_star_round_price ))-->
-              <!--      <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>Round trip</b></td>-->
-              <!--      @endif-->
-              <!--      @if(!empty(@$packages->four_star_single_price ))-->
-              <!--      <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>One Way</b></td>-->
-              <!--      @endif-->
-              <!--      @if(!empty(@$packages->four_star_land_price ))-->
-              <!--      <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>Land Package</b></td>-->
-              <!--      @endif-->
-              <!--    </tr>-->
-              <!--    <tr>-->
-              <!--      @if(!empty(@$packages->four_star_round_price ))-->
-              <!--      <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>${{ @$packages->four_star_round_price }}</b></td>-->
-              <!--      @endif-->
-              <!--      @if(!empty(@$packages->four_star_single_price ))-->
-              <!--      <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>${{ @$packages->four_star_single_price }}</b></td>-->
-              <!--      @endif-->
-              <!--      @if(!empty(@$packages->four_star_land_price ))-->
-              <!--      <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>${{ @$packages->four_star_land_price }}</b></td>-->
-              <!--      @endif-->
-              <!--    </tr>-->
-              <!--  </tbody>-->
-              <!--</table>-->
+              @if(!empty(@$packages->four_star_round_price) || !empty(@$packages->four_star_single_price) || !empty(@$packages->four_star_land_price))
+              <table class="w-100 mt-4" style="background-color: #fff;">
+                <thead>
+                  <tr>
+                    <td colspan="3" class="text-center p-2"><b style="color: #fff;">{{ @$packages->state }} 4* Hotel package (per person)</b></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    @if(!empty(@$packages->four_star_round_price))
+                    <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>Round trip</b></td>
+                    @endif
+                    @if(!empty(@$packages->four_star_single_price))
+                    <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>One Way</b></td>
+                    @endif
+                    @if(!empty(@$packages->four_star_land_price))
+                    <td style="width: 33.33%;" class="text-center p-2 text-dark"><b>Land Package</b></td>
+                    @endif
+                  </tr>
+                  <tr>
+                    @if(!empty(@$packages->four_star_round_price))
+                    <td style="width: 33.33%;" class="text-center p-2">
+                      <input class="form-check-input pkg-opt" type="radio" name="package_type" id="opt_4_rt" value="${{ @$packages->four_star_round_price }}" data-type="round_trip">
+                      <label class="form-check-label text-dark" for="opt_4_rt" style="cursor:pointer;"><b>${{ @$packages->four_star_round_price }}</b></label>
+                    </td>
+                    @endif
+                    @if(!empty(@$packages->four_star_single_price))
+                    <td style="width: 33.33%;" class="text-center p-2">
+                      <input class="form-check-input pkg-opt" type="radio" name="package_type" id="opt_4_ow" value="${{ @$packages->four_star_single_price }}" data-type="one_way">
+                      <label class="form-check-label text-dark" for="opt_4_ow" style="cursor:pointer;"><b>${{ @$packages->four_star_single_price }}</b></label>
+                    </td>
+                    @endif
+                    @if(!empty(@$packages->four_star_land_price))
+                    <td style="width: 33.33%;" class="text-center p-2">
+                      <input class="form-check-input pkg-opt" type="radio" name="package_type" id="opt_4_land" value="${{ @$packages->four_star_land_price }}" data-type="land_package">
+                      <label class="form-check-label text-dark" for="opt_4_land" style="cursor:pointer;"><b>${{ @$packages->four_star_land_price }}</b></label>
+                    </td>
+                    @endif
+                  </tr>
+                </tbody>
+              </table>
+              @endif
             </div>
               {{-- <div class="col-lg-12 col-md-12 col-sm-12 text-center mb-3">
                 <div class="form-check">
@@ -174,7 +194,7 @@
                   <p><b>Documents needed:</b> Copy of Valid Passport, Copy of Driver’s License or State ID and 1 Photographs</p>
                 </div>
                 <div class="mb-3 text-center" style="margin-top:50px !important;">
-                  <a href="{{ url("all-packages/".@$id."/apply") }}" class="button-text width-6 px-5 py-3 btn-slider1">Book Now</a>
+                  <a href="{{ url("all-packages/".@$id."/apply") }}" id="detail_book_now" class="button-text width-6 px-5 py-3 btn-slider1">Book Now</a>
                 </div>
               </div>
 
@@ -193,7 +213,15 @@
               </div> --}}
 
               <div class="col-4">
-                <img src="{{ asset("assets/flyers/".@$packages->image) }}" style="width: 100%; height: 450px; border-radius: 30px;">
+                @if(!empty(@$packages->image))
+                <div id="brochureZoom" style="position:relative; cursor:zoom-in;" data-toggle="modal" data-target="#brochureModal">
+                  <img id="brochureImg" src="{{ asset("assets/flyers/".@$packages->image) }}" style="width: 100%; height: auto; border-radius: 30px; display:block;">
+                  <span id="brochureLens" class="brochure-lens"></span>
+                  <span style="position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,.6); color:#fff; padding:6px 12px; border-radius:20px; font-size:13px; pointer-events:none;">
+                    <i class="fa fa-search-plus"></i> Click to zoom
+                  </span>
+                </div>
+                @endif
               </div>
             </div>
           </div>
@@ -203,7 +231,38 @@
     <!-- inner page banner END -->
   </div>
   <!-- Content END-->
+
+  @if(!empty(@$packages->image))
+  <!-- Brochure zoom modal -->
+  <div class="modal fade" id="brochureModal" tabindex="-1" role="dialog" aria-labelledby="brochureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content" style="background:transparent; border:0;">
+        <div class="modal-header border-0 p-1" style="background:transparent;">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:#fff; opacity:1; text-shadow:0 1px 4px rgba(0,0,0,.6); font-size:34px;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center p-0">
+          <img src="{{ asset("assets/flyers/".@$packages->image) }}" alt="{{ @$packages->name }}" style="max-width:100%; max-height:80vh; height:auto; border-radius:10px; box-shadow:0 10px 40px rgba(0,0,0,.4);">
+        </div>
+      </div>
+    </div>
+  </div>
+  @endif
+
   <style>
+    .brochure-lens {
+      display: none;
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 0 14px rgba(0, 0, 0, .45);
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 5;
+    }
     table {
       border: 1px solid black;
       height: auto;
@@ -250,61 +309,50 @@
     })();
   </script>
   <script>
-    $(document).ready(function() {
-      // Attach click event listener to each checkbox
-      $("#package_1, #package_2, #package_3").click(function() {
-        // If a checkbox is checked, enable the other two
-        if ($(this).is(":checked")) {
-          $("#package_1, #package_2, #package_3").not(this).prop("disabled", true);
+    $(document).ready(function () {
+      var base = "{{ url('all-packages/'.@$id.'/apply') }}";
+
+      // Carry the chosen tier/ticket type to the apply page via the Book Now link.
+      function updateBookNow() {
+        var $sel = $('input[name="package_type"]:checked');
+        var price = $sel.val() || '';        // e.g. "$3050"
+        var type  = $sel.data('type') || ''; // round_trip | one_way | land_package
+        var url = base + '?package_type=' + encodeURIComponent(price) + '&ticket_type=' + encodeURIComponent(type);
+        $('#detail_book_now').attr('href', url);
+      }
+
+      // Default to the first available option.
+      if (!$('input[name="package_type"]:checked').length) {
+        $('input[name="package_type"]').first().prop('checked', true);
+      }
+      updateBookNow();
+      $('input[name="package_type"]').on('change', updateBookNow);
+
+      // Magnifier lens: show a zoomed circle of the brochure under the cursor.
+      (function () {
+        var box  = document.getElementById('brochureZoom');
+        var img  = document.getElementById('brochureImg');
+        var lens = document.getElementById('brochureLens');
+        if (!box || !img || !lens) return;
+        var ZOOM = 2.5;
+
+        function move(e) {
+          var rect = img.getBoundingClientRect();
+          var x = e.clientX - rect.left;
+          var y = e.clientY - rect.top;
+          if (x < 0 || y < 0 || x > rect.width || y > rect.height) { lens.style.display = 'none'; return; }
+          var lensSize = lens.offsetWidth || 170;
+          lens.style.display = 'block';
+          lens.style.backgroundImage = "url('" + img.src + "')";
+          lens.style.backgroundSize = (rect.width * ZOOM) + 'px ' + (rect.height * ZOOM) + 'px';
+          lens.style.backgroundPosition = '-' + (x * ZOOM - lensSize / 2) + 'px -' + (y * ZOOM - lensSize / 2) + 'px';
+          lens.style.left = (x - lensSize / 2) + 'px';
+          lens.style.top  = (y - lensSize / 2) + 'px';
         }
-        // If a checkbox is unchecked, enable the other two
-        else {
-          $("#package_1, #package_2, #package_3").prop("disabled", false);
-        }
-      });
-    });
-  </script>
-  <script>
-    // Add event listeners to all the package checkboxes
-    $("input[type='checkbox']").change(function() {
-      var checked = $(this).is(":checked");
-      var container = $(this).closest(".col-lg-4");
-      container.find("input[type='radio']").prop("disabled", !checked);
-      container.find("input[type='radio']").prop("required", true);
-    });
-  </script>
-  <script>
-    $(document).ready(function() {
-      // Attach click event listener to radio buttons
-      $('input[name="first_visit"]').on('click', function() {
-        // If yes is selected, show the div
-        if ($(this).val() === 'yes') {
-          $('#previous-visit').prop('required', false);
-          $('#entry-port').prop('required', false);
-          $('#first-visit').hide();
-        }
-        // If no is selected, hide the div
-        else {
-          $('#previous-visit').prop('required', true);
-          $('#entry-port').prop('required', true);
-          $('#first-visit').show();
-        }
-      });
-    });
-  </script>
-  <script>
-    $(document).ready(function() {
-      // Attach click event listener to radio buttons
-      $('input[name="us_passport"]').on('click', function() {
-        // If yes is selected, show the div
-        if ($(this).val() === 'yes') {
-          $('#green-card').prop('required', true);
-        }
-        // If no is selected, hide the div
-        else {
-          $('#green-card').prop('required', false);
-        }
-      });
+
+        box.addEventListener('mousemove', move);
+        box.addEventListener('mouseleave', function () { lens.style.display = 'none'; });
+      })();
     });
   </script>
   @endsection

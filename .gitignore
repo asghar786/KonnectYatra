@@ -17,3 +17,7 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+# Local DB dumps / error scratch files — never commit
+*_live.sql
+konnectyatra_live.sql
+dump_err.txt

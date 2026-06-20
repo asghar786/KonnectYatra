@@ -136,7 +136,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"></script>
 <script>
   $( function() {
-    $( ".datepicker" ).datepicker({ dateFormat: 'd M yy' });
+    $( ".datepicker:not(.dob-datepicker)" ).datepicker({
+        dateFormat: 'd M yy',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '1950:+15'
+    });
+    // Date of Birth: month/year dropdowns, back to 1920, no future dates.
+    $( ".dob-datepicker" ).datepicker({
+        dateFormat: 'd M yy',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '1920:' + new Date().getFullYear(),
+        maxDate: 0,
+        defaultDate: '-25y'
+    });
   } );
   </script>
 <script>
@@ -247,7 +261,7 @@
 {{-- <script src="{{asset('assets/vendors/masonry/masonry.js')}}"></script> --}}
 <script src="{{asset('assets/vendors/masonry/filter.js')}}"></script>
 {{-- <script src="{{asset('assets/vendors/owl-carousel/owl.carousel.js')}}"></script> --}}
-<script src="{{asset('assets/js/functions.js')}}"></script>
+<script src="{{asset('assets/js/functions.js')}}?v=20260619"></script>
 <script src="{{asset('assets/js/contact.js')}}"></script>
 <!-- <script src="{{asset('assets/vendors/switcher/switcher.js')}}"></script> -->
 <!-- Revolution JavaScripts Files -->

@@ -50,7 +50,7 @@ class PackagesController extends Controller
 
   public function booking_detail($id)
   {
-    $data['yatri'] = YatriVisa::with("package", "gurdwara", "hotel", "bus")->where('id',$id)->first();
+    $data['yatri'] = YatriVisa::with("package", "gurdwara", "hotel", "bus", "documents")->where('id',$id)->first();
     return view('admin.booking-detail', $data);
   }
 
@@ -650,7 +650,7 @@ class PackagesController extends Controller
 
       unset($data['_token']);
       YatriVisa::where("id", $id)->update($data);
-      return redirect(url('admin/events'))->with("success", "Events updated successfully!");  
+      return redirect(url('admin/booking-detail', $id))->with("success", "Yatri details updated successfully!");
     }
   }
   public function delete_yatri($id)

@@ -65,9 +65,9 @@ class PackagesController extends Controller
 
     public function all_package(Request $request)
     {
-        $data['all_packages'] = Package::where('package_type', 'Vaisakhi')->get();
-        $data['all_packages1'] = Package::where('package_type', 'Gurpurab')->get();
-        $data['all_packages2'] = Package::where('package_type', 'VIP')->get();
+        $data['all_packages'] = Package::where('package_type', 'Vaisakhi')->where('status', 1)->get();
+        $data['all_packages1'] = Package::where('package_type', 'Gurpurab')->where('status', 1)->get();
+        $data['all_packages2'] = Package::where('package_type', 'VIP')->where('status', 1)->get();
         return view('forms.all_package', $data);
     }
 
@@ -383,6 +383,13 @@ class PackagesController extends Controller
         if (Cookie::has("reference_phone")) {
             $cookie["reference_phone"] = Cookie::get("reference_phone");
         }
+        // Selection carried from the package detail page's "Book Now" link.
+        if ($request->query("package_type")) {
+            $cookie["package_type"] = $request->query("package_type");
+        }
+        if ($request->query("ticket_type")) {
+            $cookie["ticket_type"] = $request->query("ticket_type");
+        }
         $data['cookie'] = $cookie;
         return view('forms.package-apply', $data);
     }
@@ -412,19 +419,51 @@ class PackagesController extends Controller
                 $routing_number = $request->routing_number;
                 $account_number = $request->account_number;
                 $amount = $request->amount;
-                $data = ["yatri_id" => $ticket_type."-".$total_count, "payment_type" => $payment_type, "routing_number" => $routing_number, "account_number" => $account_number, "amount" => $amount, "payment_status" => "paid"];
+                $data = ["payment_type" => $payment_type, "routing_number" => $routing_number, "account_number" => $account_number, "amount" => $amount, "payment_status" => "paid"];
                 YatriVisa::where("id", $id)->update($data);
             } else if ($payment_type == "Check") {
                 $check_number = $request->check_number;
                 $date_of_check = $request->date_of_check;
-                $data = ["yatri_id" => $ticket_type."-".$total_count, "payment_type" => $payment_type, "check_number" => $check_number, "date_of_check" => $date_of_check, "payment_status" => "paid"];
+                $data = ["payment_type" => $payment_type, "check_number" => $check_number, "date_of_check" => $date_of_check, "amount" => $request->amount, "payment_status" => "paid"];
                 YatriVisa::where("id", $id)->update($data);
             } else if ($payment_type == "Cash") {
-                $data = ["yatri_id" => $ticket_type."-".$total_count, "payment_type" => $payment_type, "payment_status" => "paid"];
+                $data = ["payment_type" => $payment_type, "amount" => $request->amount, "payment_status" => "paid"];
                 YatriVisa::where("id", $id)->update($data);
             } else if ($payment_type == "Pay Later") {
-                $data = ["payment_status" => "pending"];
-                YatriVisa::where("id", $id)->update($data);
+                // Keep the unique Yatri ID assigned at booking time.
+                $orderNo = $yatri_visa->yatri_id ?: ('KY-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT));
+                $validUntil = date('F j, Y', strtotime('+30 days'));
+                YatriVisa::where("id", $id)->update([
+                    "payment_type"   => $payment_type,
+                    "amount"         => $request->amount,
+                    "payment_status" => "pending",
+                ]);
+
+                // Email the booking + payment instructions to the traveller's primary email.
+                $emailSent = false;
+                if (!empty($yatri_visa->email)) {
+                    try {
+                        \Mail::to($yatri_visa->email)->send(new \App\Mail\PayLaterMail([
+                            'order_no'    => $orderNo,
+                            'name'        => trim($yatri_visa->first_name . ' ' . $yatri_visa->last_name),
+                            'amount'      => $request->amount,
+                            'ticket_type' => $yatri_visa->ticket_type,
+                            'package'     => optional($yatri_visa->package)->name,
+                            'valid_until' => $validUntil,
+                            'pay'         => $this->paymentInstructions(),
+                        ]));
+                        $emailSent = true;
+                    } catch (\Throwable $e) {
+                        \Log::error('Pay Later email failed: ' . $e->getMessage());
+                    }
+                }
+
+                return redirect(url("thank-you"))->with('paylater', [
+                    'order_no'    => $orderNo,
+                    'email'       => $yatri_visa->email,
+                    'valid_until' => $validUntil,
+                    'email_sent'  => $emailSent,
+                ]);
             }
 
             return redirect(url("thank-you"));
@@ -432,7 +471,44 @@ class PackagesController extends Controller
 
         $data['all_packages'] = Package::all();
         $data['id'] = $id;
+        $yatri_visa = YatriVisa::where("id", $id)->first();
+        $data['yatri_visa'] = $yatri_visa;
+        // Amount due = the package price the traveller selected (stored like "$2800").
+        $data['amount'] = $yatri_visa ? (int) preg_replace('/[^0-9]/', '', (string) $yatri_visa->package_type) : 0;
+        // Order number = the unique Yatri ID assigned at booking time.
+        $data['order_no'] = $yatri_visa ? ($yatri_visa->yatri_id ?: ('KY-' . str_pad((string) $yatri_visa->id, 5, '0', STR_PAD_LEFT))) : '';
+        $data['valid_until'] = date('F j, Y', strtotime('+30 days'));
+        // Payment instructions configured in admin -> Settings -> Payment Settings.
+        $data['pay'] = $this->paymentInstructions();
         return view('payment', $data);
+    }
+
+    /** Generate a unique, date/time-based Yatri ID, e.g. KY260619-1423457. */
+    private function generateYatriId(): string
+    {
+        do {
+            $id = 'KY' . date('ymd') . '-' . date('Hi') . rand(100, 999);
+        } while (YatriVisa::where('yatri_id', $id)->exists());
+        return $id;
+    }
+
+    /** Payment instructions configured in admin (Settings -> Payment Settings). */
+    private function paymentInstructions(): array
+    {
+        return [
+            'bank_name'        => \App\Models\SiteSetting::get('pay_bank_name'),
+            'bank_title'       => \App\Models\SiteSetting::get('pay_bank_account_title'),
+            'bank_routing'     => \App\Models\SiteSetting::get('pay_bank_routing'),
+            'bank_account'     => \App\Models\SiteSetting::get('pay_bank_account'),
+            'bank_note'        => \App\Models\SiteSetting::get('pay_bank_instructions'),
+            'check_payable_to' => \App\Models\SiteSetting::get('pay_check_payable_to'),
+            'check_account'    => \App\Models\SiteSetting::get('pay_check_account'),
+            'check_address'    => \App\Models\SiteSetting::get('pay_check_mail_address'),
+            'check_note'       => \App\Models\SiteSetting::get('pay_check_instructions'),
+            'cash_address'     => \App\Models\SiteSetting::get('pay_cash_address'),
+            'cash_note'        => \App\Models\SiteSetting::get('pay_cash_instructions'),
+            'cash_map_url'     => \App\Models\SiteSetting::get('pay_cash_map_url'),
+        ];
     }
 
     public function apply($id)
@@ -500,6 +576,7 @@ class PackagesController extends Controller
         if (@\Auth::user()) {
             $yatri_visa->user_id = \Auth::user()->id;
         }
+        $yatri_visa->yatri_id = $this->generateYatriId();
         $yatri_visa->package_id = $request->package_id;
         $yatri_visa->season_id = $season->id;
         $yatri_visa->package_type = $request->package_type;
@@ -508,6 +585,7 @@ class PackagesController extends Controller
         $yatri_visa->passport_type = $request->passport_type;
         $yatri_visa->issuing_authority = $request->issuing_authority;
         $yatri_visa->passport_country = $request->passport_country;
+        $yatri_visa->nationality = $request->nationality;
         $yatri_visa->issue_date = $request->issue_date;
         $yatri_visa->expiry_date = $request->expiry_date;
         if (!empty($request->reference_no)) {
@@ -561,9 +639,85 @@ class PackagesController extends Controller
         $yatri_visa->payment_status = "pending";
         $yatri_visa->save();
 
+        // Additional documents: PDFs kept as-is; images converted to WebP.
+        $docNames = $request->input('doc_name', []);
+        $docFiles = $request->file('doc_file', []);
+        foreach ((array) $docFiles as $i => $file) {
+            if (!$file || !$file->isValid()) {
+                continue;
+            }
+            $name = trim(@$docNames[$i]) ?: $file->getClientOriginalName();
+            $stored = $this->storeDocumentFile($file);
+            if ($stored) {
+                \App\Models\YatriDocument::create([
+                    'yatri_visa_id' => $yatri_visa->id,
+                    'name' => $name,
+                    'file' => $stored,
+                ]);
+            }
+        }
+
         Conversion::log('booking_request', $request, $yatri_visa->id);
 
         return redirect(url("all-packages/payment", $yatri_visa->id));
+    }
+
+    /**
+     * Store an uploaded document. PDFs (and other non-images) are kept as-is;
+     * images (jpg/jpeg/png/gif) are converted to WebP via GD. Returns the
+     * stored filename (relative to public/document_uploads) or null on failure.
+     */
+    private function storeDocumentFile($file)
+    {
+        $dir = public_path('document_uploads');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+
+        $ext = strtolower($file->getClientOriginalExtension());
+        $base = uniqid() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+
+        // Non-images (e.g. PDF) — store unchanged.
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+            $fileName = $base . '.' . $ext;
+            $file->move($dir, $fileName);
+            return $fileName;
+        }
+
+        // Images — convert to WebP.
+        $src = $file->getRealPath();
+        switch ($ext) {
+            case 'jpg':
+            case 'jpeg':
+                $img = @imagecreatefromjpeg($src);
+                break;
+            case 'png':
+                $img = @imagecreatefrompng($src);
+                break;
+            case 'gif':
+                $img = @imagecreatefromgif($src);
+                break;
+            default:
+                $img = false;
+        }
+
+        if (!$img || !function_exists('imagewebp')) {
+            // GD unavailable/failed — fall back to storing the original.
+            $fileName = $base . '.' . $ext;
+            $file->move($dir, $fileName);
+            return $fileName;
+        }
+
+        // Preserve transparency for PNG/GIF.
+        imagepalettetotruecolor($img);
+        imagealphablending($img, true);
+        imagesavealpha($img, true);
+
+        $fileName = $base . '.webp';
+        imagewebp($img, $dir . DIRECTORY_SEPARATOR . $fileName, 85);
+        imagedestroy($img);
+
+        return $fileName;
     }
 
     public function store_special_package(Request $request)
@@ -673,7 +827,7 @@ class PackagesController extends Controller
                 $ticket_type = "L/P";
                 
                 $payment_type = $data['payment_type'];
-                $yatri_visa->yatri_id = $ticket_type."-".$total_count;
+                $yatri_visa->yatri_id = $this->generateYatriId();
                 $yatri_visa->payment_type = $payment_type;
                 
                 if ($payment_type == "Bank Wire Transfer") {
