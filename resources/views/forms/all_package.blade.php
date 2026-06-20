@@ -50,7 +50,38 @@
   .apkg-btn:hover{transform:translateY(-2px);text-decoration:none;color:#fff}
   .apkg-empty{padding:50px 20px;text-align:center;color:#9aa0ac;font-size:17px;width:100%}
   .apkg-desc{margin-top:14px;color:#4b5563;font-size:14px;line-height:1.6}
-  @media (max-width:575px){.apkg-price-row{grid-template-columns:1fr}.apkg-card-head h3{font-size:19px}}
+  /* "Package Included" trigger button (replaces inline list) */
+  .apkg-incl-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:16px;
+    background:#fff;color:var(--brand);border:1.5px dashed var(--brand);font-weight:700;font-size:15px;
+    padding:12px 16px;border-radius:14px;cursor:pointer;transition:.15s}
+  .apkg-incl-btn:hover{background:var(--brand);color:#fff}
+  .apkg-incl-btn i{font-size:16px}
+  /* Modal */
+  .pkgm-overlay{position:fixed;inset:0;background:rgba(20,26,45,.6);backdrop-filter:blur(2px);z-index:1080;
+    display:none;align-items:center;justify-content:center;padding:16px}
+  .pkgm-overlay.open{display:flex}
+  .pkgm{background:#fff;border-radius:20px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;
+    overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:pkgmIn .2s ease}
+  @keyframes pkgmIn{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .pkgm-head{background:linear-gradient(135deg,#2d1b69,#5b2a9e);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:14px}
+  .pkgm-head .pkgm-ill{flex:0 0 auto;width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.16);
+    display:flex;align-items:center;justify-content:center;font-size:22px}
+  .pkgm-head h4{margin:0;font-size:18px;font-weight:800;line-height:1.2;color:#fff}
+  .pkgm-head p{margin:2px 0 0;font-size:12.5px;opacity:.85}
+  .pkgm-x{position:absolute;top:14px;right:16px;color:#fff;background:rgba(255,255,255,.18);border:0;width:30px;height:30px;
+    border-radius:50%;font-size:16px;cursor:pointer;line-height:1}
+  .pkgm-body{padding:16px 20px;overflow-y:auto;color:#33384a;font-size:14px;line-height:1.55}
+  /* Turn the included list into a clean icon checklist regardless of source markup */
+  .pkgm-body p,.pkgm-body li,.pkgm-body div{position:relative;padding:6px 0 6px 26px;margin:0;border-bottom:1px solid #f1f2f6}
+  .pkgm-body p:last-child,.pkgm-body li:last-child{border-bottom:0}
+  .pkgm-body p::before,.pkgm-body li::before{content:"\2713";position:absolute;left:0;top:6px;color:var(--brand);
+    font-weight:900;font-size:13px}
+  .pkgm-body strong,.pkgm-body b{color:var(--ink)}
+  .pkgm-body ul{list-style:none;margin:0;padding:0}
+  .pkgm-foot{padding:12px 20px 18px;border-top:1px solid #eef0f4}
+  .pkgm-foot .apkg-btn{width:100%;justify-content:center;padding:13px 0}
+  @media (max-width:575px){.apkg-price-row{grid-template-columns:1fr}.apkg-card-head h3{font-size:19px}
+    .pkgm-head h4{font-size:16px}.pkgm-body{font-size:13.5px}}
 </style>
 
 <main id="content" class="site-main apkg">
@@ -128,7 +159,12 @@
                       <div class="apkg-price"><span>One Way</span>{!! $fmtPrice(@$val->four_star_single_price) !!}</div>
                     </div>
                   </div>
-                  @if(!empty(@$val->sdescription))<div class="apkg-desc">{!! $val->sdescription !!}</div>@endif
+                  @if(!empty(@$val->sdescription))
+                  <button type="button" class="apkg-incl-btn js-pkg-incl" data-title="{{ @$val->name }}">
+                    <i class="fa fa-clipboard-list"></i> Package Included
+                  </button>
+                  <div class="js-pkg-incl-src d-none" style="display:none">{!! $val->sdescription !!}</div>
+                  @endif
                 </div>
                 <div class="apkg-card-foot">
                   <a href="{{ url('all-packages', @$val->id) }}" class="apkg-btn"><i class="fa fa-plane"></i> Book Now</a>
@@ -191,7 +227,12 @@
                       <div class="apkg-price"><span>One Way</span>{!! $fmtPrice(@$val->four_star_single_price) !!}</div>
                     </div>
                   </div>
-                  @if(!empty(@$val->sdescription))<div class="apkg-desc">{!! $val->sdescription !!}</div>@endif
+                  @if(!empty(@$val->sdescription))
+                  <button type="button" class="apkg-incl-btn js-pkg-incl" data-title="{{ @$val->name }}">
+                    <i class="fa fa-clipboard-list"></i> Package Included
+                  </button>
+                  <div class="js-pkg-incl-src d-none" style="display:none">{!! $val->sdescription !!}</div>
+                  @endif
                 </div>
                 <div class="apkg-card-foot">
                   <a href="{{ url('all-packages', @$val->id) }}" class="apkg-btn"><i class="fa fa-plane"></i> Book Now</a>
@@ -247,6 +288,24 @@
     </div>
   </section>
 </main>
+
+{{-- Package Included modal (shared) --}}
+<div class="pkgm-overlay" id="pkgIncludedModal">
+  <div class="pkgm" role="dialog" aria-modal="true" style="position:relative">
+    <button type="button" class="pkgm-x js-pkgm-close" aria-label="Close">&times;</button>
+    <div class="pkgm-head">
+      <div class="pkgm-ill"><i class="fa fa-route"></i></div>
+      <div>
+        <h4>Package Included</h4>
+        <p id="pkgmSubtitle">Everything covered in your Yatra</p>
+      </div>
+    </div>
+    <div class="pkgm-body" id="pkgmBody"></div>
+    <div class="pkgm-foot">
+      <button type="button" class="apkg-btn js-pkgm-close" style="border:0;cursor:pointer"><i class="fa fa-check"></i> Got it</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // Origin data: Country -> State/City -> [{ name, code }]  (source: airport pricing sheet)
@@ -312,6 +371,22 @@
 
     // Nothing chosen yet -> no cards.
     filterCards([]);
+
+    // ----- Package Included modal -----
+    var $pkgm = $('#pkgIncludedModal');
+    function openPkgm() { $pkgm.addClass('open'); $('body').css('overflow', 'hidden'); }
+    function closePkgm() { $pkgm.removeClass('open'); $('body').css('overflow', ''); }
+
+    $(document).on('click', '.js-pkg-incl', function () {
+      var html  = $(this).siblings('.js-pkg-incl-src').html() || '';
+      var title = $(this).data('title') || 'Everything covered in your Yatra';
+      $('#pkgmBody').html(html);
+      $('#pkgmSubtitle').text(title);
+      openPkgm();
+    });
+    $(document).on('click', '.js-pkgm-close', closePkgm);
+    $pkgm.on('click', function (e) { if (e.target === this) closePkgm(); });
+    $(document).on('keydown', function (e) { if (e.key === 'Escape') closePkgm(); });
 
     $country.on('change', function () {
       var c = this.value;

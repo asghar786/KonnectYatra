@@ -31,7 +31,15 @@ class PackagesController extends Controller
   {
     $data = Package::all();
     $yatri_package =  Package::all();
-    return view('admin.packages.packages',['packages'=>$data],['yatri_package'=>$yatri_package]);
+    // Total bookings per package id (full history, incl. removed) — used for the
+    // "X selected this package" caption and to disable delete for availed packages.
+    $booking_counts = YatriVisa::withTrashed()->select('package_id', \DB::raw('count(*) as c'))
+      ->groupBy('package_id')->pluck('c', 'package_id');
+    return view('admin.packages.packages', [
+      'packages'       => $data,
+      'yatri_package'  => $yatri_package,
+      'booking_counts' => $booking_counts,
+    ]);
   }
 
   public function users()
@@ -506,14 +514,23 @@ class PackagesController extends Controller
 
   public function delete($id)
   {
-    $package = Package::where('id', $id);
-    if($package)
+    $package = Package::find($id);
+    if(!$package)
     {
-      $package->delete();
-      PackageDetails::where('package_id', $id)->delete();
-      PriceDetails::where('package_id', $id)->delete();
-      return back()->with("success", "Package Deleted Successfully");
+      return back()->with("error", "Package not found.");
     }
+
+    // A package can only be deleted if no Yatri has ever availed (booked) it.
+    $bookings = YatriVisa::withTrashed()->where('package_id', $id)->count();
+    if($bookings > 0)
+    {
+      return back()->with("error", "Cannot delete \"{$package->name}\" — {$bookings} Yatri(s) have already availed this package. Disable it instead.");
+    }
+
+    $package->delete();
+    PackageDetails::where('package_id', $id)->delete();
+    PriceDetails::where('package_id', $id)->delete();
+    return back()->with("success", "Package Deleted Successfully");
   }
 
   public function store(Request $request)

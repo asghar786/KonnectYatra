@@ -18,6 +18,10 @@
     .pkg-type{position:absolute;top:10px;right:10px;background:rgba(45,27,105,.9);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
     .pkg-card-head{padding:14px 18px 4px}
     .pkg-card-head h5{margin:0;font-size:15px;font-weight:700;line-height:1.35;color:#222}
+    .pkg-history{display:inline-flex;align-items:center;gap:6px;margin:8px 18px 0;padding:4px 12px;border-radius:20px;
+        font-size:12px;font-weight:600;background:#eef2ff;color:#3b3f9e}
+    .pkg-history.none{background:#f3f4f6;color:#8a8f9a}
+    .pkg-history i{font-size:12px}
     .pkg-card-body{padding:8px 18px 14px;flex:1}
     .pkg-tier{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#f54e18;margin:10px 0 6px}
     .pkg-tier.four{color:#5b2a9e}
@@ -65,6 +69,11 @@
                         <div class="pkg-card-head">
                             <h5>{{ $yatri->name }}</h5>
                         </div>
+                        @php $booked = ($booking_counts[$yatri->id] ?? 0); @endphp
+                        <span class="pkg-history {{ $booked > 0 ? '' : 'none' }}">
+                            <i class="fa fa-users"></i>
+                            {{ $booked > 0 ? $booked.' '.\Illuminate\Support\Str::plural('Yatri', $booked).' selected this package' : 'No one has selected this yet' }}
+                        </span>
                         <div class="pkg-card-body">
                             <p class="pkg-tier"><i class="fa fa-star"></i> 5 Star</p>
                             <ul class="pkg-prices">
@@ -82,11 +91,18 @@
                         <div class="pkg-card-actions">
                             <a href="{{ url('admin/apply_packages/edit', $yatri->id) }}" class="btn btn-info btn-sm"><i class="fa fa-edit"></i> Edit</a>
                             <a href="{{ url('packages', $yatri->id) }}" target="_blank" class="btn btn-success btn-sm"><i class="fa fa-eye"></i> View</a>
-                            <form method="POST" action="{{ url('/admin/apply_packages/delete', $yatri->id) }}">
-                                @csrf
-                                <input name="_method" type="hidden" value="GET">
-                                <button type="submit" class="btn btn-danger btn-sm show_confirm" title="Delete"><i class="fa fa-trash"></i> Delete</button>
-                            </form>
+                            @if($booked > 0)
+                                <button type="button" class="btn btn-secondary btn-sm" disabled
+                                    title="Cannot delete — {{ $booked }} Yatri(s) have availed this package">
+                                    <i class="fa fa-lock"></i> {{ $booked }} booked
+                                </button>
+                            @else
+                                <form method="POST" action="{{ url('/admin/apply_packages/delete', $yatri->id) }}">
+                                    @csrf
+                                    <input name="_method" type="hidden" value="GET">
+                                    <button type="submit" class="btn btn-danger btn-sm show_confirm" title="Delete"><i class="fa fa-trash"></i> Delete</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>
