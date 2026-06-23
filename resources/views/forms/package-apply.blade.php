@@ -112,7 +112,7 @@
           <h3 class="text-center">Wahe Guru Ji ki Fateh</h3>
         </div>
       </div>
-      <form method="POST" action="{{ route('store-yatri-visa') }}" class="row g-3 mt-4" enctype="multipart/form-data">
+      <form method="POST" action="{{ route('store-yatri-visa') }}" class="row g-3 mt-4" enctype="multipart/form-data" novalidate>
         @csrf
         <div class="col-12 row mb-3 w-100" id="main">
           <div class="accordion w-100" id="faq">
@@ -875,7 +875,7 @@
             </div>
           </div>
           <div class="col-12 d-flex justify-content-center px-4 pt-5">
-            <button class="button-primary width-6 mt-2 mx-1" id="submit_btn" disabled>Proceed to Payment</button>
+            <button type="submit" class="button-primary width-6 mt-2 mx-1" id="submit_btn">Proceed to Payment</button>
           </div>
         </form>
       </div>
@@ -1124,7 +1124,6 @@ td {
       $('html, body').animate({
         scrollTop: next.offset().top - 100
       }, 2000);
-      if (typeof refreshProceedBtn === 'function') { refreshProceedBtn(); }
         // $(this).parent().parent().parent().parent().next().find(".collapse").prev().children().removeClass("collapsed");
         // $(this).parent().parent().parent().parent().next().find(".collapse").prev().children().click();
         // $(this).parent().parent().parent().prev().children().click();
@@ -1249,23 +1248,69 @@ $(document).on('change', '.passenger_passport', function() {
     });
   });
 
-  // Enable "Proceed to Payment" only when every mandatory field is valid
-  // AND both agreement checkboxes are checked (both are `required`, so the
-  // form's native validity already covers them along with all other required fields).
-  var refreshProceedBtn = function () {
+  // On "Proceed to Payment", if a mandatory field is missing, tell the
+  // traveller exactly which one (instead of silently doing nothing). The
+  // button is always clickable so they always get feedback.
+  (function () {
     var form = document.querySelector('form[action*="store-yatri-visa"]');
-    var btn = document.getElementById('submit_btn');
-    if (!form || !btn) return;
-    btn.disabled = !form.checkValidity();
-  };
+    if (!form) return;
 
-  $(document).ready(function () {
-    var form = document.querySelector('form[action*="store-yatri-visa"]');
-    if (form) {
-      $(form).on('input change keyup', 'input, select, textarea', refreshProceedBtn);
-      $(form).on('click', '#add_more_doc, .remove-doc', function () { setTimeout(refreshProceedBtn, 50); });
+    // Friendly label for a control: its <label>, else nearest label, else name.
+    function fieldLabel(el) {
+      var label;
+      if (el.id) {
+        label = document.querySelector('label[for="' + el.id + '"]');
+        if (label) return clean(label.textContent);
+      }
+      var group = el.closest('.form-group') || el.closest('[class*="col-"]');
+      if (group) {
+        label = group.querySelector('label');
+        if (label) return clean(label.textContent);
+      }
+      return clean((el.getAttribute('name') || 'This field').replace(/[_\[\]]/g, ' '));
     }
-    refreshProceedBtn();
-  });
+    function clean(t) { return (t || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim(); }
+
+    function notify(message) {
+      if (window.Swal && typeof window.Swal.fire === 'function') {
+        window.Swal.fire({ icon: 'warning', title: 'Missing required field', text: message, confirmButtonColor: '#f54e18' });
+      } else {
+        alert(message);
+      }
+    }
+
+    form.addEventListener('submit', function (event) {
+      // First required control that fails native validation.
+      var first = null;
+      var controls = form.querySelectorAll('input, select, textarea');
+      for (var i = 0; i < controls.length; i++) {
+        if (controls[i].willValidate && !controls[i].checkValidity()) { first = controls[i]; break; }
+      }
+      if (!first) return; // all good — let it submit
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      var group = first.closest('.form-group') || first.closest('[class*="col-"]') || first;
+      group.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      first.classList.add('is-invalid');
+
+      // Focus the right element. select2 hides the native <select>, so focus
+      // its rendered box instead; otherwise the bubble can't be shown.
+      var focusTarget = first;
+      if (first.offsetParent === null && group !== first) {
+        var rendered = group.querySelector('.select2-selection, .select2-search__field');
+        if (rendered) focusTarget = rendered;
+      }
+      try { focusTarget.focus({ preventScroll: true }); } catch (e) {}
+
+      notify('Please complete this required field: "' + fieldLabel(first) + '".');
+    }, false);
+
+    // Clear the red highlight once the traveller fixes a field.
+    $(form).on('input change', 'input, select, textarea', function () {
+      if (this.checkValidity()) this.classList.remove('is-invalid');
+    });
+  })();
 </script>
 @endsection
