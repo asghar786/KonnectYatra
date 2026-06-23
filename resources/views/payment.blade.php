@@ -117,13 +117,20 @@
                                     <div class="card-body">
                                         <h5 class="pay-card-head"><i class="fas fa-building-columns"></i> Bank Wire Transfer Details</h5>
                                         @if(!empty(@$pay['bank_name']) || !empty(@$pay['bank_account']))
-                                        <table class="w-100" style="border:0;">
-                                            @if(!empty(@$pay['bank_name']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Bank Name</b></td><td style="border:0;text-align:left;">{{ $pay['bank_name'] }}</td></tr>@endif
-                                            @if(!empty(@$pay['bank_title']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Title</b></td><td style="border:0;text-align:left;">{{ $pay['bank_title'] }}</td></tr>@endif
-                                            @if(!empty(@$pay['bank_routing']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Routing Number</b></td><td style="border:0;text-align:left;">{{ $pay['bank_routing'] }}</td></tr>@endif
-                                            @if(!empty(@$pay['bank_account']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Number</b></td><td style="border:0;text-align:left;">{{ $pay['bank_account'] }}</td></tr>@endif
-                                            <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
-                                        </table>
+                                        <div class="row align-items-center">
+                                            <div class="col-lg-8 col-md-8">
+                                                <table class="w-100" style="border:0;">
+                                                    @if(!empty(@$pay['bank_name']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Bank Name</b></td><td style="border:0;text-align:left;">{{ $pay['bank_name'] }}</td></tr>@endif
+                                                    @if(!empty(@$pay['bank_title']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Title</b></td><td style="border:0;text-align:left;">{{ $pay['bank_title'] }}</td></tr>@endif
+                                                    @if(!empty(@$pay['bank_routing']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Routing Number</b></td><td style="border:0;text-align:left;">{{ $pay['bank_routing'] }}</td></tr>@endif
+                                                    @if(!empty(@$pay['bank_account']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Number</b></td><td style="border:0;text-align:left;">{{ $pay['bank_account'] }}</td></tr>@endif
+                                                    <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 text-center mt-3 mt-md-0">
+                                                <img src="{{ asset('assets/images2/bank-illustration.svg') }}" alt="Bank" style="max-width:170px;width:100%;height:auto;">
+                                            </div>
+                                        </div>
                                         @if(!empty(@$pay['bank_note']))<p class="mt-2 mb-0 text-muted">{!! nl2br(e($pay['bank_note'])) !!}</p>@endif
                                         @else
                                         {!! $payEmpty !!}
@@ -140,12 +147,19 @@
                                     <div class="card-body">
                                         <h5 class="pay-card-head"><i class="fas fa-money-check"></i> Pay by Check</h5>
                                         @if(!empty(@$pay['check_payable_to']) || !empty(@$pay['check_address']))
-                                        <table class="w-100" style="border:0;">
-                                            @if(!empty(@$pay['check_payable_to']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Make Check Payable To</b></td><td style="border:0;text-align:left;">{{ $pay['check_payable_to'] }}</td></tr>@endif
-                                            @if(!empty(@$pay['check_account']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Number</b></td><td style="border:0;text-align:left;">{{ $pay['check_account'] }}</td></tr>@endif
-                                            @if(!empty(@$pay['check_address']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;vertical-align:top;"><b>Mail To</b></td><td style="border:0;text-align:left;">{!! nl2br(e($pay['check_address'])) !!}</td></tr>@endif
-                                            <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
-                                        </table>
+                                        <div class="row align-items-center">
+                                            <div class="col-lg-8 col-md-8">
+                                                <table class="w-100" style="border:0;">
+                                                    @if(!empty(@$pay['check_payable_to']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Make Check Payable To</b></td><td style="border:0;text-align:left;">{{ $pay['check_payable_to'] }}</td></tr>@endif
+                                                    @if(!empty(@$pay['check_account']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Account Number</b></td><td style="border:0;text-align:left;">{{ $pay['check_account'] }}</td></tr>@endif
+                                                    @if(!empty(@$pay['check_address']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;vertical-align:top;"><b>Mail To</b></td><td style="border:0;text-align:left;">{!! nl2br(e($pay['check_address'])) !!}</td></tr>@endif
+                                                    <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 text-center mt-3 mt-md-0">
+                                                <img src="{{ asset('assets/images2/cheque-illustration.svg') }}" alt="Check" style="max-width:230px;width:100%;height:auto;">
+                                            </div>
+                                        </div>
                                         @if(!empty(@$pay['check_note']))<p class="mt-2 text-muted">{!! nl2br(e($pay['check_note'])) !!}</p>@endif
                                         @else
                                         {!! $payEmpty !!}
