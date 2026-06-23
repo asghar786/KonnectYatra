@@ -483,13 +483,31 @@ class PackagesController extends Controller
         return view('payment', $data);
     }
 
-    /** Generate a unique, date/time-based Yatri ID, e.g. KY260619-1423457. */
-    private function generateYatriId(): string
+    /**
+     * Generate a short, unique customer (Yatri) ID that encodes the trip type.
+     * Format: KY-<CODE>-<NNNN>, e.g. KY-RT-0042, where CODE is:
+     *   RT = Return Trip, OW = One Way, LT = Land Travel/Trip.
+     * The sequence continues per trip-type code.
+     */
+    private function generateYatriId(?string $ticketType = null): string
     {
+        $code = $this->tripCode($ticketType);
+        $seq  = YatriVisa::where('yatri_id', 'like', 'KY-' . $code . '-%')->count() + 1;
         do {
-            $id = 'KY' . date('ymd') . '-' . date('Hi') . rand(100, 999);
+            $id = 'KY-' . $code . '-' . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+            $seq++;
         } while (YatriVisa::where('yatri_id', $id)->exists());
         return $id;
+    }
+
+    /** Map a raw ticket_type to a short trip code: RT / OW / LT. */
+    private function tripCode(?string $ticketType): string
+    {
+        switch ($ticketType) {
+            case 'one_way':      return 'OW'; // One Way
+            case 'land_package': return 'LT'; // Land Travel/Trip
+            default:             return 'RT'; // round_way / round_trip → Return Trip
+        }
     }
 
     /** Payment instructions configured in admin (Settings -> Payment Settings). */
@@ -576,7 +594,7 @@ class PackagesController extends Controller
         if (@\Auth::user()) {
             $yatri_visa->user_id = \Auth::user()->id;
         }
-        $yatri_visa->yatri_id = $this->generateYatriId();
+        $yatri_visa->yatri_id = $this->generateYatriId($request->ticket_type);
         $yatri_visa->package_id = $request->package_id;
         $yatri_visa->season_id = $season->id;
         $yatri_visa->package_type = $request->package_type;
@@ -827,7 +845,7 @@ class PackagesController extends Controller
                 $ticket_type = "L/P";
                 
                 $payment_type = $data['payment_type'];
-                $yatri_visa->yatri_id = $this->generateYatriId();
+                $yatri_visa->yatri_id = $this->generateYatriId($data['ticket_type_'.$i+1]);
                 $yatri_visa->payment_type = $payment_type;
                 
                 if ($payment_type == "Bank Wire Transfer") {
