@@ -221,25 +221,25 @@
                                 <div class="card" style="border:1px solid #eef0f4;border-radius:12px;">
                                     <div class="card-body">
                                         <h5 class="pay-card-head"><i class="fas fa-mobile-screen-button"></i> Pay by Zelle</h5>
-                                        @if(!empty(@$pay['zelle_phone']) || !empty(@$pay['zelle_email']))
                                         <div class="row align-items-start">
                                             <div class="col-lg-8 col-md-8">
+                                                @if(!empty(@$pay['zelle_phone']) || !empty(@$pay['zelle_email']))
                                                 <table class="w-100" style="border:0;">
                                                     @if(!empty(@$pay['zelle_name']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Recipient Name</b></td><td style="border:0;text-align:left;">{{ $pay['zelle_name'] }}</td></tr>@endif
                                                     @if(!empty(@$pay['zelle_phone']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Zelle Phone Number</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">{{ $pay['zelle_phone'] }}</b></td></tr>@endif
                                                     @if(!empty(@$pay['zelle_email']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Zelle Email</b></td><td style="border:0;text-align:left;">{{ $pay['zelle_email'] }}</td></tr>@endif
                                                     <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
                                                 </table>
+                                                <p class="mt-2 mb-0" style="color:#1c2541;"><b>Important:</b> Kindly test the account by sending <b>$1</b> first. Upon getting confirmation, then transfer the full / balance amount to the given number.</p>
+                                                @if(!empty(@$pay['zelle_note']))<p class="mt-2 mb-0 text-muted">{!! nl2br(e($pay['zelle_note'])) !!}</p>@endif
+                                                @else
+                                                {!! $payEmpty !!}
+                                                @endif
                                             </div>
                                             <div class="col-lg-4 col-md-4 text-center mt-2 mt-md-0">
                                                 <img src="{{ asset('assets/images2/zelle-logo.svg') }}" alt="Zelle" style="max-width:120px;width:100%;height:auto;">
                                             </div>
                                         </div>
-                                        <p class="mt-2 mb-0" style="color:#1c2541;"><b>Important:</b> Kindly test the account by sending <b>$1</b> first. Upon getting confirmation, then transfer the full / balance amount to the given number.</p>
-                                        @if(!empty(@$pay['zelle_note']))<p class="mt-2 mb-0 text-muted">{!! nl2br(e($pay['zelle_note'])) !!}</p>@endif
-                                        @else
-                                        {!! $payEmpty !!}
-                                        @endif
                                     </div>
                                 </div>
                             </div>
