@@ -25,6 +25,11 @@ class PaymentSettingController extends Controller
         'pay_cash_address',
         'pay_cash_instructions',
         'pay_cash_map_url',
+        // Zelle
+        'pay_zelle_name',
+        'pay_zelle_phone',
+        'pay_zelle_email',
+        'pay_zelle_instructions',
     ];
 
     public function index()

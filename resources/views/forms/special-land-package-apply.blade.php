@@ -369,6 +369,8 @@
                     <label class="form-check-label" for="check" style="cursor: pointer;"><b>Paid by Check</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <input class="form-check-input payment_type" type="radio" name="payment_type" id="cash" value="Cash" required>
                     <label class="form-check-label" for="cash" style="cursor: pointer;"><b>Paid by Cash</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="zelle" value="Zelle" required>
+                    <label class="form-check-label" for="zelle" style="cursor: pointer;"><b>Paid by Zelle</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <input class="form-check-input payment_type" type="radio" name="payment_type" id="pay_later" value="Pay Later" required>
                     <label class="form-check-label" for="pay_later" style="cursor: pointer;"><b>Pay Later</b></label>
                     <div class="invalid-feedback">
@@ -418,6 +420,25 @@
         </div>
         <div class="row p-3 my-3" id="note" style="display: none;">
             <p class="col-lg-12 col-md-12 col-sm-12 mb-3"><b>Note: </b>You have to pay this amount until <b>1 MONTH</b> of this yatra. Otherwise your booking will be <span style="color: red;">FAILED!</span></p>
+        </div>
+        @php
+            $zellePhone = \App\Models\SiteSetting::get('pay_zelle_phone');
+            $zelleName  = \App\Models\SiteSetting::get('pay_zelle_name');
+            $zelleEmail = \App\Models\SiteSetting::get('pay_zelle_email');
+            $zelleNote  = \App\Models\SiteSetting::get('pay_zelle_instructions');
+        @endphp
+        <div class="row p-3 my-3" id="zelle_div" style="display: none;">
+            <div class="col-lg-12 col-md-12 col-sm-12 mb-3" style="background:#fff4ef;border:1px solid #ffd9c9;border-radius:12px;padding:16px;">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5 style="font-weight:700;"><i class="fas fa-mobile-screen-button"></i> Pay by Zelle</h5>
+                    <img src="{{ asset('assets/images2/zelle-logo.svg') }}" alt="Zelle" style="max-width:90px;height:auto;">
+                </div>
+                @if(!empty($zelleName))<p class="mb-1"><b>Recipient Name:</b> {{ $zelleName }}</p>@endif
+                @if(!empty($zellePhone))<p class="mb-1"><b>Zelle Phone Number:</b> <b style="color:#f54e18;">{{ $zellePhone }}</b></p>@endif
+                @if(!empty($zelleEmail))<p class="mb-1"><b>Zelle Email:</b> {{ $zelleEmail }}</p>@endif
+                <p class="mb-0 mt-2"><b>Important:</b> Kindly test the account by sending <b>$1</b> first. Upon getting confirmation, then transfer the full / balance amount to the given number.</p>
+                @if(!empty($zelleNote))<p class="mb-0 mt-2 text-muted">{!! nl2br(e($zelleNote)) !!}</p>@endif
+            </div>
         </div>
           {{-- <div class="col-12 mt-2">
             <ul>
@@ -577,7 +598,18 @@ td {
                 $("#date_of_check").attr("required", false);
                 $("#check_div").fadeOut();
                 $("#wire_transfer_div").fadeOut();
+                $("#zelle_div").fadeOut();
                 $("#note").fadeOut();
+            } else if ($(this).val() == "Zelle") {
+                $("#routing_number").attr("required", false);
+                $("#account_number").attr("required", false);
+                $("#amount").attr("required", false);
+                $("#check_number").attr("required", false);
+                $("#date_of_check").attr("required", false);
+                $("#check_div").fadeOut();
+                $("#wire_transfer_div").fadeOut();
+                $("#note").fadeOut();
+                $("#zelle_div").fadeIn();
             } else {
                 $("#routing_number").attr("required", false);
                 $("#account_number").attr("required", false);
@@ -586,6 +618,7 @@ td {
                 $("#date_of_check").attr("required", false);
                 $("#check_div").fadeOut();
                 $("#wire_transfer_div").fadeOut();
+                $("#zelle_div").fadeOut();
                 $("#note").fadeIn();
             }
         });

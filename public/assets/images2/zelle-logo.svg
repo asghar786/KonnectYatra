@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Zelle">
+  <rect width="120" height="120" rx="26" ry="26" fill="#6D1ED4"/>
+  <g fill="#ffffff">
+    <!-- vertical bar through the Z -->
+    <rect x="56.5" y="26" width="7" height="68" rx="2"/>
+    <!-- stylised Z -->
+    <polygon points="36,38 84,38 84,49 54,71 84,71 84,82 36,82 36,71 66,49 36,49"/>
+  </g>
+</svg>

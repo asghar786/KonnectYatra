@@ -96,6 +96,31 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Zelle -->
+                    <div class="col-lg-6">
+                        <div class="card" style="border-radius:14px">
+                            <div class="card-body">
+                                <h5 style="font-weight:700"><i class="fas fa-mobile-screen-button text-info"></i> Pay by Zelle</h5>
+                                <p class="text-muted">Shown when the traveller selects "Paid by Zelle".</p>
+                                <div class="form-group">
+                                    <label class="form_label_color">Recipient Name</label>
+                                    <input type="text" name="pay_zelle_name" class="form-control" value="{{ $pay_zelle_name }}" placeholder="e.g. Konnect.us, Inc.">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color">Zelle Phone Number</label>
+                                    <input type="text" name="pay_zelle_phone" class="form-control" value="{{ $pay_zelle_phone }}" placeholder="e.g. +1 (718) 908-9464">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color">Zelle Email <span class="text-muted">(optional)</span></label>
+                                    <input type="text" name="pay_zelle_email" class="form-control" value="{{ $pay_zelle_email }}" placeholder="e.g. payments@konnect.us">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color">Additional Instructions <span class="text-muted">(optional)</span></label>
+                                    <textarea name="pay_zelle_instructions" class="form-control" rows="3" placeholder="e.g. Kindly test the account by sending $1 first. Upon confirmation, transfer the full / balance amount to the given number.">{{ $pay_zelle_instructions }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button class="btn btn-primary">Save Payment Settings</button>

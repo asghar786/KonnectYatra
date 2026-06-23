@@ -87,6 +87,8 @@
                                     <label class="form-check-label" for="check" style="cursor: pointer;"><b>Paid by Check</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     <input class="form-check-input payment_type" type="radio" name="payment_type" id="cash" value="Cash" required>
                                     <label class="form-check-label" for="cash" style="cursor: pointer;"><b>Paid by Cash</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="zelle" value="Zelle" required>
+                                    <label class="form-check-label" for="zelle" style="cursor: pointer;"><b>Paid by Zelle</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     <input class="form-check-input payment_type" type="radio" name="payment_type" id="pay_later" value="Pay Later" required>
                                     <label class="form-check-label" for="pay_later" style="cursor: pointer;"><b>Pay Later</b></label>
                                     <div class="invalid-feedback">
@@ -191,6 +193,36 @@
                                                 </a>
                                             </div>
                                         </div>
+                                        @else
+                                        {!! $payEmpty !!}
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Zelle -->
+                        <div class="row my-3" id="zelle_div" style="display:none;">
+                            <div class="col-12">
+                                <div class="card" style="border:1px solid #eef0f4;border-radius:12px;">
+                                    <div class="card-body">
+                                        <h5 class="pay-card-head"><i class="fas fa-mobile-screen-button"></i> Pay by Zelle</h5>
+                                        @if(!empty(@$pay['zelle_phone']) || !empty(@$pay['zelle_email']))
+                                        <div class="row align-items-start">
+                                            <div class="col-lg-8 col-md-8">
+                                                <table class="w-100" style="border:0;">
+                                                    @if(!empty(@$pay['zelle_name']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;width:200px;"><b>Recipient Name</b></td><td style="border:0;text-align:left;">{{ $pay['zelle_name'] }}</td></tr>@endif
+                                                    @if(!empty(@$pay['zelle_phone']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Zelle Phone Number</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">{{ $pay['zelle_phone'] }}</b></td></tr>@endif
+                                                    @if(!empty(@$pay['zelle_email']))<tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Zelle Email</b></td><td style="border:0;text-align:left;">{{ $pay['zelle_email'] }}</td></tr>@endif
+                                                    <tr><td style="border:0;text-align:left;padding:6px 12px 6px 0;"><b>Amount</b></td><td style="border:0;text-align:left;"><b style="color:#f54e18;">${{ number_format(@$amount) }}</b></td></tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 text-center mt-2 mt-md-0">
+                                                <img src="{{ asset('assets/images2/zelle-logo.svg') }}" alt="Zelle" style="max-width:120px;width:100%;height:auto;">
+                                            </div>
+                                        </div>
+                                        <p class="mt-2 mb-0" style="color:#1c2541;"><b>Important:</b> Kindly test the account by sending <b>$1</b> first. Upon getting confirmation, then transfer the full / balance amount to the given number.</p>
+                                        @if(!empty(@$pay['zelle_note']))<p class="mt-2 mb-0 text-muted">{!! nl2br(e($pay['zelle_note'])) !!}</p>@endif
                                         @else
                                         {!! $payEmpty !!}
                                         @endif
@@ -397,13 +429,15 @@
 
         $(document).on("click", ".payment_type", function () {
             var v = $(this).val();
-            $("#wire_transfer_div, #check_div, #cash_div, #note").hide();
+            $("#wire_transfer_div, #check_div, #cash_div, #zelle_div, #note").hide();
             if (v == "Bank Wire Transfer") {
                 $("#wire_transfer_div").fadeIn();
             } else if (v == "Check") {
                 $("#check_div").fadeIn();
             } else if (v == "Cash") {
                 $("#cash_div").fadeIn();
+            } else if (v == "Zelle") {
+                $("#zelle_div").fadeIn();
             } else {
                 $("#note").fadeIn();
             }

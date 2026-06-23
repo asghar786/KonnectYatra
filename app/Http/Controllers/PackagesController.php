@@ -429,6 +429,9 @@ class PackagesController extends Controller
             } else if ($payment_type == "Cash") {
                 $data = ["payment_type" => $payment_type, "amount" => $request->amount, "payment_status" => "paid"];
                 YatriVisa::where("id", $id)->update($data);
+            } else if ($payment_type == "Zelle") {
+                $data = ["payment_type" => $payment_type, "amount" => $request->amount, "payment_status" => "paid"];
+                YatriVisa::where("id", $id)->update($data);
             } else if ($payment_type == "Pay Later") {
                 // Keep the unique Yatri ID assigned at booking time.
                 $orderNo = $yatri_visa->yatri_id ?: ('KY-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT));
@@ -526,6 +529,10 @@ class PackagesController extends Controller
             'cash_address'     => \App\Models\SiteSetting::get('pay_cash_address'),
             'cash_note'        => \App\Models\SiteSetting::get('pay_cash_instructions'),
             'cash_map_url'     => \App\Models\SiteSetting::get('pay_cash_map_url'),
+            'zelle_name'       => \App\Models\SiteSetting::get('pay_zelle_name'),
+            'zelle_phone'      => \App\Models\SiteSetting::get('pay_zelle_phone'),
+            'zelle_email'      => \App\Models\SiteSetting::get('pay_zelle_email'),
+            'zelle_note'       => \App\Models\SiteSetting::get('pay_zelle_instructions'),
         ];
     }
 
@@ -858,6 +865,8 @@ class PackagesController extends Controller
                     $yatri_visa->date_of_check = $data['date_of_check'];
                     $yatri_visa->payment_status = "paid";
                 } else if ($payment_type == "Cash") {
+                    $yatri_visa->payment_status = "paid";
+                } else if ($payment_type == "Zelle") {
                     $yatri_visa->payment_status = "paid";
                 } else if ($payment_type == "Pay Later") {
                     $yatri_visa->payment_status = "pending";
