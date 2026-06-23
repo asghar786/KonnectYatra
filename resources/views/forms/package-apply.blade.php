@@ -289,14 +289,14 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Issue Date <span class="text-danger">*</span></label>
-                    <input class="form-control datepicker" type="text" name="issue_date" placeholder="dd-mm-yy" value="{{ @$cookie['issue_date'] }}" required>
+                    <input class="form-control datepicker" type="text" name="issue_date" placeholder="mm-dd-yyyy" value="{{ @$cookie['issue_date'] }}" required>
                     <div class="invalid-feedback">
                       Please provide issue date.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Expiry Date <span class="text-danger">*</span></label>
-                    <input class="form-control datepicker" type="text" name="expiry_date" placeholder="dd-mm-yyyy" value="{{ @$cookie['expiry_date'] }}" min="{{ date('Y-m-d') }}" required>
+                    <input class="form-control datepicker" type="text" name="expiry_date" placeholder="mm-dd-yyyy" value="{{ @$cookie['expiry_date'] }}" min="{{ date('Y-m-d') }}" required>
                     <div class="invalid-feedback">
                       Please provide expiry date.
                     </div>
@@ -364,7 +364,7 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Date of Birth <span class="text-danger">*</span></label>
-                    <input class="form-control dob-datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="dd-mm-yyyy" required>
+                    <input class="form-control dob-datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="mm-dd-yyyy" required>
                     <div class="invalid-feedback">
                       Please provide date of birth.
                     </div>

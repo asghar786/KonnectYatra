@@ -3,7 +3,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"></script>
 <script>
   $( function() {
-    $( ".datepicker" ).datepicker({ dateFormat: 'dd-mm-yyyy' });
+    $( ".datepicker" ).datepicker({ dateFormat: 'mm-dd-yy' });
   } );
   </script>
 <script src="{{asset('adminassets/js/form.js')}}"></script>
@@ -44,7 +44,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.js"></script>
 <script>
   $( function() {
-    $( ".datepicker" ).datepicker({ dateFormat: 'dd-mm-yy' });
+    $( ".datepicker" ).datepicker({ dateFormat: 'mm-dd-yy' });
   } );
   </script>
 <script>

@@ -29,7 +29,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Payment Date :</label>
-                            <input type="text" class="form-control datepicker" value="{{ $balance->payment_date }}" placeholder="dd-mm-yy" name="payment_date"/>
+                            <input type="text" class="form-control datepicker" value="{{ $balance->payment_date }}" placeholder="mm-dd-yyyy" name="payment_date"/>
                         </div>    
                     </div>
 

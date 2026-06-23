@@ -137,14 +137,14 @@
 <script>
   $( function() {
     $( ".datepicker:not(.dob-datepicker)" ).datepicker({
-        dateFormat: 'd M yy',
+        dateFormat: 'mm-dd-yy',
         changeMonth: true,
         changeYear: true,
         yearRange: '1950:+15'
     });
     // Date of Birth: month/year dropdowns, back to 1920, no future dates.
     $( ".dob-datepicker" ).datepicker({
-        dateFormat: 'd M yy',
+        dateFormat: 'mm-dd-yy',
         changeMonth: true,
         changeYear: true,
         yearRange: '1920:' + new Date().getFullYear(),

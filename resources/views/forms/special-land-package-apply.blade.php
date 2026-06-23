@@ -156,14 +156,14 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Issue Date <span class="text-danger">*</span></label>
-                <input class="form-control datepicker" type="text" name="issue_date_{{ $i+1 }}" placeholder="dd-mm-yy" required>
+                <input class="form-control datepicker" type="text" name="issue_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" required>
                 <div class="invalid-feedback">
                     Please provide issue date.
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Expiry Date <span class="text-danger">*</span></label>
-                <input class="form-control datepicker" type="text" name="expiry_date_{{ $i+1 }}" placeholder="dd-mm-yyyy" min="{{ date('Y-m-d') }}" required>
+                <input class="form-control datepicker" type="text" name="expiry_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" min="{{ date('Y-m-d') }}" required>
                 <div class="invalid-feedback">
                     Please provide expiry date.
                 </div>
@@ -216,7 +216,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Date of Birth <span class="text-danger">*</span></label>
-                <input class="form-control datepicker" type="text" name="dob_{{ $i+1 }}" placeholder="dd-mm-yyyy" value="" min="1997-01-01" max="2030-12-31" required>
+                <input class="form-control datepicker" type="text" name="dob_{{ $i+1 }}" placeholder="mm-dd-yyyy" value="" min="1997-01-01" max="2030-12-31" required>
                 <div class="invalid-feedback">
                     Please provide date of birth.
                 </div>
