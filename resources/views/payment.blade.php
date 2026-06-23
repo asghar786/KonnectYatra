@@ -40,6 +40,24 @@
 <!-- inner page banner -->
 <div class="page-banner contact-page section-sp2">
     <div class="container px-5 py-4 mt-4">
+        <div class="row mb-3">
+            <div class="col-12 text-center">
+                <img src="{{ asset('assets/images2/newlogo11.png') }}" alt="KonnectYatra" style="max-height:90px;width:auto;">
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="p-3" style="background:#fff4ef;border:1px solid #ffd9c9;border-radius:12px;">
+                    <p class="mb-2" style="font-size:18px;color:#1c2541;font-weight:700;">
+                        <i class="fas fa-phone"></i> Payment Contact: <span style="color:#f54e18;">+1 (718) 908-9464</span>
+                    </p>
+                    <p class="mb-0" style="color:#1c2541;">
+                        <b>Important:</b> Kindly test the account by sending <b>$1</b> first to the number above.
+                        Upon getting confirmation, then transfer the full / balance amount to the given number.
+                    </p>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-4">
                 <h3 class="text-center">Wahe Guru Ji ka Khalsa</h3>
