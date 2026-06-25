@@ -22,11 +22,14 @@
     .yt-paybrk .pd{color:#157f3d}
     .yt-paybrk .du{color:#e23b2e}
     /* Travelling info cell */
-    .yt-trip{display:flex;flex-direction:column;gap:2px;min-width:150px}
-    .yt-trip-pkg{font-weight:600;color:#1f2a44}
-    .yt-trip-pkg i{color:#e8721e;margin-right:5px}
-    .yt-trip-sub{color:#7b8499;font-size:11.5px;font-weight:600}
-    .yt-ttype{color:#3949ab}
+    .yt-trip{display:flex;flex-direction:column;gap:6px;min-width:140px}
+    .yt-trip-top{display:flex;align-items:center;gap:10px}
+    .yt-ttype{font-weight:600;color:#1f2a44;white-space:nowrap}
+    .yt-trip-toggle{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#1c5fd6;color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;padding:0;transition:background .12s}
+    .yt-trip-toggle:hover{background:#1750bd}
+    .yt-trip-details{background:#f7f9fc;border:1px solid #eef0f4;border-radius:8px;padding:8px 10px;font-size:12px;color:#5b6478;display:flex;flex-direction:column;gap:4px}
+    .yt-trip-details div{display:flex;align-items:center;gap:7px}
+    .yt-trip-details i{color:#e8721e;width:14px;text-align:center}
     /* Visa status badge */
     .yt-vbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
     .yt-vbadge.pending{background:#fff4e5;color:#b76e00}
@@ -99,7 +102,8 @@
                             $pending = (int) @$package->pending_amount;
                             $paid = $total - $pending;
                             $isPaid = $pending <= 0;
-                            $ticket = @$package->ticket_type ? ucwords(str_replace('_', ' ', $package->ticket_type)) : '';
+                            $ticketMap = ['round_trip' => 'Round Trip', 'one_way' => 'One Way', 'land' => 'Land Trip'];
+                            $ticket = $ticketMap[@$package->ticket_type] ?? (@$package->ticket_type ? ucwords(str_replace('_', ' ', $package->ticket_type)) : '—');
                             $vs = @$package->visa_status ?: 'Pending';
                             $vsClass = ['Pending' => 'pending', 'In Process' => 'process', 'Approved' => 'approved', 'Rejected' => 'rejected'][$vs] ?? 'pending';
                         @endphp
@@ -110,11 +114,15 @@
                             <td>{{ @$package->passport ?: '—' }}</td>
                             <td>
                                 <div class="yt-trip">
-                                    <span class="yt-trip-pkg"><i class="fa fa-suitcase"></i>{{ optional(@$package->package)->name ?: '—' }}</span>
-                                    <span class="yt-trip-sub">
-                                        @if($ticket)<span class="yt-ttype">{{ $ticket }}</span>@endif
-                                        @if(optional(@$package->package)->month_year) &middot; {{ $package->package->month_year }} @endif
-                                    </span>
+                                    <div class="yt-trip-top">
+                                        <span class="yt-ttype">{{ $ticket }}</span>
+                                        <button type="button" class="yt-trip-toggle" aria-expanded="false" title="View trip details"><i class="fa fa-plus"></i></button>
+                                    </div>
+                                    <div class="yt-trip-details" style="display:none;">
+                                        <div><i class="fa fa-suitcase"></i> {{ optional(@$package->package)->name ?: '—' }}</div>
+                                        @if(optional(@$package->package)->month_year)<div><i class="fa fa-calendar"></i> {{ $package->package->month_year }}</div>@endif
+                                        <div><i class="fa fa-tag"></i> {{ @$package->package_type ?: '—' }}</div>
+                                    </div>
                                 </div>
                             </td>
                             <td>
@@ -171,4 +179,18 @@
     </div>
 </main>
 <div class="ttr-overlay"></div>
+@endsection
+
+@section('js')
+<script>
+    // Travelling Info: expand/collapse trip details; the blue +/- toggles.
+    $(document).on('click', '.yt-trip-toggle', function () {
+        var $btn = $(this);
+        var $details = $btn.closest('.yt-trip').find('.yt-trip-details');
+        var willOpen = !$details.is(':visible');
+        $details.toggle(willOpen);
+        $btn.find('i').toggleClass('fa-plus', !willOpen).toggleClass('fa-minus', willOpen);
+        $btn.attr('aria-expanded', willOpen);
+    });
+</script>
 @endsection
