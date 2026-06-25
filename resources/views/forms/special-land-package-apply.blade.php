@@ -131,7 +131,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Passport No <span class="text-danger">*</span></label>
-                <input class="form-control" type="text" name="passport_{{ $i+1 }}" placeholder="Enter Passport No" required>
+                <input class="form-control" type="text" name="passport_{{ $i+1 }}" placeholder="Enter Passport No" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                 <div class="invalid-feedback">
                     Please provide valid passport.
                 </div>
@@ -156,14 +156,14 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Issue Date <span class="text-danger">*</span></label>
-                <input class="form-control datepicker" type="text" name="issue_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" required>
+                <input class="form-control datepicker passport-datepicker" type="text" name="issue_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" required>
                 <div class="invalid-feedback">
                     Please provide issue date.
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Expiry Date <span class="text-danger">*</span></label>
-                <input class="form-control datepicker" type="text" name="expiry_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" min="{{ date('Y-m-d') }}" required>
+                <input class="form-control datepicker passport-datepicker" type="text" name="expiry_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" min="{{ date('Y-m-d') }}" required>
                 <div class="invalid-feedback">
                     Please provide expiry date.
                 </div>
