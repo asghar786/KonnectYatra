@@ -571,7 +571,7 @@
                 <div class="card-body row pt-3">
                   <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                     <label for="profession" class="form-label">Traveller's Profession <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control w-50" value="{{ @$cookie['profession'] }}" name="profession" id="profession" placeholder="Enter Profession" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <input type="text" class="form-control w-50" value="{{ @$cookie['profession'] }}" name="profession" id="profession" placeholder="Enter Profession" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                     <div class="invalid-feedback">
                       Please provide profession.
                     </div>
@@ -602,6 +602,17 @@
                       <div class="invalid-feedback">
                         Please select any one.
                       </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-12 col-md-12 col-sm-12 mb-3 pk_entry_area" @if(@$cookie['pk_travel_history'] != "yes") style="display: none;" @endif>
+                    <label>How did you enter Pakistan? <span class="text-danger">*</span></label>
+                    <div class="form-check row">
+                      <input class="mr-1" type="radio" name="pk_entry_port" id="pk_entry_lahore" value="Lahore Airport" @if(@$cookie['pk_entry_port'] == "Lahore Airport" || empty(@$cookie['pk_entry_port'])) checked @endif>
+                      <label class="form-check-label mr-3" for="pk_entry_lahore">Lahore Airport</label>
+                      <input class="mr-1" type="radio" name="pk_entry_port" id="pk_entry_islamabad" value="Islamabad Airport" @if(@$cookie['pk_entry_port'] == "Islamabad Airport") checked @endif>
+                      <label class="form-check-label mr-3" for="pk_entry_islamabad">Islamabad Airport</label>
+                      <input class="mr-1" type="radio" name="pk_entry_port" id="pk_entry_wagah" value="Wagah Border" @if(@$cookie['pk_entry_port'] == "Wagah Border") checked @endif>
+                      <label class="form-check-label mr-3" for="pk_entry_wagah">Wagah Border</label>
                     </div>
                   </div>
                   <div class="col-lg-12 col-md-12 col-sm-12 mt-3 d-flex justify-content-end">
@@ -1003,6 +1014,15 @@ td {
         $(".spouse_area").css("display", "block");
       } else {
         $(".spouse_area").css("display", "none");
+      }
+    });
+
+    // Show the "How did you enter Pakistan?" options only when a Pakistani visa was granted before.
+    $(document).on('change', '.pk_travel_history', function() {
+      if ($(".pk_travel_history:checked").val() === 'yes') {
+        $(".pk_entry_area").show();
+      } else {
+        $(".pk_entry_area").hide();
       }
     });
 

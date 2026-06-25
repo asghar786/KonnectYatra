@@ -187,6 +187,9 @@
     </ul></td>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Granted Pakistani visa before</span><span class="val">{{ $v(ucfirst($yatri->pk_travel_history)) }}</span></li>
+        @if(@$yatri->pk_travel_history == 'yes')
+        <li><span class="lbl">Entered Pakistan via</span><span class="val">{{ $v($yatri->pk_entry_port) }}</span></li>
+        @endif
     </ul></td>
 </tr></table>
 

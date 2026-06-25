@@ -367,6 +367,9 @@ $field = function ($label, $value) {
                             </ul>
                             <ul class="mb-0 col-lg-6" style="list-style-type:none;">
                                 {!! $field('Granted Pakistani visa before', @$yatri->pk_travel_history) !!}
+                                @if(@$yatri->pk_travel_history == 'yes')
+                                {!! $field('Entered Pakistan via', @$yatri->pk_entry_port) !!}
+                                @endif
                             </ul>
 
                             <h6 class="col-lg-12 mt-4 mb-2" style="font-weight:700;border-bottom:2px solid #f54e18;padding-bottom:6px;">Gurdwara &amp; Reference</h6>
