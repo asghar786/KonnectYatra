@@ -198,25 +198,25 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="first_name_{{ $i+1 }}" id="first_name" placeholder="Enter First Name" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                <input type="text" class="form-control" name="first_name_{{ $i+1 }}" id="first_name" placeholder="Enter First Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                 <div class="invalid-feedback">
                     Please provide first name.
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label for="middle_name" class="form-label">Middle Name</label>
-                <input type="text" class="form-control" name="middle_name_{{ $i+1 }}" id="middle_name" placeholder="Enter Middle Name" onkeydown="return /[a-z ]/i.test(event.key)">
+                <input type="text" class="form-control" name="middle_name_{{ $i+1 }}" id="middle_name" placeholder="Enter Middle Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="last_name_{{ $i+1 }}" id="last_name" placeholder="Enter Last Name" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                <input type="text" class="form-control" name="last_name_{{ $i+1 }}" id="last_name" placeholder="Enter Last Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                 <div class="invalid-feedback">
                     Please provide last name.
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Date of Birth <span class="text-danger">*</span></label>
-                <input class="form-control datepicker" type="text" name="dob_{{ $i+1 }}" placeholder="mm-dd-yyyy" value="" min="1997-01-01" max="2030-12-31" required>
+                <input class="form-control dob-datepicker" type="text" name="dob_{{ $i+1 }}" placeholder="DD-MMM-YYYY" value="" required>
                 <div class="invalid-feedback">
                     Please provide date of birth.
                 </div>
@@ -274,7 +274,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" name="email_{{ $i+1 }}" id="email_{{ $i+1 }}" placeholder="Enter Email Address" required>
+                <input type="email" class="form-control" name="email_{{ $i+1 }}" id="email_{{ $i+1 }}" placeholder="Enter Email Address" style="text-transform:lowercase;" oninput="this.value=this.value.toLowerCase()" required>
                 <div class="invalid-feedback">
                     Please provide email address.
                 </div>

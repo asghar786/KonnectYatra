@@ -198,9 +198,10 @@
         beforeShow: passportBeforeShow,
         onChangeMonthYear: passportOnChangeMonthYear
     });
-    // Date of Birth: month/year dropdowns, back to 1920, no future dates.
+    // Date of Birth: DD-MMM-YYYY format, month/year dropdowns, back to 1920, no future dates.
     $( ".dob-datepicker" ).datepicker({
-        dateFormat: 'mm-dd-yy',
+        dateFormat: passportFmt,
+        monthNamesShort: passportMonths,
         changeMonth: true,
         changeYear: true,
         yearRange: '1920:' + new Date().getFullYear(),

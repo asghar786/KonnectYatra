@@ -346,25 +346,25 @@
                 <div class="card-body row pt-3">
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="first_name" class="form-label">First Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="first_name" value="{{ @$cookie['first_name'] }}" id="first_name" placeholder="Enter First Name" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <input type="text" class="form-control" name="first_name" value="{{ @$cookie['first_name'] }}" id="first_name" placeholder="Enter First Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                     <div class="invalid-feedback">
                       Please provide first name.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="middle_name" class="form-label">Middle Name</label>
-                    <input type="text" class="form-control" name="middle_name" value="{{ @$cookie['middle_name'] }}" id="middle_name" placeholder="Enter Middle Name" onkeydown="return /[a-z ]/i.test(event.key)">
+                    <input type="text" class="form-control" name="middle_name" value="{{ @$cookie['middle_name'] }}" id="middle_name" placeholder="Enter Middle Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="last_name" class="form-label">Last Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="last_name" value="{{ @$cookie['last_name'] }}" id="last_name" placeholder="Enter Last Name" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <input type="text" class="form-control" name="last_name" value="{{ @$cookie['last_name'] }}" id="last_name" placeholder="Enter Last Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                     <div class="invalid-feedback">
                       Please provide last name.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Date of Birth <span class="text-danger">*</span></label>
-                    <input class="form-control dob-datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="mm-dd-yyyy" required>
+                    <input class="form-control dob-datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="DD-MMM-YYYY" required>
                     <div class="invalid-feedback">
                       Please provide date of birth.
                     </div>
@@ -427,14 +427,14 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="email" class="form-label">Primary Email Address <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" name="email" value="{{ @$cookie['email'] }}" id="email" placeholder="Enter Email Address" required>
+                    <input type="email" class="form-control" name="email" value="{{ @$cookie['email'] }}" id="email" placeholder="Enter Email Address" style="text-transform:lowercase;" oninput="this.value=this.value.toLowerCase()" required>
                     <div class="invalid-feedback">
                       Please provide email address.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="email" class="form-label">Other Email Address </label>
-                    <input type="email" class="form-control" name="other_email" value="{{ @$cookie['other_email'] }}" id="email" placeholder="Enter Email Address">
+                    <input type="email" class="form-control" name="other_email" value="{{ @$cookie['other_email'] }}" id="email" placeholder="Enter Email Address" style="text-transform:lowercase;" oninput="this.value=this.value.toLowerCase()">
                     <div class="invalid-feedback">
                       Please provide email address.
                     </div>
