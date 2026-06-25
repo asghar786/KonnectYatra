@@ -621,7 +621,7 @@
                       <input class="form-control entry-datepicker" type="text" name="pk_entry_date" id="pk_entry_date" placeholder="DD-MMM-YYYY" value="{{ @$cookie['pk_entry_date'] }}" autocomplete="off" required>
                     </div>
                     <div class="pk_entry_year_field" style="display: none;">
-                      <select class="form-control" name="pk_entry_year" id="pk_entry_year" disabled required>
+                      <select class="form-control no-selectpicker" name="pk_entry_year" id="pk_entry_year" disabled required>
                         <option value="">Select Year</option>
                         @for($y = (int) date('Y'); $y >= 1980; $y--)
                         <option value="{{ $y }}">{{ $y }}</option>
