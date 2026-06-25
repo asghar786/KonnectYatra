@@ -59,7 +59,7 @@
         <tbody>
             @forelse($itenaries as $row)
             <tr>
-                <td>{{ $row->id }}</td>
+                <td>{{ $loop->iteration }}</td>
                 <td>{{ optional($row->created_at)->format('d M Y') }}<br><span class="muted">{{ optional($row->created_at)->format('h:i A') }}</span></td>
                 <td class="name">{{ $row->name ?: '—' }}</td>
                 <td>{{ $row->email ?: '—' }}</td>

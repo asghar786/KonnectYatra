@@ -72,7 +72,7 @@
                         <tbody>
                             @foreach($itenaries as $itenary)
                             <tr>
-                                <td>{{ $itenary->id }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td class="it-when" data-order="{{ optional($itenary->created_at)->timestamp }}">
                                     {{ optional($itenary->created_at)->format('d M Y') ?: '—' }}<br>
                                     <small>{{ optional($itenary->created_at)->format('h:i A') }}</small>
@@ -121,12 +121,21 @@
 <script>
     $(function () {
         if ($.fn.DataTable) {
-            $('#itenaryTable').DataTable({
-                order: [[0, 'desc']],
+            var table = $('#itenaryTable').DataTable({
+                order: [[1, 'desc']], // newest submitted first
                 pageLength: 25,
-                columnDefs: [{ orderable: false, targets: [3, 9] }],
+                columnDefs: [
+                    { orderable: false, searchable: false, targets: 0 }, // serial column
+                    { orderable: false, targets: [3, 9] }
+                ],
                 language: { search: 'Search requests:' }
             });
+            // Keep the # column as a running serial (1,2,3…) that follows sort/search/paging.
+            table.on('order.dt search.dt', function () {
+                table.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).draw();
         }
     });
 </script>
