@@ -241,9 +241,7 @@
                                     <span class="col-lg-4" style="font-weight: 500;">Uploaded Photo:</span>
                                     <span class="col-lg-8">
                                         @if(!empty($visa->photo))
-                                            <a href="{{asset('photo_uploads')}}/{{$visa->photo}}" data-lightbox="image-gallery">
-                                                <img src="{{asset('photo_uploads')}}/{{$visa->photo}}" style="width: 170px; height: 140px;">
-                                            </a>
+                                            @include('admin.visa._doc_preview', ['url' => asset('photo_uploads').'/'.$visa->photo])
                                             <div class="download-icon mt-3">
                                                 <a href="{{asset('photo_uploads')}}/{{$visa->photo}}" class="btn btn-success" style="width: 170px;" download>
                                                     <i class="fa fa-download"></i> Download
@@ -260,9 +258,7 @@
                                     <span class="col-lg-4" style="font-weight: 500;">Uploaded Passport:</span>
                                     <span class="col-lg-8">
                                         @if(!empty($visa->us_passport))
-                                            <a href="{{asset('passport_uploads')}}/{{$visa->us_passport}}" data-lightbox="image-gallery">
-                                                <img src="{{asset('passport_uploads')}}/{{$visa->us_passport}}" style="width: 170px; height: 140px;">
-                                            </a>
+                                            @include('admin.visa._doc_preview', ['url' => asset('passport_uploads').'/'.$visa->us_passport])
                                             <div class="download-icon mt-3">
                                                 <a href="{{asset('passport_uploads')}}/{{$visa->us_passport}}" class="btn btn-success" style="width: 170px;" download>
                                                     <i class="fa fa-download"></i> Download
@@ -279,9 +275,7 @@
                                     <span class="col-lg-4" style="font-weight: 500;">Uploaded ID/Driving License:</span>
                                     <span class="col-lg-8">
                                         @if(!empty($visa->driving_license))
-                                            <a href="{{asset('drivinglicense_uploads')}}/{{$visa->driving_license}}" data-lightbox="image-gallery">
-                                                <img src="{{asset('drivinglicense_uploads')}}/{{$visa->driving_license}}" style="width: 170px; height: 140px;">
-                                            </a>
+                                            @include('admin.visa._doc_preview', ['url' => asset('drivinglicense_uploads').'/'.$visa->driving_license])
                                             <div class="download-icon mt-3">
                                                 <a href="{{asset('drivinglicense_uploads')}}/{{$visa->driving_license}}" class="btn btn-success" style="width: 170px;" download>
                                                     <i class="fa fa-download"></i> Download
@@ -298,9 +292,7 @@
                                     <span class="col-lg-4" style="font-weight: 500;">Uploaded Green Card:</span>
                                     <span class="col-lg-8">
                                         @if(!empty($visa->green_card))
-                                            <a href="{{asset('greencard_uploads')}}/{{$visa->green_card}}" data-lightbox="image-gallery">
-                                                <img src="{{asset('greencard_uploads')}}/{{$visa->green_card}}" style="width: 170px; height: 140px;">
-                                            </a>
+                                            @include('admin.visa._doc_preview', ['url' => asset('greencard_uploads').'/'.$visa->green_card])
                                             <div class="download-icon mt-3">
                                                 <a href="{{asset('greencard_uploads')}}/{{$visa->green_card}}" class="btn btn-success" style="width: 170px;" download>
                                                     <i class="fa fa-download"></i> Download
