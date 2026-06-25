@@ -1010,6 +1010,22 @@ td {
       return ('' + iso).toLowerCase();
     }
 
+    // Format the typed digits into the country's own example pattern (the placeholder intl-tel-input
+    // sets, e.g. US "201-555-0123"). Digits drop into the digit slots; extra digits are dropped, so
+    // the length is naturally restricted to that country's number length.
+    function maskToPattern(input) {
+      var mask = input.getAttribute('placeholder') || '';
+      var digits = input.value.replace(/\D/g, '');
+      if (!mask) { input.value = digits; return; } // utils not loaded yet -> keep raw digits
+      var slots = (mask.match(/\d/g) || []).length;
+      digits = digits.slice(0, slots);
+      var out = '', di = 0;
+      for (var i = 0; i < mask.length && di < digits.length; i++) {
+        out += /\d/.test(mask[i]) ? digits[di++] : mask[i];
+      }
+      input.value = out;
+    }
+
     var instances = [];
     $('.phone_intl').each(function() {
       var input = this;
@@ -1043,20 +1059,22 @@ td {
         }
       }
 
+      function onType() { maskToPattern(input); sync(); }
+
       // Seed the visible field from any stored value (international format).
       if (hidden.value) {
         iti.setNumber(hidden.value);
       }
-      input.addEventListener('input', sync);
-      input.addEventListener('blur', sync);
-      iti.promise && iti.promise.then(sync); // re-run once utils (validation) has loaded
-      instances.push({ input: input, iti: iti, sync: sync });
+      input.addEventListener('input', onType);
+      input.addEventListener('blur', onType);
+      iti.promise && iti.promise.then(onType); // re-format/validate once utils + placeholder are ready
+      instances.push({ input: input, iti: iti, sync: sync, onType: onType });
     });
 
-    // When the nationality changes, lock every mobile field to that country and re-validate.
+    // When the nationality changes, lock every mobile field to that country and re-format/validate.
     $(document).on('change', "select[name='nationality']", function() {
       var iso = nationalityIso();
-      instances.forEach(function(o) { o.iti.setCountry(iso); o.sync(); });
+      instances.forEach(function(o) { o.iti.setCountry(iso); o.onType(); });
     });
   });
 </script>
