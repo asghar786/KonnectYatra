@@ -143,10 +143,17 @@
         yearRange: '1950:+15'
     });
     // Passport Issue/Expiry: a passport is valid for max 10 years, so cap the calendar
-    // to Jan 1 2016 – Dec 31 2036. Changing the month/year dropdown fills the field, and
-    // picking an Issue Date auto-fills the Expiry Date 10 years later (minus 1 day), editable.
+    // to Jan 1 2016 – Dec 31 2036. Dates use the DD-MMM-YYYY format (e.g. 22-JUL-2032).
+    // Changing the month/year dropdown fills the field, and picking an Issue Date
+    // auto-fills the Expiry Date 10 years later (minus 1 day), editable.
+    var passportFmt = 'dd-M-yy';
+    var passportMonths = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    function passportFormat(date) {
+        return $.datepicker.formatDate(passportFmt, date, { monthNamesShort: passportMonths });
+    }
     $( ".passport-datepicker" ).datepicker({
-        dateFormat: 'mm-dd-yy',
+        dateFormat: passportFmt,
+        monthNamesShort: passportMonths,
         changeMonth: true,
         changeYear: true,
         yearRange: '2016:2036',
@@ -163,17 +170,15 @@
         onChangeMonthYear: function(year, month, inst) {
             if (!inst.input.data('pmReady')) return;
             var day = inst.selectedDay ? inst.selectedDay : 1;
-            $(this).val($.datepicker.formatDate('mm-dd-yy', new Date(year, month - 1, day)));
+            $(this).val(passportFormat(new Date(year, month - 1, day)));
         },
         onSelect: function(dateText, inst) {
             var name = inst.input.attr('name') || '';
             if (name.indexOf('issue_date') === 0) {
-                var p = dateText.split('-'); // mm-dd-yyyy
-                var issue = new Date(parseInt(p[2], 10), parseInt(p[0], 10) - 1, parseInt(p[1], 10));
-                var expiry = new Date(issue.getFullYear() + 10, issue.getMonth(), issue.getDate());
+                var expiry = new Date(inst.selectedYear + 10, inst.selectedMonth, inst.selectedDay);
                 expiry.setDate(expiry.getDate() - 1); // 10 years minus one day
                 var expName = name.replace('issue_date', 'expiry_date');
-                $("input[name='" + expName + "']").val($.datepicker.formatDate('mm-dd-yy', expiry));
+                $("input[name='" + expName + "']").val(passportFormat(expiry));
             }
         }
     });

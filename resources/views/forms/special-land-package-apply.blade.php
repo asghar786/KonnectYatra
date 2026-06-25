@@ -156,14 +156,14 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Issue Date <span class="text-danger">*</span></label>
-                <input class="form-control datepicker passport-datepicker" type="text" name="issue_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" required>
+                <input class="form-control datepicker passport-datepicker" type="text" name="issue_date_{{ $i+1 }}" placeholder="DD-MMM-YYYY" required>
                 <div class="invalid-feedback">
                     Please provide issue date.
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Expiry Date <span class="text-danger">*</span></label>
-                <input class="form-control datepicker passport-datepicker" type="text" name="expiry_date_{{ $i+1 }}" placeholder="mm-dd-yyyy" min="{{ date('Y-m-d') }}" required>
+                <input class="form-control datepicker passport-datepicker" type="text" name="expiry_date_{{ $i+1 }}" placeholder="DD-MMM-YYYY" min="{{ date('Y-m-d') }}" required>
                 <div class="invalid-feedback">
                     Please provide expiry date.
                 </div>
