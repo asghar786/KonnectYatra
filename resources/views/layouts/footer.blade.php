@@ -431,14 +431,22 @@
         }
     });
 </script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/css/intlTelInput.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/intlTelInput.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/css/intlTelInput.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/intlTelInput.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   .iti { width: 100%; }
   .iti input.phone_intl { width: 100%; }
   /* Country is locked to the traveller's nationality: show the flag/dial code but block the dropdown. */
   .iti .iti__selected-flag { pointer-events: none; cursor: default; }
   .iti .iti__arrow { display: none; }
+  /* Green tick at the end of a file field once a file is chosen. */
+  .file-check-wrap { position: relative; }
+  .file-check-wrap .file-check {
+    position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
+    color: #28a745; font-size: 20px; line-height: 1; display: none; pointer-events: none;
+  }
+  .file-check-wrap.has-file .file-check { display: inline-block; }
+  .file-check-wrap.has-file .form-control { border-color: #28a745; padding-right: 38px; }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

@@ -1018,7 +1018,7 @@ td {
         separateDialCode: true,   // show the +code beside the flag
         autoPlaceholder: 'polite',
         formatOnDisplay: true,
-        utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js'
+        utilsScript: 'https://cdn.jsdelivr.net/npm/intl-tel-input@17.0.19/build/js/utils.js'
       });
       var hidden = document.getElementById(input.getAttribute('data-hidden'));
 
@@ -1365,6 +1365,22 @@ $(document).on('change', '.passenger_passport', function() {
     $('#extra_docs').on('click', '.remove-doc', function () {
       $(this).closest('.extra-doc-row').remove();
     });
+
+    // Show a green circled check at the end of an upload field once a file is selected.
+    function wrapFileField(input) {
+      var $i = $(input);
+      if ($i.closest('.file-check-wrap').length) return; // already wrapped
+      $i.wrap('<div class="file-check-wrap"></div>');
+      $i.after('<span class="file-check"><i class="fa fas fa-check-circle"></i></span>');
+    }
+    function refreshFileCheck(input) {
+      wrapFileField(input);
+      $(input).closest('.file-check-wrap').toggleClass('has-file', !!(input.files && input.files.length));
+    }
+    // Wrap the fixed document inputs up front so the layout is consistent.
+    $('#faq6 input[type="file"]').each(function () { wrapFileField(this); });
+    // Any file input (including dynamically added document rows) toggles its tick on change.
+    $(document).on('change', 'input[type="file"]', function () { refreshFileCheck(this); });
   });
 
   // On "Proceed to Payment", if a mandatory field is missing, tell the
