@@ -132,6 +132,9 @@ Route::group(['prefix' => 'admin',
     Route::get('/yatri-visa',[PackagesController::class, 'yatri_visa'])->name('yatri-visa');
     Route::get('/yatri-visa-delete/{id}',[PackagesController::class, 'delete_yatri'])->name('yatri-visa-delete');
     Route::get('/yatri-visa-edit/{id}',[PackagesController::class, 'edit_yatri_visa'])->name('yatri-visa-edit');
+    Route::get('/yatri-visa-status/{id}/{status}',[PackagesController::class, 'update_visa_status'])->name('yatri-visa-status');
+    Route::get('/yatri-comments/{id}',[PackagesController::class, 'yatri_comments'])->name('yatri-comments');
+    Route::post('/yatri-comments/{id}',[PackagesController::class, 'store_yatri_comment'])->name('yatri-comments-store');
     Route::get('/yatri-visa-view/{id}',[PackagesController::class, 'view_yatri_visa'])->name('yatri-visa-view');
     Route::get('/yatri-package-edit/{id}',[PackagesController::class, 'edit_yatri_package']);
     Route::post('/yatri-visa-update/{id}',[PackagesController::class, 'yatri_visa_update'])->name('yatri_visa_update');

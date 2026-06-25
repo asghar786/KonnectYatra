@@ -16,6 +16,29 @@
     .yt-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
     .yt-badge.paid{background:#e7f8ec;color:#157f3d}
     .yt-badge.unpaid{background:#feeceb;color:#d9534f}
+    /* Consolidated payment cell */
+    .yt-pay{display:flex;flex-direction:column;gap:2px}
+    .yt-paybrk{color:#7b8499;font-size:11.5px;font-weight:600;white-space:nowrap}
+    .yt-paybrk .pd{color:#157f3d}
+    .yt-paybrk .du{color:#e23b2e}
+    /* Travelling info cell */
+    .yt-trip{display:flex;flex-direction:column;gap:2px;min-width:150px}
+    .yt-trip-pkg{font-weight:600;color:#1f2a44}
+    .yt-trip-pkg i{color:#e8721e;margin-right:5px}
+    .yt-trip-sub{color:#7b8499;font-size:11.5px;font-weight:600}
+    .yt-ttype{color:#3949ab}
+    /* Visa status badge */
+    .yt-vbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+    .yt-vbadge.pending{background:#fff4e5;color:#b76e00}
+    .yt-vbadge.process{background:#e7f0fe;color:#1c5fd6}
+    .yt-vbadge.approved{background:#e7f8ec;color:#157f3d}
+    .yt-vbadge.rejected{background:#feeceb;color:#d9534f}
+    /* Comments count button */
+    .yt-comments{display:inline-flex;align-items:center;gap:7px;background:#f4f6fa;color:#3a4458;border:1px solid #e3e6ec;border-radius:9px;padding:6px 12px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+    .yt-comments:hover{background:#1f2a44;color:#fff;border-color:#1f2a44}
+    .yt-comments .cnt{background:#e8721e;color:#fff;border-radius:20px;padding:0 7px;font-size:11px;min-width:18px;text-align:center;line-height:18px}
+    .yt-comments:hover .cnt{background:#fff;color:#e8721e}
+    .yt-menu .dropdown-header{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#98a2b5;padding:6px 12px 2px}
 
     .yt-action-btn{display:inline-flex;align-items:center;gap:7px;background:#1f2a44;color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:background .12s}
     .yt-action-btn:hover{background:#33415f;color:#fff}
@@ -60,11 +83,12 @@
                             <th>Yatri #</th>
                             <th>Name</th>
                             <th>Passport #</th>
-                            <th>Total Amount</th>
-                            <th>Paid Amount</th>
-                            <th>Pending Amount</th>
-                            <th>Payment Status</th>
-                            <th class="text-center">Action</th>
+                            <th>Travelling Info</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Visa Status</th>
+                            <th>Comments</th>
+                            <th class="text-center not-export">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -75,21 +99,42 @@
                             $pending = (int) @$package->pending_amount;
                             $paid = $total - $pending;
                             $isPaid = $pending <= 0;
+                            $ticket = @$package->ticket_type ? ucwords(str_replace('_', ' ', $package->ticket_type)) : '';
+                            $vs = @$package->visa_status ?: 'Pending';
+                            $vsClass = ['Pending' => 'pending', 'In Process' => 'process', 'Approved' => 'approved', 'Rejected' => 'rejected'][$vs] ?? 'pending';
                         @endphp
                         <tr>
                             <td><span class="yt-idx">{{ $count }}</span></td>
                             <td><span class="yt-yid">{{ @$package->yatri_id }}</span></td>
                             <td><span class="yt-name">{{ trim(@$package->first_name.' '.@$package->middle_name.' '.@$package->last_name) }}</span></td>
                             <td>{{ @$package->passport ?: '—' }}</td>
-                            <td><span class="yt-amt total">{{ @$package->package_type ?: '—' }}</span></td>
-                            <td><span class="yt-amt paid">${{ number_format($paid) }}</span></td>
-                            <td><span class="yt-amt pend">{{ $pending > 0 ? '$'.number_format($pending) : '$0' }}</span></td>
+                            <td>
+                                <div class="yt-trip">
+                                    <span class="yt-trip-pkg"><i class="fa fa-suitcase"></i>{{ optional(@$package->package)->name ?: '—' }}</span>
+                                    <span class="yt-trip-sub">
+                                        @if($ticket)<span class="yt-ttype">{{ $ticket }}</span>@endif
+                                        @if(optional(@$package->package)->month_year) &middot; {{ $package->package->month_year }} @endif
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="yt-pay">
+                                    <span class="yt-amt total">{{ @$package->package_type ?: '—' }}</span>
+                                    <span class="yt-paybrk"><span class="pd">Paid ${{ number_format($paid) }}</span> &middot; <span class="du">Due {{ $pending > 0 ? '$'.number_format($pending) : '$0' }}</span></span>
+                                </div>
+                            </td>
                             <td>
                                 @if($isPaid)
                                     <span class="yt-badge paid"><i class="fa fa-check-circle"></i> Paid</span>
                                 @else
                                     <span class="yt-badge unpaid"><i class="fa fa-clock"></i> Unpaid</span>
                                 @endif
+                            </td>
+                            <td><span class="yt-vbadge {{ $vsClass }}">{{ $vs }}</span></td>
+                            <td>
+                                <a href="{{ route('yatri-comments', $package->id) }}" class="yt-comments" title="Communication log">
+                                    <i class="fa fa-comments"></i> <span class="cnt">{{ (int) @$package->comments_count }}</span>
+                                </a>
                             </td>
                             <td class="text-center">
                                 <div class="dropdown">
@@ -102,8 +147,15 @@
                                         @if(@$package->payment_status == "pending")
                                         <a href="{{ url('admin/payment', $package->id) }}" class="dropdown-item"><i class="fa fa-dollar-sign"></i> Add Payment</a>
                                         @endif
+                                        <a href="{{ route('yatri-comments', $package->id) }}" class="dropdown-item"><i class="fa fa-comments"></i> Comments</a>
                                         <a href="{{ url('admin/add-remarks', $package->id) }}" class="dropdown-item"><i class="fa fa-comment"></i> Remarks</a>
                                         <a href="{{ url('admin/add-balance/'.$package->id) }}" class="dropdown-item"><i class="fa fa-wallet"></i> Manage Balance</a>
+                                        <div class="dropdown-divider"></div>
+                                        <h6 class="dropdown-header">Visa Status</h6>
+                                        <a href="{{ route('yatri-visa-status', [$package->id, 'pending']) }}" class="dropdown-item"><i class="fa fa-hourglass-half"></i> Pending</a>
+                                        <a href="{{ route('yatri-visa-status', [$package->id, 'in_process']) }}" class="dropdown-item"><i class="fa fa-spinner"></i> In Process</a>
+                                        <a href="{{ route('yatri-visa-status', [$package->id, 'approved']) }}" class="dropdown-item"><i class="fa fa-check"></i> Approved</a>
+                                        <a href="{{ route('yatri-visa-status', [$package->id, 'rejected']) }}" class="dropdown-item"><i class="fa fa-times"></i> Rejected</a>
                                         <div class="dropdown-divider"></div>
                                         <a href="{{ url('admin/yatri-visa-delete/'.$package->id) }}" class="dropdown-item danger show_confirm"><i class="fa fa-trash"></i> Delete</a>
                                     </div>

@@ -554,12 +554,12 @@ class PackagesController extends Controller
     if (empty($active_season)) {
       $active_season = Season::orderBy('id', 'DESC')->first();
       if(!empty($active_season)) {
-        $yatries = YatriVisa::with("package")->where("season_id", $active_season->id)->get();
+        $yatries = YatriVisa::with("package")->withCount("comments")->where("season_id", $active_season->id)->get();
       } else {
         $yatries = [];
       }
     } else {
-      $yatries = YatriVisa::with("package")->where("season_id", $active_season)->get();
+      $yatries = YatriVisa::with("package")->withCount("comments")->where("season_id", $active_season)->get();
     }
     foreach ($yatries as $key => $value) {
       $balance = Balance::with("visa")->where('visa_id', $value->id)->get();
@@ -682,6 +682,38 @@ class PackagesController extends Controller
     {
       return back()->with('error','Something went wrong');
     }
+  }
+
+  // Update the visa processing status from the Yatri Bookings list.
+  public function update_visa_status($id, $status)
+  {
+    $map = ['pending' => 'Pending', 'in_process' => 'In Process', 'approved' => 'Approved', 'rejected' => 'Rejected'];
+    $yatri = YatriVisa::find($id);
+    if ($yatri && isset($map[$status])) {
+      $yatri->visa_status = $map[$status];
+      $yatri->save();
+      return back()->with('success', 'Visa status updated to '.$map[$status].'.');
+    }
+    return back()->with('error', 'Something went wrong');
+  }
+
+  // Communication log for a booking: list + add comments so staff remember what was discussed.
+  public function yatri_comments($id)
+  {
+    $yatri = YatriVisa::with('comments')->findOrFail($id);
+    return view('admin.packages.yatri-comments', compact('yatri'));
+  }
+
+  public function store_yatri_comment(Request $request, $id)
+  {
+    $request->validate(['comment' => 'required|string|max:2000']);
+    $yatri = YatriVisa::findOrFail($id);
+    \App\Models\YatriComment::create([
+      'yatri_visa_id' => $yatri->id,
+      'comment'       => $request->comment,
+      'author'        => optional(\Auth::user())->name,
+    ]);
+    return back()->with('success', 'Comment added.');
   }
 
   public function events()
