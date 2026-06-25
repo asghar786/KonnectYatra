@@ -660,30 +660,30 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label>Name of Nearest Gurdwara <span class="text-danger">*</span></label>
-                    <input class="form-control" value="{{ @$cookie['gurdwara_name'] }}" type="text" name="gurdwara_name" id="nearest_gurdwara" placeholder="Enter name of your nearest gurdwara" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <label>Name of Nearest Gurdwara</label>
+                    <input class="form-control" value="{{ @$cookie['gurdwara_name'] }}" type="text" name="gurdwara_name" id="nearest_gurdwara" placeholder="Enter name of your nearest gurdwara" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
                     <div class="invalid-feedback">
                       Please provide nearest gurdwara name.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label>Address <span class="text-danger">*</span></label>
-                    <input class="form-control" value="{{ @$cookie['address'] }}" type="text" name="address" placeholder="Enter Address" required>
+                    <label>Address</label>
+                    <input class="form-control" value="{{ @$cookie['address'] }}" type="text" name="address" placeholder="Enter Address">
                     <div class="invalid-feedback">
                       Please provide address.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label>City <span class="text-danger">*</span></label>
+                    <label>City</label>
                     <input class="form-control" value="{{ @$cookie['city'] }}" type="text" name="city"
-                    placeholder="Enter city" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    placeholder="Enter city" onkeydown="return /[a-z ]/i.test(event.key)">
                     <div class="invalid-feedback">
                       Please provide city.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label>State <span class="text-danger">*</span></label>
-                    <select class="form-control select2js" name="state" required>
+                    <label>State</label>
+                    <select class="form-control select2js" name="state">
                       <option value="AL" @if(@$cookie['state'] == "AL") selected @endif>Alabama</option>
                       <option value="AK" @if(@$cookie['state'] == "AK") selected @endif>Alaska</option>
                       <option value="AZ" @if(@$cookie['state'] == "AZ") selected @endif>Arizona</option>
@@ -747,15 +747,15 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
-                    <label>Zip <span class="text-danger">*</span></label>
-                    <input class="form-control" type="text" value="{{ @$cookie['zip'] }}" name="zip" placeholder="Enter zip" required>
+                    <label>Zip</label>
+                    <input class="form-control" type="text" value="{{ @$cookie['zip'] }}" name="zip" placeholder="Enter zip">
                     <div class="invalid-feedback">
                       Please provide valid zip.
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Name of Secretary/Pardan Gurdwara</label>
-                    <input class="form-control" type="text" value="{{ @$cookie['secetary_name'] }}" name="secetary_name" placeholder="Enter name of secetary gurdwara" onkeydown="return /[a-z ]/i.test(event.key)">
+                    <input class="form-control" type="text" value="{{ @$cookie['secetary_name'] }}" name="secetary_name" placeholder="Enter name of secetary gurdwara" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
                     <div class="invalid-feedback">
                       Please provide name of secretary.
                     </div>
@@ -770,7 +770,7 @@
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Reference Person Name</label>
                     <input class="form-control" type="text" value="{{ @$cookie['reference_name'] }}" name="reference_name"
-                    placeholder="Enter name of reference contact person" onkeydown="return /[a-z ]/i.test(event.key)">
+                    placeholder="Enter name of reference contact person" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
                     <div class="invalid-feedback">
                       Please provide name of secretary.
                     </div>
