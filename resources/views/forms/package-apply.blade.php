@@ -441,10 +441,7 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="phone_display" class="form-label">Primary Mobile Number <span class="text-danger">*</span></label>
-                    <div style="display:flex; align-items:stretch;">
-                      <span class="phone-code" style="display:inline-flex; align-items:center; padding:0 12px; border:1px solid #ced4da; border-right:0; background:#f1f1f1; color:#333; white-space:nowrap;">+1</span>
-                      <input type="tel" class="form-control phone_intl" data-hidden="phone" placeholder="(305) 785-3690" id="phone_display" style="border-top-left-radius:0; border-bottom-left-radius:0;" required>
-                    </div>
+                    <input type="tel" class="form-control phone_intl" data-hidden="phone" id="phone_display" autocomplete="off" required>
                     <input type="hidden" name="phone" id="phone" value="{{ @$cookie['phone'] }}">
                     <div class="invalid-feedback">
                       Please provide your mobile number.
@@ -452,10 +449,7 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="other_phone_display" class="form-label">Other Mobile Number</label>
-                    <div style="display:flex; align-items:stretch;">
-                      <span class="phone-code" style="display:inline-flex; align-items:center; padding:0 12px; border:1px solid #ced4da; border-right:0; background:#f1f1f1; color:#333; white-space:nowrap;">+1</span>
-                      <input type="tel" class="form-control phone_intl" data-hidden="other_phone" placeholder="(305) 785-3690" id="other_phone_display" style="border-top-left-radius:0; border-bottom-left-radius:0;">
-                    </div>
+                    <input type="tel" class="form-control phone_intl" data-hidden="other_phone" id="other_phone_display" autocomplete="off">
                     <input type="hidden" name="other_phone" id="other_phone" value="{{ @$cookie['other_phone'] }}">
                     <div class="invalid-feedback">
                       Please provide any other mobile number.
@@ -1004,80 +998,68 @@ td {
   });
 </script>
 <script>
-  // International mobile numbers: the country dialing code is derived from the traveller's
-  // nationality (non-editable prefix), and the number is formatted like +1 (305) 785-3690.
+  // International mobile numbers (intl-tel-input / libphonenumber): the country is locked to
+  // the traveller's selected nationality (dial code shown, not user-changeable), and the number
+  // is formatted & validated per that country. The hidden field stores the full international
+  // number (e.g. +1 305-785-3690 / +44 7400 123456) for the backend.
   $(document).ready(function() {
-    var DIAL_CODES = {
-      "AF":"+93","AL":"+355","DZ":"+213","AS":"+1","AD":"+376","AO":"+244","AI":"+1","AG":"+1",
-      "AR":"+54","AM":"+374","AW":"+297","AU":"+61","AT":"+43","AZ":"+994","BS":"+1","BH":"+973",
-      "BD":"+880","BB":"+1","BY":"+375","BE":"+32","BZ":"+501","BJ":"+229","BM":"+1","BT":"+975",
-      "BO":"+591","BA":"+387","BW":"+267","BR":"+55","IO":"+246","BN":"+673","BG":"+359","BF":"+226",
-      "BI":"+257","KH":"+855","CM":"+237","CA":"+1","CV":"+238","KY":"+1","CF":"+236","TD":"+235",
-      "CL":"+56","CN":"+86","CX":"+61","CC":"+61","CO":"+57","KM":"+269","CG":"+242","CD":"+243",
-      "CK":"+682","CR":"+506","CI":"+225","HR":"+385","CU":"+53","CY":"+357","CZ":"+420","DK":"+45",
-      "DJ":"+253","DM":"+1","DO":"+1","EC":"+593","EG":"+20","SV":"+503","GQ":"+240","ER":"+291",
-      "EE":"+372","ET":"+251","FK":"+500","FO":"+298","FJ":"+679","FI":"+358","FR":"+33","GF":"+594",
-      "PF":"+689","GA":"+241","GM":"+220","GE":"+995","DE":"+49","GH":"+233","GI":"+350","GR":"+30",
-      "GL":"+299","GD":"+1","GP":"+590","GU":"+1","GT":"+502","GN":"+224","GW":"+245","GY":"+592",
-      "HT":"+509","HN":"+504","HK":"+852","HU":"+36","IS":"+354","IN":"+91","ID":"+62","IR":"+98",
-      "IQ":"+964","IE":"+353","IL":"+972","IT":"+39","JM":"+1","JP":"+81","JO":"+962","KZ":"+7",
-      "KE":"+254","KI":"+686","KP":"+850","KR":"+82","KW":"+965","KG":"+996","LA":"+856","LV":"+371",
-      "LB":"+961","LS":"+266","LR":"+231","LY":"+218","LI":"+423","LT":"+370","LU":"+352","MO":"+853",
-      "MK":"+389","MG":"+261","MW":"+265","MY":"+60","MV":"+960","ML":"+223","MT":"+356","MH":"+692",
-      "MQ":"+596","MR":"+222","MU":"+230","YT":"+262","MX":"+52","FM":"+691","MD":"+373","MC":"+377",
-      "MN":"+976","ME":"+382","MS":"+1","MA":"+212","MZ":"+258","MM":"+95","NA":"+264","NR":"+674",
-      "NP":"+977","NL":"+31","NC":"+687","NZ":"+64","NI":"+505","NE":"+227","NG":"+234","NU":"+683",
-      "NF":"+672","MP":"+1","NO":"+47","OM":"+968","PK":"+92","PW":"+680","PS":"+970","PA":"+507",
-      "PG":"+675","PY":"+595","PE":"+51","PH":"+63","PN":"+64","PL":"+48","PT":"+351","PR":"+1",
-      "QA":"+974","RE":"+262","RO":"+40","RU":"+7","RW":"+250","BL":"+590","SH":"+290","KN":"+1",
-      "LC":"+1","MF":"+590","PM":"+508","VC":"+1","WS":"+685","SM":"+378","ST":"+239","SA":"+966",
-      "SN":"+221","RS":"+381","SC":"+248","SL":"+232","SG":"+65","SK":"+421","SI":"+386","SB":"+677",
-      "SO":"+252","ZA":"+27","SS":"+211","ES":"+34","LK":"+94","SD":"+249","SR":"+597","SJ":"+47",
-      "SZ":"+268","SE":"+46","CH":"+41","SY":"+963","TW":"+886","TJ":"+992","TZ":"+255","TH":"+66",
-      "TL":"+670","TG":"+228","TK":"+690","TO":"+676","TT":"+1","TN":"+216","TR":"+90","TM":"+993",
-      "TC":"+1","TV":"+688","UG":"+256","UA":"+380","AE":"+971","GB":"+44","US":"+1","UY":"+598",
-      "UZ":"+998","VU":"+678","VA":"+39","VE":"+58","VN":"+84","VG":"+1","VI":"+1","WF":"+681",
-      "YE":"+967","ZM":"+260","ZW":"+263","AX":"+358","GG":"+44","IM":"+44","JE":"+44","CW":"+599",
-      "SX":"+1","BQ":"+599","AQ":"+672"
-    };
+    if (typeof window.intlTelInput !== 'function' || !$('.phone_intl').length) return;
 
-    function currentDial() {
-      var iso = ($("select[name='nationality']").find("option:selected").data("iso") || '').toUpperCase();
-      return DIAL_CODES[iso] || '+1';
-    }
-    // Format a digit string as (305) 785-3690 (US-style national number, max 10 digits).
-    function formatLocal(value) {
-      var d = (value || '').replace(/\D/g, '').slice(0, 10);
-      var a = d.slice(0, 3), b = d.slice(3, 6), c = d.slice(6, 10);
-      var out = '';
-      if (a) out += '(' + a;
-      if (a.length === 3) out += ')';
-      if (b) out += ' ' + b;
-      if (c) out += '-' + c;
-      return out;
-    }
-    function syncPhone($input) {
-      var formatted = formatLocal($input.val());
-      $input.val(formatted);
-      var code = currentDial();
-      var digits = formatted.replace(/\D/g, '');
-      $('#' + $input.data('hidden')).val(digits ? (code + ' ' + formatted) : '');
-    }
-    function refreshDialCodes() {
-      $('.phone-code').text(currentDial());
-      $('.phone_intl').each(function() { syncPhone($(this)); });
+    function nationalityIso() {
+      var iso = ($("select[name='nationality']").find("option:selected").data("iso") || 'us');
+      return ('' + iso).toLowerCase();
     }
 
-    // Seed the visible fields from any stored value (strip the code, keep last 10 digits).
+    var instances = [];
     $('.phone_intl').each(function() {
-      var $i = $(this);
-      var stored = $('#' + $i.data('hidden')).val() || '';
-      $i.val(formatLocal(stored.replace(/\D/g, '').slice(-10)));
+      var input = this;
+      var iti = window.intlTelInput(input, {
+        initialCountry: nationalityIso(),
+        separateDialCode: true,   // show the +code beside the flag
+        allowDropdown: false,     // country is driven by nationality, not user-editable
+        autoPlaceholder: 'polite',
+        formatOnDisplay: true,
+        nationalMode: true,
+        utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js'
+      });
+      var hidden = document.getElementById(input.getAttribute('data-hidden'));
+
+      function fullNumber() {
+        if (window.intlTelInputUtils) {
+          return iti.getNumber(intlTelInputUtils.numberFormat.INTERNATIONAL); // e.g. +1 305-785-3690
+        }
+        return iti.getNumber ? iti.getNumber() : input.value;
+      }
+      function sync() {
+        var hasValue = input.value.trim().length > 0;
+        // Store the full international number; flag invalid numbers for the submit validator.
+        if (hasValue && iti.isValidNumber && iti.isValidNumber()) {
+          hidden.value = fullNumber();
+          input.setCustomValidity('');
+        } else if (hasValue) {
+          hidden.value = fullNumber();
+          input.setCustomValidity('Please enter a valid phone number for the selected country.');
+        } else {
+          hidden.value = '';
+          input.setCustomValidity('');
+        }
+      }
+
+      // Seed the visible field from any stored value (international format).
+      if (hidden.value) {
+        iti.setNumber(hidden.value);
+      }
+      input.addEventListener('input', sync);
+      input.addEventListener('blur', sync);
+      iti.promise && iti.promise.then(sync); // re-run once utils (validation) has loaded
+      instances.push({ input: input, iti: iti, sync: sync });
     });
 
-    $(document).on('input', '.phone_intl', function() { syncPhone($(this)); });
-    $(document).on('change', "select[name='nationality']", refreshDialCodes);
-    refreshDialCodes(); // set initial code + hidden values
+    // When the nationality changes, lock every mobile field to that country and re-validate.
+    $(document).on('change', "select[name='nationality']", function() {
+      var iso = nationalityIso();
+      instances.forEach(function(o) { o.iti.setCountry(iso); o.sync(); });
+    });
   });
 </script>
 <script>
