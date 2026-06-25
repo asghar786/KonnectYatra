@@ -430,7 +430,21 @@
 @yield('script')
 <script type="text/javascript">
     $(document).ready(function () {
-        $(".select2js").select2();
+        // Match from the start of the name (or any word in it), so typing "IN" shows
+        // India/Indonesia — not "argentINa" where the term appears mid-word.
+        function startsWithMatcher(params, data) {
+            if ($.trim(params.term) === '') { return data; }
+            if (typeof data.text === 'undefined') { return null; }
+            var term = params.term.toUpperCase();
+            var text = data.text.toUpperCase();
+            if (text.indexOf(term) === 0) { return data; }
+            var words = text.split(/[\s,()/\-]+/);
+            for (var i = 0; i < words.length; i++) {
+                if (words[i].indexOf(term) === 0) { return data; }
+            }
+            return null;
+        }
+        $(".select2js").select2({ matcher: startsWithMatcher });
         // $('.slick').slick({
         //     infinite: true,
         //     slidesToShow: 2,

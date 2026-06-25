@@ -469,7 +469,7 @@
                 <div class="card-body row pt-3">
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="father_name" class="form-label">Traveller's Father Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="father_name" id="father_name" placeholder="Enter Father Name" value="{{ @$cookie['father_name'] }}" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <input type="text" class="form-control" name="father_name" id="father_name" placeholder="Enter Father Name" value="{{ @$cookie['father_name'] }}" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                     <div class="invalid-feedback">
                       Please provide father name.
                     </div>
@@ -491,7 +491,7 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="mother_name" class="form-label">Traveller's Mother Name <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="mother_name" id="mother_name" placeholder="Enter Mother Name" value="{{ @$cookie['mother_name'] }}" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <input type="text" class="form-control" name="mother_name" id="mother_name" placeholder="Enter Mother Name" value="{{ @$cookie['mother_name'] }}" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                     <div class="invalid-feedback">
                       Please provide mother name.
                     </div>

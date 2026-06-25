@@ -288,7 +288,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label for="father_name" class="form-label">Father Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="father_name_{{ $i+1 }}" id="father_name_{{ $i+1 }}" placeholder="Enter Father Name" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                <input type="text" class="form-control" name="father_name_{{ $i+1 }}" id="father_name_{{ $i+1 }}" placeholder="Enter Father Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                 <div class="invalid-feedback">
                     Please provide father name.
                 </div>
@@ -306,7 +306,7 @@
             </div>
             <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label for="mother_name" class="form-label">Mother Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="mother_name_{{ $i+1 }}" id="mother_name_{{ $i+1 }}" placeholder="Enter Mother Name" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                <input type="text" class="form-control" name="mother_name_{{ $i+1 }}" id="mother_name_{{ $i+1 }}" placeholder="Enter Mother Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                 <div class="invalid-feedback">
                     Please provide mother name.
                 </div>
