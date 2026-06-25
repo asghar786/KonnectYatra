@@ -6,6 +6,31 @@
         background-color: #f54e18 !important;
         color: #fff !important;
     }
+    /* Payment Type — selectable cards */
+    .payment-type-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    .payment-option {
+        flex: 1 1 170px; display: flex; align-items: center; gap: 10px; margin: 0;
+        border: 2px solid #e6e6e6; border-radius: 12px; padding: 14px 16px;
+        cursor: pointer; background: #fff; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .payment-option:hover { border-color: #f5a48a; }
+    .payment-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .payment-option .po-icon {
+        flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: #f3f4f6; color: #777; font-size: 16px; transition: all .15s ease;
+    }
+    .payment-option .po-text { font-weight: 600; color: #333; font-size: 14px; line-height: 1.2; }
+    /* Selected state (CSS :has + JS .selected fallback for older browsers) */
+    .payment-option:has(input:checked),
+    .payment-option.selected {
+        border-color: #f54e18; background: #fff5f1; box-shadow: 0 2px 10px rgba(245,78,24,.15);
+    }
+    .payment-option:has(input:checked) .po-icon,
+    .payment-option.selected .po-icon { background: #f54e18; color: #fff; }
+    @media (max-width: 575px) {
+        .payment-option { flex: 1 1 100%; }
+    }
     .title-head {
         border-color: #f54e18 !important;
     }
@@ -80,20 +105,35 @@
                         <div class="row">
                             <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                                 <h4 class="my-4">Payment Type</h4>
-                                <div class="form-check">
-                                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="wire_transfer" value="Bank Wire Transfer" checked required>
-                                    <label class="form-check-label" for="wire_transfer" style="cursor: pointer;"><b>Paid by Bank Wire Transfer</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="check" value="Check" required>
-                                    <label class="form-check-label" for="check" style="cursor: pointer;"><b>Paid by Check</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="cash" value="Cash" required>
-                                    <label class="form-check-label" for="cash" style="cursor: pointer;"><b>Paid by Cash</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="zelle" value="Zelle" required>
-                                    <label class="form-check-label" for="zelle" style="cursor: pointer;"><b>Paid by Zelle</b></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <input class="form-check-input payment_type" type="radio" name="payment_type" id="pay_later" value="Pay Later" required>
-                                    <label class="form-check-label" for="pay_later" style="cursor: pointer;"><b>Pay Later</b></label>
-                                    <div class="invalid-feedback">
-                                        Please select payment type.
-                                    </div>
+                                <div class="payment-type-grid">
+                                    <label class="payment-option">
+                                        <input class="payment_type" type="radio" name="payment_type" id="wire_transfer" value="Bank Wire Transfer" checked required>
+                                        <span class="po-icon"><i class="fas fa-university"></i></span>
+                                        <span class="po-text">Bank Wire Transfer</span>
+                                    </label>
+                                    <label class="payment-option">
+                                        <input class="payment_type" type="radio" name="payment_type" id="check" value="Check" required>
+                                        <span class="po-icon"><i class="fas fa-money-check-alt"></i></span>
+                                        <span class="po-text">Check</span>
+                                    </label>
+                                    <label class="payment-option">
+                                        <input class="payment_type" type="radio" name="payment_type" id="cash" value="Cash" required>
+                                        <span class="po-icon"><i class="fas fa-money-bill-wave"></i></span>
+                                        <span class="po-text">Cash</span>
+                                    </label>
+                                    <label class="payment-option">
+                                        <input class="payment_type" type="radio" name="payment_type" id="zelle" value="Zelle" required>
+                                        <span class="po-icon"><i class="fas fa-bolt"></i></span>
+                                        <span class="po-text">Zelle</span>
+                                    </label>
+                                    <label class="payment-option">
+                                        <input class="payment_type" type="radio" name="payment_type" id="pay_later" value="Pay Later" required>
+                                        <span class="po-icon"><i class="fas fa-clock"></i></span>
+                                        <span class="po-text">Pay Later</span>
+                                    </label>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please select payment type.
                                 </div>
                             </div>
                         </div>
@@ -443,6 +483,8 @@
 
         $(document).on("click", ".payment_type", function () {
             var v = $(this).val();
+            $(".payment-option").removeClass("selected");
+            $(this).closest(".payment-option").addClass("selected");
             $("#wire_transfer_div, #check_div, #cash_div, #zelle_div, #note").hide();
             if (v == "Bank Wire Transfer") {
                 $("#wire_transfer_div").fadeIn();
@@ -456,6 +498,8 @@
                 $("#note").fadeIn();
             }
         });
+        // Highlight the payment option that's selected on load.
+        $('.payment_type:checked').closest('.payment-option').addClass('selected');
     });
 </script>
 <script>
