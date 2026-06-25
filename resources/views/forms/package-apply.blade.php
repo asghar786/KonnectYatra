@@ -1016,10 +1016,8 @@ td {
       var iti = window.intlTelInput(input, {
         initialCountry: nationalityIso(),
         separateDialCode: true,   // show the +code beside the flag
-        allowDropdown: false,     // country is driven by nationality, not user-editable
         autoPlaceholder: 'polite',
         formatOnDisplay: true,
-        nationalMode: true,
         utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js'
       });
       var hidden = document.getElementById(input.getAttribute('data-hidden'));
