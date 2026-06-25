@@ -108,7 +108,7 @@ class PackagesController extends Controller
 
         $data = ["yatri_id" => $ticket_type."-".$total_count, "payment_type" => $payment_type, "check_number" => $check_number, "date_of_check" => $date_of_check, "payment_date" => $payment_date, "amount" => $amount, "rased_number" => $rased, "payment_status" => "paid"];
         YatriVisa::where("id", $id)->update($data);
-      } else if ($payment_type == "Cash") {
+      } else if ($payment_type == "Cash" || $payment_type == "Zelle") {
         $rased = $request->rased_number;
         $payment_date = now()->format('d-m-Y');
         $amount = $request->amount;
