@@ -615,6 +615,24 @@
                       <label class="form-check-label mr-3" for="pk_entry_wagah">Wagah Border</label>
                     </div>
                   </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-3 pk_entry_area" @if(@$cookie['pk_travel_history'] != "yes") style="display: none;" @endif>
+                    <label>Date of Entry <span class="text-danger">*</span></label>
+                    <div class="pk_entry_date_field">
+                      <input class="form-control entry-datepicker" type="text" name="pk_entry_date" id="pk_entry_date" placeholder="DD-MMM-YYYY" value="{{ @$cookie['pk_entry_date'] }}" autocomplete="off" required>
+                    </div>
+                    <div class="pk_entry_year_field" style="display: none;">
+                      <select class="form-control" name="pk_entry_year" id="pk_entry_year" disabled required>
+                        <option value="">Select Year</option>
+                        @for($y = (int) date('Y'); $y >= 1980; $y--)
+                        <option value="{{ $y }}">{{ $y }}</option>
+                        @endfor
+                      </select>
+                    </div>
+                    <div class="form-check mt-2">
+                      <input class="form-check-input" type="checkbox" name="pk_entry_date_unknown" id="pk_entry_date_unknown" value="1">
+                      <label class="form-check-label" for="pk_entry_date_unknown">I don't remember the exact date — I only know the year</label>
+                    </div>
+                  </div>
                   <div class="col-lg-12 col-md-12 col-sm-12 mt-3 d-flex justify-content-end">
                     <button class="button-text width-6 btn-slider1 next next4 p-3" style="border-radius:10px !important; width: auto; background-color: #fff;" type="button">Save & Next</button>
                   </div>
@@ -1017,14 +1035,30 @@ td {
       }
     });
 
-    // Show the "How did you enter Pakistan?" options only when a Pakistani visa was granted before.
-    $(document).on('change', '.pk_travel_history', function() {
-      if ($(".pk_travel_history:checked").val() === 'yes') {
-        $(".pk_entry_area").show();
+    // "How did you enter Pakistan?" + Date of Entry: shown only when a Pakistani visa was
+    // granted before. The Date of Entry can be an exact date, or — if not remembered — just
+    // a year (checkbox swaps the date picker for a year dropdown). Hidden/irrelevant inputs
+    // are disabled so they don't block the required-field validation on submit.
+    function applyPkEntryMode() {
+      var onlyYear = $('#pk_entry_date_unknown').is(':checked');
+      $('.pk_entry_date_field').toggle(!onlyYear);
+      $('.pk_entry_year_field').toggle(onlyYear);
+      $('#pk_entry_date').prop('disabled', onlyYear);
+      $('#pk_entry_year').prop('disabled', !onlyYear);
+    }
+    function togglePkEntry() {
+      var yes = $(".pk_travel_history:checked").val() === 'yes';
+      $(".pk_entry_area").toggle(yes);
+      if (yes) {
+        applyPkEntryMode();
       } else {
-        $(".pk_entry_area").hide();
+        // Disable both so the now-hidden required fields are skipped by validation.
+        $('#pk_entry_date, #pk_entry_year').prop('disabled', true);
       }
-    });
+    }
+    $(document).on('change', '.pk_travel_history', togglePkEntry);
+    $(document).on('change', '#pk_entry_date_unknown', applyPkEntryMode);
+    togglePkEntry(); // set initial state on load
 
     $(document).on('change', '.passport_country', function() {
       var selected = $(this).find("option:selected").val();

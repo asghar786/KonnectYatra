@@ -208,6 +208,15 @@
         maxDate: 0,
         defaultDate: '-25y'
     });
+    // Date of Entry (e.g. into Pakistan): DD-MMM-YYYY, past dates only, back to 1980.
+    $( ".entry-datepicker" ).datepicker({
+        dateFormat: passportFmt,
+        monthNamesShort: passportMonths,
+        changeMonth: true,
+        changeYear: true,
+        yearRange: '1980:' + thisYear,
+        maxDate: 0
+    });
   } );
   </script>
 <script>

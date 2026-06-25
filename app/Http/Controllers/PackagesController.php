@@ -649,6 +649,8 @@ class PackagesController extends Controller
         $yatri_visa->pk_travel_history = @$request->pk_travel_history;
         if (@$request->pk_travel_history == "yes") {
             $yatri_visa->pk_entry_port = $request->pk_entry_port;
+            // Date of entry: full date if known, otherwise just the year.
+            $yatri_visa->pk_entry_date = !empty($request->pk_entry_date) ? $request->pk_entry_date : $request->pk_entry_year;
         }
         $yatri_visa->gurdwara_id = $request->gurdwara_id;
         $yatri_visa->gurdwara_name = $request->gurdwara_name;
