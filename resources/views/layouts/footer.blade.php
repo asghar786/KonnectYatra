@@ -142,45 +142,61 @@
         changeYear: true,
         yearRange: '1950:+15'
     });
-    // Passport Issue/Expiry: a passport is valid for max 10 years, so cap the calendar
-    // to Jan 1 2016 – Dec 31 2036. Dates use the DD-MMM-YYYY format (e.g. 22-JUL-2032).
-    // Changing the month/year dropdown fills the field, and picking an Issue Date
-    // auto-fills the Expiry Date 10 years later (minus 1 day), editable.
+    // Passport Issue/Expiry dates. A passport is valid for max 10 years, so:
+    //   • Issue Date is in the past  -> today back 10 years (no future dates).
+    //   • Expiry Date is in the future -> today forward 10 years.
+    // Dates use the DD-MMM-YYYY format (e.g. 22-JUL-2032). Changing the month/year
+    // dropdown fills the field, and picking an Issue Date auto-fills the Expiry Date
+    // 10 years later (minus 1 day), editable.
     var passportFmt = 'dd-M-yy';
     var passportMonths = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    var thisYear = new Date().getFullYear();
     function passportFormat(date) {
         return $.datepicker.formatDate(passportFmt, date, { monthNamesShort: passportMonths });
     }
-    $( ".passport-datepicker" ).datepicker({
+    function passportBeforeShow(input) {
+        // Suppress the onChangeMonthYear that fires during the initial open;
+        // only act once the user actually changes the dropdown/navigates.
+        var $i = $(input);
+        $i.data('pmReady', false);
+        setTimeout(function(){ $i.data('pmReady', true); }, 0);
+        return {};
+    }
+    function passportOnChangeMonthYear(year, month, inst) {
+        if (!inst.input.data('pmReady')) return;
+        var day = inst.selectedDay ? inst.selectedDay : 1;
+        $(this).val(passportFormat(new Date(year, month - 1, day)));
+    }
+    // Issue Date: today back 10 years, no future.
+    $( ".passport-datepicker[name^='issue_date']" ).datepicker({
         dateFormat: passportFmt,
         monthNamesShort: passportMonths,
         changeMonth: true,
         changeYear: true,
-        yearRange: '2016:2036',
-        minDate: new Date(2016, 0, 1),
-        maxDate: new Date(2036, 11, 31),
-        beforeShow: function(input) {
-            // Suppress the onChangeMonthYear that fires during the initial open;
-            // only act once the user actually changes the dropdown/navigates.
-            var $i = $(input);
-            $i.data('pmReady', false);
-            setTimeout(function(){ $i.data('pmReady', true); }, 0);
-            return {};
-        },
-        onChangeMonthYear: function(year, month, inst) {
-            if (!inst.input.data('pmReady')) return;
-            var day = inst.selectedDay ? inst.selectedDay : 1;
-            $(this).val(passportFormat(new Date(year, month - 1, day)));
-        },
+        yearRange: (thisYear - 10) + ':' + thisYear,
+        minDate: '-10y',
+        maxDate: 0,
+        beforeShow: passportBeforeShow,
+        onChangeMonthYear: passportOnChangeMonthYear,
         onSelect: function(dateText, inst) {
             var name = inst.input.attr('name') || '';
-            if (name.indexOf('issue_date') === 0) {
-                var expiry = new Date(inst.selectedYear + 10, inst.selectedMonth, inst.selectedDay);
-                expiry.setDate(expiry.getDate() - 1); // 10 years minus one day
-                var expName = name.replace('issue_date', 'expiry_date');
-                $("input[name='" + expName + "']").val(passportFormat(expiry));
-            }
+            var expiry = new Date(inst.selectedYear + 10, inst.selectedMonth, inst.selectedDay);
+            expiry.setDate(expiry.getDate() - 1); // 10 years minus one day
+            var expName = name.replace('issue_date', 'expiry_date');
+            $("input[name='" + expName + "']").val(passportFormat(expiry));
         }
+    });
+    // Expiry Date: today forward 10 years, no past.
+    $( ".passport-datepicker[name^='expiry_date']" ).datepicker({
+        dateFormat: passportFmt,
+        monthNamesShort: passportMonths,
+        changeMonth: true,
+        changeYear: true,
+        yearRange: thisYear + ':' + (thisYear + 10),
+        minDate: 0,
+        maxDate: '+10y',
+        beforeShow: passportBeforeShow,
+        onChangeMonthYear: passportOnChangeMonthYear
     });
     // Date of Birth: month/year dropdowns, back to 1920, no future dates.
     $( ".dob-datepicker" ).datepicker({
