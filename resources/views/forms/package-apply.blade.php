@@ -371,7 +371,7 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label for="place_birth" class="form-label">Place of Birth <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="place_birth" value="{{ @$cookie['place_birth'] }}" id="place_birth" placeholder="Enter Place of Birth" onkeydown="return /[a-z ]/i.test(event.key)" required>
+                    <input type="text" class="form-control" name="place_birth" value="{{ @$cookie['place_birth'] }}" id="place_birth" placeholder="Enter Place of Birth" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
                     <div class="invalid-feedback">
                       Please provide place of birth.
                     </div>
