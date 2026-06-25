@@ -369,7 +369,7 @@ $field = function ($label, $value) {
                                 {!! $field('Granted Pakistani visa before', @$yatri->pk_travel_history) !!}
                                 @if(@$yatri->pk_travel_history == 'yes')
                                 {!! $field('Entered Pakistan via', @$yatri->pk_entry_port) !!}
-                                {!! $field('Date of entry', @$yatri->pk_entry_date) !!}
+                                {!! $field('Recent date of entry', @$yatri->pk_entry_date) !!}
                                 @endif
                             </ul>
 

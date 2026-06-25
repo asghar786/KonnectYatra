@@ -616,7 +616,7 @@
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3 pk_entry_area" @if(@$cookie['pk_travel_history'] != "yes") style="display: none;" @endif>
-                    <label>Date of Entry <span class="text-danger">*</span></label>
+                    <label>Recent Date of Entry <span class="text-danger">*</span></label>
                     <div class="pk_entry_date_field">
                       <input class="form-control entry-datepicker" type="text" name="pk_entry_date" id="pk_entry_date" placeholder="DD-MMM-YYYY" value="{{ @$cookie['pk_entry_date'] }}" autocomplete="off" required>
                     </div>

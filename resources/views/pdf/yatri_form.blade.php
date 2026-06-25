@@ -189,7 +189,7 @@
         <li><span class="lbl">Granted Pakistani visa before</span><span class="val">{{ $v(ucfirst($yatri->pk_travel_history)) }}</span></li>
         @if(@$yatri->pk_travel_history == 'yes')
         <li><span class="lbl">Entered Pakistan via</span><span class="val">{{ $v($yatri->pk_entry_port) }}</span></li>
-        <li><span class="lbl">Date of entry</span><span class="val">{{ $v($yatri->pk_entry_date) }}</span></li>
+        <li><span class="lbl">Recent date of entry</span><span class="val">{{ $v($yatri->pk_entry_date) }}</span></li>
         @endif
     </ul></td>
 </tr></table>
