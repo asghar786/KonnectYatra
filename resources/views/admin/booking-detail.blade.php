@@ -396,7 +396,14 @@ $field = function ($label, $value) {
                                             <td>{{ $c->passport_no ?: '—' }}</td>
                                             <td>
                                                 @if(!empty($c->passport_file))
-                                                <a href="{{ asset('passport_uploads/'.$c->passport_file) }}" target="_blank">View</a>
+                                                @php
+                                                    $cExt  = strtolower(pathinfo($c->passport_file, PATHINFO_EXTENSION));
+                                                    $cType = in_array($cExt, ['jpg','jpeg','png','gif','webp','bmp','svg']) ? 'image' : ($cExt === 'pdf' ? 'pdf' : 'other');
+                                                @endphp
+                                                <a href="javascript:void(0)" class="doc-view text-decoration-none"
+                                                   data-url="{{ asset('passport_uploads/'.$c->passport_file) }}" data-type="{{ $cType }}" title="Click to view">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
                                                 @else — @endif
                                             </td>
                                         </tr>

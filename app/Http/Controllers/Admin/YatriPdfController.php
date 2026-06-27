@@ -118,6 +118,25 @@ class YatriPdfController extends Controller
                 $docs[] = ['title' => strtoupper($d->name), 'path' => public_path('document_uploads/' . $d->file), 'ext' => strtolower(pathinfo($d->file, PATHINFO_EXTENSION))];
             }
         }
+
+        // Travelling companions' passports (spouse first, then family). Title shows
+        // the relation, e.g. "SPOUSE PASSPORT (WIFE) - MINKO KAUR".
+        $spouseRelations = ['wife', 'husband', 'partner', 'spouse'];
+        foreach (($yatri->companions ?? []) as $c) {
+            if (empty($c->passport_file) || !is_file(public_path('passport_uploads/' . $c->passport_file))) {
+                continue;
+            }
+            $rel   = trim((string) $c->relation);
+            $label = in_array(strtolower($rel), $spouseRelations) ? 'SPOUSE PASSPORT' : 'COMPANION PASSPORT';
+            $title = $label . ($rel !== '' ? ' (' . strtoupper($rel) . ')' : '');
+            if (!empty($c->full_name)) $title .= ' - ' . strtoupper($c->full_name);
+            $docs[] = [
+                'title' => $title,
+                'path'  => public_path('passport_uploads/' . $c->passport_file),
+                'ext'   => strtolower(pathinfo($c->passport_file, PATHINFO_EXTENSION)),
+            ];
+        }
+
         return $docs;
     }
 
