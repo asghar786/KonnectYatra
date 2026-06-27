@@ -52,7 +52,7 @@ class YatriPdfController extends Controller
 
     private function loadYatri($id)
     {
-        return YatriVisa::with('package', 'gurdwara', 'hotel', 'bus', 'documents')->findOrFail($id);
+        return YatriVisa::with('package', 'gurdwara', 'hotel', 'bus', 'documents', 'companions')->findOrFail($id);
     }
 
     private function pdfResponse(string $bytes, string $filename, string $disposition = 'attachment')

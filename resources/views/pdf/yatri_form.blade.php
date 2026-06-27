@@ -2,8 +2,12 @@
     // Helpers
     $v = function ($val) { return ($val !== null && $val !== '' ) ? e($val) : 'N/A'; };
     $g = $yatri->gurdwara->gurdwara_name ?? $yatri->gurdwara_name ?? null;
-    $amount = $yatri->amount ?: preg_replace('/[^0-9]/', '', (string) $yatri->package_type);
-    $chrome = $chrome ?? true;
+    // Group total = per-person price × number of people travelling.
+    $unitPrice  = (int) preg_replace('/[^0-9]/', '', (string) $yatri->package_type);
+    $people     = max(1, (int) $yatri->travellers_count);
+    $amount     = $yatri->total_amount > 0 ? (int) round($yatri->total_amount) : ($yatri->amount ?: $unitPrice * $people);
+    $companions = $yatri->companions ?? collect();
+    $chrome     = $chrome ?? true;
 @endphp
 <!DOCTYPE html>
 <html>
@@ -80,7 +84,7 @@
                 <li><span class="lbl">Applicant</span><span class="val">{{ $v(trim($yatri->last_name.' '.$yatri->first_name)) }}</span></li>
                 <li><span class="lbl">Booking ID</span><span class="val">{{ $v($yatri->yatri_id) }}</span></li>
                 <li><span class="lbl">Submission Date</span><span class="val">{{ $yatri->created_at ? $yatri->created_at->format('d F, Y') : 'N/A' }}</span></li>
-                <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ $amount ?: '0' }}</span></li>
+                <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ number_format($amount ?: 0) }}{{ $people > 1 ? ' ('.$people.' people)' : '' }}</span></li>
             </ul>
         </td>
         <td style="width:30%; text-align:right; padding-left:14px;">
@@ -100,14 +104,18 @@
 <table class="kv"><tr>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Submission Date</span><span class="val">{{ $yatri->created_at ? $yatri->created_at->format('d F, Y') : 'N/A' }}</span></li>
-        <li><span class="lbl">Package Type</span><span class="val">Single Occupancy</span></li>
+        <li><span class="lbl">Occupancy</span><span class="val">{{ $people > 1 ? 'Group ('.$people.' people)' : 'Single Occupancy' }}</span></li>
         <li><span class="lbl">Hotel Name</span><span class="val">{{ $v(optional($yatri->hotel)->name) }}</span></li>
         <li><span class="lbl">Ticket Type</span><span class="val">{{ $v(ucwords(str_replace('_',' ', $yatri->ticket_type))) }}</span></li>
         <li><span class="lbl">Bus #</span><span class="val">{{ $v(optional($yatri->bus)->bus_number) }}</span></li>
     </ul></td>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Package Name</span><span class="val">{{ $v(optional($yatri->package)->name) }}</span></li>
-        <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ $amount ?: '0' }}</span></li>
+        @if($people > 1)
+        <li><span class="lbl">Price / Person</span><span class="val">${{ number_format($unitPrice) }}</span></li>
+        <li><span class="lbl">People Travelling</span><span class="val">{{ $people }}</span></li>
+        @endif
+        <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ number_format($amount ?: 0) }}</span></li>
     </ul></td>
 </tr></table>
 
@@ -170,13 +178,55 @@
         <li><span class="lbl">Mother Name</span><span class="val">{{ $v($yatri->mother_name) }}</span></li>
         <li><span class="lbl">Mother Nationality</span><span class="val">{{ $v($yatri->mother_nationality) }}</span></li>
     </ul></td>
+    @if(!empty($yatri->spouse_name) || $yatri->have_spouse === 'yes')
     <td class="col"><ul class="fields">
         <li><span class="lbl">Has Spouse</span><span class="val">{{ $v($yatri->have_spouse) }}</span></li>
         <li><span class="lbl">Spouse Name</span><span class="val">{{ $v($yatri->spouse_name) }}</span></li>
         <li><span class="lbl">Spouse Birth Country</span><span class="val">{{ $v($yatri->spouse_birth_country) }}</span></li>
         <li><span class="lbl">Spouse Nationality</span><span class="val">{{ $v($yatri->spouse_nationality) }}</span></li>
     </ul></td>
+    @else
+    <td class="col"></td>
+    @endif
 </tr></table>
+
+{{-- ===== Travelling Companions ===== --}}
+@if($companions->count())
+<h2 class="sec">Travelling Companions &mdash; Keep Together for Hotel Rooms</h2>
+<table class="kv" style="border-collapse:collapse;">
+    <thead>
+        <tr style="background:#fbf3ef;">
+            <td style="padding:3px 6px;border:1px solid #eef0f4;"><b>#</b></td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;"><b>Relation</b></td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;"><b>Full Name</b></td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;"><b>Country of Birth</b></td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;"><b>Nationality</b></td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;"><b>Passport No</b></td>
+        </tr>
+    </thead>
+    <tbody>
+        {{-- Primary traveller is the first person in the group. --}}
+        <tr>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">1</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">Primary Traveller</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ trim($yatri->last_name.' '.$yatri->first_name) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($yatri->place_birth) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($yatri->nationality) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($yatri->passport) }}</td>
+        </tr>
+        @foreach($companions as $i => $c)
+        <tr>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $i + 2 }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->relation) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->full_name) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->birth_country) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->nationality) }}</td>
+            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->passport_no) }}</td>
+        </tr>
+        @endforeach
+    </tbody>
+</table>
+@endif
 
 {{-- ===== Employment & Travel ===== --}}
 <h2 class="sec">Employment &amp; Travel History</h2>

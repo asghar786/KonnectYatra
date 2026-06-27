@@ -353,12 +353,14 @@ $field = function ($label, $value) {
                                 {!! $field("Traveller's Mother Name", @$yatri->mother_name) !!}
                                 {!! $field("Traveller's Mother Nationality", @$yatri->mother_nationality) !!}
                             </ul>
+                            @if(!empty(@$yatri->spouse_name) || @$yatri->have_spouse === 'yes')
                             <ul class="mb-0 col-lg-6" style="list-style-type:none;">
                                 {!! $field('Has Spouse', @$yatri->have_spouse) !!}
                                 {!! $field('Spouse Name', @$yatri->spouse_name) !!}
                                 {!! $field('Spouse Birth Country', @$yatri->spouse_birth_country) !!}
                                 {!! $field('Spouse Nationality', @$yatri->spouse_nationality) !!}
                             </ul>
+                            @endif
 
                             @php $companions = @$yatri->companions; @endphp
                             @if(!empty($companions) && count($companions))
