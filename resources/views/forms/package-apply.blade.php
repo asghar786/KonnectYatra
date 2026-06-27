@@ -1595,12 +1595,31 @@ $(document).on('change', '.passenger_passport', function() {
       $('#price_summary').html(html);
     }
 
+    // Has the traveller declared a spouse (checkbox ticked + name entered) in
+    // the Family Information section above?
+    function hasSpouse() {
+      return $('#spouse').is(':checked') && $.trim($('#spouse_name').val()) !== '';
+    }
+
+    // Copy the spouse details from Family Information into a companion row.
+    function fillSpouseRow($row) {
+      if (!$row || !$row.length) return;
+      $row.find("select[name='companion_relation[]']").val(defaultSpouseRelation());
+      $row.find("input[name='companion_name[]']").val($.trim($('#spouse_name').val()));
+      var bc  = $("select[name='spouse_birth_country']").val();
+      var nat = $("select[name='spouse_nationality']").val();
+      if (bc)  $row.find("select[name='companion_birth_country[]']").val(bc);
+      if (nat) $row.find("select[name='companion_nationality[]']").val(nat);
+    }
+
     function toggleFamily() {
       var on = $('#travelling_with_family').is(':checked');
       $('.companions_block').toggle(on);
       if (on && $('#companions_list .companion-item').length === 0) {
-        // First companion is the spouse — preselect relation from traveller gender.
+        // First companion is the spouse — preselect relation from traveller gender
+        // and auto-fill the spouse's details from Family Information when present.
         $('#companions_list').append(companionRow(defaultSpouseRelation()));
+        if (hasSpouse()) fillSpouseRow($('#companions_list .companion-item').first());
       }
       if (!on) {
         // Remove rows so their required (now-hidden) fields don't block submit.
@@ -1610,6 +1629,29 @@ $(document).on('change', '.passenger_passport', function() {
     }
 
     $('#travelling_with_family').on('change', toggleFamily);
+
+    // Ticking "Do you have a Spouse?" makes the companions section available and
+    // drops the spouse in as the first traveller automatically.
+    $('#spouse').on('change', function () {
+      if (!$(this).is(':checked')) return;
+      if ($('#travelling_with_family').is(':checked')) {
+        // Already travelling with family — just (re)fill the spouse row.
+        if (hasSpouse()) fillSpouseRow($('#companions_list .companion-item').first());
+      } else {
+        $('#travelling_with_family').prop('checked', true).trigger('change');
+      }
+    });
+
+    // Keep the spouse companion row's name in sync while the spouse name is typed.
+    $('#spouse_name').on('input', function () {
+      if (!$('#travelling_with_family').is(':checked')) return;
+      var $first = $('#companions_list .companion-item').first();
+      var rel = $first.find("select[name='companion_relation[]']").val();
+      // Only sync the first row while it still holds the spouse (Wife/Husband).
+      if ($first.length && (rel === 'Wife' || rel === 'Husband')) {
+        $first.find("input[name='companion_name[]']").val($.trim($(this).val()));
+      }
+    });
     $('#add_companion').on('click', function () {
       $('#companions_list').append(companionRow(''));
       refreshTotal();
