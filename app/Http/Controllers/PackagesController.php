@@ -477,8 +477,15 @@ class PackagesController extends Controller
         $data['id'] = $id;
         $yatri_visa = YatriVisa::where("id", $id)->first();
         $data['yatri_visa'] = $yatri_visa;
-        // Amount due = the package price the traveller selected (stored like "$2800").
-        $data['amount'] = $yatri_visa ? (int) preg_replace('/[^0-9]/', '', (string) $yatri_visa->package_type) : 0;
+        // Per-person price the traveller selected (stored like "$2800").
+        $unit = $yatri_visa ? (int) preg_replace('/[^0-9]/', '', (string) $yatri_visa->package_type) : 0;
+        $count = $yatri_visa ? max(1, (int) $yatri_visa->travellers_count) : 1;
+        $data['unit_amount'] = $unit;
+        $data['travellers_count'] = $count;
+        // Amount due = price per person × number of people travelling.
+        $data['amount'] = $yatri_visa && $yatri_visa->total_amount > 0
+            ? (int) round($yatri_visa->total_amount)
+            : $unit * $count;
         // Order number = the unique Yatri ID assigned at booking time.
         $data['order_no'] = $yatri_visa ? ($yatri_visa->yatri_id ?: ('KY-' . str_pad((string) $yatri_visa->id, 5, '0', STR_PAD_LEFT))) : '';
         $data['valid_until'] = date('F j, Y', strtotime('+30 days'));
@@ -687,6 +694,48 @@ class PackagesController extends Controller
                 ]);
             }
         }
+
+        // Travelling companions (spouse / family): keep them together for hotel rooms
+        // and multiply the package price by the total number of people.
+        $companionCount = 0;
+        if ($request->travelling_with_family === 'yes') {
+            $names         = (array) $request->input('companion_name', []);
+            $relations     = (array) $request->input('companion_relation', []);
+            $birthCountries= (array) $request->input('companion_birth_country', []);
+            $nationalities = (array) $request->input('companion_nationality', []);
+            $passportNos   = (array) $request->input('companion_passport_no', []);
+            $passportFiles = $request->file('companion_passport', []);
+
+            foreach ($names as $i => $name) {
+                if (trim((string) $name) === '') {
+                    continue;
+                }
+                $passportFileName = null;
+                $pf = is_array($passportFiles) ? (@$passportFiles[$i]) : null;
+                if ($pf && $pf->isValid()) {
+                    $passportFileName = uniqid() . $pf->getClientOriginalName();
+                    $pf->move(public_path('passport_uploads'), $passportFileName);
+                }
+
+                \App\Models\YatriCompanion::create([
+                    'yatri_visa_id' => $yatri_visa->id,
+                    'relation'      => @$relations[$i],
+                    'full_name'     => $name,
+                    'birth_country' => @$birthCountries[$i],
+                    'nationality'   => @$nationalities[$i],
+                    'passport_no'   => @$passportNos[$i],
+                    'passport_file' => $passportFileName,
+                ]);
+                $companionCount++;
+            }
+        }
+
+        // Per-person price is stored like "$2800"; total = price × (primary + companions).
+        $unitPrice = (float) preg_replace('/[^0-9.]/', '', (string) $yatri_visa->package_type);
+        $travellersCount = 1 + $companionCount;
+        $yatri_visa->travellers_count = $travellersCount;
+        $yatri_visa->total_amount     = $unitPrice * $travellersCount;
+        $yatri_visa->save();
 
         Conversion::log('booking_request', $request, $yatri_visa->id);
 

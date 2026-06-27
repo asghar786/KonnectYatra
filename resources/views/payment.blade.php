@@ -137,11 +137,16 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Amount due (taken from the selected package price) -->
+                        <!-- Amount due = per-person price × number of people travelling -->
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div class="p-3" style="background:#fff4ef;border:1px solid #ffd9c9;border-radius:12px;">
-                                    <span style="font-size:18px;color:#1c2541;font-weight:600;">Amount Due (per person): </span>
+                                    @if(@$travellers_count > 1)
+                                    <div style="font-size:16px;color:#1c2541;margin-bottom:6px;">
+                                        ${{ number_format(@$unit_amount) }} per person &times; {{ $travellers_count }} people travelling
+                                    </div>
+                                    @endif
+                                    <span style="font-size:18px;color:#1c2541;font-weight:600;">Total Amount Due: </span>
                                     <span style="font-size:24px;font-weight:800;color:#f54e18;">${{ number_format(@$amount) }}</span>
                                 </div>
                             </div>

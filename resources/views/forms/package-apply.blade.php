@@ -564,6 +564,43 @@
               </div>
             </div>
             <div class="card">
+              <div class="card-header" id="faqheadCompanions">
+                <a href="javascript:void;" class="btn btn-header-link">Travelling Companions</a>
+              </div>
+
+              <div id="faqCompanions" class="collapse" aria-labelledby="faqheadCompanions" data-parent="#faq">
+                <div class="card-body row pt-3">
+                  <div class="col-12 mb-2">
+                    <input type="checkbox" id="travelling_with_family" name="travelling_with_family" value="yes">
+                    <label class="form-label mb-0" for="travelling_with_family" style="font-weight: 100;">
+                      I am travelling with my spouse / family <span class="text-muted">(we must stay together — same hotel room group)</span>
+                    </label>
+                  </div>
+
+                  <div class="col-12 companions_block" style="display: none;">
+                    <div class="alert" style="background:#fff4ef;border:1px solid #ffd9c9;color:#8a3b1a;border-radius:10px;">
+                      Add everyone travelling with you (spouse first, then children or other family).
+                      The package price is multiplied by the total number of people.
+                    </div>
+                    <div id="companions_list"></div>
+                    <button type="button" class="btn btn-outline-secondary" id="add_companion">
+                      <i class="fa fa-plus"></i> Add More Person
+                    </button>
+                  </div>
+
+                  <div class="col-12 mt-3">
+                    <div class="p-3" id="price_summary" style="background:#f6f7f9;border:1px solid #e7e9ef;border-radius:12px;font-size:16px;color:#1c2541;">
+                      <!-- filled by JS -->
+                    </div>
+                  </div>
+
+                  <div class="col-lg-12 col-md-12 col-sm-12 mt-3 d-flex justify-content-end">
+                    <button class="button-text width-6 btn-slider1 next p-3" style="border-radius:10px !important; width: auto; background-color: #fff;" type="button">Save & Next</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
               <div class="card-header" id="faqhead4">
                 {{-- <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#faq4" aria-expanded="true" aria-controls="faq4">Employment & Travel History</a> --}}
                 <a href="javascript:void;" class="btn btn-header-link">Employment & Travel History</a>
@@ -1465,5 +1502,126 @@ $(document).on('change', '.passenger_passport', function() {
       if (this.checkValidity()) this.classList.remove('is-invalid');
     });
   })();
+</script>
+<script>
+  // ---------- Travelling Companions (spouse / family) ----------
+  // Capture each co-traveller (Relation, Full Name, Country of Birth, Nationality,
+  // Passport No + upload). Total = package price (per person) × number of people.
+  $(document).ready(function () {
+    @php
+      $companionCountryOptions = '';
+      foreach (($countries ?? []) as $c) {
+          $n = e($c['nicename']);
+          $sel = ($c['nicename'] === 'United States') ? ' selected' : '';
+          $companionCountryOptions .= '<option value="'.$n.'"'.$sel.'>'.$n.'</option>';
+      }
+    @endphp
+    var COUNTRY_OPTIONS = {!! json_encode($companionCountryOptions) !!};
+
+    var RELATIONS = ['Wife', 'Husband', 'Son', 'Daughter', 'Grand Son', 'Grand Daughter', 'Sister', 'Brother'];
+
+    function relationOptions(preselect) {
+      var html = '<option value="">Select</option>';
+      RELATIONS.forEach(function (r) {
+        html += '<option value="' + r + '"' + (r === preselect ? ' selected' : '') + '>' + r + '</option>';
+      });
+      return html;
+    }
+
+    // Default spouse relation from the traveller's gender (male → Wife, female → Husband).
+    function defaultSpouseRelation() {
+      var g = $("input[name='gender']:checked").val();
+      if (g === 'male')   return 'Wife';
+      if (g === 'female') return 'Husband';
+      return '';
+    }
+
+    function companionRow(preselectRelation) {
+      return '' +
+        '<div class="companion-item card mb-3" style="border:1px solid #e7e9ef;border-radius:12px;">' +
+          '<div class="card-body row pt-3">' +
+            '<div class="col-lg-4 col-md-6 mb-3">' +
+              '<label class="form-label">Relation <span class="text-danger">*</span></label>' +
+              '<select class="form-control" name="companion_relation[]" required>' + relationOptions(preselectRelation) + '</select>' +
+            '</div>' +
+            '<div class="col-lg-4 col-md-6 mb-3">' +
+              '<label class="form-label">Full Name <span class="text-danger">*</span></label>' +
+              '<input type="text" class="form-control" name="companion_name[]" placeholder="Enter Full Name" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>' +
+            '</div>' +
+            '<div class="col-lg-4 col-md-6 mb-3">' +
+              '<label class="form-label">Passport No</label>' +
+              '<input type="text" class="form-control" name="companion_passport_no[]" placeholder="Passport No" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">' +
+            '</div>' +
+            '<div class="col-lg-4 col-md-6 mb-3">' +
+              '<label class="form-label">Country of Birth <span class="text-danger">*</span></label>' +
+              '<select class="form-control" name="companion_birth_country[]" required>' + COUNTRY_OPTIONS + '</select>' +
+            '</div>' +
+            '<div class="col-lg-4 col-md-6 mb-3">' +
+              '<label class="form-label">Nationality <span class="text-danger">*</span></label>' +
+              '<select class="form-control" name="companion_nationality[]" required>' + COUNTRY_OPTIONS + '</select>' +
+            '</div>' +
+            '<div class="col-lg-3 col-md-9 mb-3">' +
+              '<label class="form-label">Upload Passport</label>' +
+              '<input type="file" class="form-control" name="companion_passport[]" accept=".pdf,.jpg,.jpeg,.png,.gif">' +
+            '</div>' +
+            '<div class="col-lg-1 col-md-3 mb-3 d-flex align-items-end">' +
+              '<button type="button" class="btn btn-outline-danger remove-companion" title="Remove">&times;</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function unitPrice() {
+      var v = $("input[name='package_type']:checked").val() || '';
+      return parseFloat(v.replace(/[^0-9.]/g, '')) || 0;
+    }
+    function peopleCount() {
+      var withFamily = $('#travelling_with_family').is(':checked');
+      return 1 + (withFamily ? $('#companions_list .companion-item').length : 0);
+    }
+    function money(n) { return '$' + n.toLocaleString('en-US'); }
+
+    function refreshTotal() {
+      var unit = unitPrice(), ppl = peopleCount();
+      var html;
+      if (unit > 0) {
+        html = '<b>Total people travelling:</b> ' + ppl +
+               ' &nbsp;|&nbsp; <b>Package price:</b> ' + money(unit) + ' per person' +
+               ' &nbsp;|&nbsp; <b style="color:#f54e18;font-size:19px;">Total: ' + money(unit * ppl) + '</b>';
+      } else {
+        html = '<b>Total people travelling:</b> ' + ppl +
+               ' &nbsp;|&nbsp; <span style="color:#f54e18;font-weight:700;">Call for Price</span>';
+      }
+      $('#price_summary').html(html);
+    }
+
+    function toggleFamily() {
+      var on = $('#travelling_with_family').is(':checked');
+      $('.companions_block').toggle(on);
+      if (on && $('#companions_list .companion-item').length === 0) {
+        // First companion is the spouse — preselect relation from traveller gender.
+        $('#companions_list').append(companionRow(defaultSpouseRelation()));
+      }
+      if (!on) {
+        // Remove rows so their required (now-hidden) fields don't block submit.
+        $('#companions_list').empty();
+      }
+      refreshTotal();
+    }
+
+    $('#travelling_with_family').on('change', toggleFamily);
+    $('#add_companion').on('click', function () {
+      $('#companions_list').append(companionRow(''));
+      refreshTotal();
+    });
+    $('#companions_list').on('click', '.remove-companion', function () {
+      $(this).closest('.companion-item').remove();
+      refreshTotal();
+    });
+    // Recompute when the per-person package price changes.
+    $(document).on('change', "input[name='package_type'], .ticket_type", refreshTotal);
+
+    refreshTotal(); // initial state (1 person)
+  });
 </script>
 @endsection

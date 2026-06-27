@@ -36,4 +36,8 @@ class YatriVisa extends Model
     public function comments(){
         return $this->hasMany('App\Models\YatriComment', 'yatri_visa_id')->latest();
     }
+
+    public function companions(){
+        return $this->hasMany('App\Models\YatriCompanion', 'yatri_visa_id');
+    }
 }

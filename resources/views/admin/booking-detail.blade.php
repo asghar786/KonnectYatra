@@ -360,6 +360,50 @@ $field = function ($label, $value) {
                                 {!! $field('Spouse Nationality', @$yatri->spouse_nationality) !!}
                             </ul>
 
+                            @php $companions = @$yatri->companions; @endphp
+                            @if(!empty($companions) && count($companions))
+                            <h6 class="col-lg-12 mt-4 mb-2" style="font-weight:700;border-bottom:2px solid #f54e18;padding-bottom:6px;">
+                                Travelling Companions
+                                <span class="badge badge-warning" style="font-weight:600;">Keep together for hotel rooms</span>
+                                <span class="float-right" style="font-size:13px;color:#1c2541;">
+                                    Total people: <b>{{ (int) (@$yatri->travellers_count ?: 1) }}</b>
+                                    @if(@$yatri->total_amount > 0) &nbsp;|&nbsp; Total: <b style="color:#f54e18;">${{ number_format($yatri->total_amount) }}</b> @endif
+                                </span>
+                            </h6>
+                            <div class="col-lg-12 mb-2">
+                                <table class="table table-bordered mb-0" style="background:#fff;">
+                                    <thead style="background:#faf7ff;">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Relation</th>
+                                            <th>Full Name</th>
+                                            <th>Country of Birth</th>
+                                            <th>Nationality</th>
+                                            <th>Passport No</th>
+                                            <th>Passport</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($companions as $i => $c)
+                                        <tr>
+                                            <td>{{ $i + 1 }}</td>
+                                            <td>{{ $c->relation }}</td>
+                                            <td>{{ $c->full_name }}</td>
+                                            <td>{{ $c->birth_country }}</td>
+                                            <td>{{ $c->nationality }}</td>
+                                            <td>{{ $c->passport_no ?: '—' }}</td>
+                                            <td>
+                                                @if(!empty($c->passport_file))
+                                                <a href="{{ asset('passport_uploads/'.$c->passport_file) }}" target="_blank">View</a>
+                                                @else — @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @endif
+
                             <h6 class="col-lg-12 mt-4 mb-2" style="font-weight:700;border-bottom:2px solid #f54e18;padding-bottom:6px;">Employment &amp; Travel History</h6>
                             <ul class="mb-0 col-lg-6" style="list-style-type:none;">
                                 {!! $field("Traveller's Profession", @$yatri->profession) !!}
