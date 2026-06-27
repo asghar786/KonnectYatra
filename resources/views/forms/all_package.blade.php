@@ -57,8 +57,11 @@
   .apkg-incl-btn:hover{background:var(--brand);color:#fff}
   .apkg-incl-btn i{font-size:16px}
   /* Modal */
-  .pkgm-overlay{position:fixed;inset:0;background:rgba(20,26,45,.6);backdrop-filter:blur(2px);z-index:1080;
+  .pkgm-overlay{--brand:#f54e18;--ink:#1c2541;position:fixed;inset:0;background:rgba(20,26,45,.6);backdrop-filter:blur(2px);z-index:1080;
     display:none;align-items:center;justify-content:center;padding:16px}
+  /* Ensure the footer button stays readable even outside the .apkg scope */
+  .pkgm-foot .apkg-btn{background:#f54e18;color:#fff !important}
+  .pkgm-foot .apkg-btn:hover{background:#e0440f}
   .pkgm-overlay.open{display:flex}
   .pkgm{background:#fff;border-radius:20px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;
     overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:pkgmIn .2s ease}
