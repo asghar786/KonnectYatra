@@ -488,7 +488,7 @@ class PackagesController extends Controller
 
     /**
      * Generate a short, unique customer (Yatri) ID that encodes the trip type.
-     * Format: KY-<CODE>-<NNNN>, e.g. KY-RT-0042, where CODE is:
+     * Format: KY-<CODE>-<NNN>, e.g. KY-RT-042, where CODE is:
      *   RT = Return Trip, OW = One Way, LT = Land Travel/Trip.
      * The sequence continues per trip-type code.
      */
@@ -497,7 +497,7 @@ class PackagesController extends Controller
         $code = $this->tripCode($ticketType);
         $seq  = YatriVisa::where('yatri_id', 'like', 'KY-' . $code . '-%')->count() + 1;
         do {
-            $id = 'KY-' . $code . '-' . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+            $id = 'KY-' . $code . '-' . str_pad((string) $seq, 3, '0', STR_PAD_LEFT);
             $seq++;
         } while (YatriVisa::where('yatri_id', $id)->exists());
         return $id;
