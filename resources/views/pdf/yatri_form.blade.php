@@ -44,8 +44,9 @@
     .top { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
     .top td { vertical-align: top; }
     .rec-title { color: #f54e18; font-weight: bold; letter-spacing: .05em; text-transform: uppercase; font-size: 11px; margin-bottom: 4px; }
-    .photo-box { width: 96px; height: 120px; border: 1px dashed #c4cad6; text-align: center; color: #9aa3b2; font-size: 8px; }
-    .photo-box img { width: 94px; height: 118px; object-fit: cover; }
+    .photo-cell { text-align: right; padding-left: 14px; }
+    .photo-box { width: 96px; height: 120px; border: 1px dashed #c4cad6; text-align: center; vertical-align: middle; color: #9aa3b2; font-size: 8px; }
+    .photo-box img { display: block; width: 96px; height: 120px; margin: 0 auto; }
     .doc-grid { width: 100%; border-collapse: separate; border-spacing: 6px 0; table-layout: fixed; }
     .doc-grid td { width: 25%; vertical-align: top; padding-bottom: 6px; }
     .doc-card { border: 1px dashed #c4cad6; border-radius: 6px; text-align: center; padding: 9px 6px; }
@@ -87,14 +88,18 @@
                 <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ number_format($amount ?: 0) }}{{ $people > 1 ? ' ('.$people.' people)' : '' }}</span></li>
             </ul>
         </td>
-        <td style="width:30%; text-align:right; padding-left:14px;">
-            <div class="photo-box">
-                @if(!empty($photoSrc))
-                    <img src="{{ $photoSrc }}">
-                @else
-                    AFFIX<br>PASSPORT-SIZE<br>PHOTOGRAPH<br><br>35 mm × 45 mm
-                @endif
-            </div>
+        <td class="photo-cell" style="width:30%;">
+            <table align="right" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                <tr>
+                    <td class="photo-box">
+                        @if(!empty($photoSrc))
+                            <img src="{{ $photoSrc }}">
+                        @else
+                            AFFIX<br>PASSPORT-SIZE<br>PHOTOGRAPH<br><br>35 mm × 45 mm
+                        @endif
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>
