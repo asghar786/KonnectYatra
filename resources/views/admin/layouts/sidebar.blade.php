@@ -64,7 +64,7 @@
                 </li>
 
                 <!-- Packages & Travel -->
-                @php $open = $groupOpen([route('apply_packages'), route('seasons'), url('admin/hotels'), url('admin/bus'), url('admin/locations'), route('admin_gurdwara'), route('admin_gurdwaras')]); @endphp
+                @php $open = $groupOpen([route('apply_packages'), route('seasons'), url('admin/hotels'), url('admin/bus'), url('admin/locations'), url('admin/origins'), route('admin_gurdwara'), route('admin_gurdwaras')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-suitcase text-primary"></i></span>
@@ -77,6 +77,7 @@
                         <li class="{{ $isCur(url('admin/hotels')) ? 'show' : '' }}"><a href="{{url('admin/hotels')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-hotel text-secondary"></i></span><span class="ttr-label">Hotels</span></a></li>
                         <li class="{{ $isCur(url('admin/bus')) ? 'show' : '' }}"><a href="{{url('admin/bus')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-bus text-primary"></i></span><span class="ttr-label">Bus</span></a></li>
                         <li class="{{ $isCur(url('admin/locations')) ? 'show' : '' }}"><a href="{{url('admin/locations')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-location-dot text-primary"></i></span><span class="ttr-label">Locations</span></a></li>
+                        <li class="{{ $isCur(url('admin/origins')) ? 'show' : '' }}"><a href="{{url('admin/origins')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-plane-departure text-info"></i></span><span class="ttr-label">Departure Origins</span></a></li>
                         <li class="{{ $isCur(route('admin_gurdwara')) ? 'show' : '' }}"><a href="{{route('admin_gurdwara')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-home text-primary"></i></span><span class="ttr-label">Gurdwaras</span></a></li>
                         <li class="{{ $isCur(route('admin_gurdwaras')) ? 'show' : '' }}"><a href="{{route('admin_gurdwaras')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-home text-success"></i></span><span class="ttr-label">Gurdwaras List</span></a></li>
                     </ul>

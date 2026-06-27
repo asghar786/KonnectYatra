@@ -123,10 +123,10 @@
       <!-- Tabs -->
       <ul class="nav nav-tabs apkg-tabs" role="tablist">
         <li class="nav-item">
-          <a class="nav-link active" data-toggle="tab" href="#vaisakhi" role="tab" aria-selected="true">Vaisakhi Packages</a>
+          <a class="nav-link" data-toggle="tab" href="#vaisakhi" role="tab" aria-selected="false">Vaisakhi Packages</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" data-toggle="tab" href="#birthday" role="tab" aria-selected="false">Gurpurab Packages</a>
+          <a class="nav-link active" data-toggle="tab" href="#birthday" role="tab" aria-selected="true">Gurpurab Packages</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="#vip" role="tab" aria-selected="false">VIP Packages</a>
@@ -135,7 +135,7 @@
 
       <div class="tab-content">
         <!-- ============ VAISAKHI ============ -->
-        <div class="tab-pane active" id="vaisakhi" role="tabpanel">
+        <div class="tab-pane" id="vaisakhi" role="tabpanel">
           <div class="row justify-content-center">
             @forelse(@$all_packages as $val)
             <div class="col-lg-6 col-md-8 mb-4">
@@ -178,7 +178,7 @@
         </div>
 
         <!-- ============ GURPURAB ============ -->
-        <div class="tab-pane" id="birthday" role="tabpanel">
+        <div class="tab-pane active" id="birthday" role="tabpanel">
           @if(count(@$all_packages1) > 0)
           <div class="apkg-origin-pick">
             <p class="apkg-origin-label"><i class="fa fa-map-marker-alt"></i> Select your origin</p>
@@ -308,30 +308,9 @@
 </div>
 
 <script>
-  // Origin data: Country -> State/City -> [{ name, code }]  (source: airport pricing sheet)
-  const APKG_ORIGINS = {
-    "USA": {
-      "New York (NY · NJ · CT)":        [{ name: "John F. Kennedy Intl", code: "JFK" }],
-      "Pennsylvania":                   [{ name: "Philadelphia Intl", code: "PHL" }],
-      "Massachusetts":                  [{ name: "Boston Logan Intl", code: "BOS" }],
-      "Illinois (IN · OH)":             [{ name: "Chicago O'Hare Intl", code: "ORD" }],
-      "Florida":                        [{ name: "Miami Intl", code: "MIA" }],
-      "Georgia":                        [{ name: "Hartsfield–Jackson Atlanta", code: "ATL" }],
-      "Texas":                          [{ name: "Dallas/Fort Worth Intl", code: "DFW" }, { name: "Houston (Hobby)", code: "HOU" }],
-      "Washington DC (DE · MD · VA)":   [{ name: "Washington Dulles Intl", code: "IAD" }],
-      "California":                     [{ name: "Los Angeles Intl", code: "LAX" }, { name: "San Francisco Intl", code: "SFO" }],
-      "Washington":                     [{ name: "Seattle–Tacoma Intl", code: "SEA" }]
-    },
-    "Canada": {
-      "Ontario":            [{ name: "Toronto Pearson Intl", code: "YYZ" }],
-      "British Columbia":   [{ name: "Vancouver Intl", code: "YVR" }]
-    },
-    "Singapore": { "Singapore":     [{ name: "Singapore Changi", code: "SIN" }] },
-    "Malaysia":  { "Kuala Lumpur":  [{ name: "Kuala Lumpur Intl", code: "KUL" }] },
-    "Germany":   { "Munich":        [{ name: "Munich Airport", code: "MUN" }],
-                   "Frankfurt":     [{ name: "Frankfurt Airport", code: "FRA" }] },
-    "Thailand":  { "Bangkok":       [{ name: "Suvarnabhumi (Bangkok)", code: "BKK" }] }
-  };
+  // Origin data: Country -> State/City -> [{ name, code }]
+  // Managed in admin → Packages & Travel → Departure Origins.
+  const APKG_ORIGINS = {!! json_encode($origins ?? [], JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT) !!};
 
   // Collect all airport codes under a country (across all its states).
   function codesForCountry(c) {

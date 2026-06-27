@@ -244,6 +244,14 @@ Route::group(['prefix' => 'admin',
     Route::post('/seasons/edit/{id}',[PackagesController::class, 'edit_seasons'])->name('edit_seasons');
     Route::get('/seasons/delete/{id}',[PackagesController::class, 'delete_seasons'])->name('delete_seasons');
 
+    // Departure Origins (Country / State-City / Airport) for the public packages selector
+    Route::get('/origins',[PackagesController::class, 'origins'])->name('origins');
+    Route::get('/origins/create',[PackagesController::class, 'create_origins'])->name('create_origins');
+    Route::post('/origins/create',[PackagesController::class, 'create_origins'])->name('create_origins');
+    Route::get('/origins/edit/{id}',[PackagesController::class, 'edit_origins'])->name('edit_origins');
+    Route::post('/origins/edit/{id}',[PackagesController::class, 'edit_origins'])->name('edit_origins');
+    Route::get('/origins/delete/{id}',[PackagesController::class, 'delete_origins'])->name('delete_origins');
+
     Route::get('/staff_ids/{id}',[PackagesController::class, 'staff_ids'])->name('staff_ids');
 
     Route::get('/gallery',[PackagesController::class, 'gallery'])->name('gallery');

@@ -68,6 +68,7 @@ class PackagesController extends Controller
         $data['all_packages'] = Package::where('package_type', 'Vaisakhi')->where('status', 1)->get();
         $data['all_packages1'] = Package::where('package_type', 'Gurpurab')->where('status', 1)->get();
         $data['all_packages2'] = Package::where('package_type', 'VIP')->where('status', 1)->get();
+        $data['origins'] = \App\Models\DepartureOrigin::tree();
         return view('forms.all_package', $data);
     }
 

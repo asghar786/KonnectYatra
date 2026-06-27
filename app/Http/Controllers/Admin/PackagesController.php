@@ -21,6 +21,7 @@ use App\Models\YatriIds;
 use App\Models\Season;
 use App\Models\Gurdwara;
 use App\Models\Country;
+use App\Models\DepartureOrigin;
 use App\Models\YatriIdsBack;
 use App\Models\Balance;
 use Session;
@@ -1054,6 +1055,78 @@ class PackagesController extends Controller
       $season->delete();
       return back()->with("success", "Season deleted successfully!");
     }
+  }
+
+  /* ---------------------------------------------------------------------
+   | Departure Origins — Country / State-City / Airport for the public
+   | /all-packages cascading selector.
+   * ------------------------------------------------------------------- */
+  public function origins()
+  {
+    $data = DepartureOrigin::orderBy('country')
+        ->orderBy('sort_order')
+        ->orderBy('state')
+        ->get();
+    return view('admin.origins.origins', ['origins' => $data]);
+  }
+
+  public function create_origins(Request $request)
+  {
+    if ($request->isMethod('post')) {
+      $this->validate($request, [
+        'country'      => 'required|string|max:255',
+        'state'        => 'required|string|max:255',
+        'airport_name' => 'required|string|max:255',
+        'airport_code' => 'required|string|max:16',
+      ]);
+
+      DepartureOrigin::create([
+        'country'      => trim($request->country),
+        'state'        => trim($request->state),
+        'airport_name' => trim($request->airport_name),
+        'airport_code' => strtoupper(trim($request->airport_code)),
+        'sort_order'   => (int) $request->sort_order,
+        'status'       => $request->has('status') ? 1 : 0,
+      ]);
+      return redirect(url('admin/origins'))->with("success", "Departure origin added successfully!");
+    }
+
+    $data['action']   = url('/admin/origins/create');
+    $data['btn_text'] = "Create";
+    return view('admin.origins.create_edit', $data);
+  }
+
+  public function edit_origins(Request $request, $id)
+  {
+    if ($request->isMethod('post')) {
+      $this->validate($request, [
+        'country'      => 'required|string|max:255',
+        'state'        => 'required|string|max:255',
+        'airport_name' => 'required|string|max:255',
+        'airport_code' => 'required|string|max:16',
+      ]);
+
+      DepartureOrigin::where('id', $id)->update([
+        'country'      => trim($request->country),
+        'state'        => trim($request->state),
+        'airport_name' => trim($request->airport_name),
+        'airport_code' => strtoupper(trim($request->airport_code)),
+        'sort_order'   => (int) $request->sort_order,
+        'status'       => $request->has('status') ? 1 : 0,
+      ]);
+      return redirect(url('admin/origins'))->with("success", "Departure origin updated successfully!");
+    }
+
+    $data['origin']   = DepartureOrigin::where('id', $id)->first();
+    $data['action']   = url('/admin/origins/edit', $id);
+    $data['btn_text'] = "Update";
+    return view('admin.origins.create_edit', $data);
+  }
+
+  public function delete_origins($id)
+  {
+    DepartureOrigin::where('id', $id)->delete();
+    return back()->with("success", "Departure origin deleted successfully!");
   }
 
   public function assign_hotel(Request $request)
