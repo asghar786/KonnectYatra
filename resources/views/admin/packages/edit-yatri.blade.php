@@ -279,7 +279,7 @@
 </div>
 <div class="col-lg-6 col-md-6 col-sm-12 mb-3 spouse_area" @if(empty(@$yatri['spouse_name'])) style="display: none;" @endif>
     <label for="spouse_name" class="form-label">Full Name <span class="text-danger">*</span></label>
-    <input type="text" class="form-control" value="{{ @$yatri['spouse_name'] }}" name="spouse_name" id="spouse_name" placeholder="Enter Spouse Name" onkeydown="return /[a-z ]/i.test(event.key)">
+    <input type="text" class="form-control" value="{{ @$yatri['spouse_name'] }}" name="spouse_name" id="spouse_name" placeholder="Enter Spouse Name" onkeydown="return /[a-z ]/i.test(event.key)" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
     <div class="invalid-feedback">
       Please provide spouse name.
   </div>
