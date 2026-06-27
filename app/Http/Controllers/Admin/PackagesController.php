@@ -564,11 +564,16 @@ class PackagesController extends Controller
     }
     foreach ($yatries as $key => $value) {
       $balance = Balance::with("visa")->where('visa_id', $value->id)->get();
-      $pending_amount = (int)str_replace("$", "", $value->package_type) - (int)$value->amount;
+      // Group total = per-person price × number of people travelling.
+      $unit = (int) str_replace("$", "", $value->package_type);
+      $people = max(1, (int) $value->travellers_count);
+      $grandTotal = (int) ($value->total_amount > 0 ? round($value->total_amount) : $unit * $people);
+      $pending_amount = $grandTotal - (int)$value->amount;
       foreach ($balance as $k => $val) {
         $pending_amount = $pending_amount - (int)$val->amount;
       }
       $yatries[$key]->pending_amount = $pending_amount;
+      $yatries[$key]->grand_total = $grandTotal;
     }
     return view('admin.packages.yatri',compact('yatries'));
   }

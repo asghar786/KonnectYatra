@@ -12,7 +12,11 @@ class BalanceController extends Controller
     public function index($id){
         $data['visa'] = YatriVisa::where("id", $id)->first();
         $data['balance'] = Balance::with("visa")->where('visa_id', $id)->get();
-        $pending_amount = (int)str_replace("$", "", $data['visa']->package_type) - (int)$data['visa']->amount;
+        // Group total = per-person price × number of people travelling.
+        $unit = (int) str_replace("$", "", $data['visa']->package_type);
+        $people = max(1, (int) $data['visa']->travellers_count);
+        $grandTotal = (int) ($data['visa']->total_amount > 0 ? round($data['visa']->total_amount) : $unit * $people);
+        $pending_amount = $grandTotal - (int)$data['visa']->amount;
         foreach ($data['balance'] as $key => $value) {
             $pending_amount = $pending_amount - (int)$value->amount;
         }

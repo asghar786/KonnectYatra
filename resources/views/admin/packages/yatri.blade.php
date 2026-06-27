@@ -98,7 +98,10 @@
                         @php $count = 1; @endphp
                         @foreach($yatries as $package)
                         @php
-                            $total = (int) str_replace("$", "", @$package->package_type);
+                            $unit = (int) str_replace("$", "", @$package->package_type);
+                            $people = max(1, (int) @$package->travellers_count);
+                            // Group total = per-person price × people (fallback if total_amount not stored).
+                            $total = (int) (@$package->grand_total ?: (@$package->total_amount > 0 ? round($package->total_amount) : $unit * $people));
                             $pending = (int) @$package->pending_amount;
                             $paid = $total - $pending;
                             $isPaid = $pending <= 0;
@@ -127,7 +130,10 @@
                             </td>
                             <td>
                                 <div class="yt-pay">
-                                    <span class="yt-amt total">{{ @$package->package_type ?: '—' }}</span>
+                                    <span class="yt-amt total">${{ number_format($total) }}</span>
+                                    @if($people > 1)
+                                    <span class="yt-people" style="font-size:11.5px;color:#6b7280;">{{ $people }} people &middot; ${{ number_format($unit) }}/person</span>
+                                    @endif
                                     <span class="yt-paybrk"><span class="pd">Paid ${{ number_format($paid) }}</span> &middot; <span class="du">Due {{ $pending > 0 ? '$'.number_format($pending) : '$0' }}</span></span>
                                 </div>
                             </td>
