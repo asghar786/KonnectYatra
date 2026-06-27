@@ -121,6 +121,14 @@ class PackagesController extends Controller
         YatriVisa::where("id", $id)->update($data);
       }
 
+      // Notify the traveller (+ admin office) that their payment status changed.
+      $yatri_visa->refresh();
+      $statusValue = $payment_type == "Pay Later" ? 'Pending' : 'Paid';
+      $note = $payment_type == "Pay Later"
+        ? 'Your payment is pending.'
+        : ('Payment of $' . number_format((int) $request->amount) . ' via ' . $payment_type . ' has been recorded.');
+      \App\Support\BookingMailer::sendStatusUpdate($yatri_visa, 'Payment Status', $statusValue, $note);
+
       return redirect(url("admin/yatri-visa"));
     }
 
@@ -698,6 +706,8 @@ class PackagesController extends Controller
     if ($yatri && isset($map[$status])) {
       $yatri->visa_status = $map[$status];
       $yatri->save();
+      // Notify the traveller of the visa-status change, with a copy to the admin office.
+      \App\Support\BookingMailer::sendStatusUpdate($yatri, 'Visa Status', $map[$status]);
       return back()->with('success', 'Visa status updated to '.$map[$status].'.');
     }
     return back()->with('error', 'Something went wrong');

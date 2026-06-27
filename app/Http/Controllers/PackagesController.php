@@ -434,39 +434,27 @@ class PackagesController extends Controller
                 $data = ["payment_type" => $payment_type, "amount" => $request->amount, "payment_status" => "paid"];
                 YatriVisa::where("id", $id)->update($data);
             } else if ($payment_type == "Pay Later") {
-                // Keep the unique Yatri ID assigned at booking time.
-                $orderNo = $yatri_visa->yatri_id ?: ('KY-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT));
-                $validUntil = date('F j, Y', strtotime('+30 days'));
                 YatriVisa::where("id", $id)->update([
                     "payment_type"   => $payment_type,
                     "amount"         => $request->amount,
                     "payment_status" => "pending",
                 ]);
+            }
 
-                // Email the booking + payment instructions to the traveller's primary email.
-                $emailSent = false;
-                if (!empty($yatri_visa->email)) {
-                    try {
-                        \Mail::to($yatri_visa->email)->send(new \App\Mail\PayLaterMail([
-                            'order_no'    => $orderNo,
-                            'name'        => trim($yatri_visa->first_name . ' ' . $yatri_visa->last_name),
-                            'amount'      => $request->amount,
-                            'ticket_type' => $yatri_visa->ticket_type,
-                            'package'     => optional($yatri_visa->package)->name,
-                            'valid_until' => $validUntil,
-                            'pay'         => $this->paymentInstructions(),
-                        ]));
-                        $emailSent = true;
-                    } catch (\Throwable $e) {
-                        \Log::error('Pay Later email failed: ' . $e->getMessage());
-                    }
-                }
+            // Confirmation (with full booking + payment info) to the traveller's primary
+            // email, and a "new submission received" notice to the admin office. Applies
+            // to every payment method.
+            $yatri_visa->refresh();
+            $isPayLater = $payment_type == "Pay Later";
+            $validUntil = $isPayLater ? date('F j, Y', strtotime('+30 days')) : null;
+            \App\Support\BookingMailer::sendNewBooking($yatri_visa, $request->amount, $isPayLater, $validUntil, $this->paymentInstructions());
 
+            if ($isPayLater) {
                 return redirect(url("thank-you"))->with('paylater', [
-                    'order_no'    => $orderNo,
+                    'order_no'    => $yatri_visa->yatri_id ?: ('KY-' . str_pad((string) $id, 5, '0', STR_PAD_LEFT)),
                     'email'       => $yatri_visa->email,
                     'valid_until' => $validUntil,
-                    'email_sent'  => $emailSent,
+                    'email_sent'  => !empty($yatri_visa->email),
                 ]);
             }
 

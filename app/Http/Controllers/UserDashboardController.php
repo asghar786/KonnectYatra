@@ -61,6 +61,12 @@ class UserDashboardController extends Controller
                 YatriVisa::where("id", $id)->update($data);
             }
 
+            // Confirmation to the traveller + new-submission notice to the admin office.
+            $yatri_visa = YatriVisa::find($id);
+            if ($yatri_visa) {
+                \App\Support\BookingMailer::sendNewBooking($yatri_visa, $amount, false, null, []);
+            }
+
             return redirect(url("user/thank-you"));
         }
 
