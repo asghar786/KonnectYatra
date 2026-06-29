@@ -139,7 +139,7 @@
 										<a href="mailto:rm@konnectyatra.org"><i class="fas fa-envelope"></i> <span class="__cf_email__">rm@konnectyatra.org</span></a>
 									</li>
 									<li>
-										<i class="fas fa-map-marker-alt"></i> 18502 Hillside Avenue, Jamaica, NY 11432
+										<i class="fas fa-map-marker-alt"></i> 148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA
 									</li>
 								</ul>
 							</div>

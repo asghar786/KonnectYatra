@@ -64,7 +64,7 @@
                               </span>
                               <div class="details-content">
                                  <h4>Location Address</h4>
-                                 <span>18502 Hillside Avenue, Jamaica, NY 11432</span>
+                                 <span>148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA</span>
                               </div>
                            </li>
                            <li>
