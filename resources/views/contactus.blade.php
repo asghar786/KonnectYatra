@@ -104,7 +104,7 @@
       <div class="map-section">
          <div class="mapouter">
             <div class="gmap_canvas">
-               <iframe src="https://maps.google.com/maps?q=18502%20Hillside%20Avenue,%20Jamaica,%20NY%2011432&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed" frameborder="0" scrolling="no" style="width: 100%; height: 400px;"></iframe><style>.mapouter{position:relative;height:400px;width:100%;background:#fff;} .maprouter a{color:#fff !important;position:absolute !important;top:0 !important;z-index:0 !important;}</style>
+               <iframe src="https://maps.google.com/maps?q=148-36%20Guy%20R%20Brewers%20Blvd,%20Jamaica,%20NY%2011434&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed" frameborder="0" scrolling="no" style="width: 100%; height: 400px;"></iframe><style>.mapouter{position:relative;height:400px;width:100%;background:#fff;} .maprouter a{color:#fff !important;position:absolute !important;top:0 !important;z-index:0 !important;}</style>
                <a href="https://blooketjoin.org/">blooket</a>
                <style>.gmap_canvas{overflow:hidden;height:400px;width:100%}.gmap_canvas iframe{position:relative;z-index:2}</style>
             </div>
