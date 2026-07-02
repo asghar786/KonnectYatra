@@ -394,7 +394,9 @@
       var c = $country.val(), st = this.value;
       $airport.html('<option value="">— Choose airport —</option>').prop('disabled', !st);
       if (st) {
-        APKG_ORIGINS[c][st].forEach(function (ap) {
+        APKG_ORIGINS[c][st].slice().sort(function (a, b) {
+          return a.name.localeCompare(b.name);
+        }).forEach(function (ap) {
           $airport.append(new Option(ap.name + ' (' + ap.code + ')', ap.code));
         });
       }
