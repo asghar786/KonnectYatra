@@ -381,7 +381,9 @@
       $state.html('<option value="">— Choose state —</option>').prop('disabled', !c);
       $airport.html('<option value="">— Choose airport —</option>').prop('disabled', true);
       if (c) {
-        Object.keys(APKG_ORIGINS[c]).forEach(function (st) {
+        Object.keys(APKG_ORIGINS[c]).sort(function (a, b) {
+          return a.localeCompare(b);
+        }).forEach(function (st) {
           $state.append(new Option(st, st));
         });
       }
