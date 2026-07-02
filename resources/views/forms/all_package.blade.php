@@ -347,7 +347,13 @@
         $state   = $('#origin_state'),
         $airport = $('#origin_airport');
 
-    Object.keys(APKG_ORIGINS).forEach(function (c) {
+    // USA pinned to the top, all other countries alphabetical.
+    Object.keys(APKG_ORIGINS).sort(function (a, b) {
+      var isUsa = function (n) { return /^(usa|u\.s\.a\.?|united states)$/i.test(String(n).trim()); };
+      if (isUsa(a)) return -1;
+      if (isUsa(b)) return 1;
+      return a.localeCompare(b);
+    }).forEach(function (c) {
       $country.append(new Option(c, c));
     });
 
