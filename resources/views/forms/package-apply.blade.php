@@ -2,6 +2,13 @@
 @section('content')
 
 <style type="text/css">
+  /* Age pill shown next to the Date of Birth field */
+  .dob-age-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#fff2ec;color:#f54e18;border:1px solid #f7c3af;
+    font-weight:700;font-size:14px;line-height:1;
+    padding:9px 16px;border-radius:30px;white-space:nowrap;
+  }
   #main #faq .card {
     margin-bottom: 30px;
     border: 0;
@@ -364,9 +371,12 @@
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                     <label>Date of Birth <span class="text-danger">*</span></label>
-                    <input class="form-control dob-datepicker" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="DD-MMM-YYYY" required>
-                    <div class="invalid-feedback">
-                      Please provide date of birth.
+                    <div class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                      <input class="form-control dob-datepicker dob-age-src" type="text" name="dob" value="{{ @$cookie['dob'] }}" placeholder="DD-MMM-YYYY" style="flex:0 0 50%;max-width:50%;" required>
+                      <span class="dob-age-pill" style="display:none;"></span>
+                      <div class="invalid-feedback" style="flex:0 0 100%;">
+                        Please provide date of birth.
+                      </div>
                     </div>
                   </div>
                   <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
@@ -1665,5 +1675,47 @@ $(document).on('change', '.passenger_passport', function() {
 
     refreshTotal(); // initial state (1 person)
   });
+</script>
+
+<script>
+  // Date of Birth -> live "Age: N Years" pill next to the DOB field.
+  (function () {
+    var MONTHS = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+
+    // Parse a DD-MMM-YYYY string (e.g. "08-SEP-1972") into a Date, or null.
+    function parseDob(str) {
+      if (!str) return null;
+      var m = String(str).trim().match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+      if (!m) return null;
+      var day = parseInt(m[1], 10), mon = MONTHS[m[2].toUpperCase()], year = parseInt(m[3], 10);
+      if (mon === undefined) return null;
+      var d = new Date(year, mon, day);
+      if (d.getFullYear() !== year || d.getMonth() !== mon || d.getDate() !== day) return null;
+      return d;
+    }
+
+    function ageFrom(dob) {
+      var now = new Date();
+      var age = now.getFullYear() - dob.getFullYear();
+      var mDiff = now.getMonth() - dob.getMonth();
+      if (mDiff < 0 || (mDiff === 0 && now.getDate() < dob.getDate())) age--;
+      return age;
+    }
+
+    function updateAge($input) {
+      var $pill = $input.closest('.d-flex').find('.dob-age-pill');
+      var dob = parseDob($input.val());
+      if (dob && dob <= new Date()) {
+        var years = ageFrom(dob);
+        $pill.html('Age: <strong>' + years + ' Year' + (years === 1 ? '' : 's') + '</strong>').show();
+      } else {
+        $pill.hide().empty();
+      }
+    }
+
+    $(document).on('change input blur', '.dob-age-src', function () { updateAge($(this)); });
+    // jQuery UI datepicker fills the value then fires change; also cover prefilled cookie value.
+    $(function () { $('.dob-age-src').each(function () { updateAge($(this)); }); });
+  })();
 </script>
 @endsection
