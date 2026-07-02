@@ -213,10 +213,13 @@
                                     <div class="row mb-2">
                                         <div class="col-lg-6 col-md-6 col-sm-12">
                                             <label>Date of Birth <span class="text-danger">*</span></label>
-                                            <input class="form-control" type="date" name="dob" max="{{ date('Y-m-d') }}"
-                                                required>
-                                            <div class="invalid-feedback">
-                                                Please provide date of birth.
+                                            <div class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                                                <input class="form-control dob-age-src" type="date" name="dob" max="{{ date('Y-m-d') }}"
+                                                    style="flex:0 0 55%;max-width:55%;" required>
+                                                <span class="dob-age-pill" style="display:none;"></span>
+                                                <div class="invalid-feedback" style="flex:0 0 100%;">
+                                                    Please provide date of birth.
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-sm-12">
@@ -692,6 +695,13 @@
             height: auto;
             text-align: center;
         }
+        /* Age pill shown next to a Date of Birth field */
+        .dob-age-pill{
+            display:inline-flex;align-items:center;gap:6px;
+            background:#fff2ec;color:#f54e18;border:1px solid #f7c3af;
+            font-weight:700;font-size:14px;line-height:1;
+            padding:9px 16px;border-radius:30px;white-space:nowrap;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -844,10 +854,13 @@
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-2">
                         <label>Date of Birth <span class="text-danger">*</span></label>
-                        <input class="form-control" type="date" name="passenger_dob[]" max="{{ date('Y-m-d') }}"
-                            required>
-                        <div class="invalid-feedback">
-                            Please provide date of birth.
+                        <div class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                            <input class="form-control dob-age-src" type="date" name="passenger_dob[]" max="{{ date('Y-m-d') }}"
+                                style="flex:0 0 55%;max-width:55%;" required>
+                            <span class="dob-age-pill" style="display:none;"></span>
+                            <div class="invalid-feedback" style="flex:0 0 100%;">
+                                Please provide date of birth.
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12 mb-2">
@@ -1285,5 +1298,33 @@
                 }
             });
         });
+    </script>
+
+    <script>
+      // Date of Birth (<input type=date>, value YYYY-MM-DD) -> live "Age: N Years" pill.
+      (function () {
+        function ageFromValue(val) {
+          if (!val) return null;
+          var m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (!m) return null;
+          var dob = new Date(+m[1], +m[2] - 1, +m[3]);
+          if (dob.getFullYear() != +m[1] || (dob.getMonth() + 1) != +m[2] || dob.getDate() != +m[3]) return null;
+          var now = new Date();
+          if (dob > now) return null;
+          var age = now.getFullYear() - dob.getFullYear();
+          var md = now.getMonth() - dob.getMonth();
+          if (md < 0 || (md === 0 && now.getDate() < dob.getDate())) age--;
+          return age;
+        }
+        function updateAge(input) {
+          var $input = $(input);
+          var $pill = $input.closest('.d-flex').find('.dob-age-pill');
+          var age = ageFromValue($input.val());
+          if (age === null) { $pill.hide().empty(); return; }
+          $pill.html('Age: <strong>' + age + ' Year' + (age === 1 ? '' : 's') + '</strong>').show();
+        }
+        $(document).on('change input', '.dob-age-src', function () { updateAge(this); });
+        $(function () { $('.dob-age-src').each(function () { updateAge(this); }); });
+      })();
     </script>
 @endsection

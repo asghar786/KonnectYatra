@@ -30,6 +30,24 @@ $field = function ($label, $value) {
          . '<span class="col-lg-5" style="font-weight:500;">' . $label . ':</span>'
          . '<span class="col-lg-7">' . $value . '</span></li>';
 };
+// "Age: N Years" pill computed from a DD-MMM-YYYY date of birth. Empty on bad/missing date.
+$agePill = function ($dob) {
+    if (empty($dob)) return '';
+    $ts = strtotime($dob);
+    if ($ts === false) return '';
+    $age = (new DateTime())->setTimestamp($ts)->diff(new DateTime('today'))->y;
+    if ($age < 0 || $age > 150) return '';
+    return ' <span style="display:inline-block;background:#fff2ec;color:#f54e18;border:1px solid #f7c3af;'
+         . 'font-weight:700;font-size:12px;line-height:1;padding:5px 12px;border-radius:30px;white-space:nowrap;margin-left:8px;">'
+         . 'Age: ' . $age . ' Year' . ($age === 1 ? '' : 's') . '</span>';
+};
+// Date-of-birth row with the age pill appended to the value.
+$dobField = function ($dob) use ($agePill) {
+    $val = (isset($dob) && $dob !== '' && $dob !== null) ? e($dob) . $agePill($dob) : 'N/A';
+    return '<li class="w-100 d-flex justify-content-between row mb-1">'
+         . '<span class="col-lg-5" style="font-weight:500;">Date of Birth:</span>'
+         . '<span class="col-lg-7">' . $val . '</span></li>';
+};
 @endphp
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -313,7 +331,7 @@ $field = function ($label, $value) {
                                 {!! $field('Last Name', @$yatri->last_name) !!}
                             </ul>
                             <ul class="mb-0 col-lg-6" style="list-style-type:none;">
-                                {!! $field('Date of Birth', @$yatri->dob) !!}
+                                {!! $dobField(@$yatri->dob) !!}
                                 {!! $field('Place of Birth', @$yatri->place_birth) !!}
                                 {!! $field('Gender', @$yatri->gender) !!}
                                 {!! $field('Marital Status', @$yatri->marital_status) !!}

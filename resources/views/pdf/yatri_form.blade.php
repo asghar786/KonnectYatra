@@ -1,6 +1,15 @@
 @php
     // Helpers
     $v = function ($val) { return ($val !== null && $val !== '' ) ? e($val) : 'N/A'; };
+    // "Age: N Years" pill from a DD-MMM-YYYY date of birth; empty on bad/missing date.
+    $agePill = function ($dob) {
+        if (empty($dob)) return '';
+        $ts = strtotime($dob);
+        if ($ts === false) return '';
+        $age = (new DateTime())->setTimestamp($ts)->diff(new DateTime('today'))->y;
+        if ($age < 0 || $age > 150) return '';
+        return '<span class="age-pill">Age: ' . $age . ' Year' . ($age === 1 ? '' : 's') . '</span>';
+    };
     $g = $yatri->gurdwara->gurdwara_name ?? $yatri->gurdwara_name ?? null;
     // Group total = per-person price × number of people travelling.
     $unitPrice  = (int) preg_replace('/[^0-9]/', '', (string) $yatri->package_type);
@@ -40,6 +49,10 @@
     ul.fields .lbl { color: #5a6273; font-family: DejaVu Sans, Arial, sans-serif; }
     /* Filled-in applicant data: distinct font (serif) + bold */
     ul.fields .val { float: right; text-align: right; font-family: "DejaVu Serif", Georgia, serif; font-weight: bold; color: #0f1830; }
+    /* Age pill next to Date of Birth */
+    .age-pill { float: right; margin-right: 8px; background: #fff2ec; color: #f54e18; border: 1px solid #f7c3af;
+                font-family: DejaVu Sans, Arial, sans-serif; font-weight: bold; font-size: 8px;
+                padding: 1px 7px; border-radius: 8px; }
 
     .top { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
     .top td { vertical-align: top; }
@@ -135,7 +148,7 @@
         <li><span class="lbl">Religion</span><span class="val">{{ $v($yatri->religion) }}</span></li>
     </ul></td>
     <td class="col"><ul class="fields">
-        <li><span class="lbl">Date of Birth</span><span class="val">{{ $v($yatri->dob) }}</span></li>
+        <li><span class="lbl">Date of Birth</span><span class="val">{{ $v($yatri->dob) }}</span>{!! $agePill($yatri->dob) !!}</li>
         <li><span class="lbl">Place of Birth</span><span class="val">{{ $v($yatri->place_birth) }}</span></li>
         <li><span class="lbl">Gender</span><span class="val">{{ $v(ucfirst($yatri->gender)) }}</span></li>
         <li><span class="lbl">Marital Status</span><span class="val">{{ $v(ucfirst($yatri->marital_status)) }}</span></li>
