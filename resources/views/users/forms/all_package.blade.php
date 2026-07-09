@@ -36,10 +36,10 @@
             </div>
             <div class="row" style="margin-top: 20px;">
                 <div class="col-6">
-                    <h6 class="text-center">Wahe Guru Ji ka Khalsa</h6>
+                    <h3 class="text-center">Wahe Guru Ji ka Khalsa</h3>
                 </div>
                 <div class="col-6">
-                    <h6 class="text-center">Wahe Guru Ji ki Fateh</h6>
+                    <h3 class="text-center">Wahe Guru Ji ki Fateh</h3>
                 </div>
             </div>
             <div class="row">

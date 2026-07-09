@@ -116,8 +116,8 @@
       <!-- Blessing -->
       <div class="apkg-blessing">
         <div class="apkg-blessing-row">
-          <span>Wahe Guru Ji ka Khalsa</span>
-          <span>Wahe Guru Ji ki Fateh</span>
+          <span class="apkg-fcfs">Wahe Guru Ji ka Khalsa</span>
+          <span class="apkg-fcfs">Wahe Guru Ji ki Fateh</span>
         </div>
         <div class="apkg-blessing-row">
           <span class="apkg-fcfs">First Come First Serve</span>
