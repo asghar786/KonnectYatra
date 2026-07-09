@@ -3,7 +3,8 @@
 <style type="text/css">
   .apkg{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
   /* Blessing header */
-  .apkg-blessing{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:6px 0 30px}
+  .apkg-blessing{display:flex;flex-direction:column;align-items:center;gap:14px;margin:6px 0 30px}
+  .apkg-blessing-row{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap}
   .apkg-blessing span{color:var(--brand);font-weight:600;font-size:16px;white-space:nowrap}
   .apkg-fcfs{display:inline-block;background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:30px;padding:7px 24px;font-weight:700;font-size:16px}
   /* Tabs */
@@ -114,9 +115,13 @@
 
       <!-- Blessing -->
       <div class="apkg-blessing">
-        <span>Wahe Guru Ji ka Khalsa</span>
-        <span class="apkg-fcfs">First Come First Serve</span>
-        <span>Wahe Guru Ji ki Fateh</span>
+        <div class="apkg-blessing-row">
+          <span>Wahe Guru Ji ka Khalsa</span>
+          <span>Wahe Guru Ji ki Fateh</span>
+        </div>
+        <div class="apkg-blessing-row">
+          <span class="apkg-fcfs">First Come First Serve</span>
+        </div>
       </div>
 
       @php
