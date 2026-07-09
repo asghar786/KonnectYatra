@@ -528,6 +528,12 @@ $dobField = function ($dob) use ($agePill) {
                 </div>
             </div>
             @endif
+
+            <div class="row my-4">
+                <div class="col-lg-12 text-center">
+                    <a href="https://visa.nadra.gov.pk" target="_blank" rel="noopener noreferrer" class="btn btn-lg" style="background-color:#f54e18;color:#fff;font-weight:600;">Check Pakistan Visa Status (NADRA)</a>
+                </div>
+            </div>
         </div>
     </div>
 </main>
