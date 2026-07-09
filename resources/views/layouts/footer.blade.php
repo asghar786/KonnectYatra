@@ -3,9 +3,6 @@
         <h3 class="">For special group package on request</h3>
         <div class="btns-center">
             <a href="{{url('contactus')}}" class="button-primary" previewlistener="true">Contact Us</a>
-            @unless(Route::is('thank-you'))
-            <a href="https://visa.nadra.gov.pk" target="_blank" rel="noopener noreferrer" class="button-primary ml-2">Check Pakistan Visa Status (NADRA)</a>
-            @endunless
         </div>
         <a href="tel:+43 6601007999">
             <p class="mt-4 text-center">Or contact our team directly today at <b>+1 (718) 908-9464</b></p>
