@@ -3,10 +3,11 @@
 <style type="text/css">
   .apkg{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
   /* Blessing header */
-  .apkg-blessing{display:flex;flex-direction:column;align-items:center;gap:14px;margin:6px 0 30px}
-  .apkg-blessing-row{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap}
-  .apkg-blessing span{color:var(--brand);font-weight:600;font-size:16px;white-space:nowrap}
-  .apkg-fcfs{display:inline-block;background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:30px;padding:7px 24px;font-weight:700;font-size:16px}
+  .apkg-blessing{display:flex;flex-direction:column;align-items:center;gap:16px;margin:6px 0 30px}
+  .apkg-blessing-row{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;width:100%;max-width:680px;margin:0 auto}
+  .apkg-blessing span{color:var(--brand);font-weight:600;font-size:19px;white-space:nowrap}
+  .apkg-fcfs{display:inline-block;background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:30px;padding:14px 32px;font-weight:700;font-size:19px}
+  .apkg-blessing-duo .apkg-fcfs{flex:1;text-align:center}
   /* Tabs */
   .apkg-tabs{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;border:0;margin-bottom:36px}
   .apkg-tabs .nav-item{margin:0}
@@ -115,7 +116,7 @@
 
       <!-- Blessing -->
       <div class="apkg-blessing">
-        <div class="apkg-blessing-row">
+        <div class="apkg-blessing-row apkg-blessing-duo">
           <span class="apkg-fcfs">Wahe Guru Ji ka Khalsa</span>
           <span class="apkg-fcfs">Wahe Guru Ji ki Fateh</span>
         </div>
