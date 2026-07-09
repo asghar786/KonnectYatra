@@ -56,6 +56,10 @@
     padding:12px 16px;border-radius:14px;cursor:pointer;transition:.15s}
   .apkg-incl-btn:hover{background:var(--brand);color:#fff}
   .apkg-incl-btn i{font-size:16px}
+  /* animated "clickable" cue so visitors know the button opens details */
+  .apkg-incl-cue{margin-left:6px;color:var(--brand);animation:apkgPoke 1.3s ease-in-out infinite}
+  .apkg-incl-btn:hover .apkg-incl-cue{color:#fff}
+  @keyframes apkgPoke{0%,100%{transform:translate(0,0)}50%{transform:translate(3px,3px)}}
   /* Modal */
   .pkgm-overlay{--brand:#f54e18;--ink:#1c2541;position:fixed;inset:0;background:rgba(20,26,45,.6);backdrop-filter:blur(2px);z-index:1080;
     display:none;align-items:center;justify-content:center;padding:16px}
@@ -165,6 +169,7 @@
                   @if(!empty(@$val->sdescription))
                   <button type="button" class="apkg-incl-btn js-pkg-incl" data-title="{{ @$val->name }}">
                     <i class="fa fa-clipboard-list"></i> Package Included
+                    <i class="fa fa-mouse-pointer apkg-incl-cue" aria-hidden="true"></i>
                   </button>
                   <div class="js-pkg-incl-src d-none" style="display:none">{!! $val->sdescription !!}</div>
                   @endif
@@ -233,6 +238,7 @@
                   @if(!empty(@$val->sdescription))
                   <button type="button" class="apkg-incl-btn js-pkg-incl" data-title="{{ @$val->name }}">
                     <i class="fa fa-clipboard-list"></i> Package Included
+                    <i class="fa fa-mouse-pointer apkg-incl-cue" aria-hidden="true"></i>
                   </button>
                   <div class="js-pkg-incl-src d-none" style="display:none">{!! $val->sdescription !!}</div>
                   @endif
