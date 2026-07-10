@@ -71,7 +71,12 @@
                                     </div>
                                     @if(!empty(@$package->image))
                                     <div class="col-lg-6 form-group">
-                                        <img src="{{ asset("assets/flyers/".@$package->image) }}" style="width: 150px; height: 150px;">
+                                        <div class="brochure-thumb" role="button" tabindex="0"
+                                             data-brochure-src="{{ asset("assets/flyers/".@$package->image) }}"
+                                             title="Click to zoom">
+                                            <img src="{{ asset("assets/flyers/".@$package->image) }}" alt="Package brochure">
+                                            <span class="brochure-thumb__zoom"><i class="fa fa-search-plus"></i></span>
+                                        </div>
                                     </div>
                                     @endif
                                 </div>
@@ -510,6 +515,67 @@
     </div>
 </main>
 <div class="ttr-overlay"></div>
+
+{{-- Brochure zoom modal --}}
+<div id="brochureModal" class="brochure-modal" aria-hidden="true">
+    <span class="brochure-modal__close" title="Close">&times;</span>
+    <img class="brochure-modal__img" src="" alt="Package brochure preview">
+</div>
+
+<style>
+    .brochure-thumb{
+        position: relative;
+        display: inline-block;
+        width: 150px;
+        height: 150px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: zoom-in;
+    }
+    .brochure-thumb img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brochure-thumb__zoom{
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0,0,0,.6);
+        color: #fff;
+        border-radius: 50%;
+        font-size: 13px;
+    }
+    .brochure-modal{
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10500;
+        background: rgba(0,0,0,.85);
+        text-align: center;
+    }
+    .brochure-modal.is-open{ display: block; }
+    .brochure-modal__img{
+        max-width: 92%;
+        max-height: 92%;
+        margin: 4% auto;
+        display: block;
+        border-radius: 4px;
+        box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    }
+    .brochure-modal__close{
+        position: absolute;
+        top: 18px;
+        right: 28px;
+        color: #fff;
+        font-size: 40px;
+        line-height: 1;
+        cursor: pointer;
+        font-weight: 300;
+    }
+</style>
 @endsection
 
 @section('js')
@@ -656,6 +722,22 @@
                 });
 
                 $('.triple_price').val(total);
+            });
+
+            // Brochure zoom modal
+            var $brochureModal = $('#brochureModal');
+            $(document).on('click keydown', '.brochure-thumb', function (e) {
+                if (e.type === 'keydown' && e.which !== 13 && e.which !== 32) return;
+                e.preventDefault();
+                $brochureModal.find('.brochure-modal__img').attr('src', $(this).data('brochure-src'));
+                $brochureModal.addClass('is-open').attr('aria-hidden', 'false');
+            });
+            $(document).on('click', '#brochureModal, .brochure-modal__close', function (e) {
+                if (e.target && $(e.target).hasClass('brochure-modal__img')) return;
+                $brochureModal.removeClass('is-open').attr('aria-hidden', 'true');
+            });
+            $(document).on('keydown', function (e) {
+                if (e.which === 27) $brochureModal.removeClass('is-open').attr('aria-hidden', 'true');
             });
         });
     </script>
