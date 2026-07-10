@@ -559,7 +559,7 @@ h4.destination {
 								</a>
 								<div class="ky-contact">
 									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-									<span class="ky-contact__meta"><span class="ky-contact__label">Visit us</span><span class="ky-contact__value">18502 Hillside Avenue, Jamaica, NY 11432</span></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Visit us</span><span class="ky-contact__value">148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA</span></span>
 								</div>
 							</div>
 						</div>
