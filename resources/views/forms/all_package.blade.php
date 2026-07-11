@@ -8,6 +8,7 @@
   .apkg-blessing span{color:var(--brand);font-weight:600;font-size:19px;white-space:nowrap}
   .apkg-fcfs{display:inline-block;background:#fff4ef;color:var(--brand);border:1px solid #ffd9c9;border-radius:30px;padding:14px 32px;font-weight:700;font-size:19px}
   .apkg-blessing-duo .apkg-fcfs{flex:1;text-align:center}
+  .apkg-blessing-row:not(.apkg-blessing-duo) .apkg-fcfs{font-size:16px;padding:11px 28px}
   /* Tabs */
   .apkg-tabs{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;border:0;margin-bottom:36px}
   .apkg-tabs .nav-item{margin:0}
