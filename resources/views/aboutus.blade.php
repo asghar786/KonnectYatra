@@ -70,7 +70,7 @@
                     </div>
                     <div class="col-lg-6 col-md-12 heading-bx p-lr mt-5">
                         <div class="video-bx">
-                            <img src="{{ asset('assets/images2/ministry.png') }}" class="about_map">
+                            <img src="{{ asset('assets/images2/ministrynew.png') }}" class="about_map">
                         </div>
                     </div>
                 </div>
