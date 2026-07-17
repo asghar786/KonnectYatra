@@ -15,7 +15,7 @@
                 <div class="col-lg-12">
                     <div class="card mb-5">
                         <div class="card-body">
-                            <form method="POST" action="{{ @$action }}" enctype="multipart/form-data" class="admin_form  ajax-form">
+                            <form method="POST" action="{{ @$action }}" enctype="multipart/form-data" class="admin_form  ajax-form" @if(!empty(@$package)) data-edit="1" @endif>
                                 @csrf
                                 <div class="row">
                                     <div class="col-lg-4 form-group">
@@ -71,11 +71,25 @@
                                     </div>
                                     @if(!empty(@$package->image))
                                     <div class="col-lg-6 form-group">
-                                        <div class="brochure-thumb" role="button" tabindex="0"
-                                             data-brochure-src="{{ asset("assets/flyers/".@$package->image) }}"
-                                             title="Click to zoom">
-                                            <img src="{{ asset("assets/flyers/".@$package->image) }}" alt="Package brochure">
-                                            <span class="brochure-thumb__zoom"><i class="fa fa-search-plus"></i></span>
+                                        <input type="hidden" name="remove_image" id="remove_image" value="0">
+                                        <div id="brochureCurrent">
+                                            <div class="brochure-thumb" role="button" tabindex="0"
+                                                 data-brochure-src="{{ asset("assets/flyers/".@$package->image) }}"
+                                                 title="Click to zoom">
+                                                <img src="{{ asset("assets/flyers/".@$package->image) }}" alt="Package brochure">
+                                                <span class="brochure-thumb__zoom"><i class="fa fa-search-plus"></i></span>
+                                            </div>
+                                            <div>
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="brochureRemove">
+                                                    <i class="fa fa-trash"></i> Remove Image
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div id="brochureRemoved" class="brochure-removed" style="display: none;">
+                                            <i class="fa fa-exclamation-circle"></i>
+                                            Brochure will be removed when you click <strong>{{ @$btn_text }}</strong>.
+                                            Upload a new one above to replace it instead.
+                                            <button type="button" class="btn btn-link btn-sm p-0" id="brochureUndo">Undo</button>
                                         </div>
                                     </div>
                                     @endif
@@ -548,6 +562,17 @@
         border-radius: 50%;
         font-size: 13px;
     }
+    .brochure-removed{
+        max-width: 340px;
+        padding: 10px 12px;
+        border: 1px dashed #f0ad4e;
+        border-radius: 6px;
+        background: #fff8ec;
+        color: #8a5a00;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    .brochure-removed .btn-link{ font-size: 13px; vertical-align: baseline; }
     .brochure-modal{
         display: none;
         position: fixed;
@@ -647,6 +672,11 @@
             event.preventDefault();
             var formData = new FormData(this);
             var formAction = $(this).attr('action');
+            // The brochure thumbnail is rendered server-side, so an edit that changed
+            // the image needs a refresh to stop showing the old file.
+            var imageInput = $('#image')[0];
+            var refreshBrochure = $(this).data('edit') == 1 &&
+                ($('#remove_image').val() === '1' || !!(imageInput && imageInput.files.length));
             $.ajax({
                 type: 'POST',
                 url: formAction,
@@ -659,6 +689,9 @@
                 {
                     if(data.status == 1){
                         toastr["success"](data.message, "Completed!");
+                        if (refreshBrochure) {
+                            setTimeout(function () { window.location.reload(); }, 1200);
+                        }
                     }else{
                         toastr["error"](data.message, "Completed!");
                     }
@@ -722,6 +755,23 @@
                 });
 
                 $('.triple_price').val(total);
+            });
+
+            // Brochure remove — deferred until save so the rest of the form isn't
+            // lost mid-edit and the removal stays undoable.
+            $(document).on('click', '#brochureRemove', function () {
+                $('#remove_image').val('1');
+                $('#brochureCurrent').hide();
+                $('#brochureRemoved').show();
+            });
+            $(document).on('click', '#brochureUndo', function () {
+                $('#remove_image').val('0');
+                $('#brochureRemoved').hide();
+                $('#brochureCurrent').show();
+            });
+            // Picking a replacement supersedes a pending removal.
+            $(document).on('change', '#image', function () {
+                if (this.files && this.files.length) $('#brochureUndo').click();
             });
 
             // Brochure zoom modal

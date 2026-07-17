@@ -337,7 +337,8 @@ class PackagesController extends Controller
     if($request->isMethod('post')){
       $data = $request->all();
 
-      if ($request->file('image')) {   
+      $fileName = null;
+      if ($request->file('image')) {
         $fileName = \App\Support\ImageHelper::save($request->file('image'), 'assets/flyers', ['width' => 1200, 'mode' => 'max', 'quality' => 90]);
       }
 
@@ -363,8 +364,19 @@ class PackagesController extends Controller
         "four_star_land_price" => @$data['four_star_land_price'],
         "package_type" => @$data['package_type']
       ];
-      if (!empty(@$fileName)) {
+      // Brochure: a new upload replaces the current one, "Remove Image" clears it.
+      // Each package owns its flyer file, so the superseded one is deleted rather
+      // than left behind in assets/flyers.
+      if (!empty($fileName)) {
         $package["image"] = $fileName;
+      } elseif ($request->input('remove_image')) {
+        $package["image"] = null;
+      }
+      if (array_key_exists("image", $package)) {
+        $old = Package::where("id", $id)->value("image");
+        if (!empty($old)) {
+          @unlink(public_path('assets/flyers/'.$old));
+        }
       }
       Package::where("id", $id)->update($package);
 
