@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Package;
 use App\Models\Gurdwara;
+use App\Models\ZipCode;
 use App\Models\News;
 use App\Models\Events;
 use App\Models\User;
@@ -169,7 +170,7 @@ class HomeController extends Controller
         return view('visa-form', $data);
     }
 
-    public function gurdwaras()
+    public function gurdwaras(Request $request)
     {
         $data['all_packages'] = Package::all();
         $gurdwaras = Gurdwara::orderBy('gurdwara_name')->get();
@@ -179,6 +180,8 @@ class HomeController extends Controller
         foreach ($gurdwaras as $g) {
             $g->state = $this->canonicalState($g->state);
         }
+
+        $data = array_merge($data, $this->zipSearch($request->query('zip'), $gurdwaras));
 
         // Group by canonical state (sorted).
         $all_state = $gurdwaras->pluck('state')->filter()->unique()->sort()->values();
@@ -194,6 +197,87 @@ class HomeController extends Controller
         $data['totalStates']    = $all_state->count();
 
         return view('gurdwaras', $data);
+    }
+
+    /**
+     * ZIP search: resolve a US ZIP to its city, then rank gurdwaras by real
+     * distance from it. Ranking (rather than filtering on the city name) means
+     * someone in Forest Hills still finds the Queens gurdwaras a few miles away.
+     */
+    private function zipSearch($raw, $gurdwaras): array
+    {
+        $out = ['zipQuery' => trim((string) $raw), 'zipResult' => null, 'zipError' => null];
+        if ($out['zipQuery'] === '') {
+            return $out;
+        }
+
+        $zip = preg_replace('/\D/', '', $out['zipQuery']);
+        if (strlen($zip) !== 5) {
+            $out['zipError'] = 'Please enter a 5-digit US ZIP code — for example 11419.';
+            return $out;
+        }
+
+        $origin = ZipCode::find($zip);
+        if (!$origin) {
+            $out['zipError'] = "We couldn't find the ZIP code {$zip}. Please check and try again.";
+            return $out;
+        }
+
+        $coords = $this->gurdwaraCoords($gurdwaras);
+        $ranked = [];
+        foreach ($gurdwaras as $g) {
+            if (empty($coords[$g->id])) {
+                continue;   // no location we trust — can't honestly claim a distance
+            }
+            [$lat, $lng] = $coords[$g->id];
+            $g->distance = ZipCode::miles($origin->lat, $origin->lng, $lat, $lng);
+            $ranked[] = $g;
+        }
+        usort($ranked, fn($a, $b) => $a->distance <=> $b->distance);
+
+        $out['zipResult'] = [
+            'zip'       => $origin->zip,
+            'city'      => $origin->city,
+            'state'     => $this->canonicalState($origin->state),
+            'gurdwaras' => array_slice($ranked, 0, 12),
+            'exact'     => count(array_filter($ranked, fn($g) => strcasecmp(trim($g->city), $origin->city) === 0)),
+        ];
+        return $out;
+    }
+
+    /**
+     * id => [lat, lng] for each gurdwara: its own ZIP when that ZIP is real,
+     * otherwise the centroid of its city. Cached until the table next changes.
+     */
+    private function gurdwaraCoords($gurdwaras): array
+    {
+        $stamp = $gurdwaras->count() . ':' . (string) $gurdwaras->max('updated_at');
+        return \Cache::remember('gurdwara_coords_' . md5($stamp), now()->addDay(), function () use ($gurdwaras) {
+            $byZip = ZipCode::whereIn('zip', $gurdwaras->pluck('zip')
+                ->map(fn($z) => str_pad(preg_replace('/\D/', '', (string) $z), 5, '0', STR_PAD_LEFT))
+                ->filter(fn($z) => strlen($z) === 5)->unique()->values())
+                ->get()->keyBy('zip');
+
+            $codes = array_flip($this->usStates());   // "New York" => "NY"
+            $cities = ZipCode::whereIn(\DB::raw('LOWER(city)'), $gurdwaras->pluck('city')
+                ->filter()->map(fn($c) => strtolower(trim($c)))->unique()->values())
+                ->selectRaw('LOWER(city) c, state, AVG(lat) lat, AVG(lng) lng')
+                ->groupBy('c', 'state')->get()->keyBy(fn($r) => $r->c . '|' . $r->state);
+
+            $out = [];
+            foreach ($gurdwaras as $g) {
+                $zip = str_pad(preg_replace('/\D/', '', (string) $g->zip), 5, '0', STR_PAD_LEFT);
+                if (strlen($zip) === 5 && isset($byZip[$zip])) {
+                    $out[$g->id] = [(float) $byZip[$zip]->lat, (float) $byZip[$zip]->lng];
+                    continue;
+                }
+                $key = strtolower(trim((string) $g->city)) . '|' . ($codes[$this->canonicalState($g->state)] ?? '');
+                if (isset($cities[$key])) {
+                    $out[$g->id] = [(float) $cities[$key]->lat, (float) $cities[$key]->lng];
+                }
+            }
+            return $out;
+        });
     }
 
     /** Normalise a raw state value (code or name) to a canonical full state name. */
