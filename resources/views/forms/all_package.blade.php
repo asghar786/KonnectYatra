@@ -30,6 +30,12 @@
   .apkg-origin-field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,78,24,.12)}
   .apkg-origin-field select:disabled{background:#f6f7f9;color:#9aa0ac;cursor:not-allowed}
   .apkg-origin-hint{text-align:center;color:#9aa0ac;font-size:16px;padding:30px 20px;margin:0}
+  /* Shown when a chosen origin has no packages yet */
+  .apkg-soon{text-align:center;padding:6px 20px 24px}
+  .apkg-soon img{width:760px;max-width:100%;height:auto;border-radius:16px;box-shadow:0 14px 40px rgba(28,37,65,.12)}
+  .apkg-soon p{margin:20px auto 0;max-width:560px;color:var(--muted);font-size:16px;line-height:1.6}
+  .apkg-soon strong{color:var(--ink)}
+  .apkg-soon a{color:var(--brand);font-weight:700}
   @media (max-width:575px){.apkg-origin-grid{grid-template-columns:1fr}}
   /* Pricing card */
   .apkg-card{background:#fff;border:1px solid #eef0f4;border-radius:20px;box-shadow:0 14px 40px rgba(28,37,65,.08);overflow:hidden;height:100%;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
@@ -219,6 +225,11 @@
             </div>
           </div>
           <p class="apkg-origin-hint" id="apkg_hint">Please choose your country above to see available packages.</p>
+          <div class="apkg-soon" id="apkg_soon" style="display:none;">
+            <img src="{{ asset('assets/images2/comingsoon.webp') }}" alt="Coming soon — no packages from this departure airport yet">
+            <p>We don't have a package departing from <strong id="apkg_soon_origin">this origin</strong> just yet.
+              <a href="{{ url('contactus') }}">Contact us</a> and our team will arrange one for your group.</p>
+          </div>
           <div class="row justify-content-center" id="apkg_cards">
             @foreach(@$all_packages1 as $key => $val)
             <div class="col-lg-6 col-md-8 mb-4 apkg-pkg" data-code="{{ $val->state_code }}" style="display:none;">
@@ -346,13 +357,26 @@
     return codes;
   }
 
-  // Show only the package cards whose code is in `codes`; empty => show none + hint.
+  // Narrowest origin the visitor has picked so far, for the "coming soon" copy.
+  function originLabel() {
+    if ($('#origin_airport').val()) return $('#origin_airport option:selected').text();
+    return $('#origin_state').val() || $('#origin_country').val() || 'this origin';
+  }
+
+  // Show only the package cards whose code is in `codes`. Three outcomes:
+  // no country picked => hint; picked with matches => cards; picked with
+  // none => "coming soon", since a blank page reads as broken.
   function filterCards(codes) {
+    var shown = 0;
     $('#apkg_cards .apkg-pkg').each(function () {
-      var code = String($(this).data('code') || '');
-      $(this).toggle(codes.indexOf(code) !== -1);
+      var match = codes.indexOf(String($(this).data('code') || '')) !== -1;
+      $(this).toggle(match);
+      if (match) shown++;
     });
-    $('#apkg_hint').toggle(codes.length === 0);
+    var picked = !!$('#origin_country').val();
+    $('#apkg_hint').toggle(!picked);
+    $('#apkg_soon').toggle(picked && shown === 0);
+    if (picked && shown === 0) $('#apkg_soon_origin').text(originLabel());
   }
 
   $(function () {
