@@ -73,7 +73,7 @@
                         <div class="gd-pad">
                             @if(!empty($gurdwara->sangat))<span class="gd-badge">{{ $gurdwara->sangat }} Sangat</span>@endif
                             <h1 class="gd-title">{{ $gurdwara->gurdwara_name }}</h1>
-                            <p class="gd-addr"><i class="fa fa-location-dot"></i>{{ $fullAddress }}</p>
+                            <p class="gd-addr"><i class="fa fa-map-marker-alt"></i>{{ $fullAddress }}</p>
 
                             <p class="gd-sec-label">Contact</p>
                             <ul class="gd-info">

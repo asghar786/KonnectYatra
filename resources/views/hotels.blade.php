@@ -94,7 +94,7 @@
                             </a>
                             <div class="ht-body">
                                 <h5>{{ $hotel->name }}</h5>
-                                <p><i class="fa fa-location-dot"></i>{{ trim(collect([$hotel->address, $hotel->city, $hotel->state])->filter()->implode(', ')) }}</p>
+                                <p><i class="fa fa-map-marker-alt"></i>{{ trim(collect([$hotel->address, $hotel->city, $hotel->state])->filter()->implode(', ')) }}</p>
                             </div>
                             <div class="ht-foot">
                                 <a href="{{ url('/hotel-detail', $hotel->id) }}" class="ht-btn">Explore More <i class="fa fa-arrow-right"></i></a>

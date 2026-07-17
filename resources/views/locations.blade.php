@@ -64,7 +64,7 @@
                         </a>
                         <div class="loc-body">
                             <h5>{{ $value->name }}</h5>
-                            <p><i class="fa fa-location-dot"></i>{{ trim(collect([$value->city, $value->state])->filter()->implode(', ')) }}</p>
+                            <p><i class="fa fa-map-marker-alt"></i>{{ trim(collect([$value->city, $value->state])->filter()->implode(', ')) }}</p>
                         </div>
                         <div class="loc-foot">
                             <a href="{{ url('/location-detail', $value->id) }}" class="loc-btn">Explore More <i class="fa fa-arrow-right"></i></a>

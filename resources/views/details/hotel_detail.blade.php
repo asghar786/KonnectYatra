@@ -74,7 +74,7 @@
                                 <h1 class="hd2-title">{{ $hotel->name }}</h1>
                                 @if(!empty($hotel->price))<span class="hd2-price">${{ $hotel->price }} / night</span>@endif
                             </div>
-                            <p class="hd2-addr"><i class="fa fa-location-dot"></i>{{ $fullAddress }}</p>
+                            <p class="hd2-addr"><i class="fa fa-map-marker-alt"></i>{{ $fullAddress }}</p>
 
                             @if(!empty($hotel->description))
                             <p class="hd2-sec">About this hotel</p>
@@ -127,7 +127,7 @@
                             </a>
                             <div style="padding:16px 18px;flex:1">
                                 <h5 style="margin:0 0 6px;font-size:16px;font-weight:700;color:var(--ink)"><a href="{{ url('/hotel-detail', $r->id) }}" style="color:var(--ink)">{{ $r->name }}</a></h5>
-                                <p style="margin:0;font-size:13px;color:var(--muted)"><i class="fa fa-location-dot" style="color:var(--brand);margin-right:6px"></i>{{ trim(collect([$r->city, $r->state])->filter()->implode(', ')) }}</p>
+                                <p style="margin:0;font-size:13px;color:var(--muted)"><i class="fa fa-map-marker-alt" style="color:var(--brand);margin-right:6px"></i>{{ trim(collect([$r->city, $r->state])->filter()->implode(', ')) }}</p>
                             </div>
                             <div style="padding:0 18px 18px;display:flex;align-items:center;justify-content:space-between">
                                 @if(!empty($r->price))<span style="color:var(--brand);font-weight:700;font-size:14px">${{ $r->price }}/night</span>@else<span></span>@endif

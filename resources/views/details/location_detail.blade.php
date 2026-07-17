@@ -69,7 +69,7 @@
                         @endif
                         <div class="ld2-pad">
                             <h1 class="ld2-title">{{ $location->name }}</h1>
-                            <p class="ld2-addr"><i class="fa fa-location-dot"></i>{{ trim(collect([$location->city, $location->state])->filter()->implode(', ')) }}</p>
+                            <p class="ld2-addr"><i class="fa fa-map-marker-alt"></i>{{ trim(collect([$location->city, $location->state])->filter()->implode(', ')) }}</p>
 
                             @if(!empty($location->description))
                             <p class="ld2-sec">About this place</p>
