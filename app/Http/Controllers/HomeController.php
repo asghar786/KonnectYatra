@@ -245,53 +245,16 @@ class HomeController extends Controller
         return $out;
     }
 
-    /**
-     * id => [lat, lng] for each gurdwara: its own ZIP when that ZIP is real,
-     * otherwise the centroid of its city. Cached until the table next changes.
-     */
+    /** id => [lat, lng] for each gurdwara. Shared with the admin Address Book. */
     private function gurdwaraCoords($gurdwaras): array
     {
-        $stamp = $gurdwaras->count() . ':' . (string) $gurdwaras->max('updated_at');
-        return \Cache::remember('gurdwara_coords_' . md5($stamp), now()->addDay(), function () use ($gurdwaras) {
-            $byZip = ZipCode::whereIn('zip', $gurdwaras->pluck('zip')
-                ->map(fn($z) => str_pad(preg_replace('/\D/', '', (string) $z), 5, '0', STR_PAD_LEFT))
-                ->filter(fn($z) => strlen($z) === 5)->unique()->values())
-                ->get()->keyBy('zip');
-
-            $codes = array_flip($this->usStates());   // "New York" => "NY"
-            $cities = ZipCode::whereIn(\DB::raw('LOWER(city)'), $gurdwaras->pluck('city')
-                ->filter()->map(fn($c) => strtolower(trim($c)))->unique()->values())
-                ->selectRaw('LOWER(city) c, state, AVG(lat) lat, AVG(lng) lng')
-                ->groupBy('c', 'state')->get()->keyBy(fn($r) => $r->c . '|' . $r->state);
-
-            $out = [];
-            foreach ($gurdwaras as $g) {
-                $zip = str_pad(preg_replace('/\D/', '', (string) $g->zip), 5, '0', STR_PAD_LEFT);
-                if (strlen($zip) === 5 && isset($byZip[$zip])) {
-                    $out[$g->id] = [(float) $byZip[$zip]->lat, (float) $byZip[$zip]->lng];
-                    continue;
-                }
-                $key = strtolower(trim((string) $g->city)) . '|' . ($codes[$this->canonicalState($g->state)] ?? '');
-                if (isset($cities[$key])) {
-                    $out[$g->id] = [(float) $cities[$key]->lat, (float) $cities[$key]->lng];
-                }
-            }
-            return $out;
-        });
+        return \App\Support\GurdwaraGeo::coords($gurdwaras);
     }
 
     /** Normalise a raw state value (code or name) to a canonical full state name. */
     private function canonicalState($raw): string
     {
-        $raw = trim((string) $raw);
-        if ($raw === '') return '';
-        $states = $this->usStates();              // CODE => Full Name
-        $upper = strtoupper($raw);
-        if (isset($states[$upper])) return $states[$upper];        // "NY" -> "New York"
-        $lowerToProper = array_change_key_case(array_flip($states), CASE_LOWER); // "new york" => "NY"
-        $lower = strtolower($raw);
-        if (isset($lowerToProper[$lower])) return $states[$lowerToProper[$lower]]; // proper-case it
-        return $raw;                              // unknown — keep as entered
+        return \App\Support\GurdwaraGeo::canonicalState($raw);
     }
 
     public function gurdwara_detail($id)
@@ -303,25 +266,5 @@ class HomeController extends Controller
             ->where('id', '!=', $data['gurdwara']->id)
             ->take(3)->get();
         return view('gurdwara-detail', $data);
-    }
-
-    /** 2-letter postal code => full US state/territory name. */
-    private function usStates(): array
-    {
-        return [
-            'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas',
-            'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware',
-            'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho',
-            'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas',
-            'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland',
-            'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi',
-            'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
-            'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York',
-            'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma',
-            'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina',
-            'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah',
-            'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia',
-            'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia',
-        ];
     }
 }

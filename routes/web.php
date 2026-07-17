@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\AdminLogoutController;
 use App\Http\Controllers\Auth\AdminRegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\GurdwaraController;
+use App\Http\Controllers\Admin\AddressBookController;
 use App\Http\Controllers\Admin\PackagesController;
 use App\Http\Controllers\AdminVisaController;
 use App\Http\Controllers\PdfController;
@@ -114,6 +115,9 @@ Route::group(['prefix' => 'admin',
 'middleware' => ['admin']
 ], function(){
     Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
+    // Address Book — field tool: nearest gurdwaras to the user's GPS position.
+    Route::get('/address-book',[AddressBookController::class, 'index'])->name('address-book');
+    Route::post('/address-book/{id}/visit',[AddressBookController::class, 'visit'])->name('address-book-visit');
     Route::get('/admin_gurdwara',[GurdwaraController::class, 'index'])->name('admin_gurdwara');
     Route::get('/admin_gurdwaras',[GurdwaraController::class, 'gurdwaras'])->name('admin_gurdwaras');
     Route::get('/undertaking',[GurdwaraController::class, 'undertaking'])->name('undertaking');

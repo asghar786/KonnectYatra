@@ -96,6 +96,7 @@
 							<ul>
 								<li><a href="{{ url("admin/yatri-visa") }}">Bookings</a></li>
 								<li><a href="{{ url("admin/admin_gurdwara") }}">Gurdwaras</a></li>
+								<li><a href="{{ url("admin/address-book") }}">Address Book</a></li>
 								<li><a href="{{ url("admin/users") }}">Users</a></li>
 							</ul>
 						</div>

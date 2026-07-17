@@ -131,6 +131,7 @@ class GurdwaraController extends Controller
             $gurdwara->address = $request->address;
             $gurdwara->city = $request->city;
             $gurdwara->state = $request->state;
+            $gurdwara->zip = $request->zip;
             $gurdwara->country = $request->country;
             $gurdwara->secretary_name = $request->secretary_name;
             $gurdwara->secretary_phone_no = $request->secretary_phone_no;
