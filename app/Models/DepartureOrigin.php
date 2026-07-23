@@ -16,6 +16,20 @@ class DepartureOrigin extends Model
     ];
 
     /**
+     * Country ordering shared by both selectors: USA pinned to the top, every
+     * other country alphabetical.
+     *
+     * sort_order still orders the airports *within* a country, but it must not
+     * decide where a country lands — origins added through the admin default to
+     * sort_order 0, which used to push new countries above USA.
+     */
+    protected static function countryRank($country)
+    {
+        $country = trim($country);
+        return (strcasecmp($country, 'USA') === 0 ? '0' : '1') . mb_strtoupper($country);
+    }
+
+    /**
      * Build the nested Country -> State/City -> [{name, code}] structure used by
      * the public packages page cascade. Only active rows, in sort order.
      */
@@ -24,7 +38,6 @@ class DepartureOrigin extends Model
         $tree = [];
         $rows = self::where('status', 1)
             ->orderBy('sort_order')
-            ->orderBy('country')
             ->orderBy('state')
             ->get();
 
@@ -34,6 +47,9 @@ class DepartureOrigin extends Model
                 'code' => $row->airport_code,
             ];
         }
+        uksort($tree, function ($a, $b) {
+            return strcmp(self::countryRank($a), self::countryRank($b));
+        });
         return $tree;
     }
 
@@ -46,9 +62,11 @@ class DepartureOrigin extends Model
     {
         return self::where('status', 1)
             ->orderBy('sort_order')
-            ->orderBy('country')
             ->orderBy('state')
             ->get()
-            ->groupBy('country');
+            ->groupBy('country')
+            ->sortBy(function ($rows, $country) {
+                return self::countryRank($country);
+            });
     }
 }
