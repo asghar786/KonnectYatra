@@ -30,9 +30,15 @@
     .pkg-prices li:last-child{border-bottom:none}
     .pkg-prices li span{color:#999}
     .pkg-prices li b{color:#222;text-align:right}
-    .pkg-card-actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid #f3f3f3}
-    .pkg-card-actions > .btn,.pkg-card-actions form{flex:1 1 0;margin:0;min-width:0}
+    /* Four equal action buttons. Grid tracks (not flex) because two of the four
+       are wrapped in a <form>, whose inner button carries its own intrinsic
+       width — with flex that made the wrapped pair narrower than the plain ones.
+       minmax(0,1fr) stops a long label widening its own column. */
+    .pkg-card-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:12px 18px;border-top:1px solid #f3f3f3}
+    .pkg-card-actions > .btn,.pkg-card-actions form{margin:0;min-width:0}
     .pkg-card-actions form .btn{width:100%}
+    .pkg-card-actions .btn{padding-left:6px;padding-right:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    @media (max-width:420px){.pkg-card-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .pkg-empty{padding:40px;text-align:center;color:#999;font-size:16px}
 </style>
 <main class="ttr-wrapper">
