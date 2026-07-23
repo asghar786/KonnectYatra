@@ -31,11 +31,24 @@
                                         $originStates = collect($origins ?? [])->flatten(1)->pluck('state');
                                         $currentState = @$package->state;
                                         $currentCode  = @$package->state_code;
-                                        $knownCodes   = collect($origins ?? [])->flatten(1)->pluck('airport_code');
+
+                                        // State -> its airports, for the cascade below.
+                                        $airportsByState = [];
+                                        foreach (collect($origins ?? [])->flatten(1) as $o) {
+                                            $airportsByState[$o->state][] = [
+                                                'name' => $o->airport_name,
+                                                'code' => $o->airport_code,
+                                            ];
+                                        }
+                                        $stateAirports = $airportsByState[$currentState] ?? [];
+                                        // A stored code the chosen state does not offer (a legacy package, or
+                                        // an older state/airport mismatch) is kept so saving cannot blank it.
+                                        $orphanCode = !empty($currentCode)
+                                            && !collect($stateAirports)->pluck('code')->contains($currentCode);
                                     @endphp
                                     <div class="col-lg-4 form-group">
                                         <label class="form_label_color">State</label>
-                                        <select name="state" class="form-control" required>
+                                        <select name="state" id="package_state" class="form-control" required>
                                             <option value="">-- Select State --</option>
                                             @if(!empty($currentState) && !$originStates->contains($currentState))
                                                 <option value="{{ $currentState }}" selected>{{ $currentState }} (current)</option>
@@ -51,22 +64,16 @@
                                     </div>
                                     <div class="col-lg-4 form-group">
                                         <label class="form_label_color">Departure Airport</label>
-                                        <select name="state_code" class="form-control" required>
+                                        <select name="state_code" id="package_airport" class="form-control" required>
                                             <option value="">-- Select Departure Airport --</option>
-                                            @if(!empty($currentCode) && !$knownCodes->contains($currentCode))
-                                                <option value="{{ $currentCode }}" selected>{{ $currentCode }} (current)</option>
+                                            @if($orphanCode)
+                                                <option value="{{ $currentCode }}" selected>{{ $currentCode }} (current — not listed under this state)</option>
                                             @endif
-                                            @foreach($origins ?? [] as $country => $rows)
-                                                <optgroup label="{{ $country }}">
-                                                    @foreach($rows as $origin)
-                                                        <option value="{{ $origin->airport_code }}" @if($currentCode == $origin->airport_code) selected @endif>
-                                                            {{ $origin->state }} — {{ $origin->airport_name }} ({{ $origin->airport_code }})
-                                                        </option>
-                                                    @endforeach
-                                                </optgroup>
+                                            @foreach($stateAirports as $airport)
+                                                <option value="{{ $airport['code'] }}" @if($currentCode == $airport['code']) selected @endif>{{ $airport['name'] }}@if(!empty($airport['code'])) ({{ $airport['code'] }})@endif</option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted">The public packages page shows this package under the airport chosen here.</small>
+                                        <small class="text-muted">Airports for the selected state. The public packages page shows this package under the airport chosen here.</small>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -678,6 +685,39 @@
     $('.date').attr('disabled', false);
 </script>
 @endif
+
+<script type="text/javascript">
+    // Departure Airport lists only the airports of the selected State, so the
+    // two can no longer be saved as a mismatched pair.
+    $(function () {
+        var AIRPORTS = @json($airportsByState);
+        var stored   = @json($currentCode ?? '');
+        var $state   = $('#package_state');
+        var $airport = $('#package_airport');
+
+        $state.on('change', function () {
+            var list = AIRPORTS[$(this).val()] || [];
+
+            $airport.empty().append(
+                $('<option>', { value: '', text: '-- Select Departure Airport --' })
+            );
+            $.each(list, function (i, a) {
+                $airport.append($('<option>', {
+                    value: a.code,
+                    text : a.code ? a.name + ' (' + a.code + ')' : a.name
+                }));
+            });
+
+            // Keep the saved airport selected when the chosen state still offers it.
+            var match = $airport.find('option').filter(function () {
+                return this.value === stored;
+            });
+            if (stored && match.length) {
+                $airport.val(stored);
+            }
+        });
+    });
+</script>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
