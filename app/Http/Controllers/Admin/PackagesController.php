@@ -539,6 +539,67 @@ class PackagesController extends Controller
     }
   }
 
+  /**
+   * Duplicate a package so a new departure/fare variant can be built from an
+   * existing one instead of retyping the ~80% that stays the same. The copy
+   * opens straight in the edit form for the departure, fares and brochure.
+   */
+  public function copy($id)
+  {
+    $package = Package::find($id);
+    if(!$package)
+    {
+      return back()->with("error", "Package not found.");
+    }
+
+    $copy = $package->replicate();
+    $copy->name = mb_substr($package->name . ' (Copy)', 0, 255);
+    // The copy gets its own flyer file. If it shared the original's filename,
+    // uploading a new brochure on the copy would delete the original's image —
+    // edit() unlinks the previous file whenever the image changes.
+    $copy->image = $this->duplicateFlyer($package->image);
+    $copy->save();
+
+    // The itinerary and price breakdown live in their own tables.
+    if($details = PackageDetails::where('package_id', $id)->first())
+    {
+      $new = $details->replicate();
+      $new->package_id = $copy->id;
+      $new->save();
+    }
+    if($prices = PriceDetails::where('package_id', $id)->first())
+    {
+      $new = $prices->replicate();
+      $new->package_id = $copy->id;
+      $new->save();
+    }
+
+    return redirect(url('admin/apply_packages/edit', $copy->id))
+      ->with("success", "Copied \"{$package->name}\". Change the departure, fares and brochure, then click Update.");
+  }
+
+  /**
+   * Copy a flyer to a new unique filename so each package owns its own image.
+   * Returns null when there is no image, or the stored one is missing on disk.
+   */
+  private function duplicateFlyer($image)
+  {
+    if(empty($image))
+    {
+      return null;
+    }
+    $source = public_path('assets/flyers/' . $image);
+    if(!is_file($source))
+    {
+      return null;
+    }
+    $name = uniqid() . '_' . pathinfo($image, PATHINFO_FILENAME);
+    $ext  = pathinfo($image, PATHINFO_EXTENSION);
+    $newName = $ext ? $name . '.' . $ext : $name;
+
+    return @copy($source, public_path('assets/flyers/' . $newName)) ? $newName : null;
+  }
+
   public function delete($id)
   {
     $package = Package::find($id);

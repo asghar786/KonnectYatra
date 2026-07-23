@@ -30,7 +30,7 @@
     .pkg-prices li:last-child{border-bottom:none}
     .pkg-prices li span{color:#999}
     .pkg-prices li b{color:#222;text-align:right}
-    .pkg-card-actions{display:flex;gap:8px;padding:12px 18px;border-top:1px solid #f3f3f3}
+    .pkg-card-actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid #f3f3f3}
     .pkg-card-actions > .btn,.pkg-card-actions form{flex:1 1 0;margin:0;min-width:0}
     .pkg-card-actions form .btn{width:100%}
     .pkg-empty{padding:40px;text-align:center;color:#999;font-size:16px}
@@ -91,6 +91,12 @@
                         <div class="pkg-card-actions">
                             <a href="{{ url('admin/apply_packages/edit', $yatri->id) }}" class="btn btn-info btn-sm"><i class="fa fa-edit"></i> Edit</a>
                             <a href="{{ url('packages', $yatri->id) }}" target="_blank" class="btn btn-success btn-sm"><i class="fa fa-eye"></i> View</a>
+                            <form method="POST" action="{{ url('/admin/apply_packages/copy', $yatri->id) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-warning btn-sm" title="Create a new package from this one — opens the copy ready to edit">
+                                    <i class="fa fa-copy"></i> Copy
+                                </button>
+                            </form>
                             @if($booked > 0)
                                 <button type="button" class="btn btn-secondary btn-sm" disabled
                                     title="Cannot delete — {{ $booked }} Yatri(s) have availed this package">

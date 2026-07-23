@@ -131,6 +131,7 @@ Route::group(['prefix' => 'admin',
     Route::post('/apply_packages/create',[PackagesController::class, 'create'])->name('create_packages');
     Route::get('/apply_packages/edit/{id}',[PackagesController::class, 'edit'])->name('edit_packages');
     Route::post('/apply_packages/edit/{id}',[PackagesController::class, 'edit'])->name('edit_packages');
+    Route::post('/apply_packages/copy/{id}',[PackagesController::class, 'copy'])->name('copy_packages');
     Route::get('/apply_packages/delete/{id}',[PackagesController::class, 'delete'])->name('apply-package-delete');
     Route::post('/apply_packages',[PackagesController::class, 'store']);
     Route::get('/yatri-visa',[PackagesController::class, 'yatri_visa'])->name('yatri-visa');
