@@ -82,6 +82,25 @@ Format:
   design of the chosen layout; 8 legacy packages left untouched (already `status=0`).
 - **Review:** see decisions.csv row dated 2026-07-23.
 
+## 2026-07-23 — Copy Package
+- **Decision:** A **Copy** button on each package card (`POST /admin/apply_packages/copy/{id}`)
+  duplicates the package plus its `package_details` and `price_details` rows, then redirects to the
+  copy's edit form. Name gets " (Copy)" appended.
+- **Reasoning:** Rashad builds most new packages from an existing one — ~80% is identical and only
+  the departure, fares and brochure change.
+- **Two traps that shaped the implementation:**
+  1. **The copy gets its own duplicated flyer file**, not the original's filename. `edit()` unlinks
+     the previous image whenever the brochure changes, so a shared filename would mean replacing the
+     copy's brochure **silently deletes the original package's image**. `duplicateFlyer()` copies the
+     file under a fresh `uniqid()` name and returns null if the stored file is missing on disk.
+  2. **The copy inherits `status`** rather than being created hidden. There is **no status control
+     anywhere in the package form** — `status` defaults to 1 in the DB and nothing in create/edit
+     writes it — so a copy created with `status=0` would be invisible on the public site with no UI
+     to enable it. Consequence: a copy is publicly visible from the moment it is created, for the few
+     seconds before it is edited. Adding a status/draft toggle would be the proper fix.
+- **Also:** `.pkg-card-actions` gained `flex-wrap:wrap` — a 4th button squeezed the row.
+- **Review:** see decisions.csv row dated 2026-07-23.
+
 ## 2026-06-19 — Rebuild the Yatri booking flow (packages, payment, PDF forms)
 - **Decision:** Major build-out of the package/booking/payment flow:
   1. **Packages** — disabled the 8 old packages (added a `status` column) and seeded **19 Gurpurab packages** (one per departure airport) from the "AIRPORT TO TRAVEL" pricing sheet via `database/seeders/PdfPackagesSeeder.php`. `state_code` now holds the airport code.
