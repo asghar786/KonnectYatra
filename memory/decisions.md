@@ -56,6 +56,32 @@ Format:
   ZIP-centroid, so same-ZIP gurdwaras tie at "<1 mi".
 - **Review:** see decisions.csv rows dated 2026-07-17.
 
+## 2026-07-23 — Package form dropdowns driven by Departure Origins (+ the state_code bug)
+- **Decision:** The admin package form's **State** dropdown now comes from the `departure_origins`
+  table, and a second **Departure Airport** dropdown was added that writes `package.state_code`.
+- **Reasoning:** Rashad reported Austria and Belgium showing under Departure Origins but missing from
+  the package form. The dropdown was **26 hand-typed `<option>` tags** copy-pasted from the `$origins`
+  array in `PdfPackagesSeeder`, frozen since 2026-06-19 — no link to the table at all.
+- **The bigger bug found underneath it:** the form had **no `state_code` field**, and neither
+  `create()` nor `edit()` ever wrote it — yet `/all-packages` filters purely on `state_code`
+  (`data-code="{{ $val->state_code }}"`), never on `state`. `state` is only a card label. So **every
+  package ever created through the admin UI had an empty `state_code` and could never appear on the
+  public page**, whichever state was picked. Only the 19 seeded packages had codes. Fixing the
+  dropdown alone would have left that intact.
+- **Alternatives considered:** a single "Departure Origin" dropdown keyed on airport code, filling
+  both fields (rejected by user — wanted the two-field layout kept).
+- **The trap when editing:** `departure_origins.state` holds *selector labels*
+  (`"New York (NY · NJ · CT)"`, `"Ontario"`) while `package.state` holds *card labels*
+  (`"New York"`, `"Ontario, Canada"`) — the two vocabularies genuinely differ. A stored value not in
+  the origins table is therefore preserved as a `"(current)"` option, so editing a package never
+  silently rewrites its public label. Don't "clean this up" by forcing one vocabulary without
+  checking what the public cards read like.
+- **Deploy:** pure code — `state_code` already exists on the `package` table, so **no migration and
+  no seeder**; GitHub Actions auto-deploy covers it.
+- **Follow-ups:** the two fields can still be set to a mismatched pair (state Texas + code VIE) by
+  design of the chosen layout; 8 legacy packages left untouched (already `status=0`).
+- **Review:** see decisions.csv row dated 2026-07-23.
+
 ## 2026-06-19 — Rebuild the Yatri booking flow (packages, payment, PDF forms)
 - **Decision:** Major build-out of the package/booking/payment flow:
   1. **Packages** — disabled the 8 old packages (added a `status` column) and seeded **19 Gurpurab packages** (one per departure airport) from the "AIRPORT TO TRAVEL" pricing sheet via `database/seeders/PdfPackagesSeeder.php`. `state_code` now holds the airport code.
