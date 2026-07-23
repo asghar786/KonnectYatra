@@ -228,6 +228,9 @@ class PackagesController extends Controller
       $package = new Package;
       $package->name = @$data['package_name'];
       $package->state = @$data['state'];
+      // state_code is the airport code the public packages page filters on — a
+      // package with no code never appears under any departure airport.
+      $package->state_code = @$data['state_code'];
       $package->month_year = @$data['month_year'];
       $package->round_single_price = @$data['round_single_price'];
       $package->round_double_price = @$data['round_double_price'];
@@ -327,6 +330,7 @@ class PackagesController extends Controller
       echo json_encode($response); return;
     }
 
+    $data['origins'] = DepartureOrigin::grouped();
     $data['action'] = url('/admin/apply_packages/create');
     $data['btn_text'] = "Create";
     return view('admin.packages.create_edit', $data);
@@ -345,6 +349,7 @@ class PackagesController extends Controller
       $package = [
         "name" => @$data['package_name'],
         "state" => @$data['state'],
+        "state_code" => @$data['state_code'],
         "month_year" => @$data['month_year'],
         "round_single_price" => @$data['round_single_price'],
         "round_double_price" => @$data['round_double_price'],
@@ -461,6 +466,7 @@ class PackagesController extends Controller
     }
 
     $data['package'] = Package::with('package_details', 'price_details')->where("id", $id)->first();
+    $data['origins'] = DepartureOrigin::grouped();
     $data['action'] = url('/admin/apply_packages/edit', $id);
     $data['btn_text'] = "Update";
     return view('admin.packages.create_edit', $data);

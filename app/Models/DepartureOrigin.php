@@ -36,4 +36,19 @@ class DepartureOrigin extends Model
         }
         return $tree;
     }
+
+    /**
+     * Active origins grouped by country, for the admin package form dropdowns.
+     * Keeps the State / Departure Airport selects in step with this table
+     * instead of the hard-coded list they used to carry.
+     */
+    public static function grouped()
+    {
+        return self::where('status', 1)
+            ->orderBy('sort_order')
+            ->orderBy('country')
+            ->orderBy('state')
+            ->get()
+            ->groupBy('country');
+    }
 }

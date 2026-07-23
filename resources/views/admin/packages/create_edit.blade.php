@@ -22,39 +22,54 @@
                                         <label class="form_label_color">Package Name</label>
                                         <input type="text" class="form-control" name="package_name" value="{{ @$package->name }}" placeholder="Enter Package Name" required />
                                     </div>
+                                    @php
+                                        // State / Departure Airport options come from the Departure Origins
+                                        // table so this form can never fall behind it. Values already stored
+                                        // on the package are kept as options even when they are not in that
+                                        // table (older packages use their own state wording), so editing a
+                                        // package never silently rewrites its label.
+                                        $originStates = collect($origins ?? [])->flatten(1)->pluck('state');
+                                        $currentState = @$package->state;
+                                        $currentCode  = @$package->state_code;
+                                        $knownCodes   = collect($origins ?? [])->flatten(1)->pluck('airport_code');
+                                    @endphp
                                     <div class="col-lg-4 form-group">
                                         <label class="form_label_color">State</label>
                                         <select name="state" class="form-control" required>
                                             <option value="">-- Select State --</option>
-                                            <option value="California" @if(@$package->state == 'California') selected @endif>California</option>
-                                            <option value="Connecticut" @if(@$package->state == 'Connecticut') selected @endif>Connecticut</option>
-                                            <option value="Delaware" @if(@$package->state == 'Delaware') selected @endif>Delaware</option>
-                                            <option value="Florida" @if(@$package->state == 'Florida') selected @endif>Florida</option>
-                                            <option value="Georgia" @if(@$package->state == 'Georgia') selected @endif>Georgia</option>
-                                            <option value="Illinois" @if(@$package->state == 'Illinois') selected @endif>Illinois</option>
-                                            <option value="Indiana" @if(@$package->state == 'Indiana') selected @endif>Indiana</option>
-                                            <option value="Maryland" @if(@$package->state == 'Maryland') selected @endif>Maryland</option>
-                                            <option value="Massachusetts" @if(@$package->state == 'Massachusetts') selected @endif>Massachusetts</option>
-                                            <option value="Michigan" @if(@$package->state == 'Michigan') selected @endif>Michigan</option>
-                                            <option value="New Jersey" @if(@$package->state == 'New Jersey') selected @endif>New Jersey</option>
-                                            <option value="New York" @if(@$package->state == 'New York') selected @endif>New York</option>
-                                            <option value="Ohio" @if(@$package->state == 'Ohio') selected @endif>Ohio</option>
-                                            <option value="Pennsylvania" @if(@$package->state == 'Pennsylvania') selected @endif>Pennsylvania</option>
-                                            <option value="Texas" @if(@$package->state == 'Texas') selected @endif>Texas</option>
-                                            <option value="Virginia" @if(@$package->state == 'Virginia') selected @endif>Virginia</option>
-                                            <option value="Washington DC" @if(@$package->state == 'Washington DC') selected @endif>Washington DC</option>
-                                            <option value="Washington" @if(@$package->state == 'Washington') selected @endif>Washington (State)</option>
-                                            <optgroup label="International / Other Origins">
-                                                <option value="Ontario, Canada" @if(@$package->state == 'Ontario, Canada') selected @endif>Ontario, Canada</option>
-                                                <option value="British Columbia, Canada" @if(@$package->state == 'British Columbia, Canada') selected @endif>British Columbia, Canada</option>
-                                                <option value="Singapore" @if(@$package->state == 'Singapore') selected @endif>Singapore</option>
-                                                <option value="Malaysia" @if(@$package->state == 'Malaysia') selected @endif>Malaysia</option>
-                                                <option value="Germany" @if(@$package->state == 'Germany') selected @endif>Germany</option>
-                                                <option value="Thailand" @if(@$package->state == 'Thailand') selected @endif>Thailand</option>
-                                            </optgroup>
+                                            @if(!empty($currentState) && !$originStates->contains($currentState))
+                                                <option value="{{ $currentState }}" selected>{{ $currentState }} (current)</option>
+                                            @endif
+                                            @foreach($origins ?? [] as $country => $rows)
+                                                <optgroup label="{{ $country }}">
+                                                    @foreach(collect($rows)->pluck('state')->unique() as $state)
+                                                        <option value="{{ $state }}" @if($currentState == $state) selected @endif>{{ $state }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
                                         </select>
-                                        {{-- <input type="text" class="form-control require" id="state" name="state" value="{{ @$package->state }}" required /> --}}
                                     </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label class="form_label_color">Departure Airport</label>
+                                        <select name="state_code" class="form-control" required>
+                                            <option value="">-- Select Departure Airport --</option>
+                                            @if(!empty($currentCode) && !$knownCodes->contains($currentCode))
+                                                <option value="{{ $currentCode }}" selected>{{ $currentCode }} (current)</option>
+                                            @endif
+                                            @foreach($origins ?? [] as $country => $rows)
+                                                <optgroup label="{{ $country }}">
+                                                    @foreach($rows as $origin)
+                                                        <option value="{{ $origin->airport_code }}" @if($currentCode == $origin->airport_code) selected @endif>
+                                                            {{ $origin->state }} — {{ $origin->airport_name }} ({{ $origin->airport_code }})
+                                                        </option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
+                                        </select>
+                                        <small class="text-muted">The public packages page shows this package under the airport chosen here.</small>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-lg-4 form-group">
                                         <label class="form_label_color">Package Type</label>
                                         <select name="package_type" class="form-control">

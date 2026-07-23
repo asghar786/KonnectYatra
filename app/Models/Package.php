@@ -12,6 +12,7 @@ class Package extends Model
     protected $fillable = [
         'name',
         'state',
+        'state_code',
         'month_year',
         'round_single_price',
         'round_double_price',
