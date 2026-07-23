@@ -46,44 +46,48 @@
                                         $orphanCode = !empty($currentCode)
                                             && !collect($stateAirports)->pluck('code')->contains($currentCode);
                                     @endphp
-                                    <div class="col-lg-4 form-group">
-                                        <label class="form_label_color">State</label>
-                                        <select name="state" id="package_state" class="form-control" required>
-                                            <option value="">-- Select State --</option>
-                                            @if(!empty($currentState) && !$originStates->contains($currentState))
-                                                <option value="{{ $currentState }}" selected>{{ $currentState }} (current)</option>
-                                            @endif
-                                            @foreach($origins ?? [] as $country => $rows)
-                                                <optgroup label="{{ $country }}">
-                                                    @foreach(collect($rows)->pluck('state')->unique() as $state)
-                                                        <option value="{{ $state }}" @if($currentState == $state) selected @endif>{{ $state }}</option>
+                                    {{-- Package Name takes 1/3; State / Departure Airport / Package Type
+                                         share the remaining 2/3 as a nested 3-column row. --}}
+                                    <div class="col-lg-8">
+                                        <div class="row">
+                                            <div class="col-lg-4 form-group">
+                                                <label class="form_label_color">State</label>
+                                                <select name="state" id="package_state" class="form-control" required>
+                                                    <option value="">-- Select State --</option>
+                                                    @if(!empty($currentState) && !$originStates->contains($currentState))
+                                                        <option value="{{ $currentState }}" selected>{{ $currentState }} (current)</option>
+                                                    @endif
+                                                    @foreach($origins ?? [] as $country => $rows)
+                                                        <optgroup label="{{ $country }}">
+                                                            @foreach(collect($rows)->pluck('state')->unique() as $state)
+                                                                <option value="{{ $state }}" @if($currentState == $state) selected @endif>{{ $state }}</option>
+                                                            @endforeach
+                                                        </optgroup>
                                                     @endforeach
-                                                </optgroup>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-lg-4 form-group">
-                                        <label class="form_label_color">Departure Airport</label>
-                                        <select name="state_code" id="package_airport" class="form-control" required>
-                                            <option value="">-- Select Departure Airport --</option>
-                                            @if($orphanCode)
-                                                <option value="{{ $currentCode }}" selected>{{ $currentCode }} (current — not listed under this state)</option>
-                                            @endif
-                                            @foreach($stateAirports as $airport)
-                                                <option value="{{ $airport['code'] }}" @if($currentCode == $airport['code']) selected @endif>{{ $airport['name'] }}@if(!empty($airport['code'])) ({{ $airport['code'] }})@endif</option>
-                                            @endforeach
-                                        </select>
-                                        <small class="text-muted">Airports for the selected state. The public packages page shows this package under the airport chosen here.</small>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-lg-4 form-group">
-                                        <label class="form_label_color">Package Type</label>
-                                        <select name="package_type" class="form-control">
-                                            <option value="Vaisakhi" @if(@$package->package_type == 'Vaisakhi') selected @endif>Vaisakhi</option>
-                                            <option value="Gurpurab" @if(@$package->package_type == 'Gurpurab') selected @endif>Gurpurab</option>
-                                            <option value="VIP" @if(@$package->package_type == 'VIP') selected @endif>VIP</option>
-                                        </select>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-4 form-group">
+                                                <label class="form_label_color">Departure Airport</label>
+                                                <select name="state_code" id="package_airport" class="form-control" required>
+                                                    <option value="">-- Select Departure Airport --</option>
+                                                    @if($orphanCode)
+                                                        <option value="{{ $currentCode }}" selected>{{ $currentCode }} (current — not listed under this state)</option>
+                                                    @endif
+                                                    @foreach($stateAirports as $airport)
+                                                        <option value="{{ $airport['code'] }}" @if($currentCode == $airport['code']) selected @endif>{{ $airport['name'] }}@if(!empty($airport['code'])) ({{ $airport['code'] }})@endif</option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="text-muted">Airports for the selected state.</small>
+                                            </div>
+                                            <div class="col-lg-4 form-group">
+                                                <label class="form_label_color">Package Type</label>
+                                                <select name="package_type" class="form-control">
+                                                    <option value="Vaisakhi" @if(@$package->package_type == 'Vaisakhi') selected @endif>Vaisakhi</option>
+                                                    <option value="Gurpurab" @if(@$package->package_type == 'Gurpurab') selected @endif>Gurpurab</option>
+                                                    <option value="VIP" @if(@$package->package_type == 'VIP') selected @endif>VIP</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
