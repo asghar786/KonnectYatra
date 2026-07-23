@@ -82,6 +82,27 @@ Format:
   design of the chosen layout; 8 legacy packages left untouched (already `status=0`).
 - **Review:** see decisions.csv row dated 2026-07-23.
 
+## 2026-07-23 — Package Status control (and the two gates for public visibility)
+- **Decision:** Added an **Active / Hidden** `status` select to the package create/edit form, saved in
+  both controller paths, plus a red **Hidden** badge + dimmed banner on the package list card.
+- **What it fixed:** Rashad's Netherlands/Amsterdam package existed, had the right airport and package
+  type, and still showed "Coming Soon" publicly. It had been built with **Copy** from a disabled
+  package and inherited `status = 0` — and nothing in the admin displayed or set `status`, so it was
+  invisible with no way to see why or fix it.
+- **The two gates a package must pass to appear on `/all-packages`** (both are easy to miss):
+  1. `status = 1` — `PackagesController@all_package` queries
+     `Package::where('package_type', …)->where('status', 1)`.
+  2. `state_code` must equal a `departure_origins.airport_code` — the page matches cards purely on
+     `data-code="{{ $val->state_code }}"`. **`package.state` is only a display label and is never
+     matched on.**
+- **A package has no country field, deliberately.** Country is resolved through `departure_origins`
+  (country → state → airport code), so the airport code already implies the country. Adding a country
+  column would just create a second source of truth that can disagree with the airport.
+- **Debugging trick worth reusing:** view-source on `/all-packages` and search for
+  `data-code="XXX"`. Absent ⇒ the row failed the `status`/`package_type` query and the card was never
+  rendered; present ⇒ the JS origin filter is at fault. It splits the problem in one step.
+- **Review:** see decisions.csv row dated 2026-07-23.
+
 ## 2026-07-23 — Copy Package
 - **Decision:** A **Copy** button on each package card (`POST /admin/apply_packages/copy/{id}`)
   duplicates the package plus its `package_details` and `price_details` rows, then redirects to the
@@ -93,11 +114,10 @@ Format:
      the previous image whenever the brochure changes, so a shared filename would mean replacing the
      copy's brochure **silently deletes the original package's image**. `duplicateFlyer()` copies the
      file under a fresh `uniqid()` name and returns null if the stored file is missing on disk.
-  2. **The copy inherits `status`** rather than being created hidden. There is **no status control
-     anywhere in the package form** — `status` defaults to 1 in the DB and nothing in create/edit
-     writes it — so a copy created with `status=0` would be invisible on the public site with no UI
-     to enable it. Consequence: a copy is publicly visible from the moment it is created, for the few
-     seconds before it is edited. Adding a status/draft toggle would be the proper fix.
+  2. **The copy inherits `status`** rather than being created hidden — at the time there was no status
+     control in the form, so a copy created with `status=0` could never be enabled. Consequence: a copy
+     is publicly visible from the moment it is created. **This inheritance bit within hours** — see the
+     Status entry below. Status control was added the same day.
 - **Also:** `.pkg-card-actions` gained `flex-wrap:wrap` — a 4th button squeezed the row.
 - **Review:** see decisions.csv row dated 2026-07-23.
 
