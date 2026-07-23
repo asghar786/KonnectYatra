@@ -250,6 +250,8 @@ class PackagesController extends Controller
       $package->five_star_land_price = $data['five_star_land_price'];
       $package->four_star_land_price = $data['four_star_land_price'];
       $package->package_type = $data['package_type'];
+      // Only status = 1 is rendered on the public packages page.
+      $package->status = isset($data['status']) ? (int) $data['status'] : 1;
       $package->save();
 
       $package_details = new PackageDetails;
@@ -369,6 +371,11 @@ class PackagesController extends Controller
         "four_star_land_price" => @$data['four_star_land_price'],
         "package_type" => @$data['package_type']
       ];
+      // Absent only if the form was submitted without the field; leave it alone then.
+      if(isset($data['status']))
+      {
+        $package["status"] = (int) $data['status'];
+      }
       // Brochure: a new upload replaces the current one, "Remove Image" clears it.
       // Each package owns its flyer file, so the superseded one is deleted rather
       // than left behind in assets/flyers.

@@ -16,6 +16,10 @@
     .pkg-banner img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
     .pkg-banner .pkg-noimg{color:#bbb;font-size:13px;text-align:center}
     .pkg-type{position:absolute;top:10px;right:10px;background:rgba(45,27,105,.9);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+    /* A hidden package renders nowhere on the public site — say so on the card,
+       otherwise its absence looks like a bug rather than a setting. */
+    .pkg-hidden{position:absolute;top:10px;left:10px;background:rgba(190,30,45,.92);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+    .pkg-card.is-hidden .pkg-banner img{opacity:.45}
     .pkg-card-head{padding:14px 18px 4px}
     .pkg-card-head h5{margin:0;font-size:15px;font-weight:700;line-height:1.35;color:#222}
     .pkg-history{display:inline-flex;align-items:center;gap:6px;margin:8px 18px 0;padding:4px 12px;border-radius:20px;
@@ -63,7 +67,7 @@
             <div class="row mt-4" id="pkgGrid">
                 @forelse($yatri_package as $yatri)
                 <div class="col-xl-4 col-lg-6 col-md-6 mb-4 pkg-item" data-search="{{ strtolower(trim($yatri->name.' '.$yatri->package_type)) }}">
-                    <div class="pkg-card">
+                    <div class="pkg-card {{ (int) $yatri->status === 0 ? 'is-hidden' : '' }}">
                         <div class="pkg-banner">
                             @if(!empty($yatri->image))
                             <img src="{{ asset('assets/flyers/'.$yatri->image) }}" alt="{{ $yatri->name }}">
@@ -71,6 +75,9 @@
                             <span class="pkg-noimg"><i class="fa fa-image fa-2x d-block mb-2"></i>No banner</span>
                             @endif
                             <span class="pkg-type">{{ $yatri->package_type ?: '—' }}</span>
+                            @if((int) $yatri->status === 0)
+                            <span class="pkg-hidden" title="Not shown on the public site — set Status to Active in Edit"><i class="fa fa-eye-slash"></i> Hidden</span>
+                            @endif
                         </div>
                         <div class="pkg-card-head">
                             <h5>{{ $yatri->name }}</h5>

@@ -91,9 +91,22 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-lg-6 form-group">
+                                    <div class="col-lg-4 form-group">
                                         <label class="form_label_color">Upload Image</label>
                                         <input type="file" class="form-control require" id="image" name="image" @if(empty(@$package->image)) required @endif />
+                                    </div>
+                                    @php
+                                        // Existing packages keep their stored value; a brand new one
+                                        // defaults to Active, matching the column default.
+                                        $currentStatus = isset($package) ? (int) $package->status : 1;
+                                    @endphp
+                                    <div class="col-lg-2 form-group">
+                                        <label class="form_label_color">Status</label>
+                                        <select name="status" class="form-control">
+                                            <option value="1" @if($currentStatus === 1) selected @endif>Active</option>
+                                            <option value="0" @if($currentStatus === 0) selected @endif>Hidden</option>
+                                        </select>
+                                        <small class="text-muted">Hidden packages never appear on the public site.</small>
                                     </div>
                                     @if(!empty(@$package->image))
                                     <div class="col-lg-6 form-group">
