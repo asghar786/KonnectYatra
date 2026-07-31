@@ -64,7 +64,7 @@
                 </li>
 
                 <!-- Packages & Travel -->
-                @php $open = $groupOpen([route('apply_packages'), route('seasons'), url('admin/hotels'), url('admin/bus'), url('admin/locations'), url('admin/origins'), route('admin_gurdwara'), route('admin_gurdwaras')]); @endphp
+                @php $open = $groupOpen([route('apply_packages'), route('seasons'), url('admin/hotels'), url('admin/bus'), url('admin/locations'), url('admin/origins'), route('admin_gurdwara'), route('admin_gurdwaras'), route('gurdwara-leads')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-suitcase text-primary"></i></span>
@@ -80,6 +80,7 @@
                         <li class="{{ $isCur(url('admin/origins')) ? 'show' : '' }}"><a href="{{url('admin/origins')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-plane-departure text-info"></i></span><span class="ttr-label">Departure Origins</span></a></li>
                         <li class="{{ $isCur(route('admin_gurdwara')) ? 'show' : '' }}"><a href="{{route('admin_gurdwara')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-home text-primary"></i></span><span class="ttr-label">Gurdwaras</span></a></li>
                         <li class="{{ $isCur(route('admin_gurdwaras')) ? 'show' : '' }}"><a href="{{route('admin_gurdwaras')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-home text-success"></i></span><span class="ttr-label">Gurdwaras List</span></a></li>
+                        <li class="{{ $isCur(route('gurdwara-leads')) ? 'show' : '' }}"><a href="{{route('gurdwara-leads')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-address-card text-warning"></i></span><span class="ttr-label">Gurdwara Leads</span></a></li>
                     </ul>
                 </li>
 

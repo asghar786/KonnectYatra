@@ -102,6 +102,9 @@ Route::post('/save-info', [UserPackages::class, 'save_info'])->name('save_info')
 // Newsletter subscription (public)
 Route::post('/subscribe', [SubscriberController::class, 'store'])->name('subscribe');
 
+// Homepage "Near Gurdwara Sahib" popup (public)
+Route::post('/gurdwara-lead', [\App\Http\Controllers\GurdwaraLeadController::class, 'store'])->name('gurdwara-lead.store');
+
 // Admin Part //
 Route::redirect('/admin', '/admin_login');
 Route::get('/admin_login',[AdminLoginController::class, 'index'])->name('admin_login');
@@ -256,6 +259,10 @@ Route::group(['prefix' => 'admin',
     Route::get('/origins/edit/{id}',[PackagesController::class, 'edit_origins'])->name('edit_origins');
     Route::post('/origins/edit/{id}',[PackagesController::class, 'edit_origins'])->name('edit_origins');
     Route::get('/origins/delete/{id}',[PackagesController::class, 'delete_origins'])->name('delete_origins');
+
+    // Gurdwara Leads — submissions from the homepage "Near Gurdwara Sahib" popup
+    Route::get('/gurdwara-leads',[\App\Http\Controllers\GurdwaraLeadController::class, 'index'])->name('gurdwara-leads');
+    Route::get('/gurdwara-leads/delete/{id}',[\App\Http\Controllers\GurdwaraLeadController::class, 'destroy'])->name('gurdwara-leads-delete');
 
     Route::get('/staff_ids/{id}',[PackagesController::class, 'staff_ids'])->name('staff_ids');
 

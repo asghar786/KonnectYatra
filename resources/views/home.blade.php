@@ -570,4 +570,200 @@ h4.destination {
 				</main>
 
 				<!-- Content END-->
+
+				<!-- "Near Gurdwara Sahib" homepage popup -->
+				<style type="text/css">
+					.gwp{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
+					.gwp-overlay{position:fixed;inset:0;background:rgba(20,26,45,.6);backdrop-filter:blur(2px);z-index:2000;
+						display:none;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .2s}
+					.gwp-overlay.open{display:flex;opacity:1}
+					.gwp-modal{background:#fff;border-radius:20px;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;
+						overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);transform:translateY(14px);opacity:0;transition:transform .25s ease,opacity .25s ease}
+					.gwp-overlay.open .gwp-modal{transform:translateY(0);opacity:1}
+					.gwp-head{position:relative;background:linear-gradient(135deg,#2d1b69,#5b2a9e);color:#fff;padding:26px 30px}
+					.gwp-head h4{margin:0 0 6px;font-size:21px;font-weight:800;color:#fff}
+					.gwp-head p{margin:0;font-size:13.5px;opacity:.88;line-height:1.5}
+					.gwp-close{position:absolute;top:14px;right:14px;color:#fff;background:rgba(255,255,255,.18);border:0;width:32px;height:32px;
+						border-radius:50%;font-size:16px;cursor:pointer;line-height:1}
+					.gwp-close:hover{background:rgba(255,255,255,.3)}
+					.gwp-body{padding:22px 30px 26px;overflow-y:auto}
+					.gwp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+					.gwp-field{margin-bottom:16px}
+					.gwp-field--full{grid-column:1 / -1}
+					.gwp-field label{display:block;font-weight:700;color:var(--ink);font-size:13.5px;margin-bottom:6px}
+					.gwp-field input[type=text],.gwp-field input[type=tel]{width:100%;border:1px solid #e2e4ea;border-radius:12px;padding:11px 14px;font-size:14.5px;outline:none;transition:.15s;box-sizing:border-box}
+					.gwp-field input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+					.gwp-pills{display:flex;flex-wrap:wrap;gap:10px}
+					.gwp-pill{position:relative;display:inline-flex;align-items:center;border:1.5px solid #e2e4ea;border-radius:30px;padding:9px 18px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s}
+					.gwp-pill input{position:absolute;opacity:0;width:0;height:0}
+					.gwp-pill:hover{border-color:var(--brand)}
+					.gwp-pill.checked{background:var(--brand);border-color:var(--brand);color:#fff}
+					.gwp-submit{display:block;width:100%;background:var(--brand);color:#fff;border:0;font-weight:700;font-size:16px;padding:14px;border-radius:30px;cursor:pointer;box-shadow:0 8px 18px rgba(245,78,24,.3);transition:.15s}
+					.gwp-submit:hover{transform:translateY(-2px)}
+					.gwp-submit:disabled{opacity:.7;cursor:not-allowed;transform:none}
+					.gwp-error{display:none;background:#fdecea;color:#c0392b;border-radius:10px;padding:10px 14px;font-size:13.5px;margin-bottom:14px}
+					.gwp-success{display:none;text-align:center;padding:30px 10px}
+					.gwp-success i{font-size:44px;color:#1c9e44;margin-bottom:14px}
+					.gwp-success h5{margin:0 0 8px;color:var(--ink);font-weight:800;font-size:19px}
+					.gwp-success p{margin:0;color:var(--muted);font-size:14px}
+					@media (max-width:575px){.gwp-grid{grid-template-columns:1fr}.gwp-head{padding:22px 22px}.gwp-body{padding:18px 22px 22px}}
+				</style>
+				<div class="gwp gwp-overlay" id="gwpPopup" role="dialog" aria-modal="true" aria-labelledby="gwpTitle">
+					<div class="gwp-modal">
+						<div class="gwp-head">
+							<button type="button" class="gwp-close js-gwp-close" aria-label="Close">&times;</button>
+							<h4 id="gwpTitle"><i class="fa fa-map-marker-alt"></i> Find Your Nearest Gurdwara Sahib</h4>
+							<p>Share your details and we'll help connect you to your nearest Gurdwara Sahib and upcoming Yatra updates.</p>
+						</div>
+						<div class="gwp-body">
+							<div class="gwp-error" id="gwpError"></div>
+							<form id="gwpForm" autocomplete="off">
+								<div class="gwp-grid">
+									<div class="gwp-field">
+										<label for="gwp_first_name">First Name</label>
+										<input type="text" id="gwp_first_name" name="first_name" required>
+									</div>
+									<div class="gwp-field">
+										<label for="gwp_last_name">Last Name</label>
+										<input type="text" id="gwp_last_name" name="last_name" required>
+									</div>
+									<div class="gwp-field gwp-field--full">
+										<label for="gwp_phone">Telephone Number</label>
+										<input type="tel" id="gwp_phone" name="phone" required>
+									</div>
+									<div class="gwp-field">
+										<label for="gwp_city">City</label>
+										<input type="text" id="gwp_city" name="city" required>
+									</div>
+									<div class="gwp-field">
+										<label for="gwp_state">State</label>
+										<input type="text" id="gwp_state" name="state" required>
+									</div>
+									<div class="gwp-field">
+										<label for="gwp_zip">Zip Code</label>
+										<input type="text" id="gwp_zip" name="zip_code" required>
+									</div>
+									<div class="gwp-field">
+										<label for="gwp_gurdwara">Name of Near Gurdwara Sahib</label>
+										<input type="text" id="gwp_gurdwara" name="near_gurdwara" required>
+									</div>
+									<div class="gwp-field gwp-field--full">
+										<label>How did you know about Konnect Yatra USA?</label>
+										<div class="gwp-pills">
+											<label class="gwp-pill"><input type="radio" name="heard_from" value="Facebook" required> Facebook</label>
+											<label class="gwp-pill"><input type="radio" name="heard_from" value="Friends"> Friends</label>
+											<label class="gwp-pill"><input type="radio" name="heard_from" value="Gurdwara Sahib"> Gurdwara Sahib</label>
+										</div>
+									</div>
+								</div>
+								<button type="submit" class="gwp-submit" id="gwpSubmitBtn"><i class="fa fa-paper-plane"></i> Submit</button>
+							</form>
+							<div class="gwp-success" id="gwpSuccess">
+								<i class="fa fa-check-circle"></i>
+								<h5>Thank you!</h5>
+								<p>We have received your details and will be in touch soon.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<script>
+					(function () {
+						var STORAGE_KEY = 'ky_gwp_submitted';
+						if (localStorage.getItem(STORAGE_KEY)) return;
+
+						var overlay = document.getElementById('gwpPopup');
+						if (!overlay) return;
+
+						var openTimer = setTimeout(function () {
+							overlay.classList.add('open');
+							document.body.style.overflow = 'hidden';
+						}, 1400);
+
+						function closePopup() {
+							clearTimeout(openTimer);
+							overlay.classList.remove('open');
+							document.body.style.overflow = '';
+						}
+
+						overlay.querySelectorAll('.js-gwp-close').forEach(function (btn) {
+							btn.addEventListener('click', closePopup);
+						});
+						overlay.addEventListener('click', function (e) {
+							if (e.target === overlay) closePopup();
+						});
+						document.addEventListener('keydown', function (e) {
+							if (e.key === 'Escape') closePopup();
+						});
+
+						overlay.querySelectorAll('.gwp-pill input[type=radio]').forEach(function (radio) {
+							radio.addEventListener('change', function () {
+								overlay.querySelectorAll('.gwp-pill').forEach(function (pill) {
+									pill.classList.remove('checked');
+								});
+								radio.closest('.gwp-pill').classList.add('checked');
+							});
+						});
+
+						var form = document.getElementById('gwpForm');
+						var errorBox = document.getElementById('gwpError');
+						var successBox = document.getElementById('gwpSuccess');
+						var submitBtn = document.getElementById('gwpSubmitBtn');
+
+						form.addEventListener('submit', function (e) {
+							e.preventDefault();
+							errorBox.style.display = 'none';
+							submitBtn.disabled = true;
+							submitBtn.innerHTML = 'Submitting…';
+
+							var heard = form.querySelector('input[name="heard_from"]:checked');
+							var payload = {
+								first_name: form.first_name.value.trim(),
+								last_name: form.last_name.value.trim(),
+								phone: form.phone.value.trim(),
+								city: form.city.value.trim(),
+								state: form.state.value.trim(),
+								zip_code: form.zip_code.value.trim(),
+								near_gurdwara: form.near_gurdwara.value.trim(),
+								heard_from: heard ? heard.value : ''
+							};
+
+							fetch('{{ route("gurdwara-lead.store") }}', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									'Accept': 'application/json',
+									'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+								},
+								body: JSON.stringify(payload)
+							}).then(function (res) {
+								return res.json().then(function (data) {
+									return { ok: res.ok, data: data };
+								});
+							}).then(function (r) {
+								submitBtn.disabled = false;
+								submitBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Submit';
+								if (r.ok && r.data.success) {
+									localStorage.setItem(STORAGE_KEY, '1');
+									form.style.display = 'none';
+									successBox.style.display = 'block';
+									setTimeout(closePopup, 2600);
+								} else {
+									var msg = 'Please check the form and try again.';
+									if (r.data && r.data.errors) {
+										msg = Object.keys(r.data.errors).map(function (k) { return r.data.errors[k][0]; }).join(' ');
+									} else if (r.data && r.data.message) {
+										msg = r.data.message;
+									}
+									errorBox.textContent = msg;
+									errorBox.style.display = 'block';
+								}
+							}).catch(function () {
+								submitBtn.disabled = false;
+								submitBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Submit';
+								errorBox.textContent = 'Something went wrong. Please try again.';
+								errorBox.style.display = 'block';
+							});
+						});
+					})();
+				</script>
 				@endsection
