@@ -132,3 +132,31 @@ Format:
 - **Reasoning:** Client (Rashad) provided the airport pricing sheet and the Yatri Booking Form design; needed accurate per-origin packages, a complete applicant record, configurable payment instructions, and printable/exportable booking forms that bundle the uploaded documents.
 - **Critical deploy caveat:** all of the above includes **DB schema + data + composer dependency changes that do NOT travel via git auto-deploy** — on production you must run the new migrations (`--path ... --force`; only the new ones, since 8 legacy migrations are intentionally left pending), run `PdfPackagesSeeder`, `composer install`, and set the Payment Settings. See [[konnectyatra-yatri-booking-flow]].
 - **Review:** see decisions.csv row dated 2026-06-19.
+
+## 2026-07-31 — Homepage "Near Gurdwara Sahib" lead-capture popup
+- **Decision:** A modal popup on the **homepage only** collects First Name, Last Name,
+  Telephone Number, City, State, Zip Code, Name of Near Gurdwara Sahib, and (added mid-session)
+  a "How did you know about Konnect Yatra USA?" pill choice (Facebook / Friends / Gurdwara Sahib).
+  Submissions save to a new `gurdwara_leads` table, email `rm@konnectyatra.org`
+  (`App\Mail\GurdwaraLeadMail`), and are reviewable at `/admin/gurdwara-leads` (new sidebar
+  entry under Packages & Travel, styled to match the existing card-table admin pages).
+- **Trigger/dismiss behaviour (explicitly specified by the user):** shows ~1.4s after the
+  homepage loads. The **X** close button only dismisses that page view — it reappears on the
+  *next* page reload. Only an actual **submit** sets a `localStorage` flag (`ky_gwp_submitted`)
+  that stops it from ever showing again on that browser. No server-side "seen" tracking, since
+  visitors aren't authenticated.
+- **Reasoning:** Rashad wants to grow the same kind of gurdwara/contact data that feeds the
+  Address Book and gurdwara master-list work (see [[konnectyatra-gurdwaras-zip-search]],
+  [[konnectyatra-address-book]]) — but sourced from site visitors instead of his own field visits.
+- **The `rm@konnectyatra.com` vs `.org` mix-up:** the user's request said `.com`; the codebase's
+  established admin address (`BookingMailer::ADMIN_EMAIL`, and the homepage's own President's
+  Message contact block) is `rm@konnectyatra.org`. Used `.org` and flagged the discrepancy rather
+  than silently guessing or shipping to an address that may not exist.
+- **Verified locally before shipping:** ran the new migration, POSTed a real test submission
+  through the live local endpoint (curl + CSRF), confirmed the row saved with all fields
+  including `heard_from`, then truncated the test row. **Caveat:** local `MAIL_MAILER` is real
+  Gmail SMTP (not a log driver), so that test send actually delivered a "Test User" dummy-data
+  email to `rm@konnectyatra.org`'s real inbox — told the user so they/Rashad can disregard it.
+- **Deploy:** new migration `2026_07_31_000000_create_gurdwara_leads_table` is pending on prod —
+  tracked in [[konnectyatra-pending-prod-migrations]] per the batch-migration preference.
+- **Review:** see decisions.csv row dated 2026-07-31.
