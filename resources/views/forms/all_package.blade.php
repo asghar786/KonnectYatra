@@ -384,11 +384,13 @@
         $state   = $('#origin_state'),
         $airport = $('#origin_airport');
 
-    // USA pinned to the top, all other countries alphabetical.
+    // USA pinned 1st, Canada pinned 2nd, all other countries alphabetical.
     Object.keys(APKG_ORIGINS).sort(function (a, b) {
       var isUsa = function (n) { return /^(usa|u\.s\.a\.?|united states)$/i.test(String(n).trim()); };
-      if (isUsa(a)) return -1;
-      if (isUsa(b)) return 1;
+      var isCanada = function (n) { return /^canada$/i.test(String(n).trim()); };
+      var rank = function (n) { return isUsa(n) ? 0 : (isCanada(n) ? 1 : 2); };
+      var ra = rank(a), rb = rank(b);
+      if (ra !== rb) return ra - rb;
       return a.localeCompare(b);
     }).forEach(function (c) {
       $country.append(new Option(c, c));
