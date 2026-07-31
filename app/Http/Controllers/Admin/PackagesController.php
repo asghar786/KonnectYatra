@@ -1164,7 +1164,13 @@ class PackagesController extends Controller
    * ------------------------------------------------------------------- */
   public function origins()
   {
-    $data = DepartureOrigin::orderBy('country')
+    // USA 1st, Canada 2nd, all other countries alphabetical after — mirrors
+    // the sort used for the public /all-packages country dropdown.
+    $data = DepartureOrigin::orderByRaw("CASE
+          WHEN LOWER(TRIM(country)) IN ('usa','u.s.a','u.s.a.','united states') THEN 0
+          WHEN LOWER(TRIM(country)) = 'canada' THEN 1
+          ELSE 2 END")
+        ->orderBy('country')
         ->orderBy('sort_order')
         ->orderBy('state')
         ->get();
