@@ -51,6 +51,9 @@ use App\Http\Controllers\SubscriberController;
 Route::get('/',[HomeController::class, 'index'])->name('index');
 Auth::routes();
 
+// XML sitemap for search engines (public pages only — see SitemapController).
+Route::get('/sitemap.xml',[\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 // Route::view('/test', 'test');
 Route::get('/our-info',[HomeController::class, 'our_info'])->name('our_info');
 Route::get('/home',[HomeController::class,'index'])->name('home');

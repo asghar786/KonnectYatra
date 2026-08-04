@@ -1,2 +1,17 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /admin_login
+Disallow: /user/
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /agreement/
+Disallow: /thank-you
+Disallow: /passport_uploads/
+Disallow: /greencard_uploads/
+Disallow: /drivinglicense_uploads/
+Disallow: /photo_uploads/
+Disallow: /document_uploads/
+Disallow: /bank_receipt/
+
+Sitemap: https://konnectyatra.org/sitemap.xml
