@@ -160,3 +160,31 @@ Format:
 - **Deploy:** new migration `2026_07_31_000000_create_gurdwara_leads_table` is pending on prod —
   tracked in [[konnectyatra-pending-prod-migrations]] per the batch-migration preference.
 - **Review:** see decisions.csv row dated 2026-07-31.
+
+## 2026-08-04 — XML sitemap + robots.txt hardening
+- **Decision:** `/sitemap.xml` is a **dynamic Laravel route**
+  (`App\Http\Controllers\SitemapController`, registered near the top of `routes/web.php`),
+  not a generated static file. It emits static public pages plus DB-driven URLs:
+  packages (`status = 1`, the same gate `/all-packages` uses), the full gurdwara directory,
+  published blog posts, hotels, locations, events and news — each with `lastmod` from
+  `updated_at`, plus `changefreq`/`priority`. 221 URLs against the local DB; prod will differ
+  because the local DB has drifted (see [[konnectyatra-prod-local-drift]]).
+- **Deliberately excluded:** `admin/*` and `user/*` (auth-walled), login/register/logout, and the
+  transactional booking steps (apply, payment, agreement, thank-you) — per-booking, not content.
+- **Reasoning:** a static file goes stale every time Rashad adds a package, gurdwara or blog post.
+  A route regenerates per request and reuses the real visibility gates, so a hidden package
+  (see [[konnectyatra-package-visibility]]) can never leak into the index.
+- **robots.txt was wide open** — a bare `Disallow:` with no rules — so the uploaded-document
+  folders (`passport_uploads`, `greencard_uploads`, `drivinglicense_uploads`, `photo_uploads`,
+  `document_uploads`, `bank_receipt`) were crawlable. Now disallowed along with the admin/user
+  and auth paths, plus a `Sitemap: https://konnectyatra.org/sitemap.xml` line.
+- **Known gap, left undone (flagged to the user, not in scope):** no page on the site has a
+  `rel="canonical"` tag, and `/home` and `/our-info` are duplicate routes for `/` and `/our-info`.
+  The sitemap lists only the canonical form, but without canonical tags the duplicates can still
+  be indexed.
+- **No DB or dependency changes** — this deploys cleanly over git auto-deploy, unlike the booking
+  work in [[konnectyatra-pending-prod-migrations]].
+- **Verified before shipping:** booted the app and rendered the route through the real HTTP kernel
+  — HTTP 200, `application/xml`, `simplexml_load_string` parsed it, 221 `<url>` entries, deep
+  links spot-checked for each content type.
+- **Review:** see decisions.csv row dated 2026-08-04.
