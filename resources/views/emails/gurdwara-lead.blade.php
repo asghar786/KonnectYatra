@@ -11,11 +11,14 @@
 
         <div style="padding:24px 28px;">
             <table style="width:100%; border-collapse:collapse;">
-                <tr><td style="padding:8px 0; width:170px; color:#5a6273;">Name</td><td style="padding:8px 0; font-weight:bold;">{{ trim($d['first_name'].' '.$d['last_name']) }}</td></tr>
+                <tr><td style="padding:8px 0; width:170px; color:#5a6273;">Name</td><td style="padding:8px 0; font-weight:bold;">{{ implode(' ', array_filter([$d['first_name'] ?? null, $d['middle_name'] ?? null, $d['last_name'] ?? null])) }}</td></tr>
+                <tr><td style="padding:8px 0; color:#5a6273;">Father's Name</td><td style="padding:8px 0;">{{ $d['father_name'] ?? '—' }}</td></tr>
                 <tr><td style="padding:8px 0; color:#5a6273;">Phone</td><td style="padding:8px 0;"><a href="tel:{{ $d['phone'] }}" style="color:#1c2541; text-decoration:none;">{{ $d['phone'] }}</a></td></tr>
+                <tr><td style="padding:8px 0; color:#5a6273;">Email</td><td style="padding:8px 0;">@if(!empty($d['email']))<a href="mailto:{{ $d['email'] }}" style="color:#1c2541;">{{ $d['email'] }}</a>@else &mdash; @endif</td></tr>
                 <tr><td style="padding:8px 0; color:#5a6273;">City</td><td style="padding:8px 0;">{{ $d['city'] }}</td></tr>
                 <tr><td style="padding:8px 0; color:#5a6273;">State</td><td style="padding:8px 0;">{{ $d['state'] }}</td></tr>
                 <tr><td style="padding:8px 0; color:#5a6273;">Zip Code</td><td style="padding:8px 0;">{{ $d['zip_code'] }}</td></tr>
+                <tr><td style="padding:8px 0; color:#5a6273;">Yatris Interested</td><td style="padding:8px 0; font-weight:bold;">{{ $d['yatri_count'] ?? '—' }}</td></tr>
                 <tr><td style="padding:8px 0; color:#5a6273;">Nearest Gurdwara Sahib</td><td style="padding:8px 0; font-weight:bold;">{{ $d['near_gurdwara'] }}</td></tr>
                 <tr><td style="padding:8px 0; color:#5a6273;">How they heard about us</td><td style="padding:8px 0;">{{ $d['heard_from'] ?? '—' }}</td></tr>
             </table>

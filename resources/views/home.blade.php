@@ -588,10 +588,12 @@ h4.destination {
 					.gwp-close:hover{background:rgba(255,255,255,.3)}
 					.gwp-body{padding:22px 30px 26px;overflow-y:auto}
 					.gwp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+					.gwp-trio{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 					.gwp-field{margin-bottom:16px}
 					.gwp-field--full{grid-column:1 / -1}
 					.gwp-field label{display:block;font-weight:700;color:var(--ink);font-size:13.5px;margin-bottom:6px}
-					.gwp-field input[type=text],.gwp-field input[type=tel]{width:100%;border:1px solid #e2e4ea;border-radius:12px;padding:11px 14px;font-size:14.5px;outline:none;transition:.15s;box-sizing:border-box}
+					.gwp-opt{font-weight:600;color:var(--muted);font-size:12px}
+					.gwp-field input[type=text],.gwp-field input[type=tel],.gwp-field input[type=email],.gwp-field input[type=number]{width:100%;border:1px solid #e2e4ea;border-radius:12px;padding:11px 14px;font-size:14.5px;outline:none;transition:.15s;box-sizing:border-box}
 					.gwp-field input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(245,78,24,.12)}
 					.gwp-pills{display:flex;flex-wrap:wrap;gap:10px}
 					.gwp-pill{position:relative;display:inline-flex;align-items:center;border:1.5px solid #e2e4ea;border-radius:30px;padding:9px 18px;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s}
@@ -606,7 +608,7 @@ h4.destination {
 					.gwp-success i{font-size:44px;color:#1c9e44;margin-bottom:14px}
 					.gwp-success h5{margin:0 0 8px;color:var(--ink);font-weight:800;font-size:19px}
 					.gwp-success p{margin:0;color:var(--muted);font-size:14px}
-					@media (max-width:575px){.gwp-grid{grid-template-columns:1fr}.gwp-head{padding:22px 22px}.gwp-body{padding:18px 22px 22px}}
+					@media (max-width:575px){.gwp-grid,.gwp-trio{grid-template-columns:1fr}.gwp-head{padding:22px 22px}.gwp-body{padding:18px 22px 22px}}
 				</style>
 				<div class="gwp gwp-overlay" id="gwpPopup" role="dialog" aria-modal="true" aria-labelledby="gwpTitle">
 					<div class="gwp-modal">
@@ -619,29 +621,49 @@ h4.destination {
 							<div class="gwp-error" id="gwpError"></div>
 							<form id="gwpForm" autocomplete="off">
 								<div class="gwp-grid">
-									<div class="gwp-field">
-										<label for="gwp_first_name">First Name</label>
-										<input type="text" id="gwp_first_name" name="first_name" required>
-									</div>
-									<div class="gwp-field">
-										<label for="gwp_last_name">Last Name</label>
-										<input type="text" id="gwp_last_name" name="last_name" required>
+									<div class="gwp-trio">
+										<div class="gwp-field">
+											<label for="gwp_first_name">First Name</label>
+											<input type="text" id="gwp_first_name" name="first_name" required>
+										</div>
+										<div class="gwp-field">
+											<label for="gwp_middle_name">Middle Name <span class="gwp-opt">(optional)</span></label>
+											<input type="text" id="gwp_middle_name" name="middle_name">
+										</div>
+										<div class="gwp-field">
+											<label for="gwp_last_name">Last Name</label>
+											<input type="text" id="gwp_last_name" name="last_name" required>
+										</div>
 									</div>
 									<div class="gwp-field gwp-field--full">
-										<label for="gwp_phone">Telephone Number</label>
+										<label for="gwp_father_name">Father's Name</label>
+										<input type="text" id="gwp_father_name" name="father_name" required>
+									</div>
+									<div class="gwp-field">
+										<label for="gwp_phone">Telephone</label>
 										<input type="tel" id="gwp_phone" name="phone" required>
 									</div>
 									<div class="gwp-field">
-										<label for="gwp_city">City</label>
-										<input type="text" id="gwp_city" name="city" required>
+										<label for="gwp_email">Email</label>
+										<input type="email" id="gwp_email" name="email" required>
+									</div>
+									<div class="gwp-trio">
+										<div class="gwp-field">
+											<label for="gwp_city">City</label>
+											<input type="text" id="gwp_city" name="city" required>
+										</div>
+										<div class="gwp-field">
+											<label for="gwp_state">State</label>
+											<input type="text" id="gwp_state" name="state" required>
+										</div>
+										<div class="gwp-field">
+											<label for="gwp_zip">Zip Code</label>
+											<input type="text" id="gwp_zip" name="zip_code" required>
+										</div>
 									</div>
 									<div class="gwp-field">
-										<label for="gwp_state">State</label>
-										<input type="text" id="gwp_state" name="state" required>
-									</div>
-									<div class="gwp-field">
-										<label for="gwp_zip">Zip Code</label>
-										<input type="text" id="gwp_zip" name="zip_code" required>
+										<label for="gwp_yatri_count">Number of Yatri Interested</label>
+										<input type="number" id="gwp_yatri_count" name="yatri_count" min="1" max="999" step="1" required>
 									</div>
 									<div class="gwp-field">
 										<label for="gwp_gurdwara">Name of Near Gurdwara Sahib</label>
@@ -653,6 +675,7 @@ h4.destination {
 											<label class="gwp-pill"><input type="radio" name="heard_from" value="Facebook" required> Facebook</label>
 											<label class="gwp-pill"><input type="radio" name="heard_from" value="Friends"> Friends</label>
 											<label class="gwp-pill"><input type="radio" name="heard_from" value="Gurdwara Sahib"> Gurdwara Sahib</label>
+											<label class="gwp-pill"><input type="radio" name="heard_from" value="Others"> Others</label>
 										</div>
 									</div>
 								</div>
@@ -718,11 +741,15 @@ h4.destination {
 							var heard = form.querySelector('input[name="heard_from"]:checked');
 							var payload = {
 								first_name: form.first_name.value.trim(),
+								middle_name: form.middle_name.value.trim(),
 								last_name: form.last_name.value.trim(),
+								father_name: form.father_name.value.trim(),
 								phone: form.phone.value.trim(),
+								email: form.email.value.trim(),
 								city: form.city.value.trim(),
 								state: form.state.value.trim(),
 								zip_code: form.zip_code.value.trim(),
+								yatri_count: form.yatri_count.value.trim(),
 								near_gurdwara: form.near_gurdwara.value.trim(),
 								heard_from: heard ? heard.value : ''
 							};

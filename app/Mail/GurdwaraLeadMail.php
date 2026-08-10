@@ -19,7 +19,11 @@ class GurdwaraLeadMail extends Mailable
 
     public function build()
     {
-        $name = trim(($this->data['first_name'] ?? '') . ' ' . ($this->data['last_name'] ?? ''));
+        $name = implode(' ', array_filter([
+            $this->data['first_name'] ?? null,
+            $this->data['middle_name'] ?? null,
+            $this->data['last_name'] ?? null,
+        ]));
         return $this->subject('New Gurdwara Info Request — ' . ($name ?: 'Website Visitor'))
                     ->view('emails.gurdwara-lead');
     }

@@ -18,9 +18,14 @@
     .gl-table tbody td.tc{text-align:center}
     .gl-idx{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#eef1f6;color:#5a6273;font-size:12px;font-weight:700}
     .gl-name{font-weight:600;color:#1f2a44}
+    .gl-name small{display:block;color:#9aa0ac;font-size:11.5px;font-weight:400}
     .gl-phone{display:inline-flex;align-items:center;gap:7px;color:#1f2a44;text-decoration:none}
     .gl-phone i{color:#f54e18}
     .gl-phone:hover{color:#1a73e8}
+    .gl-mail{display:flex;width:fit-content;align-items:center;gap:7px;color:#6b7280;text-decoration:none;font-size:12.5px;margin-top:3px}
+    .gl-mail i{color:#f54e18}
+    .gl-mail:hover{color:#1a73e8}
+    .gl-count{display:inline-block;min-width:30px;text-align:center;font-weight:700;color:#1f2a44;background:#fff2ec;border:1px solid #ffd9c9;border-radius:20px;padding:4px 11px;font-size:12.5px}
     .gl-addr{color:#4b5563}
     .gl-addr small{display:block;color:#9aa0ac;font-size:11.5px}
     .gl-gurdwara{display:inline-block;font-weight:700;color:#2d1b69;background:#eef0ff;border-radius:20px;padding:4px 12px;font-size:12.5px}
@@ -50,7 +55,7 @@
                 <span class="gl-total"><i class="fa fa-address-card"></i> {{ count($leads) }} Submissions</span>
                 <div class="gl-search">
                     <i class="fa fa-search"></i>
-                    <input type="text" id="glSearch" placeholder="Search by name, phone, city, gurdwara…" autocomplete="off">
+                    <input type="text" id="glSearch" placeholder="Search by name, father's name, phone, email, city, gurdwara…" autocomplete="off">
                 </div>
             </div>
 
@@ -60,8 +65,9 @@
                         <tr>
                             <th class="tc">#</th>
                             <th>Name</th>
-                            <th>Phone</th>
+                            <th>Contact</th>
                             <th>Location</th>
+                            <th class="tc">Yatris</th>
                             <th>Near Gurdwara Sahib</th>
                             <th>Heard From</th>
                             <th>Submitted On</th>
@@ -70,11 +76,15 @@
                     </thead>
                     <tbody id="glBody">
                         @forelse($leads as $i => $lead)
-                        <tr class="gl-row" data-search="{{ strtolower(trim($lead->first_name.' '.$lead->last_name.' '.$lead->phone.' '.$lead->city.' '.$lead->state.' '.$lead->zip_code.' '.$lead->near_gurdwara)) }}">
+                        <tr class="gl-row" data-search="{{ strtolower(trim($lead->full_name.' '.$lead->father_name.' '.$lead->phone.' '.$lead->email.' '.$lead->city.' '.$lead->state.' '.$lead->zip_code.' '.$lead->near_gurdwara)) }}">
                             <td class="tc"><span class="gl-idx">{{ $i + 1 }}</span></td>
-                            <td><span class="gl-name">{{ $lead->first_name }} {{ $lead->last_name }}</span></td>
-                            <td><a class="gl-phone" href="tel:{{ $lead->phone }}"><i class="fa fa-phone"></i> {{ $lead->phone }}</a></td>
+                            <td><span class="gl-name">{{ $lead->full_name }}@if($lead->father_name)<small>S/o {{ $lead->father_name }}</small>@endif</span></td>
+                            <td>
+                                <a class="gl-phone" href="tel:{{ $lead->phone }}"><i class="fa fa-phone"></i> {{ $lead->phone }}</a>
+                                @if($lead->email)<a class="gl-mail" href="mailto:{{ $lead->email }}"><i class="fa fa-envelope"></i> {{ $lead->email }}</a>@endif
+                            </td>
                             <td><span class="gl-addr">{{ $lead->city }}, {{ $lead->state }}<small>Zip {{ $lead->zip_code }}</small></span></td>
+                            <td class="tc">@if($lead->yatri_count)<span class="gl-count">{{ $lead->yatri_count }}</span>@else <span class="gl-sub">—</span> @endif</td>
                             <td><span class="gl-gurdwara">{{ $lead->near_gurdwara }}</span></td>
                             <td>@if($lead->heard_from)<span class="gl-badge">{{ $lead->heard_from }}</span>@else <span class="gl-sub">—</span> @endif</td>
                             <td><span class="gl-sub">{{ optional($lead->created_at)->format('d M Y, h:i A') ?: '—' }}</span></td>
@@ -85,7 +95,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="8" class="gl-empty">No submissions yet.</td></tr>
+                        <tr><td colspan="9" class="gl-empty">No submissions yet.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

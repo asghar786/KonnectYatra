@@ -17,13 +17,25 @@ class GurdwaraLeadController extends Controller
     {
         $validated = $request->validate([
             'first_name'    => ['required', 'string', 'max:255'],
+            'middle_name'   => ['nullable', 'string', 'max:255'],
             'last_name'     => ['required', 'string', 'max:255'],
+            'father_name'   => ['required', 'string', 'max:255'],
             'phone'         => ['required', 'string', 'max:40'],
+            'email'         => ['required', 'email', 'max:255'],
             'city'          => ['required', 'string', 'max:255'],
             'state'         => ['required', 'string', 'max:255'],
             'zip_code'      => ['required', 'string', 'max:20'],
+            'yatri_count'   => ['required', 'integer', 'min:1', 'max:999'],
             'near_gurdwara' => ['required', 'string', 'max:255'],
-            'heard_from'    => ['required', 'string', 'in:Facebook,Friends,Gurdwara Sahib'],
+            'heard_from'    => ['required', 'string', 'in:Facebook,Friends,Gurdwara Sahib,Others'],
+        ], [], [
+            // Errors surface in the popup's banner, so keep the wording human.
+            'father_name'   => "father's name",
+            'phone'         => 'telephone',
+            'zip_code'      => 'zip code',
+            'yatri_count'   => 'number of Yatri interested',
+            'near_gurdwara' => 'nearest Gurdwara Sahib',
+            'heard_from'    => 'how you knew about Konnect Yatra USA',
         ]);
 
         $lead = GurdwaraLead::create($validated);
