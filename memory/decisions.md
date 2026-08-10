@@ -188,3 +188,38 @@ Format:
   — HTTP 200, `application/xml`, `simplexml_load_string` parsed it, 221 `<url>` entries, deep
   links spot-checked for each content type.
 - **Review:** see decisions.csv row dated 2026-08-04.
+
+## 2026-08-10 — Expand the homepage Gurdwara Sahib popup to a fuller lead record
+
+The client sent a marked-up screenshot of the live popup with the field list he wants. The
+popup shipped 2026-07-31 (see the entry for that date and [[gurdwara-leads-popup]]) collected
+8 fields; it now collects 12.
+
+- **Added:** middle name (the only optional field), father's name, email alongside telephone,
+  number of Yatris interested, and an **Others** pill on "How did you know about Konnect Yatra
+  USA?" — previously anyone who found the site another way had to pick a wrong answer.
+- **Layout follows the client's own line grouping:** First/Middle/Last on one row (new
+  `.gwp-trio` 3-column grid), Father's Name full width, Telephone + Email, City/State/Zip on a
+  trio row, then Yatri count + nearest Gurdwara Sahib. All trios collapse to one column under
+  576px.
+- **Kept, though the client's list did not mention it:** "Name of Near Gurdwara Sahib". It is
+  the point of the popup — the heading is "Find Your Nearest Gurdwara Sahib" and the whole
+  feature exists to route people to a gurdwara. Removing it is a one-line change if he
+  confirms he wants it gone; flagged to the user rather than dropped silently.
+- **New columns are nullable** (`middle_name`, `father_name`, `email`, `yatri_count`) so the
+  submissions captured since 2026-07-31 stay valid; validation still requires all but the
+  middle name. Custom validation attribute names were added because the messages surface in
+  the popup's own error banner ("The father's name field is required", not "father name").
+- **`heard_from` values unchanged** (Facebook / Friends / Gurdwara Sahib) with Others appended,
+  so existing rows keep matching the `in:` rule.
+- **Admin list restructured rather than widened:** father's name sits under the name as a
+  `S/o` sub-line and email under the phone, so the table grew by one column (Yatris), not four.
+- **Verified before shipping:** ran the controller with `Mail::fake()` — valid submit returns
+  200 and saves all 12 fields, the rendered notification email contains the new rows, and
+  missing father's name / bad email / `yatri_count` 0 / an unknown source are each rejected
+  while a blank middle name passes. Test rows deleted afterwards. Mail was faked deliberately:
+  local SMTP is real Gmail and would have emailed Rashad (see [[gurdwara-leads-popup]]).
+  Layout checked by screenshotting the popup at 800px and 430px.
+- **Needs a prod migration** — the auto-deploy ships the code but not the schema; see
+  [[konnectyatra-pending-prod-migrations]].
+- **Review:** see decisions.csv row dated 2026-08-10.
