@@ -223,3 +223,56 @@ popup shipped 2026-07-31 (see the entry for that date and [[gurdwara-leads-popup
 - **Needs a prod migration** — the auto-deploy ships the code but not the schema; see
   [[konnectyatra-pending-prod-migrations]].
 - **Review:** see decisions.csv row dated 2026-08-10.
+
+## 2026-08-13 — Rebuild the Special Land Package configurator and its apply step
+
+Both pages of the land-package flow (`/special-package` and `/special-package/{id}/apply`) were
+redesigned against a shared token stylesheet, **`public/new-assets/css/special-land-package.css`**
+(primitive → semantic → component layers, all scoped under `.slp` so the legacy theme is untouched).
+
+- **The design idea:** the six included days are a real route with direction (Wagah → Islamabad →
+  Lahore → Nankana → Kartarpur → Wagah), so the day list became an **itinerary spine** — one
+  continuous line with numbered station markers, solid kesari through the included days and a
+  dashed saffron continuation into the optional ones. **Adding an optional day solidifies its
+  marker and card**, so extending the trip visibly extends the road. Numbered markers are used
+  because the content genuinely is a sequence, not as decoration.
+- **What was actually broken (not just ugly):** the six included days were styled `.pkg-days.disabled`,
+  so the itinerary you are paying for read as unavailable; the optional days never showed their
+  surcharge ($125 on 4★, $150 on 5★) so the total changed with no stated cause; and the price and
+  the only CTA sat at the very bottom of a 3400px page. The apply step asked ~40 fields per
+  traveller with **no recap of what had been configured** — that recap now leads the page and links
+  back with "Change journey".
+- **Typography stayed on Raleway + Open Sans**, already loaded sitewide. A third display face would
+  have cost a render-blocking request and broken consistency with the other ~20 pages, so the
+  distinctiveness went into treatment (0.18em uppercase eyebrows as the only labelling device,
+  tabular numerals on the spine markers) rather than new families.
+- **Mobile** (explicitly asked for): the summary rail is `position: sticky` ≥992px and becomes a
+  fixed bottom action bar below it, with `#whatsappFloat` and `#backTotop` lifted above it via
+  `--slp-bar-h` on `:root`. Verified 0 overflowing elements at 390px on both pages.
+- **Bugs fixed along the way:** the tier radios were toggled with `.attr("checked", …)` on
+  `display:none` inputs, which only worked because the radios were never clicked directly — now
+  native inputs; five element IDs (`first_name`, `last_name`, `place_birth`, `issuing_authority`,
+  `selected_package_type`) were **duplicated once per traveller**, so every label pointed at
+  traveller 1 — now suffixed and verified 0 duplicates across 5 travellers; and the
+  `.green_card_area` toggle applied to *every* applicant at once instead of the one being edited.
+  Roughly 200 lines of dead script were removed (`#package_1/2/3`, `first_visit`, `us_passport`,
+  `.ticket_type`, `#gurdwara`, `.next`) — none of those elements exist on either page.
+- **Two CSS specificity traps worth remembering**, both self-inflicted and both caught only by
+  screenshotting: `.slp p` (0,1,1) silently beat every component class like `.slp-lede` (0,1,0) and
+  killed their margins, so the lede never centred — the resets are now wrapped in `:where()` to
+  carry zero specificity. But `list-style: none` then lost to the theme's `ul {}` and the disc
+  bullets came back, so list-style is deliberately kept at normal weight while margin/padding sit
+  in `:where()`.
+- **FA5, not FA6:** `fa-shield-halved`, `fa-circle-info` and `fa-mobile-screen-button` rendered as
+  nothing — the same trap logged on 2026-07-17. Public pages are Font Awesome 5.
+- **Deliberately not changed:** the payment section still collects routing/account numbers rather
+  than following the admin-configured Payment Settings model used by the Gurpurab booking flow, and
+  the wire-transfer fields are still not `required` on load despite showing `*`. Both are
+  pre-existing behaviour; changing what the form accepts is the client's call. Flagged, not touched.
+- **No DB or dependency changes** — deploys cleanly over git auto-deploy.
+- **Verified:** drove the real page over CDP — (950 + 150×2) × 3 = $3,750 with the exact posted
+  strings the controller expects (`5 Star Package`, `Day 7`/`Day 8`), submitted end to end to
+  `/special-package/9/apply`, confirmed the recap read back, then deleted the test row. Two console
+  errors on these pages come from theme `custom.min.js` / `iternary.js` and also fire on the
+  untouched homepage.
+- **Review:** see decisions.csv row dated 2026-08-13.
