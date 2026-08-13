@@ -56,7 +56,7 @@
                 <fieldset class="slp-fieldset">
                   <legend class="slp-section-head">
                     <p class="slp-eyebrow slp-eyebrow--accent">Step one</p>
-                    <h3 class="slp-section-title">Who is travelling?</h3>
+                    <h3 class="slp-section-title">No. of persons travelling with you?</h3>
                     <p class="slp-section-note">The price below is for everyone in your party.</p>
                   </legend>
 
