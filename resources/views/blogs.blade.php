@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @php
+    // Nav still links here, so keep the empty state out of the index as well as
+    // out of the sitemap — "No blog posts yet" is not a page worth ranking.
+    $pageRobots = count($blogs) ? 'index, follow' : 'noindex, follow';
+
     $pageTitle = 'Yatra Blog — Sikh Pilgrimage News & Travel Guides';
     $pageDescription = 'Articles and travel guides from Konnect Yatra on Sikh pilgrimage to Pakistan: '
         . 'Nankana Sahib, Panja Sahib, Kartarpur Sahib, pilgrim visa guidance and Gurpurab travel news.';

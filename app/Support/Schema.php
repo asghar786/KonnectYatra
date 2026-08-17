@@ -488,7 +488,16 @@ class Schema
             return null;
         }
 
-        $text = html_entity_decode(strip_tags((string) $html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // strip_tags() joins block elements with no separator, so "<p>a.</p><p>b</p>"
+        // would come out as "a.b". Put a space at every block boundary first;
+        // inline tags (<b>, <a>, <span>) are left alone so words aren't split.
+        $text = preg_replace(
+            '#</?(?:p|div|br|li|ul|ol|tr|td|th|h[1-6]|section|article|blockquote|table)\b[^>]*>#i',
+            ' ',
+            (string) $html
+        );
+
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = trim(preg_replace('/\s+/u', ' ', $text));
 
         if ($text === '') {

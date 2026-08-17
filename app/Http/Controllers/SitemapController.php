@@ -28,7 +28,6 @@ class SitemapController extends Controller
         'gurdwaras'         => ['weekly',  '0.8'],
         'aboutus'           => ['monthly', '0.7'],
         'contactus'         => ['monthly', '0.7'],
-        'blogs'             => ['weekly',  '0.7'],
         'pakistan-hotels'   => ['monthly', '0.7'],
         'popular-locations' => ['monthly', '0.7'],
         'our-info'          => ['monthly', '0.6'],
@@ -56,7 +55,16 @@ class SitemapController extends Controller
         }
 
         // Blog posts — published only, matching BlogController::show().
-        foreach (Blog::where('status', 'published')->get(['slug', 'updated_at']) as $row) {
+        $posts = Blog::where('status', 'published')->get(['slug', 'updated_at']);
+
+        // /blogs is a listing with nothing of its own to say: while there are no
+        // published posts it renders "No blog posts yet", so submitting it just
+        // asks Google to index an empty page.
+        if ($posts->isNotEmpty()) {
+            $urls[] = $this->entry('blogs', $posts->max('updated_at'), 'weekly', '0.7');
+        }
+
+        foreach ($posts as $row) {
             $urls[] = $this->entry('blog/' . $row->slug, $row->updated_at, 'monthly', '0.6');
         }
 
