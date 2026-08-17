@@ -353,3 +353,21 @@ opens. Both were tested against the real controller action.
   expected outcome was about *booking data quality* — whether staff get complete records and usable
   exports. That can't be verified from the code, so it needs the user's answer. Re-flagged for
   2026-09-16.
+
+## 2026-08-17 — Unset social profiles are omitted, not shown as placeholders
+
+Reported by the user: two profiles configured (Facebook, Instagram) but four icons rendering. The
+theme hard-coded all four with a `?: '#'` fallback, and the Integrations help text described that
+as intentional ("Leave a field empty to keep that icon as a placeholder").
+
+**Decision:** omit the icon entirely rather than render a disabled or placeholder one. A dead link
+is a broken promise to whoever taps it, and four per page is four wasted crawl targets. Rejected
+the alternatives of greying the icon out (still a link, still confusing) and of hiding it in CSS
+(the `href="#"` stays in the HTML for crawlers).
+
+Implemented as `Business::socialLinks()`, consumed by four views. Side effect worth having: the
+same URLs now populate `sameAs` in the JSON-LD, which closes the P9 finding from the schema audit —
+the cheapest entity-confirmation signal, previously publishing nothing.
+
+Not logged in `decisions.csv`: this is a defect fix with an obvious right answer, not a bet that
+needs revisiting in 30 days.

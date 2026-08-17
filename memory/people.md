@@ -20,6 +20,12 @@ Format:
   profile links), he expects a field in the admin rather than asking a developer — see
   [[settings-belong-in-admin]]. Admin → SEO Settings → Business Details was built for this on
   2026-08-17.
+- **Social presence (as of 2026-08-17):** Facebook and Instagram only —
+  `https://www.facebook.com/share/15D6rJA1H5/` and `https://www.instagram.com/konnect.yatra/`,
+  both set in Admin → Settings → Integrations and now published as `sameAs`. **No X/Twitter or
+  LinkedIn account exists**, so don't treat those empty fields as an oversight. The Facebook value
+  is a `/share/` link rather than the page's permanent vanity URL — weaker as a `sameAs` signal and
+  worth swapping if he can supply the canonical one.
 - **How he specifies changes:** sends a screenshot of the live page plus a typed list of the fields/labels he wants, in his own line grouping (e.g. `Telephone:   Email:` on one line = put them side by side). Treat the grouping as the layout spec. His lists are not always exhaustive — the 2026-08-10 popup list silently dropped an existing field — so check what's in the current form but missing from his list and raise it rather than deleting it.
 
 ## Asghar (AsgharSHAH)
