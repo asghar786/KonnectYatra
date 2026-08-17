@@ -4,8 +4,11 @@
         <div class="btns-center">
             <a href="{{url('contactus')}}" class="button-primary" previewlistener="true">Contact Us</a>
         </div>
-        <a href="tel:+43 6601007999">
-            <p class="mt-4 text-center">Or contact our team directly today at <b>+1 (718) 908-9464</b></p>
+        {{-- The tel: href used to point at +43 660 100 7999 — an Austrian number left
+             over from the theme — while displaying the real one. Both now come from
+             Admin > SEO Settings > Business Details. --}}
+        <a href="tel:{{ \App\Support\Business::phoneDigits() }}">
+            <p class="mt-4 text-center">Or contact our team directly today at <b>{{ \App\Support\Business::phone() }}</b></p>
         </a>
 
     </div>

@@ -163,15 +163,17 @@
 					<div class="row">
 						<div class="col-lg-8 d-none d-lg-block">
 							<div class="header-contact-info">
+								{{-- Address/phone/email come from Admin > SEO Settings > Business Details,
+								     the same source the Schema.org markup reads, so the two can't drift. --}}
 								<ul>
 									<li>
-										<a href="#"><i class="fas fa-phone"></i> +1 (718) 908-9464</a>
+										<a href="tel:{{ \App\Support\Business::phoneDigits() }}"><i class="fas fa-phone"></i> {{ \App\Support\Business::phone() }}</a>
 									</li>
 									<li>
-										<a href="mailto:rm@konnectyatra.org"><i class="fas fa-envelope"></i> <span class="__cf_email__">rm@konnectyatra.org</span></a>
+										<a href="mailto:{{ \App\Support\Business::email() }}"><i class="fas fa-envelope"></i> <span class="__cf_email__">{{ \App\Support\Business::email() }}</span></a>
 									</li>
 									<li>
-										<i class="fas fa-map-marker-alt"></i> 148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA
+										<i class="fas fa-map-marker-alt"></i> {{ \App\Support\Business::addressLine() }}
 									</li>
 								</ul>
 							</div>

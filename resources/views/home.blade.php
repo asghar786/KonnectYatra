@@ -578,17 +578,17 @@ h4.destination {
 								</audio>
 							</div>
 							<div class="ky-president__contacts">
-								<a class="ky-contact" href="mailto:rm@konnectyatra.org">
+								<a class="ky-contact" href="mailto:{{ \App\Support\Business::email() }}">
 									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
-									<span class="ky-contact__meta"><span class="ky-contact__label">Email</span><span class="ky-contact__value">rm@konnectyatra.org</span></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Email</span><span class="ky-contact__value">{{ \App\Support\Business::email() }}</span></span>
 								</a>
-								<a class="ky-contact" href="tel:+17189089464">
+								<a class="ky-contact" href="tel:{{ \App\Support\Business::phoneDigits() }}">
 									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-									<span class="ky-contact__meta"><span class="ky-contact__label">Call us</span><span class="ky-contact__value">+1 (718) 908-9464</span></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Call us</span><span class="ky-contact__value">{{ \App\Support\Business::phone() }}</span></span>
 								</a>
 								<div class="ky-contact">
 									<span class="ky-contact__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-									<span class="ky-contact__meta"><span class="ky-contact__label">Visit us</span><span class="ky-contact__value">148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA</span></span>
+									<span class="ky-contact__meta"><span class="ky-contact__label">Visit us</span><span class="ky-contact__value">{{ \App\Support\Business::addressLine() }}</span></span>
 								</div>
 							</div>
 						</div>

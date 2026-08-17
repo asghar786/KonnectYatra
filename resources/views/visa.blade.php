@@ -57,7 +57,8 @@
             'question' => 'How do I start my application?',
             'answer'   => 'Choose your departure city on the packages page and complete the online '
                         . 'booking form, uploading your documents as you go. If you would rather '
-                        . 'talk it through first, call Rashad Mahmood on +1 (718) 908-9464.',
+                        . 'talk it through first, call Rashad Mahmood on '
+                        . \App\Support\Business::phone() . '.',
         ],
     ];
 @endphp

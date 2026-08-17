@@ -37,7 +37,9 @@ return [
     // Contact — must match resources/views/layouts/header.blade.php and
     // resources/views/contactus.blade.php exactly.
     // ---------------------------------------------------------------------
-    'telephone'   => '+1-718-908-9464',
+    // Written the way the site displays it. The tel: href strips it to digits,
+    // and Google parses either form — matching the visible page is what counts.
+    'telephone'   => '+1 (718) 908-9464',
     'email'       => 'rm@konnectyatra.org',
 
     /*

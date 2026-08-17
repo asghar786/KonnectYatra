@@ -179,6 +179,9 @@ Route::group(['prefix' => 'admin',
     // SEO settings
     Route::get('/seo',[\App\Http\Controllers\Admin\SeoController::class, 'index'])->name('seo');
     Route::post('/seo',[\App\Http\Controllers\Admin\SeoController::class, 'update'])->name('seo_update');
+    // Business details — address, phone, map position, opening hours. Feeds both
+    // the visible pages and the Schema.org markup.
+    Route::post('/seo/business',[\App\Http\Controllers\Admin\SeoController::class, 'updateBusiness'])->name('seo_business_update');
 
     // Payment settings (bank/check/cash instructions shown on the payment page)
     Route::get('/payment-settings',[\App\Http\Controllers\Admin\PaymentSettingController::class, 'index'])->name('payment_settings');

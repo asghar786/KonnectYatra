@@ -3,8 +3,9 @@
 @php
     $pageTitle = 'Contact Konnect Yatra — Jamaica, New York';
     $pageDescription = 'Speak to the Konnect Yatra team about a Sikh yatra to Pakistan. '
-        . 'Call +1 (718) 908-9464, email rm@konnectyatra.org, or visit us at '
-        . '148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA.';
+        . 'Call ' . \App\Support\Business::phone()
+        . ', email ' . \App\Support\Business::email()
+        . ', or visit us at ' . \App\Support\Business::addressLine() . '.';
 @endphp
 
 @section('schema')
@@ -88,7 +89,7 @@
                               </span>
                               <div class="details-content">
                                  <h4>Location Address</h4>
-                                 <span>148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA</span>
+                                 <span>{{ \App\Support\Business::addressLine() }}</span>
                               </div>
                            </li>
                            <li>
@@ -97,7 +98,7 @@
                               </span>
                               <div class="details-content">
                                  <h4>Email Address</h4>
-                                 <span><a href="mailto:rm@konnectyatra.org" class="__cf_email__">rm@konnectyatra.org</a></span>
+                                 <span><a href="mailto:{{ \App\Support\Business::email() }}" class="__cf_email__">{{ \App\Support\Business::email() }}</a></span>
                               </div>
                            </li>
                            <li>
@@ -106,7 +107,7 @@
                               </span>
                               <div class="details-content">
                                  <h4>Phone Number</h4>
-                                 <span>+1 (718) 908-9464</span>
+                                 <span><a href="tel:{{ \App\Support\Business::phoneDigits() }}">{{ \App\Support\Business::phone() }}</a></span>
                               </div>
                            </li>
                         </ul>
@@ -128,8 +129,10 @@
       <div class="map-section">
          <div class="mapouter">
             <div class="gmap_canvas">
-               <iframe src="https://maps.google.com/maps?q=148-36%20Guy%20R%20Brewers%20Blvd,%20Jamaica,%20NY%2011434&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed" frameborder="0" scrolling="no" style="width: 100%; height: 400px;"></iframe><style>.mapouter{position:relative;height:400px;width:100%;background:#fff;} .maprouter a{color:#fff !important;position:absolute !important;top:0 !important;z-index:0 !important;}</style>
-               <a href="https://blooketjoin.org/">blooket</a>
+               <iframe src="https://maps.google.com/maps?q={{ urlencode(\App\Support\Business::addressLine()) }}&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=&amp;output=embed" frameborder="0" scrolling="no" style="width: 100%; height: 400px;"></iframe><style>.mapouter{position:relative;height:400px;width:100%;background:#fff;} .maprouter a{color:#fff !important;position:absolute !important;top:0 !important;z-index:0 !important;}</style>
+               {{-- Removed: <a href="https://blooketjoin.org/">blooket</a> — an unrelated
+                    outbound link injected by whichever free map-embed generator produced
+                    this block. It was live, followed, and had nothing to do with the site. --}}
                <style>.gmap_canvas{overflow:hidden;height:400px;width:100%}.gmap_canvas iframe{position:relative;z-index:2}</style>
             </div>
          </div>

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\SiteSetting;
+use App\Support\Business;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -96,16 +97,7 @@ class Schema
     public static function organization(): array
     {
         $cfg = config('schema');
-
-        $sameAs = array_values(array_filter(array_merge(
-            [
-                SiteSetting::get('facebook_url'),
-                SiteSetting::get('twitter_url'),
-                SiteSetting::get('instagram_url'),
-                SiteSetting::get('linkedin_url'),
-            ],
-            (array) ($cfg['same_as'] ?? [])
-        ), fn ($u) => !empty($u) && $u !== '#' && Str::startsWith($u, ['http://', 'https://'])));
+        $geo = Business::geo();
 
         $node = [
             '@type'         => ['TravelAgency', 'Organization'],
@@ -119,13 +111,13 @@ class Schema
             // logoImage()), referenced here by @id so it is defined once.
             'logo'        => ['@id' => self::id('logo')],
             'image'       => ['@id' => self::id('logo')],
-            'telephone'   => $cfg['telephone'] ?? null,
-            'email'       => $cfg['email'] ?? null,
-            'priceRange'  => $cfg['price_range'] ?? null,
+            'telephone'   => Business::phone(),
+            'email'       => Business::email(),
+            'priceRange'  => Business::priceRange(),
             'currenciesAccepted' => 'USD',
-            'address'     => self::postalAddress($cfg['address'] ?? []),
-            'geo'         => self::geo($cfg['geo']['lat'] ?? null, $cfg['geo']['lng'] ?? null),
-            'sameAs'      => $sameAs ?: null,
+            'address'     => self::postalAddress(Business::address()),
+            'geo'         => $geo ? self::geo($geo['lat'], $geo['lng']) : null,
+            'sameAs'      => Business::sameAs() ?: null,
             'knowsAbout'  => $cfg['knows_about'] ?? null,
             'founder'     => !empty($cfg['founder'])
                 ? ['@type' => 'Person', 'name' => $cfg['founder']]
@@ -138,21 +130,20 @@ class Schema
                 [
                     '@type'             => 'ContactPoint',
                     'contactType'       => 'customer service',
-                    'telephone'         => $cfg['telephone'] ?? null,
-                    'email'             => $cfg['email'] ?? null,
+                    'telephone'         => Business::phone(),
+                    'email'             => Business::email(),
                     'areaServed'        => $cfg['areas_served'] ?? null,
                     'availableLanguage' => ['English', 'Punjabi', 'Hindi', 'Urdu'],
                 ],
             ],
         ];
 
-        if (!empty($cfg['opening_hours'])) {
-            $node['openingHoursSpecification'] = array_map(fn ($h) => [
-                '@type'     => 'OpeningHoursSpecification',
-                'dayOfWeek' => $h['days'],
-                'opens'     => $h['opens'],
-                'closes'    => $h['closes'],
-            ], $cfg['opening_hours']);
+        // Omitted entirely until an admin fills them in — a wrong "Open now"
+        // badge in front of a pilgrim about to call is worse than no badge.
+        $hours = Business::hoursSpecification();
+
+        if ($hours) {
+            $node['openingHoursSpecification'] = $hours;
         }
 
         return $node;
