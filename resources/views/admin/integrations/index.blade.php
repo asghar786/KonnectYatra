@@ -70,7 +70,14 @@
                     <div class="card mt-4" style="border-radius:14px">
                         <div class="card-body">
                             <h5 style="font-weight:700"><i class="fas fa-share-nodes text-primary"></i> Social Media Links</h5>
-                            <p class="text-muted">Paste the full URLs of your social profiles. These power the social icons in the website header and footer. Leave a field empty to keep that icon as a placeholder (it will link to <code>#</code> until you add the URL).</p>
+                            <p class="text-muted">
+                                Paste the full URLs of your social profiles. These power the social icons in the
+                                website header, footer and Contact page &mdash; and they are published as
+                                <code>sameAs</code> in your Schema.org data, which is how Google confirms this
+                                website and your social pages are the same organisation.
+                                <strong>Leave a field empty and that icon simply won't appear</strong> &mdash;
+                                only profiles with a real URL are shown, so visitors never click a dead link.
+                            </p>
 
                             <form method="POST" action="{{ url('admin/integrations') }}">
                                 @csrf

@@ -201,4 +201,39 @@ class Business
     {
         return self::get('price_range');
     }
+
+    /**
+     * The social profiles that actually have a URL, ready to render as icons.
+     *
+     * Only configured platforms come back — an unset profile is left out
+     * entirely rather than rendered as an icon pointing at "#". A dead link is
+     * a broken promise to the visitor who clicks it, and four of them on every
+     * page is four wasted crawl targets.
+     *
+     * @return array<int,array{name:string,url:string,icon:string}>
+     */
+    public static function socialLinks(): array
+    {
+        $platforms = [
+            ['key' => 'facebook_url',  'name' => 'Facebook',  'icon' => 'fab fa-facebook-f'],
+            ['key' => 'twitter_url',   'name' => 'X',         'icon' => 'fab fa-twitter'],
+            ['key' => 'instagram_url', 'name' => 'Instagram', 'icon' => 'fab fa-instagram'],
+            ['key' => 'linkedin_url',  'name' => 'LinkedIn',  'icon' => 'fab fa-linkedin'],
+        ];
+
+        $out = [];
+
+        foreach ($platforms as $p) {
+            $url = trim((string) SiteSetting::get($p['key']));
+
+            // '#' is the placeholder the original theme shipped with.
+            if ($url === '' || $url === '#' || !preg_match('#^https?://#i', $url)) {
+                continue;
+            }
+
+            $out[] = ['name' => $p['name'], 'url' => $url, 'icon' => $p['icon']];
+        }
+
+        return $out;
+    }
 }

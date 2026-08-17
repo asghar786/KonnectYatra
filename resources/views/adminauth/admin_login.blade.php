@@ -113,23 +113,22 @@
                         </div>
                     </div>
 
+				@php
+					// Only configured profiles render. This page uses the theme's own
+					// coloured pills rather than the site's icon list, so it keeps its
+					// own brand colours keyed off the platform name.
+					$socialBg = ['Facebook' => '#3b5998', 'X' => '#1da1f2', 'Instagram' => '#e1306c', 'LinkedIn' => '#0a66c2'];
+					$socials  = \App\Support\Business::socialLinks();
+				@endphp
+				@if(count($socials))
 				<div class="contact100-form-social flex-c-m" style="margin-top: -20%; gap: 16px;">
-					<a href="{{ \App\Models\SiteSetting::get('facebook_url') ?: '#' }}" target="_blank" rel="noopener" class="contact100-form-social-item flex-c-m" style="background:#3b5998;">
-						<i class="fa fa-facebook-f" aria-hidden="true"></i>
+					@foreach($socials as $social)
+					<a href="{{ $social['url'] }}" target="_blank" rel="noopener" aria-label="{{ $social['name'] }}" title="{{ $social['name'] }}" class="contact100-form-social-item flex-c-m" style="background:{{ $socialBg[$social['name']] ?? '#555' }};">
+						<i class="{{ $social['icon'] }}" aria-hidden="true"></i>
 					</a>
-
-					<a href="{{ \App\Models\SiteSetting::get('twitter_url') ?: '#' }}" target="_blank" rel="noopener" class="contact100-form-social-item flex-c-m" style="background:#1da1f2;">
-						<i class="fa fa-twitter" aria-hidden="true"></i>
-					</a>
-
-					<a href="{{ \App\Models\SiteSetting::get('instagram_url') ?: '#' }}" target="_blank" rel="noopener" class="contact100-form-social-item flex-c-m" style="background:#e1306c;">
-						<i class="fa fa-instagram" aria-hidden="true"></i>
-					</a>
-
-					<a href="{{ \App\Models\SiteSetting::get('linkedin_url') ?: '#' }}" target="_blank" rel="noopener" class="contact100-form-social-item flex-c-m" style="background:#0a66c2;">
-						<i class="fa fa-linkedin" aria-hidden="true"></i>
-					</a>
+					@endforeach
 				</div>
+				@endif
 
 				<p class="login100-footer">All rights reserved {{ date('Y') }} Copyright KONNECT US INC.</p>
 			</form>
