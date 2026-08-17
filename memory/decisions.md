@@ -308,3 +308,48 @@ notes say 18502 Hillside Avenue; the schema uses the published one. (2) The four
 Admin > Settings are empty, so `sameAs` is omitted; filling them is the single cheapest entity
 signal left. (3) The `/visa` FAQ copy was drafted from existing site content and needs his
 sign-off.
+
+## 2026-08-17 — Business Details moved from config into the admin
+
+**Context.** The structured-data work deliberately left several facts blank because inventing them
+does active harm: office coordinates (a guessed pin puts the business on the wrong part of the
+map), opening hours (a wrong "Open now" badge in front of a pilgrim about to call), and the
+`sameAs` profile URLs. Those sat in `config/schema.php`, i.e. developer-only. The user asked for
+them to be editable from the back end.
+
+**Decision.** A Business Details card under Admin → SEO Settings, backed by `biz_*` keys in the
+existing `site_settings` table, resolved through a new `App\Support\Business` helper as
+*saved setting → config default*.
+
+The larger part of the decision was scope: rather than exposing only the two blank fields, the
+address, phone and email moved in too — because they had been hard-coded in **five separate
+views**, which meant NAP consistency depended on remembering to edit all five. Inconsistent NAP is
+the most common reason a site fails to match its Google Business Profile, so this was a
+correctness fix, not convenience. Six consumers now read one source.
+
+Alternatives considered:
+- *Leave them in config.* Rejected — the user has to be able to fill these in without a deploy.
+- *A dedicated `business_settings` table.* Rejected — `site_settings` already exists and is already
+  cached per request, so this needed no migration (which matters: prod migrations are run manually
+  and in batches).
+- *Expose only lat/lng and hours.* Rejected — it would have left the address duplicated across five
+  views, which is the risk actually worth closing.
+
+**Guards written into the controller, not just documented.** A latitude without a longitude saves
+neither; a week marked entirely closed publishes no hours rather than asserting the business never
+opens. Both were tested against the real controller action.
+
+**Incidental finds while wiring it up.** The Contact page carried an injected outbound link to
+`blooketjoin.org` from a free map-embed generator — live and followed. The footer's `tel:` href was
+`+43 660 100 7999`, Austrian theme boilerplate, while displaying the New York number.
+
+## 2026-08-17 — Review of two overdue decisions
+
+- **Production deploy (2026-06-16): HELD.** Verified directly — five pushes to `main` during this
+  session each reached konnectyatra.org within roughly 30 seconds with no manual step, and the
+  deploy's `optimize:clear` + `config:cache` picked up a brand-new config file correctly. Next
+  review 2026-11-15.
+- **Yatri booking flow (2026-06-19): AWAITING USER.** The build shipped and is live, but the
+  expected outcome was about *booking data quality* — whether staff get complete records and usable
+  exports. That can't be verified from the code, so it needs the user's answer. Re-flagged for
+  2026-09-16.
