@@ -8,7 +8,8 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="keywords" content="" />
 	<meta name="author" content="" />
-	<meta name="robots" content="" />
+	<meta name="robots" content="noindex, nofollow" />
+	<meta name="description" content="Create a Konnect Yatra account to book and track your yatra." />
 
 	<!-- FAVICONS ICON ============================================= -->
 	<link rel="icon" href="{{asset('assets/images/favicon.ico" type="image/x-icon')}}" />

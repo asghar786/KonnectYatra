@@ -9,10 +9,10 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="keywords" content="" />
 	<meta name="author" content="" />
-	<meta name="robots" content="" />
+	<meta name="robots" content="noindex, nofollow" />
 
 	<!-- DESCRIPTION -->
-	<meta name="description" content="EduChamp : Education HTML Template" />
+	<meta name="description" content="Sign in to your Konnect Yatra account to manage your yatra booking." />
 
 	<!-- OG -->
 
