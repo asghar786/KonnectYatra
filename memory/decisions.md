@@ -276,3 +276,35 @@ redesigned against a shared token stylesheet, **`public/new-assets/css/special-l
   errors on these pages come from theme `custom.min.js` / `iternary.js` and also fire on the
   untouched homepage.
 - **Review:** see decisions.csv row dated 2026-08-13.
+
+## 2026-08-17 — Sitewide Schema.org / JSON-LD
+
+**Context.** An audit of konnectyatra.org found zero structured data on every page, one shared
+`<title>` ("KONNECT YATRA") and one shared meta description across all 224 sitemap URLs, and no
+`rel="canonical"` anywhere. Machine readers had no way to tell a package page from a gurdwara
+page, and nothing tied the 224 URLs to a single business.
+
+**Decision.** Emit one `@graph` per page from a central builder (`app/Support/Schema.php`), with
+the business facts in `config/schema.php` rather than a settings table.
+
+Alternatives considered:
+- *Hand-written JSON-LD per view.* Rejected — the Organization block would drift between pages,
+  which is the exact failure mode that stops Google collapsing them into one entity.
+- *A `schema_settings` DB table with an admin screen.* Rejected for now — it needs a migration
+  and prod migrations are batched (see preferences), and these facts change roughly never. A
+  config file is a `config:clear` away from being editable.
+- *Separate `Organization` and `LocalBusiness` nodes.* Rejected — that publishes two entities for
+  one business. `TravelAgency` is a subtype of both, so one node carries both sets of signals.
+- *`Product` as the package type.* Rejected as primary; a tour is a `TouristTrip`. The node
+  carries `additionalType: schema.org/Product` so Product-consuming parsers still read it,
+  without a second competing entity.
+
+**Left undone on purpose.** Office lat/lng and opening hours are null in config — a wrong map pin
+or a wrong "Open now" badge is worse than none. No `SearchAction`, because the header search form
+has no action and no results route. No `geo` on gurdwaras; the table has no coordinates.
+
+**Follow-ups for Rashad.** (1) The NAP conflict — the site says 148-36 Guy R Brewer Blvd, our
+notes say 18502 Hillside Avenue; the schema uses the published one. (2) The four social URLs in
+Admin > Settings are empty, so `sameAs` is omitted; filling them is the single cheapest entity
+signal left. (3) The `/visa` FAQ copy was drafted from existing site content and needs his
+sign-off.
