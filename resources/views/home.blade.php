@@ -1,4 +1,33 @@
 ﻿@extends('layouts.app')
+
+@php
+    // /home renders the same page as / — point both at the root so the two
+    // URLs consolidate into one indexed page.
+    \App\Support\Schema::setCanonical(rtrim(url('/'), '/') . '/');
+
+    $pageTitle = 'Sikh Yatra Tours to Nankana Sahib, Panja Sahib & Kartarpur Sahib';
+    $pageDescription = 'Konnect Yatra organises Sikh pilgrimage tours from the USA and Canada to '
+        . 'Nankana Sahib, Panja Sahib and Kartarpur Sahib in Pakistan — pilgrim visa, airline '
+        . 'tickets, hotels, transport and full security included.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'name'        => 'Konnect Yatra — Sikh Pilgrimage Tours to Pakistan',
+        'description' => $pageDescription,
+        'primaryEntity' => \App\Support\Schema::orgId(),
+    ]),
+    \App\Support\Schema::itemList(
+        collect($gurdwaras)->map(fn ($g) => [
+            'url'  => route('gurdwara_detail', $g->id),
+            'name' => $g->gurdwara_name,
+        ])->all(),
+        'Top Gurdwaras'
+    ),
+]) !!}
+@endsection
+
 @section('content')
 <!-- Content -->
 <style>

@@ -1,4 +1,61 @@
 @extends('layouts.app')
+
+@php
+    $postUrl   = route('blog_detail', $blog->slug);
+    $postImage = ($blog->featured_image ?: $blog->image)
+        ? asset('blog_images/' . ($blog->featured_image ?: $blog->image))
+        : null;
+    $postBody  = \App\Support\Schema::text($blog->body);
+
+    $pageTitle = $blog->title;
+    $pageDescription = \App\Support\Schema::text($blog->excerpt, 300) ?: \Illuminate\Support\Str::limit($postBody, 300);
+    $pageImage = $postImage;
+    $pageType  = 'article';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'            => 'BlogPosting',
+        '@id'              => $postUrl . '#article',
+        'headline'         => \Illuminate\Support\Str::limit($blog->title, 110, ''),
+        'name'             => $blog->title,
+        'description'      => $pageDescription,
+        'url'              => $postUrl,
+        'image'            => $postImage,
+        'articleBody'      => $postBody,
+        'wordCount'        => $postBody ? str_word_count($postBody) : null,
+        'datePublished'    => \App\Support\Schema::date($blog->published_date ?: $blog->created_at),
+        'dateModified'     => \App\Support\Schema::date($blog->updated_at ?: $blog->published_date ?: $blog->created_at),
+        'inLanguage'       => 'en-US',
+        // Named author when we have one; otherwise the organisation is the
+        // author, which is honest and still satisfies the required property.
+        'author'           => !empty($blog->author)
+            ? ['@type' => 'Person', 'name' => $blog->author]
+            : ['@id' => \App\Support\Schema::orgId()],
+        'publisher'        => ['@id' => \App\Support\Schema::orgId()],
+        'isPartOf'         => ['@id' => route('blogs') . '#blog'],
+        'mainEntityOfPage' => ['@id' => $postUrl . '#webpage'],
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'WebPage',
+        'name'          => $blog->title,
+        'description'   => $pageDescription,
+        'image'         => $postImage,
+        'url'           => $postUrl,
+        'datePublished' => $blog->published_date ?: $blog->created_at,
+        'dateModified'  => $blog->updated_at,
+        'primaryEntity' => $postUrl . '#article',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Blog', route('blogs')],
+        [$blog->title, null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <main id="content" class="site-main">

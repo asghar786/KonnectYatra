@@ -1,4 +1,27 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Pakistan Visa Form — Apply for Your Yatra Visa';
+    $pageDescription = 'Complete the Konnect Yatra visa form and upload your passport, ID and '
+        . 'photograph so we can file your Pakistan pilgrim visa application.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'name'          => 'Visa Form',
+        'description'   => $pageDescription,
+        'primaryEntity' => route('visa') . '#service',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Pilgrim Visa', route('visa')],
+        ['Visa Form', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <style>

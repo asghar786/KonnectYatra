@@ -1,4 +1,37 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Airline Tickets & Flight Booking for Pakistan Yatra';
+    $pageDescription = 'Request airline tickets for your yatra through Konnect Yatra — one-way, '
+        . 'round-trip and multi-city routings from US and Canadian cities to Islamabad and Lahore.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'       => 'Service',
+        '@id'         => route('itinerary') . '#service',
+        'name'        => 'Airline ticketing for yatra travel',
+        'serviceType' => 'Air travel booking',
+        'description' => $pageDescription,
+        'url'         => route('itinerary'),
+        'provider'    => ['@id' => \App\Support\Schema::orgId()],
+        'areaServed'  => array_map(fn ($c) => ['@type' => 'Country', 'name' => $c], config('schema.areas_served')),
+        'audience'    => ['@type' => 'Audience', 'audienceType' => 'Sikh pilgrims travelling to Pakistan'],
+    ],
+    \App\Support\Schema::webPage([
+        'name'          => 'Airline Tickets',
+        'description'   => $pageDescription,
+        'primaryEntity' => route('itinerary') . '#service',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Airline Tickets', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 <style>
     .listt {

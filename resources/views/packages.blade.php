@@ -1,4 +1,27 @@
 @extends('layouts.app')
+
+@php
+    // Legacy route /packages/{id} serves the same package as /all-packages/{id}.
+    // Canonicalise to the linked-to URL so the duplicate doesn't get indexed.
+    \App\Support\Schema::setCanonical(route('package', $packages->id));
+
+    $pageTitle = trim($packages->name);
+    $pageDescription = \App\Support\Schema::text($packages->description, 300)
+        ?: 'Sikh pilgrimage package from ' . $packages->state . ' to Nankana Sahib, Panja Sahib and Kartarpur Sahib.';
+@endphp
+
+@section('schema')
+{{-- The full package graph lives on the canonical URL (forms/package.blade.php).
+     This legacy view only needs the sitewide entity. --}}
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type' => 'ItemPage',
+        'name' => $packages->name,
+        'url'  => route('package', $packages->id),
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
     <style type="text/css">

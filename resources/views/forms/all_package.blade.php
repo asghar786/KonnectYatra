@@ -1,4 +1,38 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Yatra Packages to Pakistan — Gurpurab, Vaisakhi & VIP Tours';
+    $pageDescription = 'All Konnect Yatra pilgrimage packages: Gurpurab, Vaisakhi and VIP tours to '
+        . 'Nankana Sahib, Panja Sahib and Kartarpur Sahib, with departures from cities across the '
+        . 'USA and Canada. Round trip, one way and land-only pricing.';
+    $schemaPackages = collect($all_packages)
+        ->concat($all_packages1)
+        ->concat($all_packages2)
+        ->filter();
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'        => 'CollectionPage',
+        'name'        => 'Yatra Packages',
+        'description' => $pageDescription,
+        'breadcrumb'  => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Yatra Packages', null],
+    ]),
+    \App\Support\Schema::itemList(
+        $schemaPackages->map(fn ($p) => [
+            'url'  => route('package', $p->id),
+            'name' => $p->name,
+        ])->all(),
+        'Konnect Yatra pilgrimage packages'
+    ),
+]) !!}
+@endsection
+
 @section('content')
 <style type="text/css">
   .apkg{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}

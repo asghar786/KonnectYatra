@@ -1,4 +1,27 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'About Konnect Yatra — Seva for Sikh Pilgrims';
+    $pageDescription = 'Konnect Yatra takes pride in contributing to the seva for Sikh pilgrims '
+        . 'embarking on the Nankana Sahib yatra and visiting the other sacred Gurdwaras in Pakistan.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'          => 'AboutPage',
+        'name'          => 'About Konnect Yatra',
+        'description'   => $pageDescription,
+        'primaryEntity' => \App\Support\Schema::orgId(),
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['About Us', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 <style type="text/css">
     .about_map:hover {

@@ -1,10 +1,68 @@
 @extends('layouts.app')
-@section('content')
+
 @php
     $fullAddress = trim(collect([$hotel->address, $hotel->city, $hotel->state])->filter()->implode(', '));
     $hasGeo = !empty($hotel->latitude) && !empty($hotel->longitude);
     $mapQuery = urlencode($hotel->name . ' ' . $fullAddress . ' Pakistan');
+
+    $hotelUrl    = route('hotel_detail', $hotel->id);
+    $hotelImages = collect([$hotel->image])
+        ->concat(collect($hotel->images ?? [])->pluck('image'))
+        ->filter()->unique()
+        ->map(fn ($img) => asset('hotels/' . $img))
+        ->values();
+
+    $pageTitle = $hotel->name . ($hotel->city ? ' — ' . $hotel->city . ', Pakistan' : '');
+    $pageDescription = \App\Support\Schema::text($hotel->description, 300)
+        ?: $hotel->name . ($fullAddress ? ', ' . $fullAddress : '')
+           . ' — one of the hotels Konnect Yatra uses for yatra groups in Pakistan.';
+    $pageImage = $hotelImages->first();
 @endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'       => 'Hotel',
+        '@id'         => $hotelUrl . '#hotel',
+        'name'        => $hotel->name,
+        'url'         => $hotelUrl,
+        'description' => \App\Support\Schema::text($hotel->description, 500),
+        'image'       => $hotelImages->all() ?: null,
+        'telephone'   => $hotel->phone ?: null,
+        'address'     => \App\Support\Schema::postalAddress([
+            'street'   => $hotel->address,
+            'locality' => $hotel->city,
+            'region'   => $hotel->state,
+            'postal'   => $hotel->zip,
+            'country'  => 'PK',
+        ]),
+        'geo'    => \App\Support\Schema::geo($hotel->latitude, $hotel->longitude),
+        'hasMap' => 'https://www.google.com/maps/search/?api=1&query=' . $mapQuery,
+        // `price` is the nightly rate Konnect Yatra quotes, not a bookable
+        // offer on this site — published as priceRange, not as an Offer.
+        'priceRange' => (!empty($hotel->price) && (float) $hotel->price > 0)
+            ? '$' . number_format((float) $hotel->price) . ' per night'
+            : null,
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => $hotel->name,
+        'description'   => $pageDescription,
+        'image'         => $pageImage,
+        'url'           => $hotelUrl,
+        'dateModified'  => $hotel->updated_at,
+        'primaryEntity' => $hotelUrl . '#hotel',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Popular Hotels', route('pakistan_hotels')],
+        [$hotel->name, null],
+    ]),
+]) !!}
+@endsection
+
+@section('content')
 @if($hasGeo)<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">@endif
 <style type="text/css">
     .hd2{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}

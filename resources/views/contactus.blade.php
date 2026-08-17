@@ -1,4 +1,28 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Contact Konnect Yatra — Jamaica, New York';
+    $pageDescription = 'Speak to the Konnect Yatra team about a Sikh yatra to Pakistan. '
+        . 'Call +1 (718) 908-9464, email rm@konnectyatra.org, or visit us at '
+        . '148-36 Guy R Brewer Blvd, Suite 202A, Jamaica, NY 11434.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'          => 'ContactPage',
+        'name'          => 'Contact Us',
+        'description'   => $pageDescription,
+        'primaryEntity' => \App\Support\Schema::orgId(),
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Contact Us', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <main id="content" class="site-main">

@@ -24,6 +24,17 @@
 		$clarity  = \App\Models\SiteSetting::get('clarity_project_id');
 		$ogImage  = !empty($seoOg) ? asset($seoOg) : asset('assets/images2/newlogo11.png');
 		$metaDesc = $seoDesc ?: 'Konnect Yatra — holy yatra tours to Nankana Sahib, Panja Sahib and Kartarpur Sahib, Pakistan.';
+
+		// Per-page SEO overrides. A view sets these with a plain @php block at the
+		// top of the file — Blade passes the child view's variables up into the
+		// layout, so they are visible here. Falling back to the sitewide values
+		// keeps every page that hasn't been given its own copy working as before.
+		$pageTitle = $pageTitle ?? null;
+		$pageDesc  = !empty($pageDescription) ? \App\Support\Schema::text($pageDescription, 300) : $metaDesc;
+		$pageImage = !empty($pageImage) ? $pageImage : $ogImage;
+		$pageType  = $pageType ?? 'website';
+		$canonical = \App\Support\Schema::canonical();
+		$docTitle  = $pageTitle ? $pageTitle . ' | Konnect Yatra' : (!empty($seoTitle) ? $seoTitle . ' | KONNECT YATRA' : 'KONNECT YATRA');
 	@endphp
 	@if(!empty($gsv))<meta name="google-site-verification" content="{{ $gsv }}" />@endif
 	@if(!empty($clarity))
@@ -42,21 +53,28 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="keywords" content="{{ $seoKeys }}" />
 	<meta name="author" content="" />
-	<meta name="robots" content="index, follow" />
+	{{-- Transactional steps (apply / payment / agreement / thank-you) set
+	     $pageRobots = 'noindex, follow' so per-booking URLs stay out of the index. --}}
+	<meta name="robots" content="{{ $pageRobots ?? 'index, follow' }}" />
 	<!-- DESCRIPTION -->
-	<meta name="description" content="{{ $metaDesc }}" />
+	<meta name="description" content="{{ $pageDesc }}" />
+	<!-- CANONICAL — query strings are stripped so filters/UTMs can't fork the URL -->
+	<link rel="canonical" href="{{ $canonical }}" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.css" integrity="sha512-nNlU0WK2QfKsuEmdcTwkeh+lhGs6uyOxuUs+n+0oXSYDok5qy0EI0lt01ZynHq6+p/tbgpZ7P+yUb+r71wqdXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 	<!-- OG -->
-	<meta property="og:type" content="website" />
-	<meta property="og:title" content="{{ $seoTitle ?: 'Konnect Yatra' }}" />
-	<meta property="og:description" content="{{ $metaDesc }}" />
-	<meta property="og:image" content="{{ $ogImage }}" />
+	<meta property="og:type" content="{{ $pageType }}" />
+	<meta property="og:site_name" content="Konnect Yatra" />
+	<meta property="og:url" content="{{ $canonical }}" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:title" content="{{ $pageTitle ?: ($seoTitle ?: 'Konnect Yatra') }}" />
+	<meta property="og:description" content="{{ $pageDesc }}" />
+	<meta property="og:image" content="{{ $pageImage }}" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="{{ $seoTitle ?: 'Konnect Yatra' }}" />
-	<meta name="twitter:description" content="{{ $metaDesc }}" />
-	<meta name="twitter:image" content="{{ $ogImage }}" />
+	<meta name="twitter:title" content="{{ $pageTitle ?: ($seoTitle ?: 'Konnect Yatra') }}" />
+	<meta name="twitter:description" content="{{ $pageDesc }}" />
+	<meta name="twitter:image" content="{{ $pageImage }}" />
 	<meta name="format-detection" content="telephone=no">
 	<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.css'>
 	<!-- FAVICONS ICON ============================================= -->
@@ -65,7 +83,7 @@
 
   	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/1.0.10/datepicker.min.css"/>
 	<!-- PAGE TITLE HERE ============================================= -->
-	<title>@yield('titlename', !empty($seoTitle) ? $seoTitle.' | ' : '')KONNECT YATRA</title>
+	<title>{{ $docTitle }}</title>
 	<script src="https://kit.fontawesome.com/f5eb8f10bc.js" crossorigin="anonymous"></script>
 	<!-- MOBILE SPECIFIC ============================================= -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -115,7 +133,21 @@
             }
         };
 	</script>
-	
+
+	{{--
+		STRUCTURED DATA (Schema.org / JSON-LD).
+		A view supplies its page-specific nodes with @section('schema'); pages that
+		don't get the sitewide Organization + WebSite graph anyway, so the business
+		entity is described on every URL rather than only on the homepage.
+	--}}
+	@hasSection('schema')
+		@yield('schema')
+	@else
+		{!! \App\Support\Schema::graph([
+			\App\Support\Schema::webPage(),
+		]) !!}
+	@endif
+
 </head>
 <body id="bg" oncontextmenu="return false">
 	<div id="siteLoader" class="site-loader" style="display: none;">

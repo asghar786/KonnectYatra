@@ -1,4 +1,64 @@
 @extends('layouts.app')
+
+@php
+    $slpUrl = route('special-package');
+    $pageTitle = 'Special Land Package — 6-Day Holy Journey to Nankana Sahib';
+    $pageDescription = 'Six days on the road between the shrines of Punjab — Panja Sahib, Nankana '
+        . 'Sahib and Kartarpur Sahib — travelling as one group from Wagah Border and back. Visa, '
+        . 'hotels, transport, meals and full security included, from $750 per person.';
+    $pageType = 'product';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'          => 'TouristTrip',
+        'additionalType' => 'https://schema.org/Product',
+        '@id'            => $slpUrl . '#trip',
+        'name'           => 'Special Land Package — Holy Journey to Nankana Sahib',
+        'description'    => $pageDescription,
+        'url'            => $slpUrl,
+        'provider'       => ['@id' => \App\Support\Schema::orgId()],
+        'touristType'    => ['Sikh pilgrims', 'Religious travellers'],
+        // Land-only: the tour starts and ends at the Wagah land border, so no
+        // departureLocation in the USA is claimed here.
+        'arrivalLocation' => [
+            '@type'   => 'Place',
+            'name'    => 'Wagah Border, Punjab, Pakistan',
+            'address' => ['@type' => 'PostalAddress', 'addressRegion' => 'Punjab', 'addressCountry' => 'PK'],
+        ],
+        'itinerary' => [
+            '@type'           => 'ItemList',
+            'numberOfItems'   => 3,
+            'itemListElement' => [
+                ['@type' => 'ListItem', 'position' => 1, 'item' => ['@type' => 'Place', 'name' => 'Gurdwara Panja Sahib, Hasan Abdal']],
+                ['@type' => 'ListItem', 'position' => 2, 'item' => ['@type' => 'Place', 'name' => 'Gurdwara Janam Asthan, Nankana Sahib']],
+                ['@type' => 'ListItem', 'position' => 3, 'item' => ['@type' => 'Place', 'name' => 'Gurdwara Darbar Sahib, Kartarpur']],
+            ],
+        ],
+        // The two published tiers. Extra days are priced per night on top and
+        // are not fixed offers, so they are left out of the offer list.
+        'offers' => \App\Support\Schema::aggregateOffer([
+            \App\Support\Schema::offer(750, 'Standard — 6 days, per person', $slpUrl),
+            \App\Support\Schema::offer(950, 'Deluxe — 6 days, per person',   $slpUrl),
+        ], $slpUrl),
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => 'Special Land Package',
+        'description'   => $pageDescription,
+        'url'           => $slpUrl,
+        'primaryEntity' => $slpUrl . '#trip',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Yatra Packages', route('all_package')],
+        ['Special Land Package', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <link rel="stylesheet" href="{{ asset('new-assets/css/special-land-package.css') }}?v=1">

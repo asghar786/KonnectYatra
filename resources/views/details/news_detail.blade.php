@@ -1,4 +1,58 @@
 @extends('layouts.app')
+
+@php
+    $newsUrl  = route('news_detail', $news->id);
+    // The `file` column holds either an image or an mp4; only images belong in
+    // `image`, so video items fall back to no image rather than a broken one.
+    $isVideo   = \Illuminate\Support\Str::contains(strtolower((string) $news->file_type), 'video');
+    $newsImage = (!empty($news->file) && !$isVideo) ? asset('news_and_events/' . $news->file) : null;
+    $newsBody  = \App\Support\Schema::text($news->description);
+
+    $pageTitle = $news->title;
+    $pageDescription = \Illuminate\Support\Str::limit($newsBody, 300);
+    $pageImage = $newsImage;
+    $pageType  = 'article';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'            => 'NewsArticle',
+        '@id'              => $newsUrl . '#article',
+        'headline'         => \Illuminate\Support\Str::limit($news->title, 110, ''),
+        'name'             => $news->title,
+        'description'      => $pageDescription,
+        'url'              => $newsUrl,
+        'image'            => $newsImage,
+        'articleBody'      => $newsBody,
+        'datePublished'    => \App\Support\Schema::date($news->created_at),
+        'dateModified'     => \App\Support\Schema::date($news->updated_at ?: $news->created_at),
+        'inLanguage'       => 'en-US',
+        'author'           => !empty($news->reported_by)
+            ? ['@type' => 'Person', 'name' => $news->reported_by]
+            : ['@id' => \App\Support\Schema::orgId()],
+        'publisher'        => ['@id' => \App\Support\Schema::orgId()],
+        'mainEntityOfPage' => ['@id' => $newsUrl . '#webpage'],
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => $news->title,
+        'description'   => $pageDescription,
+        'image'         => $newsImage,
+        'url'           => $newsUrl,
+        'datePublished' => $news->created_at,
+        'dateModified'  => $news->updated_at,
+        'primaryEntity' => $newsUrl . '#article',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['News', url('/')],
+        [$news->title, null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <main id="content" class="site-main">

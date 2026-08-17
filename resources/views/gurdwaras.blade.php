@@ -1,4 +1,36 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Gurdwara Directory — ' . ($totalGurdwaras ?? '') . ' Gurdwaras across the USA';
+    $pageDescription = 'Directory of Gurdwara Sahibs across ' . ($totalStates ?? 'the') . ' US states — '
+        . 'address, phone, office bearers and directions for each. Search by ZIP code to find the '
+        . 'Gurdwara Sahib nearest to you.';
+    // Flatten the state-grouped structure back to a single ordered list.
+    $schemaGurdwaras = collect($gurdwaras)->flatMap(fn ($group) => collect($group['gurdwaras'] ?? []));
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'        => 'CollectionPage',
+        'name'        => 'Gurdwara Directory',
+        'description' => $pageDescription,
+        'breadcrumb'  => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Gurdwaras', null],
+    ]),
+    \App\Support\Schema::itemList(
+        $schemaGurdwaras->map(fn ($g) => [
+            'url'  => route('gurdwara_detail', $g->id),
+            'name' => trim($g->gurdwara_name . ' — ' . $g->city . ', ' . $g->state, ' —,'),
+        ])->all(),
+        'Gurdwaras in the United States'
+    ),
+]) !!}
+@endsection
+
 @section('content')
 <style type="text/css">
     .gw-tip{position:fixed;pointer-events:none;background:#1c2541;color:#fff;font-size:13px;padding:7px 12px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;opacity:0;transition:opacity .12s;white-space:nowrap}

@@ -1,4 +1,49 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Yatra Blog — Sikh Pilgrimage News & Travel Guides';
+    $pageDescription = 'Articles and travel guides from Konnect Yatra on Sikh pilgrimage to Pakistan: '
+        . 'Nankana Sahib, Panja Sahib, Kartarpur Sahib, pilgrim visa guidance and Gurpurab travel news.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'       => 'Blog',
+        '@id'         => route('blogs') . '#blog',
+        'name'        => 'Konnect Yatra Blog',
+        'description' => $pageDescription,
+        'url'         => route('blogs'),
+        'publisher'   => ['@id' => \App\Support\Schema::orgId()],
+        'inLanguage'  => 'en-US',
+        'blogPost'    => collect($blogs)->map(fn ($b) => [
+            '@type'         => 'BlogPosting',
+            '@id'           => route('blog_detail', $b->slug) . '#article',
+            'headline'      => \Illuminate\Support\Str::limit($b->title, 110, ''),
+            'url'           => route('blog_detail', $b->slug),
+            'datePublished' => \App\Support\Schema::date($b->published_date ?: $b->created_at),
+            'image'         => ($b->featured_image ?: $b->image)
+                ? asset('blog_images/' . ($b->featured_image ?: $b->image))
+                : null,
+            'author'        => !empty($b->author)
+                ? ['@type' => 'Person', 'name' => $b->author]
+                : ['@id' => \App\Support\Schema::orgId()],
+        ])->all(),
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'CollectionPage',
+        'name'          => 'Konnect Yatra Blog',
+        'description'   => $pageDescription,
+        'primaryEntity' => route('blogs') . '#blog',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Blog', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <main id="content" class="site-main">

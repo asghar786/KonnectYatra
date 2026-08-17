@@ -1,4 +1,44 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Tour Gallery — Photos from Konnect Yatra Pilgrimages';
+    $pageDescription = 'Photographs from Konnect Yatra pilgrimage groups at Nankana Sahib, Panja '
+        . 'Sahib, Kartarpur Sahib and the other Gurdwaras of Pakistan.';
+    $galleryImages = collect($gallery)->filter(fn ($g) => !empty($g->image));
+    $pageImage = $galleryImages->count() ? asset('gallery/' . $galleryImages->first()->image) : null;
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'          => 'CollectionPage',
+        'name'          => 'Tour Gallery',
+        'description'   => $pageDescription,
+        'image'         => $pageImage,
+        'primaryEntity' => \App\Support\Schema::canonical() . '#gallery',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    [
+        '@type'         => 'ImageGallery',
+        '@id'           => \App\Support\Schema::canonical() . '#gallery',
+        'name'          => 'Konnect Yatra tour gallery',
+        'url'           => \App\Support\Schema::canonical(),
+        'publisher'     => ['@id' => \App\Support\Schema::orgId()],
+        'numberOfItems' => $galleryImages->count(),
+        'associatedMedia' => $galleryImages->map(fn ($g) => array_filter([
+            '@type'       => 'ImageObject',
+            'contentUrl'  => asset('gallery/' . $g->image),
+            'name'        => $g->caption ?: null,
+            'description' => \App\Support\Schema::text($g->note, 200),
+        ]))->values()->all(),
+    ],
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Tour Gallery', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 <style type="text/css">
     .galp{--brand:#f54e18;--ink:#1c2541}

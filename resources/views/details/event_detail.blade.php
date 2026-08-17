@@ -1,4 +1,60 @@
 @extends('layouts.app')
+
+@php
+    $eventUrl   = route('event_detail', $event->id);
+    $eventImage = !empty($event->image) ? asset('news_and_events/' . $event->image) : null;
+
+    // Combine the separate date and time columns into one ISO-8601 startDate.
+    // Event requires a start date, so the node is only emitted when we have one.
+    $eventStart = null;
+    if (!empty($event->event_date)) {
+        $stamp = strtotime(trim($event->event_date . ' ' . ($event->event_time ?: '')));
+        $eventStart = $stamp
+            ? date(!empty($event->event_time) ? \DateTime::ATOM : 'Y-m-d', $stamp)
+            : null;
+    }
+
+    $pageTitle = $event->title;
+    $pageDescription = \App\Support\Schema::text($event->description, 300);
+    $pageImage = $eventImage;
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph(array_filter([
+    $eventStart ? [
+        '@type'       => 'Event',
+        '@id'         => $eventUrl . '#event',
+        'name'        => $event->title,
+        'url'         => $eventUrl,
+        'description' => \App\Support\Schema::text($event->description, 500),
+        'image'       => $eventImage,
+        'startDate'   => $eventStart,
+        'eventStatus' => 'https://schema.org/EventScheduled',
+        'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
+        'location'    => !empty($event->location)
+            ? ['@type' => 'Place', 'name' => $event->location,
+               'address' => ['@type' => 'PostalAddress', 'name' => $event->location]]
+            : null,
+        'organizer'   => ['@id' => \App\Support\Schema::orgId()],
+    ] : null,
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => $event->title,
+        'description'   => $pageDescription,
+        'image'         => $eventImage,
+        'url'           => $eventUrl,
+        'dateModified'  => $event->updated_at,
+        'primaryEntity' => $eventStart ? $eventUrl . '#event' : null,
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Events', url('/')],
+        [$event->title, null],
+    ]),
+])) !!}
+@endsection
+
 @section('content')
 
 <main id="content" class="site-main">

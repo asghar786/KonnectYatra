@@ -1,4 +1,35 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Hotels in Pakistan for Yatra Groups';
+    $pageDescription = 'The ' . ($totalHotels ?? '') . ' hotels across ' . ($totalCities ?? '')
+        . ' Pakistani cities that Konnect Yatra uses for yatra groups — Islamabad, Rawalpindi, '
+        . 'Lahore and Gujranwala, with addresses, phone numbers and nightly rates.';
+    $schemaHotels = collect($hotels)->flatMap(fn ($group) => collect($group['hotels'] ?? []));
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'        => 'CollectionPage',
+        'name'        => 'Hotels in Pakistan',
+        'description' => $pageDescription,
+        'breadcrumb'  => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Popular Hotels', null],
+    ]),
+    \App\Support\Schema::itemList(
+        $schemaHotels->map(fn ($h) => [
+            'url'  => route('hotel_detail', $h->id),
+            'name' => trim($h->name . ' — ' . $h->city, ' —'),
+        ])->all(),
+        'Hotels used by Konnect Yatra in Pakistan'
+    ),
+]) !!}
+@endsection
+
 @section('content')
 <style type="text/css">
     .ht{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}

@@ -1,4 +1,34 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Popular Locations Visited on a Pakistan Yatra';
+    $pageDescription = 'The historic Gurdwaras and sites Konnect Yatra pilgrims visit in Pakistan — '
+        . 'Nankana Sahib, Panja Sahib, Kartarpur Sahib, Rohri Sahib, Sacha Sauda and the Gurdwaras '
+        . 'of Lahore.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'        => 'CollectionPage',
+        'name'        => 'Popular Locations',
+        'description' => $pageDescription,
+        'breadcrumb'  => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Popular Locations', null],
+    ]),
+    \App\Support\Schema::itemList(
+        collect($locations)->map(fn ($l) => [
+            'url'  => route('location_detail', $l->id),
+            'name' => trim($l->name . ' — ' . $l->city, ' —'),
+        ])->all(),
+        'Places visited on a Konnect Yatra pilgrimage'
+    ),
+]) !!}
+@endsection
+
 @section('content')
 <style type="text/css">
     .loc{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}

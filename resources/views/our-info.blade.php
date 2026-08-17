@@ -1,4 +1,27 @@
 @extends('layouts.app')
+
+@php
+    $pageTitle = 'Our Info — Gallery, Events and Gurdwaras';
+    $pageDescription = 'Konnect Yatra at a glance: tour gallery, upcoming events and the Gurdwara '
+        . 'Sahibs we work with across the United States.';
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    \App\Support\Schema::webPage([
+        'type'          => 'AboutPage',
+        'name'          => 'Our Info',
+        'description'   => $pageDescription,
+        'primaryEntity' => \App\Support\Schema::orgId(),
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Our Info', null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <main id="content" class="site-main">

@@ -20,7 +20,8 @@ class PackagesController extends Controller
 {
     public function index($id)
     {
-        $data['packages'] = Package::where("id", $id)->first();
+        // 404 rather than render an empty 200 — a soft-404 gets indexed as a thin page.
+        $data['packages'] = Package::where("id", $id)->firstOrFail();
         $data['all_packages'] = Package::all();
         return view('packages', $data);
     }
@@ -29,7 +30,7 @@ class PackagesController extends Controller
     {
         $data['all_packages'] = Package::all();
         $data['id'] = $id;
-        $data['packages'] = Package::where("id", $id)->first();
+        $data['packages'] = Package::where("id", $id)->firstOrFail();
         return view('forms.package', $data);
     }
     
@@ -213,7 +214,7 @@ class PackagesController extends Controller
 
     public function hotel_detail($id)
     {
-        $data['hotel'] = Hotels::with('images')->where("id", $id)->first();
+        $data['hotel'] = Hotels::with('images')->where("id", $id)->firstOrFail();
         $data['related'] = collect();
         if ($data['hotel'] && !empty($data['hotel']->city)) {
             $data['related'] = Hotels::where('city', $data['hotel']->city)
@@ -225,19 +226,19 @@ class PackagesController extends Controller
 
     public function location_detail($id)
     {
-        $data['location'] = Locations::with('images')->where("id", $id)->first();
+        $data['location'] = Locations::with('images')->where("id", $id)->firstOrFail();
         return view('details.location_detail', $data);
     }
 
     public function event_detail($id)
     {
-        $data['event'] = Events::where("id", $id)->first();
+        $data['event'] = Events::where("id", $id)->firstOrFail();
         return view('details.event_detail', $data);
     }
 
     public function news_detail($id)
     {
-        $data['news'] = News::where("id", $id)->first();
+        $data['news'] = News::where("id", $id)->firstOrFail();
         return view('details.news_detail', $data);
     }
 

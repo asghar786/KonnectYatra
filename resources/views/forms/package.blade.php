@@ -1,4 +1,105 @@
 @extends('layouts.app')
+
+@php
+    // Packages hidden from /all-packages (status != 1) stay reachable by direct
+    // link but must not be indexed, and must not publish prices for something
+    // the business has withdrawn.
+    $pageRobots = ((int) ($packages->status ?? 0) === 1) ? 'index, follow' : 'noindex, follow';
+
+    // --- Structured data source values -------------------------------------
+    $pkgUrl   = route('package', $packages->id);
+    $pkgImage = !empty($packages->image) ? asset('assets/flyers/' . $packages->image) : null;
+    $pkgMonth = (!empty($packages->month_year) && strtotime($packages->month_year))
+        ? date('F Y', strtotime($packages->month_year))
+        : null;
+
+    $pkgDesc = \App\Support\Schema::text($packages->sdescription, 400)
+        ?: \App\Support\Schema::text($packages->round_way_description, 400)
+        ?: 'Sikh pilgrimage package from ' . $packages->state . ' to Nankana Sahib, Panja Sahib and '
+           . 'Kartarpur Sahib, including pilgrim visa, hotels, transport, meals and security.';
+
+    $pageTitle = trim($packages->name) . ($pkgMonth ? ' — ' . $pkgMonth : '');
+    $pageDescription = $pkgDesc;
+    $pageImage = $pkgImage;
+    $pageType  = 'product';
+
+    // The stops advertised in the package's own "Package Included" list. Only
+    // the "Visit ..." bullets are real places — the rest are meals/transport.
+    $pkgStops = collect();
+    if (!empty($packages->sdescription)) {
+        preg_match_all('/<li[^>]*>(.*?)<\/li>/is', $packages->sdescription, $m);
+        $pkgStops = collect($m[1] ?? [])
+            ->map(fn ($li) => \App\Support\Schema::text($li, 120))
+            ->filter(fn ($t) => $t && stripos($t, 'visit ') === 0)
+            ->map(fn ($t) => trim(preg_replace('/^visit\s+/i', '', $t)))
+            ->unique()->values();
+    }
+
+    // Six published price points: 5-star and 4-star, each round trip / one way /
+    // land package. Anything not priced is skipped rather than published as 0.
+    $pkgOffers = array_filter([
+        \App\Support\Schema::offer($packages->five_star_round_price,  '5-star hotel package, round trip',   $pkgUrl),
+        \App\Support\Schema::offer($packages->five_star_single_price, '5-star hotel package, one way',      $pkgUrl),
+        \App\Support\Schema::offer($packages->five_star_land_price,   '5-star hotel package, land only',    $pkgUrl),
+        \App\Support\Schema::offer($packages->four_star_round_price,  '4-star hotel package, round trip',   $pkgUrl),
+        \App\Support\Schema::offer($packages->four_star_single_price, '4-star hotel package, one way',      $pkgUrl),
+        \App\Support\Schema::offer($packages->four_star_land_price,   '4-star hotel package, land only',    $pkgUrl),
+    ]);
+@endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type' => 'TouristTrip',
+        // Lets Product-consuming parsers read the same node instead of us
+        // publishing a second, competing entity for the same package.
+        'additionalType' => 'https://schema.org/Product',
+        '@id'         => $pkgUrl . '#trip',
+        'name'        => $packages->name,
+        'description' => $pkgDesc,
+        'url'         => $pkgUrl,
+        'image'       => $pkgImage,
+        'touristType' => ['Sikh pilgrims', 'Religious travellers'],
+        'provider'    => ['@id' => \App\Support\Schema::orgId()],
+        'departureLocation' => !empty($packages->state) ? [
+            '@type' => 'Place',
+            'name'  => $packages->state,
+            'address' => ['@type' => 'PostalAddress', 'addressRegion' => $packages->state, 'addressCountry' => 'US'],
+        ] : null,
+        'arrivalLocation' => [
+            '@type'   => 'Place',
+            'name'    => 'Pakistan',
+            'address' => ['@type' => 'PostalAddress', 'addressCountry' => 'PK'],
+        ],
+        'itinerary' => $pkgStops->count() ? [
+            '@type' => 'ItemList',
+            'numberOfItems' => $pkgStops->count(),
+            'itemListElement' => $pkgStops->values()->map(fn ($stop, $i) => [
+                '@type'    => 'ListItem',
+                'position' => $i + 1,
+                'item'     => ['@type' => 'Place', 'name' => $stop],
+            ])->all(),
+        ] : null,
+        'offers' => \App\Support\Schema::aggregateOffer($pkgOffers, $pkgUrl),
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => $packages->name,
+        'description'   => $pkgDesc,
+        'image'         => $pkgImage,
+        'url'           => $pkgUrl,
+        'dateModified'  => $packages->updated_at,
+        'primaryEntity' => $pkgUrl . '#trip',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Yatra Packages', route('all_package')],
+        [$packages->name, null],
+    ]),
+]) !!}
+@endsection
+
 @section('content')
 
 <style type="text/css">

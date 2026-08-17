@@ -1,4 +1,10 @@
 @extends('layouts.app')
+
+@php
+    // Per-booking transactional step — never an entry point from search.
+    $pageRobots = 'noindex, follow';
+@endphp
+
 @section('content')
 
 <link rel="stylesheet" href="{{ asset('new-assets/css/special-land-package.css') }}?v=1">

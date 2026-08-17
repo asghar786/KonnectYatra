@@ -1,10 +1,62 @@
 @extends('layouts.app')
-@section('content')
+
 @php
     $fullAddress = trim(collect([$location->name, $location->city, $location->state])->filter()->implode(', '));
     $hasGeo = !empty($location->latitude) && !empty($location->longitude);
     $mapQuery = urlencode($location->name . ' ' . $location->city . ' ' . $location->state . ' Pakistan');
+
+    $locUrl    = route('location_detail', $location->id);
+    $locImages = collect([$location->image])
+        ->concat(collect($location->images ?? [])->pluck('image'))
+        ->filter()->unique()
+        ->map(fn ($img) => asset('locations/' . $img))
+        ->values();
+
+    $pageTitle = $location->name . ($location->city ? ' — ' . $location->city . ', Pakistan' : '');
+    $pageDescription = \App\Support\Schema::text($location->description, 300)
+        ?: $location->name . ($fullAddress ? ', ' . $fullAddress : '')
+           . ' — a place visited on Konnect Yatra pilgrimage tours of Pakistan.';
+    $pageImage = $locImages->first();
 @endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'       => 'TouristAttraction',
+        '@id'         => $locUrl . '#place',
+        'name'        => $location->name,
+        'url'         => $locUrl,
+        'description' => \App\Support\Schema::text($location->description, 500),
+        'image'       => $locImages->all() ?: null,
+        'address'     => \App\Support\Schema::postalAddress([
+            'locality' => $location->city,
+            'region'   => $location->state,
+            'country'  => 'PK',
+        ]),
+        'geo'                 => \App\Support\Schema::geo($location->latitude, $location->longitude),
+        'hasMap'              => 'https://www.google.com/maps/search/?api=1&query=' . $mapQuery,
+        'touristType'         => ['Sikh pilgrims', 'Religious travellers'],
+        'isAccessibleForFree' => true,
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => $location->name,
+        'description'   => $pageDescription,
+        'image'         => $pageImage,
+        'url'           => $locUrl,
+        'dateModified'  => $location->updated_at,
+        'primaryEntity' => $locUrl . '#place',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Popular Locations', route('popular_locations')],
+        [$location->name, null],
+    ]),
+]) !!}
+@endsection
+
+@section('content')
 @if($hasGeo)<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">@endif
 <style type="text/css">
     .ld2{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}

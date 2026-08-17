@@ -1,11 +1,83 @@
 @extends('layouts.app')
-@section('content')
+
 @php
     $fullAddress = trim(collect([
         $gurdwara->address, $gurdwara->city, $gurdwara->state, $gurdwara->zip, $gurdwara->country
     ])->filter()->implode(', '));
     $mapQuery = urlencode($gurdwara->gurdwara_name . ' ' . $fullAddress);
+
+    $gdUrl   = route('gurdwara_detail', $gurdwara->id);
+    $gdImage = !empty($gurdwara->gurdwara_image) ? asset('gurdwara_images/' . $gurdwara->gurdwara_image) : null;
+    $gdWhere = trim(collect([$gurdwara->city, $gurdwara->state])->filter()->implode(', '));
+
+    $pageTitle = $gurdwara->gurdwara_name . ($gdWhere ? ' — ' . $gdWhere : '');
+    $pageDescription = $gurdwara->gurdwara_name . ($gdWhere ? ' in ' . $gdWhere : '') . '. '
+        . ($fullAddress ? 'Address: ' . $fullAddress . '. ' : '')
+        . (!empty($gurdwara->phone_no) ? 'Phone: ' . $gurdwara->phone_no . '. ' : '')
+        . 'Contact details, office bearers and directions.';
+    $pageImage = $gdImage;
+
+    // Office bearers, as Person nodes on the place. Only names we actually hold.
+    $gdPeople = collect([
+        ['Chairman',   $gurdwara->chairman_name,     $gurdwara->chairman_phone_no,     $gurdwara->chairman_email],
+        ['Pardhan',    $gurdwara->pardan_name,       $gurdwara->phone_no,              $gurdwara->pardan_email],
+        ['Secretary',  $gurdwara->secretary_name,    $gurdwara->secretary_phone_no,    $gurdwara->secretary_email],
+        ['Office Manager', $gurdwara->manager_name,  $gurdwara->manager_phone_no,      $gurdwara->manager_email],
+        ['Granthi',    $gurdwara->granthi_name,      null,                             $gurdwara->granthi_email],
+        ['Head Granthi', $gurdwara->head_garanti_name, $gurdwara->head_garanti_phone_no, null],
+    ])->filter(fn ($p) => !empty($p[1]))->map(fn ($p) => array_filter([
+        '@type'     => 'Person',
+        'name'      => $p[1],
+        'jobTitle'  => $p[0],
+        'telephone' => $p[2] ?: null,
+        'email'     => $p[3] ?: null,
+    ]))->values();
 @endphp
+
+@section('schema')
+{!! \App\Support\Schema::graph([
+    [
+        '@type'        => ['PlaceOfWorship', 'CivicStructure'],
+        '@id'          => $gdUrl . '#place',
+        'name'         => $gurdwara->gurdwara_name,
+        'url'          => $gdUrl,
+        'image'        => $gdImage,
+        'description'  => \App\Support\Schema::text($gurdwara->notes, 400),
+        'telephone'    => $gurdwara->phone_no ?: null,
+        'email'        => $gurdwara->email_address ?: null,
+        'address'      => \App\Support\Schema::postalAddress([
+            'street'   => $gurdwara->address,
+            'locality' => $gurdwara->city,
+            'region'   => $gurdwara->state,
+            'postal'   => $gurdwara->zip,
+            'country'  => $gurdwara->country ?: 'US',
+        ]),
+        // No coordinates are stored per Gurdwara — the ZIP-centroid values used
+        // by the admin Address Book are too coarse to publish as `geo`.
+        'hasMap'       => 'https://www.google.com/maps/search/?api=1&query=' . $mapQuery,
+        'employee'     => $gdPeople->all() ?: null,
+        'isAccessibleForFree' => true,
+        'publicAccess' => true,
+    ],
+    \App\Support\Schema::webPage([
+        'type'          => 'ItemPage',
+        'name'          => $gurdwara->gurdwara_name,
+        'description'   => $pageDescription,
+        'image'         => $gdImage,
+        'url'           => $gdUrl,
+        'dateModified'  => $gurdwara->updated_at,
+        'primaryEntity' => $gdUrl . '#place',
+        'breadcrumb'    => \App\Support\Schema::canonical() . '#breadcrumb',
+    ]),
+    \App\Support\Schema::breadcrumb([
+        ['Home', url('/')],
+        ['Gurdwaras', route('gurdwaras')],
+        [$gurdwara->gurdwara_name, null],
+    ]),
+]) !!}
+@endsection
+
+@section('content')
 <style type="text/css">
     .gd{--brand:#f54e18;--ink:#1c2541;--muted:#6b7280}
     .gd-card{background:#fff;border:1px solid #eef0f4;border-radius:18px;box-shadow:0 12px 36px rgba(28,37,65,.08);overflow:hidden}
