@@ -4,7 +4,7 @@
     $pageTitle = 'Contact Konnect Yatra — Jamaica, New York';
     $pageDescription = 'Speak to the Konnect Yatra team about a Sikh yatra to Pakistan. '
         . 'Call +1 (718) 908-9464, email rm@konnectyatra.org, or visit us at '
-        . '148-36 Guy R Brewer Blvd, Suite 202A, Jamaica, NY 11434.';
+        . '148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA.';
 @endphp
 
 @section('schema')

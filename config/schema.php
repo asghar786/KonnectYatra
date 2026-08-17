@@ -40,8 +40,15 @@ return [
     'telephone'   => '+1-718-908-9464',
     'email'       => 'rm@konnectyatra.org',
 
+    /*
+     | Confirmed by the owner on 2026-08-17 as the correct and final address,
+     | and written exactly as it appears in the site header and on the Contact
+     | page. Keep all three byte-identical — NAP consistency is what lets Google
+     | match this site to the Google Business Profile, so do not "tidy" the
+     | punctuation here without changing the other two at the same time.
+     */
     'address' => [
-        'street'   => '148-36 Guy R Brewer Blvd, Suite 202A',
+        'street'   => '148-36 Guy R Brewers Blvd. Suit #202A',
         'locality' => 'Jamaica',
         'region'   => 'NY',
         'postal'   => '11434',
