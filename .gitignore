@@ -21,3 +21,9 @@ yarn-error.log
 *_live.sql
 konnectyatra_live.sql
 dump_err.txt
+
+# Yatri document uploads — new ones stay out of git (already-tracked files are unaffected)
+/public/passport_uploads/
+/public/photo_uploads/
+/public/greencard_uploads/
+/public/drivinglicense_uploads/

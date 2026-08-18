@@ -37,7 +37,10 @@ $logMsys    = $scriptMsys -replace "check_reviews\.sh$", "check_reviews.log"
 $action  = New-ScheduledTaskAction -Execute $bash -Argument "-lc `"$scriptMsys >> $logMsys 2>&1`""
 $trigger = New-ScheduledTaskTrigger -Daily -At ([datetime]$Time)
 
-Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger `
+# Defaults would skip the run on battery power and never catch up a missed day.
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+
+Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
   -Description "Daily: flag KonnectYatra decisions that have reached their 30-day review date." `
   -Force | Out-Null
 
