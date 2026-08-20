@@ -513,3 +513,56 @@ traditional accounts attributed as traditions, but he is the authority and being
 more than rankings do.
 
 **Review:** see decisions.csv row dated 2026-08-20.
+
+## 2026-08-20 — One date format for the yatri record, and the traps under the admin theme
+
+**Context.** Rashad's admin edit form (`/admin/yatri-visa-edit/{id}`) drew its four date
+fields with native `<input type="date">`, so they rendered in the browser's own locale —
+`10/17/2023` — and posted `YYYY-MM-DD`.
+
+**What the columns actually hold.** `dob`, `issue_date`, `expiry_date`,
+`green_card_expiry_date` and `pk_entry_date` are all `varchar(255)`, not dates, and a survey
+of the rows found four formats already in use: `14-AUG-1947` (the public apply form),
+`1960-07-25` (anything with a native date input), `06-18-2026` (the generic jQuery UI
+`.datepicker`, `mm-dd-yy`) and `1 Apr 2025` (older/seeded rows). The admin form was adding
+a fifth reading of the same column.
+
+**Decision.** DD-MMM-YYYY everywhere on that form — the format the public apply form already
+writes, and the one a US reader cannot misread. `App\Support\YatriDate::format()` renders any
+of the four on the way in and normalises whatever is submitted on the way out, so a record
+converges on one format the first time it is saved. No migration: the columns stay varchar.
+
+**The one thing it will not do is guess.** An all-numeric `NN-NN-YYYY` is genuinely
+ambiguous — `09-12-2000` is September 12th if a picker wrote it and December 9th if a human
+typed it. The app's own pickers wrote month-first, so month-first is the assumption, except
+where the first number is above 12 and can only be a day. Anything it cannot read at all
+(`Ipsum deserunt et u`, `31-FEB-2026`, the bare `2017` in one `pk_entry_date`) is handed back
+untouched rather than replaced with a guess.
+
+**A latent block fixed on the way past.** `min`/`max` on the old native inputs meant a record
+holding an expired passport was `:out-of-range` and failed HTML5 validation — that record
+could not be saved at all until the expiry date was changed. Text inputs remove the block;
+the same limits now live in the picker instead.
+
+**Two traps in the admin theme**, both of which will bite the next third-party widget dropped
+into `/admin`: `table thead th { color: white }` hid the picker's day names against its white
+panel, and `td { padding: 10px !important }` pushed the calendar's last column outside it.
+Overrides are scoped to `#ui-datepicker-div`; the padding one needs `!important` to win.
+
+**And a repo problem worth knowing about.** The six files in
+`public/new-assets/vendors/jquery-ui/images/` are not images — they are six identical 162KB
+HTML documents with `.html` extensions, referenced as such by the vendored CSS. The jQuery UI
+month arrows have therefore never rendered anywhere on the site, the public apply form
+included. Worked around here by drawing the arrows in CSS; the public forms are untouched.
+
+**Verified**, not assumed: the real page rendered and driven over CDP — all four fields typed
+`text` with a picker attached, month dropdown `JAN…DEC`, clicking a day wrote `01-JUL-1960`,
+no new JS exceptions (the two on the page come from `waypoints-min.js` and a `selectpicker`
+call in `functions.js`, both pre-existing). The save path was exercised against the real
+controller inside a transaction that was rolled back: `07/10/1967` → `10-JUL-1967`,
+`2023-10-17` → `17-OCT-2023`, `10-16-2033` → `16-OCT-2033`.
+
+**Deliberately not done.** The logged-in user apply form still posts `YYYY-MM-DD`, and the
+read-only admin screens still print whatever is stored. Neither was in scope.
+
+**Review:** see decisions.csv row dated 2026-08-20.
