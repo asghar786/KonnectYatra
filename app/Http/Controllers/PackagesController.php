@@ -663,6 +663,13 @@ class PackagesController extends Controller
         $yatri_visa->us_passport = $passport;
         $yatri_visa->green_card = $greencard;
         $yatri_visa->driving_license = $drivinglicense;
+        // Travel options from the printed application form.
+        $yatri_visa->wheelchair_airport   = $request->wheelchair_airport;
+        $yatri_visa->wheelchair_full_trip = $request->wheelchair_full_trip;
+        $yatri_visa->two_suitcases_wagah  = $request->two_suitcases_wagah;
+        $yatri_visa->meal_ack             = $request->meal_ack;
+        $yatri_visa->signature            = $request->signature;
+        $yatri_visa->signature_date       = $request->signature_date;
         $yatri_visa->payment_status = "pending";
         $yatri_visa->save();
 
@@ -722,8 +729,23 @@ class PackagesController extends Controller
         // Per-person price is stored like "$2800"; total = price × (primary + companions).
         $unitPrice = (float) preg_replace('/[^0-9.]/', '', (string) $yatri_visa->package_type);
         $travellersCount = 1 + $companionCount;
+
+        // Surcharges are worked out here, server-side, and the amounts are stored
+        // on the booking. The rates are admin-editable, so recomputing them later
+        // would silently restate a total the yatri already agreed to and paid.
+        $fees = \App\Support\TravelFees::calculate([
+            'wheelchair_full_trip' => $request->wheelchair_full_trip,
+            'two_suitcases_wagah'  => $request->two_suitcases_wagah,
+            'passport_country'     => $request->passport_country,
+            'nationality'          => $request->nationality,
+        ]);
+        $yatri_visa->fee_wheelchair       = $fees['wheelchair'];
+        $yatri_visa->fee_indian_passport  = $fees['indian_passport'];
+        $yatri_visa->fee_baggage          = $fees['baggage'];
+        $yatri_visa->fee_late_application = $fees['late'];
+
         $yatri_visa->travellers_count = $travellersCount;
-        $yatri_visa->total_amount     = $unitPrice * $travellersCount;
+        $yatri_visa->total_amount     = ($unitPrice * $travellersCount) + $fees['total'];
         $yatri_visa->save();
 
         Conversion::log('booking_request', $request, $yatri_visa->id);

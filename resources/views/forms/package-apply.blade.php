@@ -98,6 +98,75 @@
   .accordion .card button:hover {
     background-color: #000 !important;
   }
+
+  /* Travel Options — the blue option bars from the printed application form.
+     The whole bar is the <label>, so the tap target is the full width; this
+     section is aimed at older yatris filling it on a phone. */
+  .opt-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    border: 2px solid #1a3d8f;
+    border-radius: 12px;
+    background: #1a3d8f;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color .15s ease, box-shadow .15s ease;
+  }
+
+  .opt-bar:hover {
+    box-shadow: 0 4px 14px rgba(26, 61, 143, .28);
+  }
+
+  .opt-bar input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .opt-bar-icon {
+    font-size: 26px;
+    flex: 0 0 auto;
+    line-height: 1;
+  }
+
+  .opt-bar-text {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .opt-bar-text small {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: .85;
+    margin-top: 2px;
+  }
+
+  /* A ticked bar turns orange, the accent used everywhere else on this form. */
+  .opt-bar:has(input:checked) {
+    background: #f54e18;
+    border-color: #f54e18;
+  }
+
+  /* Fallback for browsers without :has() — the JS adds .selected. */
+  .opt-bar.selected {
+    background: #f54e18;
+    border-color: #f54e18;
+  }
+
+  @media (max-width: 575px) {
+    .opt-bar { padding: 12px 13px; gap: 10px; }
+    .opt-bar-icon { font-size: 22px; }
+    .opt-bar-text { font-size: 15px; }
+  }
 </style>
 
 <!-- Content -->
@@ -617,6 +686,84 @@
               </div>
             </div>
             <div class="card">
+              <div class="card-header" id="faqheadOptions">
+                <a href="javascript:void;" class="btn btn-header-link">Travel Options &amp; Assistance</a>
+              </div>
+
+              <div id="faqOptions" class="collapse" aria-labelledby="faqheadOptions" data-parent="#faq">
+                <div class="card-body row pt-3">
+                  <div class="col-12 mb-3">
+                    <p class="mb-0" style="font-weight:100;">
+                      Tell us what you need on the journey. Anything with a fee is added to your total below.
+                    </p>
+                  </div>
+
+                  {{-- The three option bars from the printed application, plus the
+                       Wagah baggage declaration from its instructions page. --}}
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <label class="opt-bar" for="wheelchair_airport">
+                      <input type="checkbox" id="wheelchair_airport" name="wheelchair_airport" value="yes">
+                      <i class="fas fa-wheelchair opt-bar-icon" aria-hidden="true"></i>
+                      <span class="opt-bar-text">
+                        Wheelchair at airport
+                        <small>No charge</small>
+                      </span>
+                    </label>
+                  </div>
+
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <label class="opt-bar" for="wheelchair_full_trip">
+                      <input type="checkbox" id="wheelchair_full_trip" name="wheelchair_full_trip" value="yes">
+                      <i class="fas fa-wheelchair opt-bar-icon" aria-hidden="true"></i>
+                      <span class="opt-bar-text">
+                        Wheelchair throughout the trip
+                        <small>Adds {{ '$'.number_format(\App\Support\TravelFees::rate('wheelchair_full_trip')) }}</small>
+                      </span>
+                    </label>
+                  </div>
+
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <label class="opt-bar" for="two_suitcases_wagah">
+                      <input type="checkbox" id="two_suitcases_wagah" name="two_suitcases_wagah" value="yes">
+                      <i class="fas fa-suitcase opt-bar-icon" aria-hidden="true"></i>
+                      <span class="opt-bar-text">
+                        I will carry two suitcases through the Wagah Border
+                        <small>Adds {{ '$'.number_format(\App\Support\TravelFees::rate('baggage_wagah')) }} baggage handling</small>
+                      </span>
+                    </label>
+                  </div>
+
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <label class="opt-bar opt-bar-static" for="meal_ack">
+                      <input type="checkbox" id="meal_ack" name="meal_ack" value="yes" required>
+                      <i class="fas fa-utensils opt-bar-icon" aria-hidden="true"></i>
+                      <span class="opt-bar-text">
+                        Meal preference: vegetarian meals only
+                        <small>I understand only vegetarian meals are served</small>
+                      </span>
+                    </label>
+                    <div class="invalid-feedback">
+                      Please confirm you understand the meal policy.
+                    </div>
+                  </div>
+
+                  {{-- Fees the yatri does not choose — they follow from the passport
+                       country and today's date. Shown so the total is never a
+                       surprise at the payment step. --}}
+                  <div class="col-12" id="auto_fees_block" style="display:none;">
+                    <div class="alert" style="background:#fff4ef;border:1px solid #ffd9c9;color:#8a3b1a;border-radius:10px;">
+                      <b>Also applies to your application:</b>
+                      <ul class="mb-0 mt-2" id="auto_fees_list" style="padding-left:18px;"></ul>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-12 col-md-12 col-sm-12 mt-3 d-flex justify-content-end">
+                    <button class="button-text width-6 btn-slider1 next p-3" style="border-radius:10px !important; width: auto; background-color: #fff;" type="button">Save &amp; Next</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
               <div class="card-header" id="faqhead4">
                 {{-- <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#faq4" aria-expanded="true" aria-controls="faq4">Employment & Travel History</a> --}}
                 <a href="javascript:void;" class="btn btn-header-link">Employment & Travel History</a>
@@ -894,62 +1041,99 @@
             </div>
           </div>
         </div>
-          {{-- <div class="col-12 mt-2">
-            <ul>
-              <li>Price is guaranteed if booking is made 8 weeks in advance and paid in full. <b>Payable to Konnect.us, Inc. and mail at 185-02 Hillside Avenue, Jamaica NY 11432.</b></li>
-              <li>Stay in 4 Star Hotel in Islamabad & Lahore. Breakfast/Dinner and Refreshment included.</li>
-              <li>Pick and drop transportation throughout the holy trip.</li>
-              <li>Yatris must follow the group rules and regulation. No private tour is allowed due to security reason</li>
-              <li>This application is valid till October 31, 2023.</li>
-              <li>(Double occupancy $100 discount only for one person if wife and husband traveling together. Note: JFK-ISB-LHE-JFK (One way passengers will pay $600 less from the above package price)</li>
-              <li>For Business Class prices please call <b>RASHAD MAHMOOD @ +1 (718) 908-9464</b></li>
-              <li><b>Cancellation of Trip: Airline applicable cancellation charges and $100 service charges applies.</b></li>
-            </ul>
-          </div>
-          <div class="col-4 mt-2">
-            <label>Signature of Yatri</label>
-            <input class="form-control" type="text" name="signature" style="border-top: 0px; border-left: 0px; border-right: 0px;" onkeydown="return /[a-z ]/i.test(event.key)" required>
-            <div class="invalid-feedback">
-              Please add your signature.
+          <div class="col-12 mt-4 px-4">
+            <div class="p-3" style="background:#f6f7f9;border:1px solid #e7e9ef;border-radius:12px;">
+              <b style="color:#1a3d8f;">Before you submit</b>
+              <ul class="mt-2 mb-0" style="font-weight:100;">
+                <li>Price is guaranteed when booking is made at least <b>10 weeks in advance</b> and paid in full.</li>
+                <li>A separate application form is required for each traveller.</li>
+                <li>Visa approval is not guaranteed and rests solely with the Government of Pakistan. <b class="text-danger">False or misleading information may cause visa rejection. Fees are non-refundable.</b></li>
+                <li>You must follow all group rules and regulations.</li>
+                <li><b>Cancellation:</b> applicable airline cancellation charges plus a $100 service fee apply.</li>
+                <li>Seats are allocated on a <b>first come, first served</b> basis.</li>
+                <li>For security and privacy reasons, final itinerary details may be provided as late as one week before departure.</li>
+                @if(\App\Support\Business::phone())
+                  <li>Questions? Call <b>{{ \App\Support\Business::phone() }}</b>.</li>
+                @endif
+              </ul>
             </div>
-          </div> --}}
-          <div class="col-12 mt-2">
-            <input type="checkbox" name="terms" value="agree" required>
-            <label class="form-label" style="font-weight: 100;">To the best of my knowledge and belief the information given in this application is correct.</label><br>
-            <input type="checkbox" name="terms" value="agree" required>
-            <label class="form-label" style="font-weight: 100;">I agree to the <a href="javascript:void;" data-toggle="modal" data-target="#exampleModal"><b>terms & conditions</b></a>.</label><br>
+          </div>
+
+          <div class="col-12 mt-3 px-4">
+            <div class="row">
+              <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                <label>Signature of Yatri <span class="text-danger">*</span></label>
+                <input class="form-control" type="text" name="signature" placeholder="Type your full name as your signature"
+                       style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" required>
+                <small class="d-block text-muted mt-1">Typing your name here counts as your signature on this application.</small>
+                <div class="invalid-feedback">
+                  Please add your signature.
+                </div>
+              </div>
+              <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                <label>Date</label>
+                <input class="form-control" type="text" name="signature_date" value="{{ strtoupper(date('d-M-Y')) }}" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 mt-2 px-4">
+            {{-- Two separate declarations: they are two different promises, and
+                 naming them both "terms" meant only one value ever reached the
+                 server, so a dispute could not be answered from the record. --}}
+            <input type="checkbox" id="declaration_true" name="declaration_true" value="agree" required>
+            <label class="form-label" for="declaration_true" style="font-weight: 100;">To the best of my knowledge and belief the information given in this application is correct.</label><br>
+            <input type="checkbox" id="terms" name="terms" value="agree" required>
+            <label class="form-label" for="terms" style="font-weight: 100;">I agree to the <a href="javascript:void;" data-toggle="modal" data-target="#exampleModal"><b>Yatri application &amp; travel instructions</b></a>.</label><br>
             <label style="font-weight: 100;"><b style="font-weight: 600;">NOTE:</b> Application will be submitted after payment process is completed.</label>
             <div class="invalid-feedback">
               Please click the above checkbox.
             </div>
           </div>
           <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
               <div class="modal-content">
                 <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Terms & Conditions</h5>
+                  <h5 class="modal-title" id="exampleModalLabel">Yatri Application &amp; Travel Instructions</h5>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
                 </div>
-                <div class="modal-body">
-                  <h3>What can you do:</h3>
-                  <p>
-                    you can travel one way to Pakistan and go to India (pay $600 less of the package price) but if you carrying two suitcases you have to pay additional $35 luggage handling.
-                  </p>
-                  <p>
-                    You can go to India and use our Land package and join the group. We can receive you from the Wagha Border, Lahore.
-                  </p>
-                  <h3>What you cannot do:</h3>
+                <div class="modal-body" style="font-size:15px;max-height:70vh;overflow-y:auto;">
+                  <h5 style="color:#1a3d8f;">Documents Required</h5>
                   <ul>
-                    <li>You can not change assigned seat during trip</li>
-                    <li>Exchange phone numbers with local people or Government officials</li>
-                    <li>No Alcohol allowed</li>
-                    <li>You can not go anywhere without prior permission of the group leader</li>
-                  </ul> 
-                  <p>You will be responsible for all expenses of your private tour incase permission is granted by the special Police through the group leader.</p>
+                    <li><b>Clear copy of passport and driver's licence or State ID:</b> please provide a clear, legible copy of your valid passport and your driver's licence or State-issued ID.</li>
+                    <li><b>Passport-size photograph:</b> a recent passport-size photograph with a white background and no glasses or sunglasses, as required by the visa application system. If the visa system does not accept the submitted photograph, additional photographs may be requested.</li>
+                    <li><b>Visa approval:</b> visa approval is not guaranteed and is solely subject to the decision of the Government of Pakistan and the applicable visa authorities. Providing false, incomplete or misleading information may result in visa rejection or other consequences.</li>
+                    <li><b>Indian passport holders:</b> must provide a copy of their Green Card, passport, and driver's licence or State ID, as applicable. An additional <b>{{ '$'.number_format(\App\Support\TravelFees::rate('indian_passport')) }} processing fee</b> applies.</li>
+                  </ul>
+
+                  <h5 style="color:#1a3d8f;">Travel Options &amp; Group Rules</h5>
+                  <ul>
+                    <li><b>Travel via Wagah Border:</b> if the Wagah Border, Lahore, is officially open and available for passenger travel, yatris may travel to India through the Wagah Border.</li>
+                    <li><b>Two-suitcase baggage handling:</b> if a yatri is carrying two suitcases when travelling through the Wagah Border, an additional <b>{{ '$'.number_format(\App\Support\TravelFees::rate('baggage_wagah')) }} baggage-handling fee</b> applies.</li>
+                    <li><b>USA-to-India travel / Land Package:</b> yatris may travel from the USA to India and join the Konnect Yatra group through the Land Package. Our team will receive and assist yatris at the Wagah Border, Lahore, subject to the border being open and applicable government permissions.</li>
+                    <li><b>Seating policy:</b> seats are available on a <b>first-come, first-served basis</b>. Yatris are requested not to change or reserve assigned seats without permission from the group leader or Konnect Yatra staff.</li>
+                  </ul>
+
+                  <h5 style="color:#1a3d8f;">Yatra Rules &amp; Safety</h5>
+                  <ul>
+                    <li><b>Personal contact information:</b> for your safety and privacy, yatris should not exchange personal phone numbers or other private contact information with unauthorised local individuals. Please follow the instructions of Konnect Yatra staff regarding communication with local people or government officials.</li>
+                    <li><b>Alcohol policy:</b> alcohol is strictly prohibited as part of the Yatra rules during this holy pilgrimage.</li>
+                    <li><b>Group travel:</b> yatris must remain with the group and should not leave the group or designated Yatra programme without prior permission from the group leader or authorised Konnect Yatra staff.</li>
+                    <li><b>Private / ancestral village visits:</b> these are not included in the standard Yatra itinerary. Such visits require prior permission and authorisation from the appropriate government authorities and must be arranged at the traveller's own expense. Approval is not guaranteed.</li>
+                  </ul>
+
+                  <h5 style="color:#1a3d8f;">Security &amp; Itinerary Notice</h5>
+                  <p>For security and privacy reasons, <b>final itinerary details may be provided as late as one week before departure.</b></p>
                   <p>
-                    Price Guaranteed if booking is made 3 months in advance and paid in full. 2 months before departure you will pay different package price.
+                    The Yatra programme provided at the time of application is tentative. Routes, destinations, schedules, hotel arrangements, transportation and other programme details may be changed, amended or cancelled when necessary due to security concerns, government instructions, border conditions, weather, transportation issues, or other circumstances beyond the control of Konnect Yatra USA.
+                  </p>
+                  <p>The safety and security of our yatris remains our highest priority.</p>
+
+                  <h5 style="color:#1a3d8f;">Disclaimer &amp; Copyright</h5>
+                  <p style="font-size:14px;">
+                    The content of this page, including its text, format, policies and instructions, is the property of Konnect.US, Inc., doing business as Konnect Yatra USA. Unauthorised copying, reproduction, distribution, modification or alteration of this content is prohibited and may result in legal action.
                   </p>
                 </div>
                 <div class="modal-footer">
@@ -1597,19 +1781,93 @@ $(document).on('change', '.passenger_passport', function() {
     }
     function money(n) { return '$' + n.toLocaleString('en-US'); }
 
+    // Surcharge rates and the late-application window, as configured in the
+    // admin. Kept in one place so the figures shown here cannot drift from the
+    // ones App\Support\TravelFees charges on submit.
+    var FEES = {!! json_encode(\App\Support\TravelFees::forJavascript()) !!};
+
+    // Does the Indian-passport processing fee apply? Mirrors
+    // TravelFees::isIndianPassport — the passport country decides, falling back
+    // to nationality when the traveller has not reached that field yet.
+    function isIndianPassport() {
+      var v = $.trim($("select[name='passport_country']").val() || '') ||
+              $.trim($("select[name='nationality']").val() || '');
+      return /^(india|indian|in)$/i.test(v);
+    }
+
+    // The fees the traveller chose, plus the two that follow automatically.
+    // Returns the line items so both the total and the notice can use them.
+    function surcharges() {
+      var lines = [];
+      if ($('#wheelchair_full_trip').is(':checked')) {
+        lines.push({ label: 'Wheelchair throughout the trip', amount: FEES.wheelchairFullTrip, auto: false });
+      }
+      if ($('#two_suitcases_wagah').is(':checked')) {
+        lines.push({ label: 'Two-suitcase baggage handling at Wagah', amount: FEES.baggageWagah, auto: false });
+      }
+      if (isIndianPassport()) {
+        lines.push({ label: 'Indian passport processing fee', amount: FEES.indianPassport, auto: true });
+      }
+      if (FEES.lateApplies) {
+        lines.push({ label: 'Late application fee', amount: FEES.lateApplication, auto: true });
+      }
+      return lines;
+    }
+
+    // The two automatic fees get their own callout, because the traveller did
+    // not tick anything to incur them and should not meet them first at payment.
+    function refreshAutoFees() {
+      var auto = surcharges().filter(function (l) { return l.auto; });
+      if (!auto.length) {
+        $('#auto_fees_block').hide();
+        return;
+      }
+      $('#auto_fees_list').html(auto.map(function (l) {
+        return '<li>' + l.label + ' — <b>' + money(l.amount) + '</b></li>';
+      }).join(''));
+      $('#auto_fees_block').show();
+    }
+
     function refreshTotal() {
       var unit = unitPrice(), ppl = peopleCount();
+      var lines = surcharges();
+      var extras = lines.reduce(function (sum, l) { return sum + l.amount; }, 0);
       var html;
       if (unit > 0) {
         html = '<b>Total people travelling:</b> ' + ppl +
                ' &nbsp;|&nbsp; <b>Package price:</b> ' + money(unit) + ' per person' +
-               ' &nbsp;|&nbsp; <b style="color:#f54e18;font-size:19px;">Total: ' + money(unit * ppl) + '</b>';
+               ' &nbsp;|&nbsp; <b>Packages:</b> ' + money(unit * ppl);
+        if (extras > 0) {
+          html += '<div style="margin-top:8px;font-size:14px;">' +
+                  lines.map(function (l) {
+                    return '+ ' + l.label + ': <b>' + money(l.amount) + '</b>';
+                  }).join('<br>') + '</div>';
+        }
+        html += '<div style="margin-top:8px;"><b style="color:#f54e18;font-size:19px;">Total: ' +
+                money(unit * ppl + extras) + '</b></div>';
       } else {
         html = '<b>Total people travelling:</b> ' + ppl +
                ' &nbsp;|&nbsp; <span style="color:#f54e18;font-weight:700;">Call for Price</span>';
+        if (extras > 0) {
+          html += '<div style="margin-top:8px;font-size:14px;">' +
+                  lines.map(function (l) {
+                    return '+ ' + l.label + ': <b>' + money(l.amount) + '</b>';
+                  }).join('<br>') + '</div>';
+        }
       }
       $('#price_summary').html(html);
+      refreshAutoFees();
     }
+
+    // Travel Options: keep the .selected fallback in step with the checkbox for
+    // browsers without :has(), and re-price on every change.
+    $(document).on('change', '.opt-bar input[type="checkbox"]', function () {
+      $(this).closest('.opt-bar').toggleClass('selected', this.checked);
+      refreshTotal();
+    });
+
+    // The Indian-passport fee depends on fields in an earlier section.
+    $(document).on('change', "select[name='passport_country'], select[name='nationality']", refreshTotal);
 
     // Has the traveller declared a spouse (checkbox ticked + name entered) in
     // the Family Information section above?
