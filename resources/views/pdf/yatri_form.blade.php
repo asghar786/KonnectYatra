@@ -106,8 +106,10 @@
     .pay-qr { width: 170px; padding: 6px 14px 6px 0; text-align: center; }
     .pay-qr img { width: 150px; height: 150px; background: #fff; border: 1px solid #e3e6ec; padding: 6px; }
     .pay-cap { font-size: 8px; color: #5a6273; margin-top: 4px; }
+    /* A bare div stretches to the row height in dompdf, so the empty state uses a
+       fixed table cell — the same trick the photo box uses. */
     .pay-noqr { width: 150px; height: 150px; border: 1px dashed #c4cad6; color: #9aa3b2; font-size: 9px;
-                text-align: center; padding-top: 62px; margin: 0 auto; }
+                text-align: center; vertical-align: middle; }
     .pay-info { vertical-align: top; }
     .pay-note { background: #fbf3ef; border-left: 3px solid #f54e18; padding: 5px 8px; font-size: 8.5px;
                 color: #4b5563; margin-top: 5px; }
@@ -413,7 +415,9 @@
             <img src="{{ $zelle['qr'] }}" alt="Zelle QR code">
             <div class="pay-cap">Open Zelle in your bank's app and scan</div>
         @else
-            <div class="pay-noqr">QR code<br>not set up</div>
+            <table align="center" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                <tr><td class="pay-noqr">QR code<br>not set up</td></tr>
+            </table>
         @endif
     </td>
     <td class="pay-info">
