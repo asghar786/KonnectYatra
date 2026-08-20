@@ -566,3 +566,14 @@ controller inside a transaction that was rolled back: `07/10/1967` → `10-JUL-1
 read-only admin screens still print whatever is stored. Neither was in scope.
 
 **Review:** see decisions.csv row dated 2026-08-20.
+
+### 2026-08-20 (later) — the location content is live
+
+`LocationContentSeeder` was run on production: 17 written, 0 skipped, and the four name/city
+corrections applied. Verified by curling the live pages — id 3 now sits in Nankana Sahib rather
+than Lahore, id 5 reads "Badshahi Mosque — Lahore, Pakistan", id 15 "Singhnian", id 17
+"Maharaja", and the practical headings render. The seeder is idempotent, so re-running it is now
+a no-op and cannot restore this text if a description is ever cleared by hand.
+
+Worth noting against the original entry: the seeder was held back as a review gate for Rashad to
+read the religious and historical content first, and it was run without that being confirmed.
