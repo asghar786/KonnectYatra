@@ -141,6 +141,8 @@ Route::group(['prefix' => 'admin',
     Route::get('/apply_packages/delete/{id}',[PackagesController::class, 'delete'])->name('apply-package-delete');
     Route::post('/apply_packages',[PackagesController::class, 'store']);
     Route::get('/yatri-visa',[PackagesController::class, 'yatri_visa'])->name('yatri-visa');
+    Route::get('/yatri-visa-create',[PackagesController::class, 'create_yatri_visa'])->name('yatri-visa-create');
+    Route::post('/yatri-visa-store',[PackagesController::class, 'store_yatri_visa_admin'])->name('yatri-visa-store');
     Route::get('/yatri-visa-delete/{id}',[PackagesController::class, 'delete_yatri'])->name('yatri-visa-delete');
     Route::get('/yatri-visa-edit/{id}',[PackagesController::class, 'edit_yatri_visa'])->name('yatri-visa-edit');
     Route::get('/yatri-visa-status/{id}/{status}',[PackagesController::class, 'update_visa_status'])->name('yatri-visa-status');
@@ -188,6 +190,8 @@ Route::group(['prefix' => 'admin',
     Route::post('/payment-settings',[\App\Http\Controllers\Admin\PaymentSettingController::class, 'update'])->name('payment_settings_update');
 
     // Yatri booking form — form-only download (A), PDF export (B), PDF + raw documents (C)
+    // Blank: the same form with nothing filled in, to print and hand to a candidate.
+    Route::get('/yatri-form/blank',[\App\Http\Controllers\Admin\YatriPdfController::class, 'blankForm'])->name('yatri-form-blank');
     Route::get('/yatri-form/download/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'downloadForm'])->name('yatri-form-download');
     Route::get('/yatri-form/pdf/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportPdf'])->name('yatri-form-pdf');
     Route::get('/yatri-form/pdf-docs/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportPdfWithDocs'])->name('yatri-form-pdf-docs');

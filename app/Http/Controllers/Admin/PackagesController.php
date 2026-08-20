@@ -25,6 +25,7 @@ use App\Models\DepartureOrigin;
 use App\Models\YatriIdsBack;
 use App\Models\Balance;
 use App\Support\YatriDate;
+use App\Support\YatriId;
 use Session;
 
 class PackagesController extends Controller
@@ -720,66 +721,123 @@ class PackagesController extends Controller
     $packages = YatariPackage::all();
     $countries = Country::all();
     $gurdwaras  = Gurdwara::all();
+    $allPackages = Package::where('status', 1)->orderBy('name')->get();
     $yatri = YatriVisa::where('id',$id)->first();
     if($yatri)
     {
-      return view('admin.packages.edit-yatri',compact('yatri','packages','countries','gurdwaras'));
+      return view('admin.packages.edit-yatri',compact('yatri','packages','countries','gurdwaras','allPackages'));
     }
     else
     {
       return back()->with('error','Something went wrong');
     }
   }
+
+  /**
+   * Blank version of the edit form, for keying in a paper application by hand.
+   * Same view, so the fields a candidate fills on the printed form and the
+   * fields the admin types cannot drift apart.
+   */
+  public function create_yatri_visa()
+  {
+    $packages    = YatariPackage::all();
+    $countries   = Country::all();
+    $gurdwaras   = Gurdwara::all();
+    $allPackages = Package::where('status', 1)->orderBy('name')->get();
+    $yatri       = new YatriVisa();
+
+    return view('admin.packages.edit-yatri', compact('yatri','packages','countries','gurdwaras','allPackages'));
+  }
+
+  /** Save a booking the admin entered by hand. */
+  public function store_yatri_visa_admin(Request $request)
+  {
+    $request->validate([
+      'first_name' => 'required|string|max:190',
+      'last_name'  => 'required|string|max:190',
+      'passport'   => 'required|string|max:190',
+    ]);
+
+    $data = $this->prepareYatriData($request);
+
+    // The list is filtered by season, so a record saved into the wrong one is
+    // invisible on the page the admin just came from. Use the season they are
+    // currently viewing, falling back the same way the list itself does.
+    $season = Session::get('season')
+      ?: optional(Season::where('status', '1')->first())->id
+      ?: optional(Season::orderBy('id', 'DESC')->first())->id;
+    $data['season_id'] = $season;
+
+    // `marital_status` and `photo` are NOT NULL with no default, and a paper
+    // application often arrives without either — an unticked radio and no
+    // photograph yet. Insert an empty value rather than making the admin invent
+    // one; both read as "not provided" everywhere they are displayed.
+    foreach (['marital_status', 'photo'] as $column) {
+      if (!isset($data[$column])) {
+        $data[$column] = '';
+      }
+    }
+
+    $data['yatri_id']    = YatriId::generate($request->ticket_type);
+    $data['visa_status'] = 'Pending';
+    // Nothing is paid until someone records a payment, so leave `amount` unset:
+    // the list works out what is due from the package price minus payments.
+
+    $yatri = YatriVisa::create($data);
+
+    return redirect(url('admin/booking-detail', $yatri->id))
+      ->with('success', 'Yatri ' . $yatri->yatri_id . ' added successfully!');
+  }
+
   public function yatri_visa_update(Request $request, $id)
   {
     if($request->isMethod('post')){
 
-      $data = $request->all();
-      // dd($data);
-
-      if ($request->file('photo')) {   
-        $file = $request->file('photo');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('photo_uploads');
-        $file->move($destinationPath,$fileName);
-        $data['photo'] = $fileName;
-      }
-      if ($request->file('us_passport')) {   
-        $file = $request->file('us_passport');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('passport_uploads');
-        $file->move($destinationPath,$fileName);
-        $data['us_passport'] = $fileName;
-      }
-      if ($request->file('driving_license')) {   
-        $file = $request->file('driving_license');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('drivinglicense_uploads');
-        $file->move($destinationPath,$fileName);
-        $data['driving_license'] = $fileName;
-      }
-      if ($request->file('green_card')) {   
-        $file = $request->file('green_card');
-        $fileName = uniqid().$file->getClientOriginalName();
-        $destinationPath = public_path('greencard_uploads');
-        $file->move($destinationPath,$fileName);
-        $data['green_card'] = $fileName;
-      }
-
-      unset($data['_token']);
-
-      // The date columns are varchar, so whatever the form posts is what gets
-      // stored. Put every date into the house DD-MMM-YYYY format on the way in,
-      // so the record reads the same as one the public apply form writes.
-      foreach (['dob', 'issue_date', 'expiry_date', 'green_card_expiry_date', 'pk_entry_date'] as $dateField) {
-        if (array_key_exists($dateField, $data)) {
-          $data[$dateField] = YatriDate::format($data[$dateField]);
-        }
-      }
+      $data = $this->prepareYatriData($request);
 
       YatriVisa::where("id", $id)->update($data);
       return redirect(url('admin/booking-detail', $id))->with("success", "Yatri details updated successfully!");
     }
+  }
+
+  /**
+   * Everything the create and edit forms have in common: move any uploaded
+   * files into place and put the dates into the house format.
+   */
+  private function prepareYatriData(Request $request): array
+  {
+    $data = $request->all();
+    unset($data['_token']);
+
+    $uploads = [
+      'photo'           => 'photo_uploads',
+      'us_passport'     => 'passport_uploads',
+      'driving_license' => 'drivinglicense_uploads',
+      'green_card'      => 'greencard_uploads',
+    ];
+    foreach ($uploads as $field => $directory) {
+      if ($request->file($field)) {
+        $file     = $request->file($field);
+        $fileName = uniqid().$file->getClientOriginalName();
+        $file->move(public_path($directory), $fileName);
+        $data[$field] = $fileName;
+      } else {
+        // An untouched file input posts nothing; make sure a stray empty value
+        // never overwrites the filename already stored.
+        unset($data[$field]);
+      }
+    }
+
+    // The date columns are varchar, so whatever the form posts is what gets
+    // stored. Put every date into the house DD-MMM-YYYY format on the way in,
+    // so the record reads the same as one the public apply form writes.
+    foreach (['dob', 'issue_date', 'expiry_date', 'green_card_expiry_date', 'pk_entry_date'] as $dateField) {
+      if (array_key_exists($dateField, $data)) {
+        $data[$dateField] = YatriDate::format($data[$dateField]);
+      }
+    }
+
+    return $data;
   }
   public function delete_yatri($id)
   {

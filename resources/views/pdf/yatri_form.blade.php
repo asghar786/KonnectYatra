@@ -1,8 +1,19 @@
 @php
+    // Blank mode prints the same form with nothing filled in, to hand to a
+    // candidate. Values become writing lines (the rule comes from CSS, so every
+    // "{{ $v(...) }}" below works unchanged) and the sections that are hidden
+    // when a record has no data are shown, because that is exactly where someone
+    // needs somewhere to write.
+    $blank = $blank ?? false;
+
     // Helpers
-    $v = function ($val) { return ($val !== null && $val !== '' ) ? e($val) : 'N/A'; };
+    $v = function ($val) use ($blank) {
+        if ($blank) return '';
+        return ($val !== null && $val !== '' ) ? e($val) : 'N/A';
+    };
     // "Age: N Years" pill from a DD-MMM-YYYY date of birth; empty on bad/missing date.
-    $agePill = function ($dob) {
+    $agePill = function ($dob) use ($blank) {
+        if ($blank) return '';
         if (empty($dob)) return '';
         $ts = strtotime($dob);
         if ($ts === false) return '';
@@ -37,7 +48,11 @@
     .pg-header .rule { border-bottom: 2px solid #f54e18; margin-top: 10px; }
     .pg-footer { position: fixed; bottom: -56px; left: 0; right: 0; font-size: 8px; color: #8a93a6; }
     .pg-footer .rule { border-top: 1px solid #e3a07f; margin-bottom: 6px; }
-    .pagenum:after { content: counter(page) " of " counter(pages); }
+    /* Just the page number: this dompdf build never resolves counter(pages) —
+       it renders 0 — so "Page 1 of 0" is the only thing "of" can produce here.
+       The merged exports get a real "Page X of Y" because FPDI stamps those
+       after the fact, when the total is actually known. */
+    .pagenum:after { content: counter(page); }
 
     h2.sec { background: #16233a; color: #fff; font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
              padding: 4px 10px; margin: 8px 0 2px; border-radius: 2px; }
@@ -68,37 +83,59 @@
     .decl { background: #fbf3ef; border-left: 4px solid #f54e18; padding: 7px 10px; font-size: 9px; color: #4b5563; margin-top: 8px; }
     .sign td { padding-top: 18px; font-size: 9px; }
     .sign .line { border-top: 1px solid #1c2541; padding-top: 4px; width: 80%; }
+
+    /* ---- Blank (hand-fill) mode ----
+       The value spans are empty, so give them a width and a rule and they become
+       something to write on. Rows are taller than the filled version because a
+       pen needs more room than 10px type. */
+    .blank ul.fields li { padding: 6px 0 2px; }
+    .blank ul.fields .val { width: 54%; height: 13px; border-bottom: 1px solid #9aa3b2; }
+    .blank .doc-card .di { color: #5a6273; }
+    .blank .fill-cell { height: 17px; }
+    .blank .hint { color: #8a93a6; font-size: 8px; font-style: italic; }
 </style>
 </head>
-<body>
+<body class="{{ $blank ? 'blank' : '' }}">
 
 @if($chrome)
 <div class="pg-header">
     <table style="width:100%"><tr>
         <td style="width:60%"><span class="ttl">YATRI BOOKING FORM</span><br><span class="sub">EXPLORE AND DISCOVER THE GLOBE</span></td>
-        <td style="width:40%; text-align:right;"><span class="bid-label">BOOKING ID</span> <span class="bid">{{ $yatri->yatri_id }}</span></td>
+        <td style="width:40%; text-align:right;">
+            @if($blank)
+                <span class="bid-label">BOOKING ID</span> <span style="display:inline-block;width:90px;border-bottom:1px solid #9aa3b2;">&nbsp;</span>
+            @else
+                <span class="bid-label">BOOKING ID</span> <span class="bid">{{ $yatri->yatri_id }}</span>
+            @endif
+        </td>
     </tr></table>
     <div class="rule"></div>
 </div>
 <div class="pg-footer">
     <div class="rule"></div>
     <table style="width:100%"><tr>
-        <td style="width:70%">KONNECT.US INC. — Explore and Discover the Globe · +1 (718) 908-9464 · 18502 Hillside Avenue, Jamaica, NY 11432</td>
+        {{-- Address must match config/schema.php and the site header exactly (NAP). --}}
+        <td style="width:70%">KONNECT.US INC. — Explore and Discover the Globe · +1 (718) 908-9464 · 148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434</td>
         <td style="width:30%; text-align:right;">Page <span class="pagenum"></span></td>
     </tr></table>
 </div>
 @endif
 
 {{-- ===== Top record summary + photo ===== --}}
+@if($blank)
+<div class="rec-title">Yatri Application — Please Complete in Block Capitals</div>
+<div class="hint" style="margin-bottom:5px;">Dates in DD-MMM-YYYY format, e.g. 20-AUG-2026. Leave anything that does not apply blank.</div>
+@else
 <div class="rec-title">Pilgrimage Booking Record</div>
+@endif
 <table class="top">
     <tr>
         <td style="width:70%">
             <ul class="fields" style="padding-right:0;">
                 <li><span class="lbl">Applicant</span><span class="val">{{ $v(trim($yatri->last_name.' '.$yatri->first_name)) }}</span></li>
                 <li><span class="lbl">Booking ID</span><span class="val">{{ $v($yatri->yatri_id) }}</span></li>
-                <li><span class="lbl">Submission Date</span><span class="val">{{ $yatri->created_at ? $yatri->created_at->format('d F, Y') : 'N/A' }}</span></li>
-                <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ number_format($amount ?: 0) }}{{ $people > 1 ? ' ('.$people.' people)' : '' }}</span></li>
+                <li><span class="lbl">Submission Date</span><span class="val">{{ $blank ? '' : ($yatri->created_at ? $yatri->created_at->format('d F, Y') : 'N/A') }}</span></li>
+                <li><span class="lbl">Total Amount</span><span class="val brand-orange">{{ $blank ? '' : '$'.number_format($amount ?: 0).($people > 1 ? ' ('.$people.' people)' : '') }}</span></li>
             </ul>
         </td>
         <td class="photo-cell" style="width:30%;">
@@ -121,19 +158,19 @@
 <h2 class="sec">Booking Information</h2>
 <table class="kv"><tr>
     <td class="col"><ul class="fields">
-        <li><span class="lbl">Submission Date</span><span class="val">{{ $yatri->created_at ? $yatri->created_at->format('d F, Y') : 'N/A' }}</span></li>
-        <li><span class="lbl">Occupancy</span><span class="val">{{ $people > 1 ? 'Group ('.$people.' people)' : 'Single Occupancy' }}</span></li>
+        <li><span class="lbl">Submission Date</span><span class="val">{{ $blank ? '' : ($yatri->created_at ? $yatri->created_at->format('d F, Y') : 'N/A') }}</span></li>
+        <li><span class="lbl">Occupancy</span><span class="val">{{ $blank ? '' : ($people > 1 ? 'Group ('.$people.' people)' : 'Single Occupancy') }}</span></li>
         <li><span class="lbl">Hotel Name</span><span class="val">{{ $v(optional($yatri->hotel)->name) }}</span></li>
         <li><span class="lbl">Ticket Type</span><span class="val">{{ $v(ucwords(str_replace('_',' ', $yatri->ticket_type))) }}</span></li>
         <li><span class="lbl">Bus #</span><span class="val">{{ $v(optional($yatri->bus)->bus_number) }}</span></li>
     </ul></td>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Package Name</span><span class="val">{{ $v(optional($yatri->package)->name) }}</span></li>
-        @if($people > 1)
-        <li><span class="lbl">Price / Person</span><span class="val">${{ number_format($unitPrice) }}</span></li>
-        <li><span class="lbl">People Travelling</span><span class="val">{{ $people }}</span></li>
+        @if($blank || $people > 1)
+        <li><span class="lbl">Price / Person</span><span class="val">{{ $blank ? '' : '$'.number_format($unitPrice) }}</span></li>
+        <li><span class="lbl">People Travelling</span><span class="val">{{ $blank ? '' : $people }}</span></li>
         @endif
-        <li><span class="lbl">Total Amount</span><span class="val brand-orange">${{ number_format($amount ?: 0) }}</span></li>
+        <li><span class="lbl">Total Amount</span><span class="val brand-orange">{{ $blank ? '' : '$'.number_format($amount ?: 0) }}</span></li>
     </ul></td>
 </tr></table>
 
@@ -196,7 +233,7 @@
         <li><span class="lbl">Mother Name</span><span class="val">{{ $v($yatri->mother_name) }}</span></li>
         <li><span class="lbl">Mother Nationality</span><span class="val">{{ $v($yatri->mother_nationality) }}</span></li>
     </ul></td>
-    @if(!empty($yatri->spouse_name) || $yatri->have_spouse === 'yes')
+    @if($blank || !empty($yatri->spouse_name) || $yatri->have_spouse === 'yes')
     <td class="col"><ul class="fields">
         <li><span class="lbl">Has Spouse</span><span class="val">{{ $v($yatri->have_spouse) }}</span></li>
         <li><span class="lbl">Spouse Name</span><span class="val">{{ $v($yatri->spouse_name) }}</span></li>
@@ -209,7 +246,11 @@
 </tr></table>
 
 {{-- ===== Travelling Companions ===== --}}
-@if($companions->count())
+@if($blank || $companions->count())
+@php
+    // Taller cells on the blank form — a pen needs more room than 10px type.
+    $cell = 'padding:3px 6px;border:1px solid #eef0f4;' . ($blank ? 'height:17px;' : '');
+@endphp
 <h2 class="sec">Travelling Companions &mdash; Keep Together for Hotel Rooms</h2>
 <table class="kv" style="border-collapse:collapse;">
     <thead>
@@ -225,23 +266,38 @@
     <tbody>
         {{-- Primary traveller is the first person in the group. --}}
         <tr>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">1</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">Primary Traveller</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ trim($yatri->last_name.' '.$yatri->first_name) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($yatri->place_birth) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($yatri->nationality) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($yatri->passport) }}</td>
+            <td style="{{ $cell }}">1</td>
+            <td style="{{ $cell }}">Primary Traveller</td>
+            <td style="{{ $cell }}">{{ $blank ? '' : trim($yatri->last_name.' '.$yatri->first_name) }}</td>
+            <td style="{{ $cell }}">{{ $v($yatri->place_birth) }}</td>
+            <td style="{{ $cell }}">{{ $v($yatri->nationality) }}</td>
+            <td style="{{ $cell }}">{{ $v($yatri->passport) }}</td>
         </tr>
-        @foreach($companions as $i => $c)
-        <tr>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $i + 2 }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->relation) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->full_name) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->birth_country) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->nationality) }}</td>
-            <td style="padding:3px 6px;border:1px solid #eef0f4;">{{ $v($c->passport_no) }}</td>
-        </tr>
-        @endforeach
+        @if($blank)
+            {{-- Four spare rows: a separate application form is required for each
+                 traveller, but the group has to be listed to be roomed together. --}}
+            @for($i = 2; $i <= 5; $i++)
+            <tr>
+                <td style="{{ $cell }}">{{ $i }}</td>
+                <td style="{{ $cell }}">&nbsp;</td>
+                <td style="{{ $cell }}">&nbsp;</td>
+                <td style="{{ $cell }}">&nbsp;</td>
+                <td style="{{ $cell }}">&nbsp;</td>
+                <td style="{{ $cell }}">&nbsp;</td>
+            </tr>
+            @endfor
+        @else
+            @foreach($companions as $i => $c)
+            <tr>
+                <td style="{{ $cell }}">{{ $i + 2 }}</td>
+                <td style="{{ $cell }}">{{ $v($c->relation) }}</td>
+                <td style="{{ $cell }}">{{ $v($c->full_name) }}</td>
+                <td style="{{ $cell }}">{{ $v($c->birth_country) }}</td>
+                <td style="{{ $cell }}">{{ $v($c->nationality) }}</td>
+                <td style="{{ $cell }}">{{ $v($c->passport_no) }}</td>
+            </tr>
+            @endforeach
+        @endif
     </tbody>
 </table>
 @endif
@@ -255,7 +311,7 @@
     </ul></td>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Granted Pakistani visa before</span><span class="val">{{ $v(ucfirst($yatri->pk_travel_history)) }}</span></li>
-        @if(@$yatri->pk_travel_history == 'yes')
+        @if($blank || @$yatri->pk_travel_history == 'yes')
         <li><span class="lbl">Entered Pakistan via</span><span class="val">{{ $v($yatri->pk_entry_port) }}</span></li>
         <li><span class="lbl">Recent date of entry</span><span class="val">{{ $v($yatri->pk_entry_date) }}</span></li>
         @endif
@@ -281,7 +337,10 @@
 </tr></table>
 
 {{-- ===== Uploaded Documents ===== --}}
-<h2 class="sec">Uploaded Documents</h2>
+<h2 class="sec">{{ $blank ? 'Documents to Attach' : 'Uploaded Documents' }}</h2>
+@if($blank)
+<div class="hint" style="margin:3px 0 5px;">Passport must be valid for at least 6 months. Green Card required if you are not a U.S. citizen.</div>
+@endif
 @php
     $docList = [
         ['PHOTO', $yatri->photo],
@@ -301,7 +360,7 @@
         <td>
             <div class="doc-card">
                 <div class="dt">{{ $d[0] }}</div>
-                <div class="di">@if(!empty($d[1])){{ strtoupper(pathinfo($d[1], PATHINFO_EXTENSION)) }} · attached @else not provided @endif</div>
+                <div class="di">@if($blank)&#9744; attached @elseif(!empty($d[1])){{ strtoupper(pathinfo($d[1], PATHINFO_EXTENSION)) }} · attached @else not provided @endif</div>
             </div>
         </td>
         @endforeach
@@ -316,7 +375,7 @@
     <td class="col"><ul class="fields">
         <li><span class="lbl">Payment Type</span><span class="val">{{ $v($yatri->payment_type) }}</span></li>
         <li><span class="lbl">Bank Receipt</span><span class="val">{{ $v($yatri->bank_receipt) }}</span></li>
-        <li><span class="lbl">Amount</span><span class="val">{{ $yatri->amount ? '$'.$yatri->amount : 'N/A' }}</span></li>
+        <li><span class="lbl">Amount</span><span class="val">{{ $blank ? '' : ($yatri->amount ? '$'.$yatri->amount : 'N/A') }}</span></li>
     </ul></td>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Routing Number</span><span class="val">{{ $v($yatri->routing_number) }}</span></li>

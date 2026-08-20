@@ -67,6 +67,14 @@
     .dataTables_wrapper .dataTables_filter input:focus{border-color:#f54e18;box-shadow:0 0 0 3px rgba(245,78,24,.12)}
     .dataTables_wrapper .dataTables_paginate .paginate_button.current{background:#1f2a44 !important;color:#fff !important;border-radius:8px;border:0}
     .dataTables_wrapper .dataTables_paginate .paginate_button{border-radius:8px}
+
+    /* Toolbar above the table */
+    .yt-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+    .yt-toolbar .btn{border-radius:10px;padding:9px 18px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+    .yt-toolbar .btn-primary{background:#f54e18;border-color:#f54e18}
+    .yt-toolbar .btn-primary:hover{background:#d94212;border-color:#d94212}
+    .yt-toolbar .btn-outline-secondary{border:1px solid #e3e6ec;background:#fff;color:#3a4458}
+    .yt-toolbar .btn-outline-secondary:hover{background:#1f2a44;border-color:#1f2a44;color:#fff}
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -78,6 +86,14 @@
             </ul>
         </div>
         <div class="main-body">
+            <div class="yt-toolbar">
+                <a href="{{ route('yatri-visa-create') }}" class="btn btn-primary">Add New Yatri <i class="fa fa-plus"></i></a>
+                {{-- Opens in a new tab so the list stays put; print from there and
+                     hand the sheet to a candidate to fill in by hand. --}}
+                <a href="{{ route('yatri-form-blank') }}" target="_blank" rel="noopener" class="btn btn-outline-secondary">
+                    <i class="fa fa-print"></i> Blank Form to Print
+                </a>
+            </div>
             <div class="yt-card">
                 <table class="table" id="myTables">
                     <thead>

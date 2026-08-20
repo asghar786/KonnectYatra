@@ -8,6 +8,23 @@ use setasign\Fpdi\Fpdi;
 
 class YatriPdfController extends Controller
 {
+    /**
+     * Blank — the same form with nothing filled in, to print and hand to a
+     * candidate. Rendered from the same template as the filled version so the
+     * boxes someone writes in and the fields the admin later types cannot drift.
+     */
+    public function blankForm()
+    {
+        $pdf = \PDF::loadView('pdf.yatri_form', [
+            'yatri'    => new YatriVisa(),
+            'photoSrc' => null,
+            'chrome'   => true,
+            'blank'    => true,
+        ])->setPaper('a4');
+
+        return $this->pdfResponse($pdf->output(), 'Yatri-Application-Form-Blank.pdf', 'inline');
+    }
+
     /** A — download the Yatri form only (pages 1 & 2), no documents. */
     public function downloadForm($id)
     {

@@ -491,23 +491,14 @@ class PackagesController extends Controller
      */
     private function generateYatriId(?string $ticketType = null): string
     {
-        $code = $this->tripCode($ticketType);
-        $seq  = YatriVisa::where('yatri_id', 'like', 'KY-' . $code . '-%')->count() + 1;
-        do {
-            $id = 'KY-' . $code . '-' . str_pad((string) $seq, 3, '0', STR_PAD_LEFT);
-            $seq++;
-        } while (YatriVisa::where('yatri_id', $id)->exists());
-        return $id;
+        // Shared with the admin's manual-entry form so both draw on one series.
+        return \App\Support\YatriId::generate($ticketType);
     }
 
     /** Map a raw ticket_type to a short trip code: RT / OW / LT. */
     private function tripCode(?string $ticketType): string
     {
-        switch ($ticketType) {
-            case 'one_way':      return 'OW'; // One Way
-            case 'land_package': return 'LT'; // Land Travel/Trip
-            default:             return 'RT'; // round_way / round_trip → Return Trip
-        }
+        return \App\Support\YatriId::tripCode($ticketType);
     }
 
     /** Payment instructions configured in admin (Settings -> Payment Settings). */

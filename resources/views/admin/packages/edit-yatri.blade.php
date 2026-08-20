@@ -4,28 +4,82 @@
 // The date columns are varchar and hold several historical formats; show every
 // one of them in the house DD-MMM-YYYY format. See App\Support\YatriDate.
 $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); };
+
+// One view serves both jobs: editing a booking a yatri submitted online, and
+// keying in a paper application by hand. Sharing it is the point — the fields
+// cannot drift apart, and the printed blank form comes off the same field list.
+$isNew = !$yatri->exists;
+
+// Nothing is selected on a new record, so every country dropdown would open on
+// whatever comes first alphabetically — Afghanistan — and quietly save that if
+// the admin skipped the field. This is a US operator, so a blank form starts on
+// United States. Editing an existing record is unaffected.
+$countrySelected = function ($stored, $nicename) use ($isNew) {
+    return $isNew ? ($nicename === 'United States') : ($stored == $nicename);
+};
 @endphp
 <main class="ttr-wrapper">
     <div class="container-fluid">
         <div class="db-breadcrumb">
-            <h4 class="breadcrumb-title">Edit Yatri Visa Packages</h4>
+            <h4 class="breadcrumb-title">{{ $isNew ? 'Add New Yatri' : 'Edit Yatri Visa Packages' }}</h4>
             <ul class="db-breadcrumb-list">
                 <li>
-                  <a href="#">
-                    <i class="fa fa-home"></i>Home </a>
+                  <a href="{{ route('yatri-visa') }}">
+                    <i class="fa fa-home"></i>Yatri Bookings </a>
                 </li>
-                <li>Admin Can Edit Yatri Applied Visa Packages</li>
+                <li>{{ $isNew ? 'Enter a completed application form' : 'Admin Can Edit Yatri Applied Visa Packages' }}</li>
             </ul>
         </div>
         <div class="main-body">
             <div class=" px-5" bis_skin_checked="1">
-                <form method="POST" action="{{ url('admin/yatri-visa-update/'.$yatri->id) }}" class="row g-3 mt-4" enctype="multipart/form-data">
+                <form method="POST" action="{{ $isNew ? route('yatri-visa-store') : url('admin/yatri-visa-update/'.$yatri->id) }}" class="row g-3 mt-4" enctype="multipart/form-data">
                     @csrf
                     <div class="col-12 row mb-3 w-100" id="main">
                       <div class="accordion w-100" id="faq">
                         <div class="card">
+                          <div id="faq0" class="">
+                            <div class="card-body row">
+                              <div class="col-12"><h5 class="mb-3" style="font-weight:600;color:#1f2a44;">Booking Details</h5></div>
+                              <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
+                                <label>Package</label>
+                                <select class="form-control select2js" name="package_id">
+                                  <option value="">— Select package —</option>
+                                  {{-- Only active packages are offered, but bookings exist against
+                                       retired ones (and against packages since deleted outright).
+                                       Carry the stored value as its own option, or saving this form
+                                       would silently blank the package on an old booking. --}}
+                                  @if(!$isNew && $yatri->package_id && !$allPackages->contains('id', $yatri->package_id))
+                                  <option value="{{ $yatri->package_id }}" selected>{{ optional($yatri->package)->name ?: 'Package #'.$yatri->package_id }} — as recorded (no longer listed)</option>
+                                  @endif
+                                  @foreach($allPackages as $p)
+                                  <option value="{{ $p->id }}" @if((string) $yatri->package_id === (string) $p->id) selected @endif>{{ $p->name }}@if($p->state) — {{ $p->state }}@endif</option>
+                                  @endforeach
+                                </select>
+                              </div>
+                              <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+                                <label>Ticket Type</label>
+                                <select class="form-control" name="ticket_type">
+                                  {{-- Same guard as the package: an unrecognised stored value would
+                                       otherwise fall through to the first option and be saved as that. --}}
+                                  @if($yatri->ticket_type && !in_array($yatri->ticket_type, ['round_trip','one_way','land_package'], true))
+                                  <option value="{{ $yatri->ticket_type }}" selected>{{ ucwords(str_replace('_',' ', $yatri->ticket_type)) }} — as recorded</option>
+                                  @endif
+                                  <option value="round_trip" @if($yatri->ticket_type === 'round_trip') selected @endif>Round Trip</option>
+                                  <option value="one_way" @if($yatri->ticket_type === 'one_way') selected @endif>One Way</option>
+                                  <option value="land_package" @if($yatri->ticket_type === 'land_package') selected @endif>Land Package</option>
+                                </select>
+                                @if($isNew)<small class="text-muted">Sets the booking reference: RT / OW / LT.</small>@endif
+                              </div>
+                              <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+                                <label>Price (per person)</label>
+                                <input class="form-control" type="text" name="package_type" value="{{ $yatri->package_type }}" placeholder="$3050">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="card">
                           <div id="faq1" class="">
-                            <div class="card-body row"> 
+                            <div class="card-body row">
                               <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                                 <label>Passport No <span class="text-danger">*</span></label>
                                 <input class="form-control" type="text" value="{{ @$yatri['passport'] }}" name="passport" placeholder="Enter Passport No" required>
@@ -58,7 +112,7 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
                     <label>Passport Country <span class="text-danger">*</span></label>
                     <select class="form-control select2js passport_country" name="passport_country" required>
                       @foreach(@$countries as $key => $val)
-                      <option value="{{ @$val->nicename }}" @if($yatri->passport_country == $val->nicename) selected @endif>{{ @$val->nicename }}</option>
+                      <option value="{{ @$val->nicename }}" @if($countrySelected($yatri->passport_country, $val->nicename)) selected @endif>{{ @$val->nicename }}</option>
                       @endforeach
                   </select>
                   <div class="invalid-feedback">
@@ -90,7 +144,7 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
     <label>Permanent Residence Country <span class="text-danger">*</span></label>
     <select class="form-control select2js" name="residence_country">
       @foreach(@$countries as $key => $val)
-      <option value="{{ @$val['nicename'] }}" @if($yatri->residence_country == $val->nicename) selected @endif>{{ @$val['nicename'] }}</option> 
+      <option value="{{ @$val['nicename'] }}" @if($countrySelected($yatri->residence_country, $val->nicename)) selected @endif>{{ @$val['nicename'] }}</option> 
       @endforeach
   </select>
   <div class="invalid-feedback">
@@ -243,7 +297,7 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
       @if(empty(@$yatri['father_nationality']) && @$val['nicename'] == "United States")
       <option value="{{ @$val['nicename'] }}" selected>{{ @$val['nicename'] }}</option>
       @else
-      <option value="{{ @$val['nicename'] }}" @if(@$yatri['father_nationality'] == @$val['nicename']) selected @endif>{{ @$val['nicename'] }}</option>
+      <option value="{{ @$val['nicename'] }}" @if($countrySelected(@$yatri['father_nationality'], @$val['nicename'])) selected @endif>{{ @$val['nicename'] }}</option>
       @endif
       @endforeach
   </select>
@@ -265,7 +319,7 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
       @if(empty(@$yatri['mother_nationality']) && @$val['nicename'] == "United States")
       <option value="{{ @$val['nicename'] }}" selected>{{ @$val['nicename'] }}</option>
       @else
-      <option value="{{ @$val['nicename'] }}" @if(@$yatri['mother_nationality'] == @$val['nicename']) selected @endif>{{ @$val['nicename'] }}</option>
+      <option value="{{ @$val['nicename'] }}" @if($countrySelected(@$yatri['mother_nationality'], @$val['nicename'])) selected @endif>{{ @$val['nicename'] }}</option>
       @endif
       @endforeach
   </select>
@@ -294,7 +348,7 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
       @if(empty(@$yatri['spouse_birth_country']) && @$val['nicename'] == "United States")
       <option value="{{ @$val['nicename'] }}" selected>{{ @$val['nicename'] }}</option>
       @else
-      <option value="{{ @$val['nicename'] }}" @if(@$yatri['spouse_birth_country'] == @$val['nicename']) selected @endif>{{ @$val['nicename'] }}</option>
+      <option value="{{ @$val['nicename'] }}" @if($countrySelected(@$yatri['spouse_birth_country'], @$val['nicename'])) selected @endif>{{ @$val['nicename'] }}</option>
       @endif
       @endforeach
   </select>
@@ -309,7 +363,7 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
       @if(empty(@$yatri['spouse_nationality']) && @$val['nicename'] == "United States")
       <option value="{{ @$val['nicename'] }}" selected>{{ @$val['nicename'] }}</option>
       @else
-      <option value="{{ @$val['nicename'] }}" @if(@$yatri['spouse_nationality'] == @$val['nicename']) selected @endif>{{ @$val['nicename'] }}</option>
+      <option value="{{ @$val['nicename'] }}" @if($countrySelected(@$yatri['spouse_nationality'], @$val['nicename'])) selected @endif>{{ @$val['nicename'] }}</option>
       @endif
       @endforeach
   </select>
@@ -543,8 +597,8 @@ $yatriDate = function ($value) { return \App\Support\YatriDate::format($value); 
     </div>
     @endif
 </div>
-<div class="col-lg-1  col-md-1 col-sm-12 mb-3">
-    <button type="submit" class="btn btn-lg btn-block btn-success mt-2 mx-1 mb-2">Submit</button>
+<div class="col-lg-3 col-md-4 col-sm-12 mb-3">
+    <button type="submit" class="btn btn-lg btn-block btn-success mt-2 mx-1 mb-2">{{ $isNew ? 'Save New Yatri' : 'Submit' }}</button>
 </div>
 </div>
 </div>
