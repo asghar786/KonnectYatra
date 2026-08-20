@@ -12,7 +12,22 @@
         ->map(fn ($img) => asset('locations/' . $img))
         ->values();
 
-    $pageTitle = $location->name . ($location->city ? ' — ' . $location->city . ', Pakistan' : '');
+    // A shrine on the yatra gets the qualifier people actually search for
+    // ("Panja Sahib Yatra", "Gurdwara Dera Sahib Lahore Tour"); the Mughal and
+    // civic landmarks on the itinerary are not pilgrimage sites and keep a
+    // plain title. Keyed off the name so no column or admin field is needed.
+    $isShrine = (bool) preg_match('/gurdwara|gurudwara|sahib|samadhi/iu', $location->name);
+
+    // Nankana Sahib is a shrine in a city of the same name — "Nankana Sahib —
+    // Nankana Sahib" helps nobody, so drop a city already inside the name.
+    $titleCity = $location->city
+        && stripos($location->name, (string) $location->city) === false
+            ? $location->city
+            : null;
+
+    $pageTitle = $isShrine
+        ? $location->name . ' Yatra & Tour' . ($titleCity ? ' — ' . $titleCity : '')
+        : $location->name . ($titleCity ? ' — ' . $titleCity . ', Pakistan' : '');
     $pageDescription = \App\Support\Schema::text($location->description, 300)
         ?: $location->name . ($fullAddress ? ', ' . $fullAddress : '')
            . ' — a place visited on Konnect Yatra pilgrimage tours of Pakistan.';

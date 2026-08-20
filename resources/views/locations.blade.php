@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @php
-    $pageTitle = 'Popular Locations Visited on a Pakistan Yatra';
-    $pageDescription = 'The historic Gurdwaras and sites Konnect Yatra pilgrims visit in Pakistan — '
-        . 'Nankana Sahib, Panja Sahib, Kartarpur Sahib, Rohri Sahib, Sacha Sauda and the Gurdwaras '
-        . 'of Lahore.';
+    $pageTitle = 'Sikh Holy Places in Pakistan — Heritage & Pilgrimage Sites';
+    $pageDescription = 'Every Sikh holy place and heritage site Konnect Yatra visits in Pakistan — '
+        . 'Nankana Sahib, Panja Sahib, Kartarpur Sahib, Dera Sahib, Rohri Sahib, Sacha Sauda, the '
+        . 'Samadhi of Maharaja Ranjit Singh and the Gurdwaras of Lahore.';
 @endphp
 
 @section('schema')
@@ -57,7 +57,7 @@
             style="background-image: url('{{ \App\Models\PageBanner::url('popular-locations', asset('assets/images2/Inner-banner-01.png')) }}');background-position:center !important;">
             <div class="container">
                 <div class="inner-banner-content">
-                    <h1 class="inner-title" style="font-size:60px !important;">POPULAR LOCATIONS</h1>
+                    <h1 class="inner-title" style="font-size:clamp(24px,4.2vw,48px) !important;">Sikh Holy Places &amp; Heritage Sites in Pakistan</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
@@ -74,7 +74,24 @@
         <div class="container">
             <div class="section-heading text-center" style="margin-bottom:30px">
                 <h5 class="dash-style" style="color:var(--brand)">EXPLORE GREAT LOCATIONS</h5>
-                <h2 style="font-weight:700;color:var(--ink)">Popular Locations</h2>
+                <h2 style="font-weight:700;color:var(--ink)">Where a Konnect Yatra group goes</h2>
+                <div class="section-disc mx-auto" style="max-width:820px;text-align:left;margin-top:18px;">
+                    <p>
+                        The Sikh holy places of Pakistan are not scattered at random. Guru Nanak was born at
+                        Nankana Sahib, left his handprint on the rock at Hasan Abdal, made the true bargain on
+                        the road at Farooqabad, and spent his last years farming at Kartarpur. A century later
+                        Guru Arjan Dev was imprisoned in Lahore Fort and martyred where Gurdwara Dera Sahib
+                        now stands. Two centuries after that, Maharaja Ranjit Singh ruled Punjab from that same
+                        city and was laid to rest a few steps from the shrine.
+                    </p>
+                    <p>
+                        That is why our itinerary reads the way it does. It follows one story across the
+                        Punjab, and it takes in the Sikh historical places that belong to it — the Samadhi of
+                        Maharaja Ranjit Singh, the Samadhi of Bhai Mani Singh, Gurdwara Shaheed Ganj — as well
+                        as the Mughal Lahore that surrounds them. Every site below has its own page explaining
+                        what happened there and what a visit involves.
+                    </p>
+                </div>
                 <p class="text-muted" style="max-width:720px;margin:8px auto 0">
                     Places widely recognized for their cultural, historical or natural importance — drawing visitors from various regions.
                 </p>
