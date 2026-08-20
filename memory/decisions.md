@@ -464,3 +464,52 @@ May 2026). No padding of thin pages that aren't keyword targets. The blog stays 
 unserved commercial intents matter more.
 
 **Review:** see decisions.csv row dated 2026-08-20.
+
+## 2026-08-20 — The 17 location pages: what to write, and where content lives
+
+**Context.** Rashad supplied two further keyword batches (49 in total). The strongest were the
+named-shrine terms — Nankana Sahib Yatra, Panja Sahib Yatra, Gurdwara Dera Sahib Lahore Tour —
+because the pages already existed. They turned out not to be thin but **empty**: every
+`locations.description` was NULL, and the 42–62 words on each page were template chrome.
+
+**Decision on what to write.** Not more history. A brief against the pages actually ranking showed
+that all of them — imusafir.pk, pak-tours.com, trangoadventure.com, sikhyatra.pk, traveltoamritsar
+— are written either for someone already inside Pakistan or for an Indian pilgrim crossing at
+Wagah. **None address a yatri flying from the United States.** Visit duration, what the ground
+underfoot is like, whether a wheelchair will cope, when the crowds come, what to carry: that is the
+gap, it is ownable, and it is precisely what the booking form already asks about.
+
+Alternatives considered:
+- *One shared etiquette block across all 17.* Rejected outright — duplicate content across a page
+  set is the doorway-page failure the quality gate exists to prevent. Where two sites share a
+  constraint it is written from that site's angle instead.
+- *Pad every page to the 600-word threshold.* Rejected. There is genuinely less to say truthfully
+  about the Haveli at Gujranwala than about Nankana Sahib; the smaller pages sit at ~330 words and
+  should. Padding to hit a number is the exact behaviour the threshold is meant to discourage.
+
+**Decision on where content lives.** One text column, with a minimal convention rendered by
+`App\Support\Prose`: `## ` becomes a heading, `- ` a list item. Rejected adding columns per section
+— that means a migration, and prod migrations are batched and run by hand. Everything is escaped
+before rendering, because non-technical staff edit this field and a half-typed tag must show as
+text rather than break the page. It is deliberately not Markdown.
+
+**Shipped as a seeder,** because seeded data does not travel through git. Idempotent: skips any
+location that already has a description, so re-running never clobbers an admin edit.
+
+**Errors found only by reading the rendered output.** Nankana Sahib was recorded as being in
+Lahore — its own city, ~80 km away, on the most important page of the tour. "Badshahi Mosque,
+Lahore." carried the city and a full stop inside the name. Row 15 held non-breaking spaces
+mid-name, invisible in the admin, which silently defeated an exact-match lookup; the seeder now
+matches on a normalised key. And `Prose::summary` replaced a raw 155-character truncation that was
+emitting "in the village then c" into search results.
+
+**A bug caught before it shipped.** The prose file was created in `database/seeders/data/` —
+lowercase. PSR-4 maps `Database\Seeders\Data\` to `Data/`. It resolves on Windows and fails to
+autoload on the Linux production server.
+
+**Deliberately not run on prod.** The seeder is the review gate: Rashad should read the religious
+and historical content before it faces pilgrims. Facts were checked against mainstream sources and
+traditional accounts attributed as traditions, but he is the authority and being wrong here matters
+more than rankings do.
+
+**Review:** see decisions.csv row dated 2026-08-20.
