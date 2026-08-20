@@ -1,5 +1,10 @@
 @extends('admin.layouts.app') 
 @section('content') 
+@php
+// The date columns are varchar and hold several historical formats; show every
+// one of them in the house DD-MMM-YYYY format. See App\Support\YatriDate.
+$yatriDate = function ($value) { return \App\Support\YatriDate::format($value); };
+@endphp
 <main class="ttr-wrapper">
     <div class="container-fluid">
         <div class="db-breadcrumb">
@@ -62,15 +67,14 @@
               </div>
               <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
                 <label>Issue Date <span class="text-danger">*</span></label>
-                <input class="form-control" type="date" name="issue_date" value="{{ @$yatri['issue_date'] }}" max="{{ date('Y-m-d') }}"
-                required>
+                <input class="form-control ky-date ky-date-issue" type="text" name="issue_date" value="{{ $yatriDate(@$yatri['issue_date']) }}" placeholder="DD-MMM-YYYY" autocomplete="off" required>
                 <div class="invalid-feedback">
                   Please provide issue date.
               </div>
           </div>
           <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
             <label>Expiry Date <span class="text-danger">*</span></label>
-            <input class="form-control" type="date" name="expiry_date" value="{{ @$yatri['expiry_date'] }}" min="{{ date('Y-m-d') }}">
+            <input class="form-control ky-date ky-date-expiry" type="text" name="expiry_date" value="{{ $yatriDate(@$yatri['expiry_date']) }}" placeholder="DD-MMM-YYYY" autocomplete="off">
             <div class="invalid-feedback">
               Please provide expiry date.
           </div>
@@ -95,7 +99,7 @@
 </div>
 <div class="col-lg-6 col-md-6 col-sm-12 mb-3 green_card_area" @if(empty(@$yatri['green_card_expiry_date'])) style="display: none;" @endif>
     <label>Expiry Date <span class="text-danger">*</span></label>
-    <input class="form-control" type="date" value="{{ @$yatri['green_card_expiry_date'] }}" name="green_card_expiry_date" min="{{ date('Y-m-d') }}">
+    <input class="form-control ky-date ky-date-expiry" type="text" value="{{ $yatriDate(@$yatri['green_card_expiry_date']) }}" name="green_card_expiry_date" placeholder="DD-MMM-YYYY" autocomplete="off">
     <div class="invalid-feedback">
       Please provide expiry date.
   </div>
@@ -129,8 +133,7 @@
 </div>
 <div class="col-lg-6 col-md-6 col-sm-12 mb-3">
     <label>Date of Birth <span class="text-danger">*</span></label>
-    <input class="form-control" type="date" name="dob" value="{{ @$yatri['dob'] }}" max="{{ date('Y-m-d') }}"
-    required>
+    <input class="form-control ky-date ky-date-dob" type="text" name="dob" value="{{ $yatriDate(@$yatri['dob']) }}" placeholder="DD-MMM-YYYY" autocomplete="off" required>
     <div class="invalid-feedback">
       Please provide date of birth.
   </div>
@@ -554,4 +557,84 @@
 </div>
 </main>
 <div class="ttr-overlay"></div>
+@endsection
+
+@section('js')
+{{-- Dates on this form are shown and stored as DD-MMM-YYYY (e.g. 20-AUG-2026), the
+     same format the public apply form writes. jQuery UI is pulled in here rather
+     than sitewide because this is the only admin page that needs it — the admin
+     footer's generic ".datepicker" is a different plugin and cannot render month
+     names. Whatever is typed by hand is normalised server-side on save, so the
+     picker is the easy path rather than the only one. --}}
+<link rel="stylesheet" href="{{ asset('new-assets/vendors/jquery-ui/jquery-ui.min.css') }}">
+<script src="{{ asset('new-assets/vendors/jquery-ui/jquery-ui.min.js') }}"></script>
+<style>
+/* Two things the picker cannot render on its own in here: the admin theme paints
+   every table header white, which hides the day names against the white panel;
+   and the vendored jQuery UI sprites are not images at all (the six files in
+   new-assets/vendors/jquery-ui/images are saved HTML), so the month arrows have
+   to be drawn rather than sprited. Scoped to the picker's own element. */
+#ui-datepicker-div th,
+#ui-datepicker-div th span { color: #2c3e50; }
+
+/* The admin theme also pads every table cell to 10px with !important, which
+   pushes the last column outside the panel. Put jQuery UI's spacing back. */
+#ui-datepicker-div .ui-datepicker-calendar th { padding: .7em .3em !important; }
+#ui-datepicker-div .ui-datepicker-calendar td { padding: 1px !important; }
+
+
+#ui-datepicker-div .ui-datepicker-prev,
+#ui-datepicker-div .ui-datepicker-next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon,
+#ui-datepicker-div .ui-datepicker-next .ui-icon {
+    position: static;
+    margin: 0;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    background: none;
+    text-indent: 0;
+    font-size: 0;                 /* hides the "Prev"/"Next" label */
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon::before,
+#ui-datepicker-div .ui-datepicker-next .ui-icon::before {
+    font: 700 20px/1 Arial, sans-serif;
+    color: #2c3e50;
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon::before { content: '\2039'; }
+#ui-datepicker-div .ui-datepicker-next .ui-icon::before { content: '\203A'; }
+</style>
+
+<script>
+  $(function () {
+      var base = {
+          dateFormat:      'dd-M-yy',
+          monthNamesShort: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
+          changeMonth:     true,
+          changeYear:      true
+      };
+      var thisYear = new Date().getFullYear();
+
+      function picker(selector, extra) {
+          $(selector).datepicker($.extend({}, base, extra));
+      }
+
+      // Passport Issue Date: in the past, and a passport runs at most 10 years.
+      picker('.ky-date-issue', { yearRange: (thisYear - 10) + ':' + thisYear, maxDate: 0 });
+
+      // Passport / Green Card Expiry: ahead of today, at most 10 years out.
+      picker('.ky-date-expiry', { yearRange: thisYear + ':' + (thisYear + 10), minDate: 0 });
+
+      // Date of Birth: no future dates, back to 1920 for the oldest yatris.
+      picker('.ky-date-dob', { yearRange: '1920:' + thisYear, maxDate: 0, defaultDate: '-25y' });
+  });
+</script>
 @endsection

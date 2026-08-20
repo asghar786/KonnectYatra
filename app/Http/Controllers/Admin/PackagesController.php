@@ -24,6 +24,7 @@ use App\Models\Country;
 use App\Models\DepartureOrigin;
 use App\Models\YatriIdsBack;
 use App\Models\Balance;
+use App\Support\YatriDate;
 use Session;
 
 class PackagesController extends Controller
@@ -766,6 +767,16 @@ class PackagesController extends Controller
       }
 
       unset($data['_token']);
+
+      // The date columns are varchar, so whatever the form posts is what gets
+      // stored. Put every date into the house DD-MMM-YYYY format on the way in,
+      // so the record reads the same as one the public apply form writes.
+      foreach (['dob', 'issue_date', 'expiry_date', 'green_card_expiry_date', 'pk_entry_date'] as $dateField) {
+        if (array_key_exists($dateField, $data)) {
+          $data[$dateField] = YatriDate::format($data[$dateField]);
+        }
+      }
+
       YatriVisa::where("id", $id)->update($data);
       return redirect(url('admin/booking-detail', $id))->with("success", "Yatri details updated successfully!");
     }
