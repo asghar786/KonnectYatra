@@ -428,3 +428,39 @@ it is `fa-utensils`.
 system should generate them. (3) Whether `konnectus.inc@gmail.com` replaces `rm@konnectyatra.org`.
 
 **Review:** see decisions.csv row dated 2026-08-20.
+
+## 2026-08-20 — USA keyword targeting, and the H1 that was blocking it
+
+**Context.** Rashad supplied 15 USA-focused keywords. The site already had unique, well-written
+titles and descriptions from the 2026-08-17 pass, but nothing anywhere said "USA" in a position a
+search engine weighs.
+
+**The finding that shaped the plan.** Page one for the head terms is entirely Pakistan-based
+inbound operators. They receive pilgrims who have already landed; they cannot sell a flight from
+Philadelphia or work from a US office. The genuine competitors (KB Travel World, My Guru Yatra,
+Complete Pak Yatra) only appear once a query carries an origin. So the differentiator is exactly
+the qualifier in every one of the 15 keywords — and Konnect Yatra holds three things none of them
+can match: a New York office, 19 US departure airports, and a 150-Gurdwara directory.
+
+**Decision.** Treat the 15 as four intents on four pages, not fifteen pages. Notably the
+agency/operator cluster goes to the **home page, not `/aboutus`** — the results page for agency
+terms is full of package hubs, so an About page is a page-type mismatch, and `/aboutus` carries
+only 204 words.
+
+**A prerequisite, not an improvement.** `layouts/header.blade.php` wrapped the logo in an `<h1>`,
+so every one of the 223 URLs opened with an H1 containing no text and then a second H1 holding a
+one-word label. H1 is precisely where an origin qualifier belongs, so rewriting the labels first
+would have wasted the work. Fixed first, on its own.
+
+**A bug caught in review of my own edit.** The `/gurdwaras` H1 was written with a hardcoded "150".
+The page title computes the count from `$totalGurdwaras` — local reads 149, production 150 — so
+the heading would have contradicted the title on the same page. Now reads the same variable.
+
+**Verified**, not assumed: over CDP at 390px, exactly one H1 per page and no horizontal overflow,
+then confirmed again on production after deploy.
+
+**Deliberately not done.** No new FAQ markup (Google retired FAQ rich results for all sites in
+May 2026). No padding of thin pages that aren't keyword targets. The blog stays neglected — four
+unserved commercial intents matter more.
+
+**Review:** see decisions.csv row dated 2026-08-20.
