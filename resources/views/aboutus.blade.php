@@ -41,7 +41,7 @@
         <div class="inner-baner-container" style="background-image: url('{{ \App\Models\PageBanner::url('aboutus', asset('assets/images2/g2.jpg')) }}'); background-position:center;">
             <div class="container">
                 <div class="inner-banner-content">
-                    <h1 class="inner-title" style="font-size:65px !important;">ABOUT US</h1>
+                    <h1 class="inner-title" style="font-size:clamp(24px,4.2vw,48px) !important;">A Sikh Pilgrimage Travel Agency in New York</h1>
                 </div>
             </div>
         </div>

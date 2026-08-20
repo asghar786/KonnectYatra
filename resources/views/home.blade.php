@@ -5,7 +5,7 @@
     // URLs consolidate into one indexed page.
     \App\Support\Schema::setCanonical(rtrim(url('/'), '/') . '/');
 
-    $pageTitle = 'Sikh Yatra Tours to Nankana Sahib, Panja Sahib & Kartarpur Sahib';
+    $pageTitle = 'Sikh Yatra from the USA — Pilgrimage Tours to Nankana Sahib & Kartarpur Sahib';
     $pageDescription = 'Konnect Yatra organises Sikh pilgrimage tours from the USA and Canada to '
         . 'Nankana Sahib, Panja Sahib and Kartarpur Sahib in Pakistan — pilgrim visa, airline '
         . 'tickets, hotels, transport and full security included.';
@@ -155,6 +155,37 @@ h4.destination {
 		</div>
 	</section>
 	<!-- slider html start -->
+
+	{{-- Page heading. The hero is a slider of <h2> banner titles, so before this the
+	     homepage had no H1 at all outside the logo — it never stated, in a heading,
+	     what it sells or where it departs from. --}}
+	<style>
+		.ky-intro { padding: 64px 0 0; }
+		.ky-intro-eyebrow {
+			font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+			color: #f54e18; margin: 0 0 10px;
+		}
+		.ky-intro-title {
+			font-size: clamp(28px, 4.6vw, 54px) !important;
+			line-height: 1.12; margin: 0 0 16px; color: #1a3d8f; text-wrap: balance;
+		}
+		.ky-intro-lede {
+			font-size: clamp(16px, 1.5vw, 18px); line-height: 1.7; max-width: 68ch; margin: 0;
+		}
+		@media (max-width: 767px) { .ky-intro { padding-top: 40px; } }
+	</style>
+	<section class="ky-intro">
+		<div class="container">
+			<p class="ky-intro-eyebrow">Nankana Sahib &middot; Panja Sahib &middot; Kartarpur Sahib</p>
+			<h1 class="ky-intro-title">Sikh Yatra from the USA to Pakistan</h1>
+			<p class="ky-intro-lede">
+				Konnect Yatra is a Sikh pilgrimage travel agency based in Jamaica, New York, running
+				group and family yatras from cities across the United States to the holy Gurdwaras of
+				Pakistan. Pilgrim visa, airline tickets, hotels, transport and full security are
+				arranged end to end, and our team travels with every group.
+			</p>
+		</div>
+	</section>
 
 	<!-- Home packages section html start -->
 	<section class="package-section" style="margin-top:100px !important;">

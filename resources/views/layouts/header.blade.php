@@ -200,12 +200,15 @@
 			<div class="bottom-header">
 				<div class="container d-flex justify-content-between align-items-center">
 					<div class="site-identity">
-						<h1 class="site-title">
+						{{-- Not an <h1>: this is the logo, and it appeared on all 223 pages as an
+						     H1 containing no text, competing with each page's real heading.
+						     The .site-title class carries the styling, so nothing moves. --}}
+						<div class="site-title">
 							<a href="{{ url("/") }}">
-								<img class="white-logo" src="{{asset('assets\images2/newwhitelogo.png')}}" alt="logo">
-								<img class="black-logo" src="{{asset('assets\images2/newlogo11.png')}}" alt="logo">
+								<img class="white-logo" src="{{asset('assets\images2/newwhitelogo.png')}}" alt="Konnect Yatra — Sikh yatra tours from the USA to Pakistan">
+								<img class="black-logo" src="{{asset('assets\images2/newlogo11.png')}}" alt="Konnect Yatra — Sikh yatra tours from the USA to Pakistan">
 							</a>
-						</h1>
+						</div>
 					</div>
 					<div class="main-navigation d-none d-lg-block">
 						<nav id="navigation" class="navigation">

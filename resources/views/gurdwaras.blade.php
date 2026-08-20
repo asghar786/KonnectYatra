@@ -96,7 +96,7 @@
             style="background-image: url('{{ \App\Models\PageBanner::url('gurdwaras', asset('assets/images2/News-04.png')) }}');background-position: center !important;">
             <div class="container">
                 <div class="inner-banner-content">
-                    <h1 class="inner-title" style="font-size:65px !important;">GURDWARAS</h1>
+                    <h1 class="inner-title" style="font-size:clamp(24px,4.2vw,48px) !important;">Gurdwara Directory &mdash; {{ $totalGurdwaras ?? '' }} Gurdwaras across the USA</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
