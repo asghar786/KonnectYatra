@@ -265,6 +265,13 @@ class LocationContentSeeder extends Seeder
     {
         $overwrite = in_array('--force-overwrite', $_SERVER['argv'] ?? [], true);
         $content   = $this->content();
+
+        // History from content(), practical detail from the Data class, joined
+        // per site. They are kept apart because they change for different
+        // reasons: the history is settled, the practical notes follow what the
+        // itinerary actually does.
+        $practical = collect(\Database\Seeders\Data\LocationPracticalContent::all())
+            ->mapWithKeys(fn ($text, $name) => [$this->key($name) => "\n\n" . $this->normalise($text)]);
         $written   = 0;
         $skipped   = 0;
         $missing   = [];
@@ -308,7 +315,7 @@ class LocationContentSeeder extends Seeder
 
             // Stored as plain text: the view renders nl2br(e($description)),
             // so any markup would be escaped and shown to the reader.
-            $loc->description = $this->normalise($text);
+            $loc->description = $this->normalise($text) . $practical->get($this->key($name), '');
             $loc->save();
             $written++;
         }

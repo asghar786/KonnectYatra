@@ -28,7 +28,7 @@
     $pageTitle = $isShrine
         ? $location->name . ' Yatra & Tour' . ($titleCity ? ' — ' . $titleCity : '')
         : $location->name . ($titleCity ? ' — ' . $titleCity . ', Pakistan' : '');
-    $pageDescription = \App\Support\Schema::text($location->description, 300)
+    $pageDescription = \App\Support\Prose::summary($location->description)
         ?: $location->name . ($fullAddress ? ', ' . $fullAddress : '')
            . ' — a place visited on Konnect Yatra pilgrimage tours of Pakistan.';
     $pageImage = $locImages->first();
@@ -41,7 +41,7 @@
         '@id'         => $locUrl . '#place',
         'name'        => $location->name,
         'url'         => $locUrl,
-        'description' => \App\Support\Schema::text($location->description, 500),
+        'description' => \App\Support\Schema::text(\App\Support\Prose::plain($location->description), 500),
         'image'       => $locImages->all() ?: null,
         'address'     => \App\Support\Schema::postalAddress([
             'locality' => $location->city,
@@ -85,6 +85,11 @@
     .ld2-addr{color:var(--muted);font-size:15px;margin:10px 0 0}.ld2-addr i{color:var(--brand);margin-right:7px}
     .ld2-sec{text-transform:uppercase;letter-spacing:.06em;font-size:12px;font-weight:700;color:var(--muted);margin:24px 0 12px}
     .ld2-desc{color:#374151;font-size:15px;line-height:1.75}
+    .ld2-desc p{margin:0 0 14px}
+    .ld2-desc .ld2-h2{font-size:21px;font-weight:800;color:var(--ink);margin:26px 0 10px;line-height:1.3}
+    .ld2-desc .ld2-h2:first-child{margin-top:0}
+    .ld2-desc .ld2-list{margin:0 0 14px;padding-left:20px}
+    .ld2-desc .ld2-list li{margin-bottom:7px}
     .ld2-info{list-style:none;padding:0;margin:0}
     .ld2-info li{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed #eef0f4;font-size:14.5px}
     .ld2-info li:last-child{border-bottom:none}
@@ -126,11 +131,11 @@
             <div class="row">
                 <div class="col-lg-8 mb-4">
                     <div class="ld2-card">
-                        <img class="ld2-feature ld2-zoom" src="{{ asset('locations/'.$location->image) }}" data-full="{{ asset('locations/'.$location->image) }}" alt="{{ $location->name }}">
+                        <img class="ld2-feature ld2-zoom" src="{{ asset('locations/'.$location->image) }}" data-full="{{ asset('locations/'.$location->image) }}" alt="{{ $location->name }}{{ $isShrine ? ' — Sikh yatra site' : '' }}{{ $location->city ? ', '.$location->city : '' }}, Pakistan">
                         @if($location->images && $location->images->count())
                         <div class="ld2-gallery">
                             @foreach($location->images as $img)
-                            <img class="ld2-zoom" src="{{ asset('locations/'.$img->image) }}" data-full="{{ asset('locations/'.$img->image) }}" alt="{{ $location->name }} photo">
+                            <img class="ld2-zoom" src="{{ asset('locations/'.$img->image) }}" data-full="{{ asset('locations/'.$img->image) }}" alt="{{ $location->name }}, {{ $location->city }} — photograph from a Konnect Yatra pilgrimage group">
                             @endforeach
                         </div>
                         @endif
@@ -141,8 +146,7 @@
                             <p class="ld2-addr"><i class="fa fa-map-marker-alt"></i>{{ trim(collect([$location->city, $location->state])->filter()->implode(', ')) }}</p>
 
                             @if(!empty($location->description))
-                            <p class="ld2-sec">About this place</p>
-                            <div class="ld2-desc">{!! nl2br(e($location->description)) !!}</div>
+                            <div class="ld2-desc">{!! \App\Support\Prose::render($location->description) !!}</div>
                             @endif
 
                             <p class="ld2-sec">Details</p>
