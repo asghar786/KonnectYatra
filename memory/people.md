@@ -26,6 +26,18 @@ Format:
   LinkedIn account exists**, so don't treat those empty fields as an oversight. The Facebook value
   is a `/share/` link rather than the page's permanent vanity URL — weaker as a `sameAs` signal and
   worth swapping if he can supply the canonical one.
+- **Second contact address, unresolved (2026-08-20):** the printed Konnect.US Yatri Application
+  gives his contact as **`konnectus.inc@gmail.com`**, while the site and all booking notifications
+  use `rm@konnectyatra.org` (hardcoded in `BookingMailer::ADMIN_EMAIL`). Both are his. **Do not
+  swap one for the other without asking** — which address the site should publish is still an open
+  question put to him. Same form gives the phone as +1 718-908-9464, which matches.
+- **Sends work as a printed form, not a spec:** the Yatri Application PDF (letterhead
+  "KONNECT.US, INC. — Explore and Discover the Globe", DBA Konnect Yatra USA; version stamped
+  "Updated: August 17, 2026") is the real source of truth for what the booking flow must collect
+  and what the terms say. Treat a new revision of it as a change request, and diff it against the
+  web form rather than assuming it only adds things — the 2026-08-17 revision changed the Wagah
+  luggage fee from $35 to $25 and the price-guarantee window from 3 months to 10 weeks, both of
+  which contradicted copy already live on the site.
 - **How he specifies changes:** sends a screenshot of the live page plus a typed list of the fields/labels he wants, in his own line grouping (e.g. `Telephone:   Email:` on one line = put them side by side). Treat the grouping as the layout spec. His lists are not always exhaustive — the 2026-08-10 popup list silently dropped an existing field — so check what's in the current form but missing from his list and raise it rather than deleting it.
 
 ## Asghar (AsgharSHAH)

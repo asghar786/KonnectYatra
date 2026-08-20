@@ -371,3 +371,60 @@ the cheapest entity-confirmation signal, previously publishing nothing.
 
 Not logged in `decisions.csv`: this is a defect fix with an obvious right answer, not a bet that
 needs revisiting in 30 days.
+
+## 2026-08-20 — Travel options and surcharges from the printed application form
+
+**Context.** Rashad shared the Konnect.US Yatri Application (paper form, updated 2026-08-17).
+Roughly 85% of it was already collected by the web apply form, but four items were missing and
+three of them carry money: wheelchair at the airport (free), wheelchair throughout the trip
+(+$300), the two-suitcase Wagah declaration (+$25), and the vegetarian-meal acknowledgement. Two
+further fees apply without anyone ticking anything — Indian passport processing (+$25) and a late
+application fee (+$100 between 11 Sep and 15 Oct 2026).
+
+**Decision.** A new "Travel Options & Assistance" accordion section on the apply form, with all
+six fees resolved server-side by `App\Support\TravelFees`. Rates live in `site_settings` under
+`fee_*` keys (no migration, admin-editable, config-style constants as fallback); the amounts
+actually charged are written to `fee_*` columns on `yatri_visas`.
+
+Alternatives considered:
+- *Hard-code the rates.* Rejected — the standing preference is that anything only the client can
+  supply gets a back-end field. These are prices; they will change.
+- *Recompute the surcharges whenever a booking is displayed.* Rejected, and this is the load-bearing
+  part of the decision. It reads as the tidier option, but it means editing a rate silently rewrites
+  the total on every past booking, including ones already quoted, invoiced and paid. Rates and
+  charged amounts are different facts with different lifetimes.
+- *Reuse the existing `amount` column.* Rejected — it already carries the wire-transfer amount only,
+  and overloading it would make the land-package $0 bug worse rather than better.
+
+**A judgment call that needs Rashad's confirmation.** The wheelchair and baggage fees are charged
+**once**, not multiplied by the companion count, on the reading that a wheelchair and a set of
+suitcases belong to one person — and the printed form says a separate application is required per
+traveller. But this app puts companions on a single booking and does not offer them their own
+options. If a companion needs a wheelchair, the form cannot currently say so. Flagged, not guessed
+at further.
+
+**Superseded copy found while wiring it up.** The Terms & Conditions modal was still quoting
+**$35** luggage handling and "3 months in advance"; the new form says $25 and 10 weeks. It has been
+replaced with the instructions page in full. A commented-out block below it held the wrong office
+address (185-02 Hillside Avenue — see people.md) and "valid till October 31, 2023"; the signature
+field had been commented out along with it and is now restored.
+
+**A defect fixed in passing.** The two acceptance checkboxes were both `name="terms"` with the same
+value, so only one value ever reached the server — the declaration that the information is true and
+the agreement to the terms were indistinguishable in the record. They are now separate fields.
+
+**Deploy ordering matters here.** `store_yatri_visa` assigns the new columns, so pushing before the
+migration runs on prod breaks every booking submission — the same failure as the gurdwara_leads
+window in July. The commit was deliberately held back from `main` until the migration is run.
+
+**Verified**, not assumed: drove the real page over CDP at a true 390px mobile viewport —
+$3,050 + $300 + $25 + $25 = $3,400, the automatic-fee notice appears when passport country is set to
+India, the option bars respond, and the document does not scroll horizontally. Also caught by
+screenshotting: `fa-cutlery` is a Font Awesome 4 name and rendered nothing on these FA 5.12 pages;
+it is `fa-utensils`.
+
+**Still open for Rashad.** (1) The form's prices ($3,150 / $2,650) do not match the database
+($3,050 / $2,350); Land Package $1,650 does match. (2) What SR#/RT#/OW#/LP# are, and whether the
+system should generate them. (3) Whether `konnectus.inc@gmail.com` replaces `rm@konnectyatra.org`.
+
+**Review:** see decisions.csv row dated 2026-08-20.
