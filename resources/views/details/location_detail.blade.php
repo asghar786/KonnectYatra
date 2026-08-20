@@ -120,7 +120,9 @@
                         </div>
                         @endif
                         <div class="ld2-pad">
-                            <h1 class="ld2-title">{{ $location->name }}</h1>
+                            {{-- The banner above is this page's H1; repeating the name in a
+                                 second H1 gave every location page two competing headings. --}}
+                            <h2 class="ld2-title">{{ $location->name }}</h2>
                             <p class="ld2-addr"><i class="fa fa-map-marker-alt"></i>{{ trim(collect([$location->city, $location->state])->filter()->implode(', ')) }}</p>
 
                             @if(!empty($location->description))

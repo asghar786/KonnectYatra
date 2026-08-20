@@ -144,7 +144,9 @@
                         @endif
                         <div class="gd-pad">
                             @if(!empty($gurdwara->sangat))<span class="gd-badge">{{ $gurdwara->sangat }} Sangat</span>@endif
-                            <h1 class="gd-title">{{ $gurdwara->gurdwara_name }}</h1>
+                            {{-- The banner above is this page's H1; repeating the name in a
+                                 second H1 gave all 151 Gurdwara pages two competing headings. --}}
+                            <h2 class="gd-title">{{ $gurdwara->gurdwara_name }}</h2>
                             <p class="gd-addr"><i class="fa fa-map-marker-alt"></i>{{ $fullAddress }}</p>
 
                             <p class="gd-sec-label">Contact</p>
