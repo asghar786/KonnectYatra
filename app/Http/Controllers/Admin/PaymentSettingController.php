@@ -29,8 +29,13 @@ class PaymentSettingController extends Controller
         'pay_zelle_name',
         'pay_zelle_phone',
         'pay_zelle_email',
+        'pay_zelle_account',
         'pay_zelle_instructions',
     ];
+
+    /** Where the uploaded Zelle QR code lives, relative to public/. */
+    public const QR_DIRECTORY = 'assets/payment';
+    public const QR_KEY       = 'pay_zelle_qr';
 
     public function index()
     {
@@ -38,6 +43,7 @@ class PaymentSettingController extends Controller
         foreach ($this->keys as $key) {
             $data[$key] = SiteSetting::get($key);
         }
+        $data[self::QR_KEY] = SiteSetting::get(self::QR_KEY);
         return view('admin.payment_settings.index', $data);
     }
 
@@ -48,6 +54,37 @@ class PaymentSettingController extends Controller
                 SiteSetting::put($key, trim((string) $request->input($key)));
             }
         }
+
+        // Zelle QR code. Rashad exports this from his bank's app, and it changes
+        // if the account does, so it is uploaded here rather than committed.
+        if ($request->hasFile(self::QR_KEY)) {
+            $request->validate([
+                self::QR_KEY => 'image|mimes:jpg,jpeg,png,webp|max:4096',
+            ]);
+
+            $file     = $request->file(self::QR_KEY);
+            $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path(self::QR_DIRECTORY), $fileName);
+
+            $this->deleteQr(SiteSetting::get(self::QR_KEY));
+            SiteSetting::put(self::QR_KEY, $fileName);
+        } elseif ($request->boolean('remove_zelle_qr')) {
+            $this->deleteQr(SiteSetting::get(self::QR_KEY));
+            SiteSetting::put(self::QR_KEY, '');
+        }
+
         return redirect(url('admin/payment-settings'))->with('success', 'Payment settings saved.');
+    }
+
+    /** Remove a superseded QR image so the folder does not collect dead files. */
+    private function deleteQr(?string $fileName): void
+    {
+        if (empty($fileName)) {
+            return;
+        }
+        $path = public_path(self::QR_DIRECTORY . '/' . basename($fileName));
+        if (is_file($path)) {
+            @unlink($path);
+        }
     }
 }

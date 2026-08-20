@@ -15,7 +15,7 @@
 
             <p class="text-muted">These details are shown to travellers on the payment page based on the payment method they choose. The amount due is taken automatically from the package price they selected.</p>
 
-            <form method="POST" action="{{ url('admin/payment-settings') }}">
+            <form method="POST" action="{{ url('admin/payment-settings') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
                     <!-- Bank Wire Transfer -->
@@ -115,8 +115,32 @@
                                     <input type="text" name="pay_zelle_email" class="form-control" value="{{ $pay_zelle_email }}" placeholder="e.g. payments@konnect.us">
                                 </div>
                                 <div class="form-group">
+                                    <label class="form_label_color">Account Shown in Zelle <span class="text-muted">(optional)</span></label>
+                                    <input type="text" name="pay_zelle_account" class="form-control" value="{{ $pay_zelle_account }}" placeholder="e.g. BUS COMPLETE CHK (…9855)">
+                                    <small class="text-muted">Copy it exactly as Zelle displays it, so a payer can check they have the right account.</small>
+                                </div>
+                                <div class="form-group">
                                     <label class="form_label_color">Additional Instructions <span class="text-muted">(optional)</span></label>
                                     <textarea name="pay_zelle_instructions" class="form-control" rows="3" placeholder="e.g. Kindly test the account by sending $1 first. Upon confirmation, transfer the full / balance amount to the given number.">{{ $pay_zelle_instructions }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form_label_color">Zelle QR Code</label>
+                                    <p class="text-muted mb-2" style="font-size:13px">
+                                        Printed on the Yatri application form so a candidate can scan and pay.
+                                        In your bank's app open Zelle &rarr; <b>Scan or Share Code</b> &rarr; <b>My code</b>, then save or share the image and upload it here.
+                                    </p>
+                                    @if(!empty($pay_zelle_qr))
+                                    <div class="d-flex align-items-center mb-2" style="gap:14px">
+                                        <img src="{{ asset(\App\Http\Controllers\Admin\PaymentSettingController::QR_DIRECTORY.'/'.$pay_zelle_qr) }}" alt="Zelle QR code" style="width:120px;height:120px;object-fit:contain;border:1px solid #e3e6ec;border-radius:8px;padding:6px;background:#fff">
+                                        <label class="mb-0" style="font-weight:500">
+                                            <input type="checkbox" name="remove_zelle_qr" value="1"> Remove this code
+                                        </label>
+                                    </div>
+                                    @else
+                                    <p class="text-danger mb-2" style="font-size:13px"><i class="fa fa-exclamation-triangle"></i> No code uploaded — the form prints payment details without a QR code.</p>
+                                    @endif
+                                    <input type="file" name="pay_zelle_qr" class="form-control" accept="image/*">
+                                    <small class="text-muted">JPG, PNG or WebP, up to 4&nbsp;MB. Uploading a new code replaces the old one.</small>
                                 </div>
                             </div>
                         </div>

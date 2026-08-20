@@ -40,4 +40,9 @@ class YatriVisa extends Model
     public function companions(){
         return $this->hasMany('App\Models\YatriCompanion', 'yatri_visa_id');
     }
+
+    /** Payments recorded against this booking — `raseed_no` is the receipt/transaction number. */
+    public function payments(){
+        return $this->hasMany('App\Models\Balance', 'visa_id');
+    }
 }

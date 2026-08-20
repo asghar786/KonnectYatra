@@ -27,3 +27,7 @@ dump_err.txt
 /public/photo_uploads/
 /public/greencard_uploads/
 /public/drivinglicense_uploads/
+
+# Zelle QR code uploaded in Admin → Settings → Payment Settings. It is the
+# client's banking artefact and changes with the account, so it stays out of git.
+/public/assets/payment/

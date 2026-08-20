@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SiteSetting;
 use App\Models\YatriVisa;
 use setasign\Fpdi\Fpdi;
 
@@ -20,6 +21,7 @@ class YatriPdfController extends Controller
             'photoSrc' => null,
             'chrome'   => true,
             'blank'    => true,
+            'zelle'    => $this->zelleDetails(),
         ])->setPaper('a4');
 
         return $this->pdfResponse($pdf->output(), 'Yatri-Application-Form-Blank.pdf', 'inline');
@@ -33,6 +35,7 @@ class YatriPdfController extends Controller
             'yatri'    => $yatri,
             'photoSrc' => $this->photoSrc($yatri),
             'chrome'   => true,
+            'zelle'    => $this->zelleDetails(),
         ])->setPaper('a4');
         return $this->pdfResponse($pdf->output(), 'Yatri-Form-' . $yatri->yatri_id . '.pdf');
     }
@@ -69,7 +72,7 @@ class YatriPdfController extends Controller
 
     private function loadYatri($id)
     {
-        return YatriVisa::with('package', 'gurdwara', 'hotel', 'bus', 'documents', 'companions')->findOrFail($id);
+        return YatriVisa::with('package', 'gurdwara', 'hotel', 'bus', 'documents', 'companions', 'payments')->findOrFail($id);
     }
 
     private function pdfResponse(string $bytes, string $filename, string $disposition = 'attachment')
@@ -87,6 +90,7 @@ class YatriPdfController extends Controller
             'yatri'    => $yatri,
             'photoSrc' => $this->photoSrc($yatri),
             'chrome'   => $chrome,
+            'zelle'    => $this->zelleDetails(),
         ])->setPaper('a4');
 
         $path = tempnam(sys_get_temp_dir(), 'kyform') . '.pdf';
@@ -98,8 +102,13 @@ class YatriPdfController extends Controller
     private function photoSrc($yatri)
     {
         if (empty($yatri->photo)) return null;
-        $path = public_path('photo_uploads/' . $yatri->photo);
-        if (!is_file($path)) return null;
+        return $this->imageDataUri(public_path('photo_uploads/' . $yatri->photo));
+    }
+
+    /** Any image as a dompdf-safe data URI — dompdf will not read webp. */
+    private function imageDataUri(?string $path)
+    {
+        if (empty($path) || !is_file($path)) return null;
 
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
@@ -113,6 +122,27 @@ class YatriPdfController extends Controller
             return $uri;
         }
         return null;
+    }
+
+    /**
+     * Zelle payment details for the form's "How to Pay" block, all of them
+     * maintained in Admin → Settings → Payment Settings. Returns nulls happily:
+     * the template simply leaves out whatever has not been filled in yet.
+     */
+    private function zelleDetails(): array
+    {
+        $qrFile = SiteSetting::get(PaymentSettingController::QR_KEY);
+
+        return [
+            'name'         => SiteSetting::get('pay_zelle_name'),
+            'phone'        => SiteSetting::get('pay_zelle_phone'),
+            'email'        => SiteSetting::get('pay_zelle_email'),
+            'account'      => SiteSetting::get('pay_zelle_account'),
+            'instructions' => SiteSetting::get('pay_zelle_instructions'),
+            'qr'           => $qrFile
+                ? $this->imageDataUri(public_path(PaymentSettingController::QR_DIRECTORY . '/' . basename($qrFile)))
+                : null,
+        ];
     }
 
     /** Ordered list of documents: built-in uploads + additional documents. */

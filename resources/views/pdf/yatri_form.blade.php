@@ -28,6 +28,19 @@
     $amount     = $yatri->total_amount > 0 ? (int) round($yatri->total_amount) : ($yatri->amount ?: $unitPrice * $people);
     $companions = $yatri->companions ?? collect();
     $chrome     = $chrome ?? true;
+
+    // Zelle details from Admin → Settings → Payment Settings. Absent when a
+    // caller has not supplied them (the Form C export shares none of this).
+    $zelle = ($zelle ?? []) + ['name' => null, 'phone' => null, 'email' => null, 'account' => null, 'instructions' => null, 'qr' => null];
+
+    // The transaction number of the most recent recorded payment. `raseed_no`
+    // on the balance table is where staff enter the Zelle confirmation number,
+    // so a paid booking prints its own reference back to the traveller.
+    $paidReference = '';
+    if (!$blank) {
+        $lastPayment = collect($yatri->payments ?? [])->last();
+        $paidReference = $lastPayment->raseed_no ?? '';
+    }
 @endphp
 <!DOCTYPE html>
 <html>
@@ -84,12 +97,34 @@
     .sign td { padding-top: 18px; font-size: 9px; }
     .sign .line { border-top: 1px solid #1c2541; padding-top: 4px; width: 80%; }
 
+    /* ---- Pay by Zelle block ----
+       The QR has to survive being printed and then scanned off paper, so it is
+       given 150px (~40 mm) and a white quiet zone rather than being squeezed
+       into the margin. */
+    .pay-block { width: 100%; border-collapse: collapse; margin-top: 4px; }
+    .pay-block td { vertical-align: top; }
+    .pay-qr { width: 170px; padding: 6px 14px 6px 0; text-align: center; }
+    .pay-qr img { width: 150px; height: 150px; background: #fff; border: 1px solid #e3e6ec; padding: 6px; }
+    .pay-cap { font-size: 8px; color: #5a6273; margin-top: 4px; }
+    .pay-noqr { width: 150px; height: 150px; border: 1px dashed #c4cad6; color: #9aa3b2; font-size: 9px;
+                text-align: center; padding-top: 62px; margin: 0 auto; }
+    .pay-info { vertical-align: top; }
+    .pay-note { background: #fbf3ef; border-left: 3px solid #f54e18; padding: 5px 8px; font-size: 8.5px;
+                color: #4b5563; margin-top: 5px; }
+    .pay-txn { margin-top: 8px; font-size: 9px; }
+    .pay-txn .lbl { color: #5a6273; }
+    .pay-txn-line { display: block; border-bottom: 1px solid #9aa3b2; height: 14px; margin-top: 3px;
+                    font-family: "DejaVu Serif", Georgia, serif; font-weight: bold; color: #0f1830; }
+
     /* ---- Blank (hand-fill) mode ----
        The value spans are empty, so give them a width and a rule and they become
        something to write on. Rows are taller than the filled version because a
        pen needs more room than 10px type. */
     .blank ul.fields li { padding: 6px 0 2px; }
     .blank ul.fields .val { width: 54%; height: 13px; border-bottom: 1px solid #9aa3b2; }
+    /* …except the Zelle details, which are printed answers, not blanks to fill. */
+    .blank .pay-info ul.fields li { padding: 2.5px 0; }
+    .blank .pay-info ul.fields .val { width: auto; height: auto; border-bottom: 0; }
     .blank .doc-card .di { color: #5a6273; }
     .blank .fill-cell { height: 17px; }
     .blank .hint { color: #8a93a6; font-size: 8px; font-style: italic; }
@@ -369,6 +404,36 @@
     @endforeach
 </table>
 
+{{-- ===== Pay by Zelle ===== --}}
+@if(!empty($zelle['qr']) || !empty($zelle['phone']) || !empty($zelle['name']))
+<h2 class="sec">How to Pay &mdash; Scan with Your Bank's App</h2>
+<table class="pay-block"><tr>
+    <td class="pay-qr">
+        @if(!empty($zelle['qr']))
+            <img src="{{ $zelle['qr'] }}" alt="Zelle QR code">
+            <div class="pay-cap">Open Zelle in your bank's app and scan</div>
+        @else
+            <div class="pay-noqr">QR code<br>not set up</div>
+        @endif
+    </td>
+    <td class="pay-info">
+        <ul class="fields" style="padding-right:0;">
+            @if(!empty($zelle['name']))<li><span class="lbl">Pay to</span><span class="val">{{ $zelle['name'] }}</span></li>@endif
+            @if(!empty($zelle['phone']))<li><span class="lbl">Zelle phone</span><span class="val">{{ $zelle['phone'] }}</span></li>@endif
+            @if(!empty($zelle['email']))<li><span class="lbl">Zelle email</span><span class="val">{{ $zelle['email'] }}</span></li>@endif
+            @if(!empty($zelle['account']))<li><span class="lbl">Account</span><span class="val">{{ $zelle['account'] }}</span></li>@endif
+        </ul>
+        @if(!empty($zelle['instructions']))
+        <div class="pay-note">{{ $zelle['instructions'] }}</div>
+        @endif
+        <div class="pay-txn">
+            <span class="lbl">Transaction / confirmation number once paid</span>
+            <span class="pay-txn-line">{{ $paidReference }}</span>
+        </div>
+    </td>
+</tr></table>
+@endif
+
 {{-- ===== Payment ===== --}}
 <h2 class="sec">Payment Information</h2>
 <table class="kv"><tr>
@@ -376,6 +441,7 @@
         <li><span class="lbl">Payment Type</span><span class="val">{{ $v($yatri->payment_type) }}</span></li>
         <li><span class="lbl">Bank Receipt</span><span class="val">{{ $v($yatri->bank_receipt) }}</span></li>
         <li><span class="lbl">Amount</span><span class="val">{{ $blank ? '' : ($yatri->amount ? '$'.$yatri->amount : 'N/A') }}</span></li>
+        <li><span class="lbl">Transaction / Confirmation #</span><span class="val">{{ $blank ? '' : ($paidReference ?: 'N/A') }}</span></li>
     </ul></td>
     <td class="col"><ul class="fields">
         <li><span class="lbl">Routing Number</span><span class="val">{{ $v($yatri->routing_number) }}</span></li>
