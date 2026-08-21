@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\QuickYatri;
+use App\Support\YatriDate;
 use Illuminate\Http\Request;
 
 /**
@@ -99,6 +100,57 @@ class QuickYatriController extends Controller
 
     /* ---------------- helpers ---------------- */
 
+    /** The date fields on the sheet, in the order they appear, with sheet labels. */
+    const DATE_FIELDS = [
+        'date_of_birth'       => 'Date of Birth',
+        'date_of_issue'       => 'Date of Issue',
+        'date_of_expiry'      => 'Date of Expiry',
+        'previous_visit_date' => 'Previous Visit Date',
+        'signature_date'      => 'Signature Date',
+    ];
+
+    /**
+     * The form types dates as DD-MMM-YYYY (21-AUG-2026). Canonicalise whatever
+     * came in — picker output, that stamp typed by hand, or a pasted 2026-08-21
+     * — into Y-m-d before validation, so the `date` rule and the model's date
+     * cast both see something unambiguous.
+     *
+     * Anything unparseable is left exactly as typed and then fails the
+     * `date_format:Y-m-d` rule, so the admin is told — rather than this
+     * silently storing a guess. Parsing is strict for the same reason:
+     * createFromFormat is otherwise happy to read "31-FEB-2026" as 3 March.
+     */
+    private function normaliseDates(Request $request): void
+    {
+        foreach (array_keys(self::DATE_FIELDS) as $field) {
+            $raw = trim((string) $request->input($field));
+            if ($raw === '') {
+                continue;
+            }
+
+            $stamped = YatriDate::format($raw);           // -> 21-AUG-2026
+            $date    = \DateTime::createFromFormat('!d-M-Y', $stamped);
+            $errors  = \DateTime::getLastErrors();
+
+            $rolledOver = is_array($errors) && ($errors['warning_count'] > 0 || $errors['error_count'] > 0);
+
+            if ($date && !$rolledOver) {
+                $request->merge([$field => $date->format('Y-m-d')]);
+            }
+        }
+    }
+
+    /** "Date of Birth must be a real date, e.g. 21-AUG-2026." for each date field. */
+    private function dateMessages(): array
+    {
+        $messages = [];
+        foreach (self::DATE_FIELDS as $field => $label) {
+            $messages[$field . '.date_format'] = $label . ' must be a real date written as DD-MMM-YYYY, e.g. 21-AUG-2026.';
+        }
+
+        return $messages;
+    }
+
     /**
      * Validate and shape the submitted sheet.
      *
@@ -107,6 +159,8 @@ class QuickYatriController extends Controller
      */
     private function payload(Request $request, QuickYatri $existing = null): array
     {
+        $this->normaliseDates($request);
+
         $data = $request->validate([
             'sr_no'                => ['nullable', 'string', 'max:50'],
             'rt_no'                => ['nullable', 'string', 'max:50'],
@@ -116,7 +170,7 @@ class QuickYatriController extends Controller
             'trip_option'          => ['nullable', 'string', 'in:round_trip_5star,one_way_5star,round_trip_land'],
             'applicant_name'       => ['required', 'string', 'max:255'],
             'gender'               => ['nullable', 'string', 'in:M,F'],
-            'date_of_birth'        => ['nullable', 'date'],
+            'date_of_birth'        => ['nullable', 'date_format:Y-m-d'],
             'place_of_birth'       => ['nullable', 'string', 'max:255'],
             'cell_phone'           => ['nullable', 'string', 'max:40'],
             'email'                => ['nullable', 'email', 'max:255'],
@@ -124,11 +178,11 @@ class QuickYatriController extends Controller
             'mother_name'          => ['nullable', 'string', 'max:255'],
             'citizenship'          => ['nullable', 'string', 'max:255'],
             'passport_no'          => ['nullable', 'string', 'max:60'],
-            'date_of_issue'        => ['nullable', 'date'],
-            'date_of_expiry'       => ['nullable', 'date'],
+            'date_of_issue'        => ['nullable', 'date_format:Y-m-d'],
+            'date_of_expiry'       => ['nullable', 'date_format:Y-m-d'],
             'first_visit_pakistan' => ['nullable', 'string', 'in:Yes,No'],
             'port_of_entry'        => ['nullable', 'string', 'in:Wagah,Islamabad,Lahore'],
-            'previous_visit_date'  => ['nullable', 'date'],
+            'previous_visit_date'  => ['nullable', 'date_format:Y-m-d'],
             'profession'           => ['nullable', 'string', 'max:255'],
             'family_traveling'     => ['nullable', 'string', 'in:Yes,No'],
             'family_members_count' => ['nullable', 'string', 'max:10'],
@@ -140,9 +194,9 @@ class QuickYatriController extends Controller
             'state_zip'            => ['nullable', 'string', 'max:255'],
             'nearest_gurdwara'     => ['nullable', 'string', 'max:255'],
             'gurdwara_city_state'  => ['nullable', 'string', 'max:255'],
-            'signature_date'       => ['nullable', 'date'],
+            'signature_date'       => ['nullable', 'date_format:Y-m-d'],
             'photo'                => ['nullable', 'image', 'max:4096'],
-        ]);
+        ], $this->dateMessages());
 
         // Tick boxes: absent means unticked, so read every one explicitly.
         foreach ([

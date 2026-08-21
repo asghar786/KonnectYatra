@@ -23,20 +23,21 @@
         return '<span class="qy-val">' . e($row->{$name}) . '</span>';
     };
 
-    // A date cell. Stored as a real date; shown as DD-MMM-YYYY, the one date
-    // format used across this admin.
-    // $onRule = the field sits on a writing line rather than inside a bordered
-    // cell (the Date beside the signature).
-    $dat = function ($name, $onRule = false) use ($row, $isEntry, $isBlank) {
+    // Dates read as DD-MMM-YYYY everywhere — 21-AUG-2026 — typed, shown and
+    // printed. $picker names the jQuery UI class that ranges the calendar;
+    // $onRule = the field sits on a writing line rather than in a bordered cell
+    // (the Date beside the signature).
+    $dat = function ($name, $picker = 'ky-date-any', $onRule = false) use ($row, $isEntry, $isBlank) {
         $cls = $onRule ? ' qy-rule' : '';
         if ($isEntry) {
-            $val = old($name, optional($row->{$name})->format('Y-m-d'));
-            return '<input type="date" class="qy-in' . $cls . '" name="' . $name . '" value="' . e($val) . '">';
+            $val = old($name, $row->stamp($name));
+            return '<input type="text" class="qy-in ' . $picker . $cls . '" name="' . $name
+                . '" value="' . e($val) . '" placeholder="DD-MMM-YYYY" autocomplete="off">';
         }
         if ($isBlank) {
             return $onRule ? '<span class="qy-rule"></span>' : '<span class="qy-fill"></span>';
         }
-        return '<span class="qy-val' . $cls . '">' . e(optional($row->{$name})->format('d-M-Y')) . '</span>';
+        return '<span class="qy-val' . $cls . '">' . e($row->stamp($name)) . '</span>';
     };
 
     // Box sizes vary by context in the design (8pt in the grid, 9pt in the trip
@@ -175,7 +176,7 @@
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:3pt 6pt">Date of Birth (D/M/Y):</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_birth') !!}</td>
+                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_birth', 'ky-date-dob') !!}</td>
                 <td style="border:1px solid #111; padding:3pt 6pt">Place of Birth:</td>
                 <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('place_of_birth') !!}</td>
             </tr>
@@ -199,9 +200,9 @@
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:3pt 6pt">Date of Issue:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_issue') !!}</td>
+                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_issue', 'ky-date-issue') !!}</td>
                 <td style="border:1px solid #111; padding:3pt 6pt">Date of Expiry:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_expiry') !!}</td>
+                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_expiry', 'ky-date-expiry') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:3pt 6pt">First visit to Pakistan?</td>
@@ -211,7 +212,7 @@
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:3pt 6pt">If No - Previous Visit Date:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('previous_visit_date') !!}</td>
+                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('previous_visit_date', 'ky-date-past') !!}</td>
                 <td style="border:1px solid #111; padding:3pt 6pt">Profession:</td>
                 <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('profession') !!}</td>
             </tr>
@@ -263,7 +264,7 @@
 
     <div style="display:flex; align-items:flex-end; gap:14pt; font-size:9pt; margin-top:auto">
         <span style="display:flex; align-items:flex-end; gap:5pt; flex:1.5">Signature:<span class="qy-rule"></span></span>
-        <span style="display:flex; align-items:flex-end; gap:5pt; flex:0.9">Date:{!! $dat('signature_date', true) !!}</span>
+        <span style="display:flex; align-items:flex-end; gap:5pt; flex:0.9">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
         <span style="display:flex; align-items:center; gap:11pt; font-size:8.4pt">Upload:
             <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_passport') !!}Passport</span>
             <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_green_card') !!}Green Card</span>

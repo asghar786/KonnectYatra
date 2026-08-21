@@ -106,7 +106,7 @@
                             <td>
                                 @if($r->passport_no)
                                     <span class="qy-pp">{{ $r->passport_no }}</span>
-                                    @if($r->date_of_expiry)<small class="qy-sub" style="display:block">exp {{ $r->date_of_expiry->format('d-M-Y') }}</small>@endif
+                                    @if($r->date_of_expiry)<small class="qy-sub" style="display:block">exp {{ $r->stamp('date_of_expiry') }}</small>@endif
                                 @else
                                     <span class="qy-sub">&mdash;</span>
                                 @endif

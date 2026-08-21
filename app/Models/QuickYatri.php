@@ -65,6 +65,18 @@ class QuickYatri extends Model
         return self::TRIP_OPTIONS[$this->trip_option]['label'] ?? '—';
     }
 
+    /**
+     * A date field in the house format — DD-MMM-YYYY with the month upper-cased,
+     * e.g. 21-AUG-2026. The same stamp `YatriDate` writes, so every date on
+     * screen, on the sheet and in the list reads identically.
+     */
+    public function stamp(string $field): string
+    {
+        return $this->{$field}
+            ? strtoupper($this->{$field}->format('d-M-Y'))
+            : '';
+    }
+
     /** Where the applicant's photograph lives on disk, or null. */
     public function photoPath(): ?string
     {

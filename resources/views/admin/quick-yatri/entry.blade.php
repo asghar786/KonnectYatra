@@ -57,6 +57,86 @@
 <div class="ttr-overlay"></div>
 @endsection
 @section('js')
+{{-- Dates are typed and shown as DD-MMM-YYYY (21-AUG-2026). jQuery UI is pulled
+     in here rather than sitewide because the admin footer's generic ".datepicker"
+     is a different plugin and cannot render month names. Whatever is typed by
+     hand is normalised server-side on save, so the picker is the easy path
+     rather than the only one. Same setup as the Yatri booking form. --}}
+<link rel="stylesheet" href="{{ asset('new-assets/vendors/jquery-ui/jquery-ui.min.css') }}">
+<script src="{{ asset('new-assets/vendors/jquery-ui/jquery-ui.min.js') }}"></script>
+<style>
+/* Two things the picker cannot render on its own in here: the admin theme paints
+   every table header white, which hides the day names against the white panel;
+   and the vendored jQuery UI sprites are not images at all (the files in
+   new-assets/vendors/jquery-ui/images are saved HTML), so the month arrows have
+   to be drawn rather than sprited. Scoped to the picker's own element. */
+#ui-datepicker-div th,
+#ui-datepicker-div th span { color: #2c3e50; }
+
+/* The admin theme also pads every table cell to 10px with !important, which
+   pushes the last column outside the panel. Put jQuery UI's spacing back. */
+#ui-datepicker-div .ui-datepicker-calendar th { padding: .7em .3em !important; }
+#ui-datepicker-div .ui-datepicker-calendar td { padding: 1px !important; }
+
+#ui-datepicker-div .ui-datepicker-prev,
+#ui-datepicker-div .ui-datepicker-next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon,
+#ui-datepicker-div .ui-datepicker-next .ui-icon {
+    position: static;
+    margin: 0;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    background: none;
+    text-indent: 0;
+    font-size: 0;                 /* hides the "Prev"/"Next" label */
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon::before,
+#ui-datepicker-div .ui-datepicker-next .ui-icon::before {
+    font: 700 20px/1 Arial, sans-serif;
+    color: #2c3e50;
+}
+
+#ui-datepicker-div .ui-datepicker-prev .ui-icon::before { content: '\2039'; }
+#ui-datepicker-div .ui-datepicker-next .ui-icon::before { content: '\203A'; }
+</style>
+<script>
+    $(function () {
+        var base = {
+            dateFormat:      'dd-M-yy',
+            monthNamesShort: ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'],
+            changeMonth:     true,
+            changeYear:      true
+        };
+        var thisYear = new Date().getFullYear();
+
+        function picker(selector, extra) {
+            $(selector).datepicker($.extend({}, base, extra));
+        }
+
+        // Date of Birth: no future dates, back to 1920 for the oldest yatris.
+        picker('.ky-date-dob', { yearRange: '1920:' + thisYear, maxDate: 0, defaultDate: '-25y' });
+
+        // Passport Issue Date: in the past, and a passport runs at most 10 years.
+        picker('.ky-date-issue', { yearRange: (thisYear - 10) + ':' + thisYear, maxDate: 0 });
+
+        // Passport Expiry: ahead of today, at most 10 years out.
+        picker('.ky-date-expiry', { yearRange: thisYear + ':' + (thisYear + 10), minDate: 0 });
+
+        // Previous visit / signature date: past, within living memory.
+        picker('.ky-date-past', { yearRange: (thisYear - 40) + ':' + thisYear, maxDate: 0 });
+
+        // Anything else on the sheet that takes a date.
+        picker('.ky-date-any', { yearRange: (thisYear - 40) + ':' + (thisYear + 10) });
+    });
+</script>
 <script>
     (function () {
         // Show the chosen photograph in the box straight away.
