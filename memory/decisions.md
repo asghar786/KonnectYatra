@@ -577,3 +577,28 @@ a no-op and cannot restore this text if a description is ever cleared by hand.
 
 Worth noting against the original entry: the seeder was held back as a review gate for Rashad to
 read the religious and historical content first, and it was run without that being confirmed.
+
+## 2026-08-21 — Quick Yatri: its own table, and printing from the browser
+- **Decision:** The printed Konnect.US Yatri Application became a standalone admin module —
+  top-level link **Quick Yatri** (`/admin/quick-yatri`), its own `quick_yatris` table, and one
+  Blade template rendered in three modes (entry / blank / print).
+- **Reasoning:** The sheet is the client's artefact and revises on its own schedule (this
+  revision is stamped "Updated: August 17, 2026"). Folding ~40 paper fields into `yatri_visas`
+  would bend them onto a schema built for the booking/visa/payment pipeline, and every future
+  revision of the paper would put that pipeline at risk. A separate table mirrors the paper
+  column for column and touches nothing existing.
+- **Alternatives considered:** extending `yatri_visas` (rejected: couples the paper form to the
+  booking pipeline); a second shape of the existing `pdf/yatri_form.blade.php` (rejected: that
+  one is written as nested tables *for* dompdf, and this design is flex/grid).
+- **The dompdf call:** the approved design uses flexbox and CSS grid throughout, which dompdf
+  cannot lay out at all. The blank and filled sheets therefore render as ordinary web pages and
+  download via the browser's own Print → "Save as PDF". This is a deliberate departure from the
+  rest of the admin's PDF exports, not an oversight.
+- **Getting the design out of Claude Design:** the share link (`claude.ai/design/p/…`) is not
+  machine-readable — it 403s, and the id is not an artifact id. The exported
+  `QUICKKonnectYatra Application Form.html` is a bundler wrapper whose real document is a JSON
+  string on line 395 under `<script type="__bundler/template">`. Ask for that export, not the link.
+- **Left open for Rashad:** the three blue option bars carry no tick box in the design, so the
+  blank printed sheet gives a candidate no way to mark them; entry and print show a box so a
+  stored record can say which were chosen.
+- **Review:** see decisions.csv row dated 2026-08-21.
