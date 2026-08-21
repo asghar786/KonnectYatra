@@ -31,3 +31,6 @@ dump_err.txt
 # Zelle QR code uploaded in Admin → Settings → Payment Settings. It is the
 # client's banking artefact and changes with the account, so it stays out of git.
 /public/assets/payment/
+
+# Quick Yatri applicant photographs — uploaded in the admin, never in git.
+/public/quick_yatri_uploads/

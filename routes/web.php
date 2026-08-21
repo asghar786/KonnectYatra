@@ -197,6 +197,18 @@ Route::group(['prefix' => 'admin',
     Route::get('/yatri-form/pdf-docs/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportPdfWithDocs'])->name('yatri-form-pdf-docs');
     Route::get('/yatri-form/form-c/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportFormC'])->name('yatri-form-c'); // Form 'C' — Foreigners Registration
 
+    // Quick Yatri — the Konnect.US application sheet: list, capture, print.
+    // `/blank` and `/print` render the sheet in the browser (the design is
+    // flex/grid, which dompdf cannot lay out); Ctrl+P -> Save as PDF downloads it.
+    Route::get('/quick-yatri',[\App\Http\Controllers\Admin\QuickYatriController::class, 'index'])->name('quick-yatri');
+    Route::get('/quick-yatri/blank',[\App\Http\Controllers\Admin\QuickYatriController::class, 'blank'])->name('quick-yatri-blank');
+    Route::get('/quick-yatri/create',[\App\Http\Controllers\Admin\QuickYatriController::class, 'create'])->name('quick-yatri-create');
+    Route::post('/quick-yatri/store',[\App\Http\Controllers\Admin\QuickYatriController::class, 'store'])->name('quick-yatri-store');
+    Route::get('/quick-yatri/{id}/edit',[\App\Http\Controllers\Admin\QuickYatriController::class, 'edit'])->name('quick-yatri-edit');
+    Route::post('/quick-yatri/{id}/update',[\App\Http\Controllers\Admin\QuickYatriController::class, 'update'])->name('quick-yatri-update');
+    Route::get('/quick-yatri/{id}/print',[\App\Http\Controllers\Admin\QuickYatriController::class, 'printOne'])->name('quick-yatri-print');
+    Route::get('/quick-yatri/{id}/delete',[\App\Http\Controllers\Admin\QuickYatriController::class, 'destroy'])->name('quick-yatri-delete');
+
     // Newsletter subscribers
     Route::get('/subscribers',[SubscriberController::class, 'index'])->name('subscribers');
     Route::get('/subscribers/delete/{id}',[SubscriberController::class, 'destroy'])->name('subscribers_delete');

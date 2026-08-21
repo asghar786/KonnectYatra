@@ -43,6 +43,14 @@
                     </a>
                 </li>
 
+                <!-- Quick Yatri -->
+                <li class="{{ $isCur(route('quick-yatri')) ? 'show' : '' }}">
+                    <a href="{{route('quick-yatri')}}" class="ttr-material-button">
+                        <span class="ttr-icon"><i class="fas fa-bolt text-warning"></i></span>
+                        <span class="ttr-label">Quick Yatri</span>
+                    </a>
+                </li>
+
                 <!-- Bookings & Yatris -->
                 @php $open = $groupOpen([route('yatri-visa'), url('admin/booking-detail'), route('visa'), route('ids'), route('airline-list'), route('itenaries'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
