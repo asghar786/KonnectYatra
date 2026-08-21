@@ -16,3 +16,12 @@ Format:
   themselves and shouldn't need a developer or a deploy. Prefer `site_settings` (key/value, already
   cached per request) so it needs no migration; keep the `config/` value as the fallback default.
 - **Batch prod DB migrations:** When work introduces new DB migrations, run them locally as needed but DON'T tell the user to migrate prod after each change. Accumulate the pending prod migrations and give one consolidated `php artisan migrate ... --force` command set at the end of the work session. Why: user runs prod migrations manually one time, after all add/edit/delete changes are done (requested 2026-06-25). Track pending ones in [[konnectyatra-pending-prod-migrations]].
+- **One date format, upper-cased: `21-AUG-2026`.** Every date the user sees — on screen, in a
+  list, typed into a form, and printed on a PDF or sheet — reads DD-MMM-YYYY with the month in
+  capitals. Never `21-Aug-2026`, never `2026-08-21`, and never a bare `<input type="date">`
+  (it shows the browser's own mm/dd/yyyy and ignores the house format). Use
+  `App\Support\YatriDate::format()` for varchar date columns, or a `stamp()` helper on the model
+  for real `date` columns; for entry, the jQuery UI picker configured `dd-M-yy` with upper-case
+  `monthNamesShort`. Why: the user asked for exactly this on 2026-08-21 for Quick Yatri, and it is
+  the same stamp the public apply form has always written — DD-MMM-YYYY is unambiguous where
+  NN-NN-YYYY is not. See `memory/decisions.md` 2026-08-21 and the `konnectyatra-yatri-dates` note.

@@ -15,6 +15,11 @@ Format:
 - Role / relationship: President / business owner of Konnect Yatra (the client). The cPanel hosting account is his (`rashad`, /home/rashad); he is also the admin user in the app.
 - Context: Appears as `MAIL_FROM_NAME` in mail config; the homepage has an audio message "from the President" (the section redesigned 2026-06-16). He supplies source data himself (the airport pricing sheet, the gurdwara master list).
 - Notes: Public contact — rm@konnectyatra.org, +1 (718) 908-9464. **Address (confirmed final by the user 2026-08-17): `148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434, USA`** — write it exactly like that, "Brewers" plural and "Suit #202A", because the site header, Contact page and `config/schema.php` must stay byte-identical for NAP/Google Business Profile matching. An earlier note here said 18502 Hillside Avenue, NY 11432; that is wrong, superseded.
+- **He is the admin login.** `users` id **1**, `konnectus.inc@gmail.com`, `role = 'admin'` — the
+  **only** row that can reach `/admin/*`, because `App\Http\Middleware\Admin` requires
+  `currentuser() === 'admin'` exactly. Two junk signups, `adminxp@gmail.com` and
+  `adminexp@gmail.com`, carry `role = '1'` and are locked out by that same check; the user was
+  told about them 2026-08-21 and has not asked for them to be removed.
 - **Works in the field:** he drives to gurdwaras and updates their details in person (phones, office-bearers, photos). The admin Address Book was built for this — phone-first, GPS-ranked. Assume mobile use and one-handed taps for anything aimed at him. See [[konnectyatra-address-book]].
 - **Wants to self-serve:** where a value is his to supply (office coordinates, opening hours, social
   profile links), he expects a field in the admin rather than asking a developer — see

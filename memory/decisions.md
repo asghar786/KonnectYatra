@@ -601,4 +601,9 @@ read the religious and historical content first, and it was run without that bei
 - **Left open for Rashad:** the three blue option bars carry no tick box in the design, so the
   blank printed sheet gives a candidate no way to mark them; entry and print show a box so a
   stored record can say which were chosen.
+- **Date format, same day:** the user asked for `21-AUG-2026` in all three modes. Entry moved off
+  `<input type="date">` (which shows the browser's mm/dd/yyyy) onto the jQuery UI picker the
+  booking form already uses, and typed input is normalised server-side so the picker is the easy
+  path rather than the only one. Validation moved from `date` to `date_format:Y-m-d` after strict
+  parsing — under the looser rule an impossible `31-FEB-2026` was being stored as 3 March.
 - **Review:** see decisions.csv row dated 2026-08-21.
