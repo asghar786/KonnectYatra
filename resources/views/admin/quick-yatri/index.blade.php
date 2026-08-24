@@ -49,6 +49,8 @@
     .qy-btn.del{background:#feeceb; color:#e23b2e}
     .qy-btn.del:hover{background:#e23b2e; color:#fff; box-shadow:0 6px 14px rgba(226,59,46,.3)}
     .qy-empty{padding:40px; text-align:center; color:#999; font-size:15px}
+    .qy-blank-picker{display:inline-flex; align-items:center; gap:8px}
+    .qy-blank-picker select{border:1px solid #d4e2ff; border-radius:24px; padding:9px 14px; font-size:13px; color:#1a3fa0; background:#eaf2ff; outline:none; max-width:190px}
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -65,7 +67,15 @@
             <div class="qy-toolbar">
                 <div class="qy-toolbar-left">
                     <a href="{{ route('quick-yatri-create') }}" class="qy-cta add"><i class="fa fa-plus"></i> Add New</a>
-                    <a href="{{ route('quick-yatri-blank') }}" target="_blank" rel="noopener" class="qy-cta dl"><i class="fa fa-download"></i> Download Blank Form</a>
+                    <div class="qy-blank-picker">
+                        <select id="qyBlankAirport" title="Pre-fill the departure airport on the blank form">
+                            <option value="">Blank (write in)</option>
+                            @foreach($usOrigins as $o)
+                                <option value="{{ $o->airport_code }}">{{ $o->airport_code }} &mdash; {{ $o->airport_name }}</option>
+                            @endforeach
+                        </select>
+                        <a href="{{ route('quick-yatri-blank') }}" target="_blank" rel="noopener" id="qyBlankLink" class="qy-cta dl"><i class="fa fa-download"></i> Download Blank Form</a>
+                    </div>
                     <span class="qy-total"><i class="fa fa-bolt"></i> {{ count($rows) }} Applications</span>
                 </div>
                 <div class="qy-search">
@@ -150,6 +160,19 @@
 @endsection
 @section('js')
 <script>
+    (function () {
+        // Rewrites the Download link's ?airport= so the printed blank sheet
+        // shows that departure airport (e.g. "MIA/FL") instead of a line to
+        // write in — for handing out sheets at one region's signup event.
+        var picker = document.getElementById('qyBlankAirport');
+        var link = document.getElementById('qyBlankLink');
+        var baseHref = link ? link.getAttribute('href') : '';
+        if (picker && link) {
+            picker.addEventListener('change', function () {
+                link.setAttribute('href', this.value ? (baseHref + '?airport=' + encodeURIComponent(this.value)) : baseHref);
+            });
+        }
+    })();
     (function () {
         var input = document.getElementById('qySearch');
         var rows = Array.prototype.slice.call(document.querySelectorAll('.qy-row'));

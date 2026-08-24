@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Admin\PaymentSettingController;
 use App\Models\DepartureOrigin;
 use App\Models\QuickYatri;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -121,6 +123,92 @@ class QuickYatriSheetTest extends TestCase
             'may be changed, amended, canceled, or rescheduled when necessary',
             $body
         );
+    }
+
+    public function test_blank_form_can_be_prefilled_with_a_departure_airport()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank', ['airport' => 'MIA']))->getContent();
+
+        // Pre-filled text, not the hand-writing line, and in the CODE/ST form
+        // Rashad asked for.
+        $this->assertStringContainsString('Round Trip <span class="qy-val">MIA/FL</span>', $body);
+        $this->assertStringNotContainsString('Round Trip <span class="qy-rule"', $body);
+    }
+
+    public function test_blank_form_ignores_an_unknown_airport_code()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank', ['airport' => 'ZZZ']))->getContent();
+
+        // Falls back to the writing line rather than printing a made-up code.
+        $this->assertStringContainsString('Round Trip <span class="qy-rule"', $body);
+        $this->assertStringNotContainsString('ZZZ', $body);
+    }
+
+    public function test_quick_yatri_list_offers_the_airport_picker_for_the_blank_form()
+    {
+        $this->asAdmin();
+
+        $response = $this->get(route('quick-yatri'));
+
+        $response->assertStatus(200);
+        $response->assertSee('id="qyBlankAirport"', false);
+        $response->assertSee('id="qyBlankLink"', false);
+
+        foreach (DepartureOrigin::where('country', 'USA')->where('status', 1)->pluck('airport_code') as $code) {
+            $response->assertSee('value="' . $code . '"', false);
+        }
+    }
+
+    public function test_the_two_removed_notes_are_gone_and_the_footer_is_redesigned()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $this->assertStringNotContainsString('Price is guaranteed when booking is made', $body);
+        $this->assertStringNotContainsString('Please send a $1 test payment first', $body);
+
+        // Still present, unaffected by the removal of the two bullets above it.
+        // Not pinned to a specific date — that line's deadline gets updated by
+        // hand from time to time and isn't what this test is checking.
+        $this->assertStringContainsString('This application is valid through', $body);
+
+        $this->assertStringContainsString('Uploads:', $body);
+        $this->assertStringContainsString('>Signature<', $body);
+        $this->assertStringContainsString('Scan Me', $body);
+    }
+
+    /**
+     * Both branches of the QR block, driving pay_zelle_qr directly rather than
+     * trusting whatever is actually uploaded in the shared dev DB right now —
+     * and restoring it afterward either way, since Payment Settings is real
+     * data (Rashad's banking QR), not test fixture.
+     */
+    public function test_qr_block_shows_the_uploaded_zelle_qr_or_a_placeholder_when_none_is_set()
+    {
+        $this->asAdmin();
+
+        $original = SiteSetting::get(PaymentSettingController::QR_KEY);
+
+        try {
+            SiteSetting::put(PaymentSettingController::QR_KEY, '');
+            $body = $this->get(route('quick-yatri-blank'))->getContent();
+            $this->assertStringContainsString('QR not set', $body);
+            $this->assertStringNotContainsString('<img src=', $body);
+
+            SiteSetting::put(PaymentSettingController::QR_KEY, 'unit-test-qr.png');
+            $body = $this->get(route('quick-yatri-blank'))->getContent();
+            $this->assertStringContainsString(
+                'src="' . asset(PaymentSettingController::QR_DIRECTORY . '/unit-test-qr.png') . '"',
+                $body
+            );
+        } finally {
+            SiteSetting::put(PaymentSettingController::QR_KEY, (string) $original);
+        }
     }
 
     public function test_a_since_deactivated_airport_is_preserved_as_current_rather_than_dropped()

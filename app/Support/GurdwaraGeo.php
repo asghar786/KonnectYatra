@@ -74,6 +74,30 @@ class GurdwaraGeo
         return $raw;                                                     // unknown — keep as entered
     }
 
+    /**
+     * A state label down to its primary state's 2-letter code: "Florida" -> "FL",
+     * "New York (NY · NJ · CT)" -> "NY", "Washington DC (DE · MD · VA)" -> "DC".
+     * Falls back to the label itself when it isn't a recognised state name, so an
+     * unexpected value stays visible rather than silently disappearing.
+     */
+    public static function stateAbbreviation($label): string
+    {
+        $label = trim((string) $label);
+        if ($label === '') {
+            return '';
+        }
+
+        $primary = trim(preg_replace('/\s*\(.*$/', '', $label));
+
+        if (strcasecmp($primary, 'Washington DC') === 0) {
+            return 'DC';
+        }
+
+        $codesByLowerName = array_change_key_case(array_flip(self::usStates()), CASE_LOWER);
+
+        return $codesByLowerName[strtolower($primary)] ?? $label;
+    }
+
     /** CODE => Full Name */
     public static function usStates(): array
     {

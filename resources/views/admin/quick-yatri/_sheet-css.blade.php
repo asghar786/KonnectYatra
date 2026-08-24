@@ -8,8 +8,14 @@
         box-sizing:border-box;
         display:flex;
         flex-direction:column;
+        /* Without this, a browser printing with "background graphics" off
+           drops every fill colour below (the blue option bars, the price
+           table header) and leaves only a soft, edgeless grey on paper. This
+           is inherited, so it covers the whole sheet from one declaration. */
+        print-color-adjust:exact;
+        -webkit-print-color-adjust:exact;
     }
-    .qy-page-1{padding:0.26in 0.3in; gap:5pt; font-size:8.6pt; line-height:1.3}
+    .qy-page-1{padding:0.2in 0.3in; gap:3pt; font-size:8.6pt; line-height:1.3}
     .qy-page-2{padding:0.3in 0.42in; gap:8pt; font-size:9.2pt; line-height:1.32}
     .qy-page a{color:#1a3fa0}
 
@@ -20,8 +26,9 @@
     .qy-photo-label small{display:block; font-size:7pt; letter-spacing:0; color:#8a93a5; margin-top:3pt; text-transform:none}
     .qy-photo-label:hover{background:#f5f8ff}
 
-    /* Blue option bars */
-    .qy-bar{background:#1a3fa0; color:#fff; border-radius:5pt; padding:6pt 9pt; display:flex; align-items:center; gap:9pt; font-family:'Archivo Narrow',sans-serif; font-weight:700; font-size:12pt; line-height:1.1}
+    /* Blue option bars — a border of their own so the box reads as a bounded
+       group even where a printer doesn't reproduce the fill colour. */
+    .qy-bar{background:#1a3fa0; color:#fff; border:1.25pt solid #111; border-radius:5pt; padding:5pt 9pt; display:flex; align-items:center; gap:9pt; font-family:'Archivo Narrow',sans-serif; font-weight:700; font-size:12pt; line-height:1.1}
     .qy-bar-ico{width:20pt; height:20pt; border-radius:50%; background:#fff; color:#1a3fa0; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; font-size:13pt; line-height:1}
 
     /* Tick boxes — drawn squares when printing, real inputs when typing */

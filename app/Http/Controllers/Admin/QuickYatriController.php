@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\DepartureOrigin;
 use App\Models\QuickYatri;
 use App\Support\YatriDate;
 use Illuminate\Http\Request;
@@ -25,7 +26,14 @@ class QuickYatriController extends Controller
     {
         $rows = QuickYatri::orderBy('created_at', 'desc')->get();
 
-        return view('admin.quick-yatri.index', compact('rows'));
+        // Feeds the "Download Blank Form" airport picker — a representative
+        // working one region (e.g. a Miami event) can hand out sheets that
+        // already show that departure airport instead of a blank line.
+        $usOrigins = DepartureOrigin::where('country', 'USA')->where('status', 1)
+            ->orderBy('sort_order')->orderBy('state')
+            ->get(['airport_code', 'airport_name', 'state']);
+
+        return view('admin.quick-yatri.index', compact('rows', 'usOrigins'));
     }
 
     public function create()
@@ -81,8 +89,21 @@ class QuickYatriController extends Controller
      */
     public function blank()
     {
+        $row = new QuickYatri();
+
+        // Optional ?airport=CODE pre-fills the Round Trip line on the printed
+        // blank sheet (e.g. "MIA/FL") instead of leaving a line to write on —
+        // for a representative handing out sheets at one region's event, where
+        // every candidate signing up there departs from the same airport.
+        // Never persisted; $row here only ever renders, it is not saved.
+        $airport = trim((string) request('airport'));
+        if ($airport !== '' && DepartureOrigin::where('country', 'USA')->where('status', 1)
+                ->where('airport_code', $airport)->exists()) {
+            $row->departure_airport_code = $airport;
+        }
+
         return view('admin.quick-yatri.sheet', [
-            'row'       => new QuickYatri(),
+            'row'       => $row,
             'mode'      => 'blank',
             'autoPrint' => request()->boolean('print'),
         ]);

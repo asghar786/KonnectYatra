@@ -89,6 +89,16 @@
 
     $airport = function () use ($row, $isEntry, $isBlank, $usOrigins) {
         if ($isBlank) {
+            // A representative working one region's signup event can pre-fill
+            // this via ?airport=CODE on the blank-form link (Quick Yatri list
+            // page), so every sheet handed out there already reads e.g.
+            // "MIA/FL" instead of leaving a line to write on.
+            if ($row->departure_airport_code) {
+                $origin = $usOrigins->firstWhere('airport_code', $row->departure_airport_code);
+                $abbr = $origin ? \App\Support\GurdwaraGeo::stateAbbreviation($origin->state) : '';
+                $label = e($row->departure_airport_code) . ($abbr !== '' ? '/' . e($abbr) : '');
+                return '<span class="qy-val">' . $label . '</span>';
+            }
             // Outside a table cell, unlike every other free-text field on the
             // sheet, so it needs its own writing line — qy-rule, the same
             // class the Signature line uses for the same reason.
@@ -118,6 +128,12 @@
         $html .= '</select>';
         return $html;
     };
+
+    // Same Zelle QR the dompdf yatri_form.blade.php prints — Admin > Payment
+    // Settings, uploaded (never committed) — so there is one QR to keep
+    // current, not a second copy specific to this sheet.
+    $qrFile = \App\Models\SiteSetting::get(\App\Http\Controllers\Admin\PaymentSettingController::QR_KEY);
+    $qrUrl = $qrFile ? asset(\App\Http\Controllers\Admin\PaymentSettingController::QR_DIRECTORY . '/' . $qrFile) : null;
 @endphp
 
 <div class="qy-page qy-page-1">
@@ -200,115 +216,128 @@
          filling the printed sheet by pen has something to tick — entry and print
          already added one because a stored record has to say which were chosen. --}}
     <div style="display:grid; grid-template-columns:1fr 1.12fr 1.12fr; gap:9pt">
-        <div class="qy-bar">{!! $check('wheelchair_airport', 10, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair at airport</div>
-        <div class="qy-bar">{!! $check('wheelchair_full_trip', 10, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair throughout the trip (+$300)</div>
-        <div class="qy-bar">{!! $check('meal_vegetarian', 10, 'qy-box-light') !!}<span class="qy-bar-ico">&#127860;</span>Meal preference: Vegetarian meals only</div>
+        <div class="qy-bar">{!! $check('wheelchair_airport', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair at airport</div>
+        <div class="qy-bar">{!! $check('wheelchair_full_trip', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair throughout the trip (+$300)</div>
+        <div class="qy-bar">{!! $check('meal_vegetarian', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#127860;</span>Meal preference: Vegetarian meals only</div>
     </div>
 
     {{-- Applicant grid --}}
     <table class="qy-grid" style="width:100%; border-collapse:collapse; font-size:8.8pt">
         <tbody>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt; width:19%">Name of Applicant:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt; width:29%">{!! $txt('applicant_name', ' required') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt; width:19%">Gender:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt; width:33%"><span style="display:flex; gap:22pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'M') !!}M</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'F') !!}F</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Name of Applicant:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:29%">{!! $txt('applicant_name', ' required') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Gender:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:33%"><span style="display:flex; gap:22pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'M') !!}M</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'F') !!}F</span></span></td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Date of Birth (D/M/Y):</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_birth', 'ky-date-dob') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Place of Birth:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('place_of_birth') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Date of Birth (D/M/Y):</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $dat('date_of_birth', 'ky-date-dob') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Place of Birth:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('place_of_birth') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Cell Phone No.:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('cell_phone') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Email:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('email') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Cell Phone No.:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('cell_phone') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Email:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('email') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Father&rsquo;s Name:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('father_name') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Mother&rsquo;s Name:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('mother_name') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Father&rsquo;s Name:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('father_name') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Mother&rsquo;s Name:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('mother_name') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Citizenship / Nationality:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('citizenship') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Passport No.:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('passport_no') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Citizenship / Nationality:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('citizenship') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Passport No.:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('passport_no') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Date of Issue:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_issue', 'ky-date-issue') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Date of Expiry:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('date_of_expiry', 'ky-date-expiry') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Date of Issue:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $dat('date_of_issue', 'ky-date-issue') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Date of Expiry:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $dat('date_of_expiry', 'ky-date-expiry') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">First visit to Pakistan?</td>
-                <td style="border:1px solid #111; padding:3pt 6pt"><span style="display:flex; gap:20pt"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('first_visit_pakistan', 'Yes') !!}Yes</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('first_visit_pakistan', 'No') !!}No</span></span></td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Port of Entry:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt; font-size:8.4pt"><span style="display:flex; gap:11pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('port_of_entry', 'Wagah') !!}Wagah</span><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('port_of_entry', 'Islamabad') !!}Islamabad</span><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('port_of_entry', 'Lahore') !!}Lahore</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt">First visit to Pakistan?</td>
+                <td style="border:1px solid #111; padding:2pt 6pt"><span style="display:flex; gap:20pt"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('first_visit_pakistan', 'Yes') !!}Yes</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('first_visit_pakistan', 'No') !!}No</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Port of Entry:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt; font-size:8.4pt"><span style="display:flex; gap:11pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('port_of_entry', 'Wagah') !!}Wagah</span><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('port_of_entry', 'Islamabad') !!}Islamabad</span><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('port_of_entry', 'Lahore') !!}Lahore</span></span></td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">If No - Previous Visit Date:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $dat('previous_visit_date', 'ky-date-past') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Profession:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('profession') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">If No - Previous Visit Date:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $dat('previous_visit_date', 'ky-date-past') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Profession:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('profession') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Family traveling with you?</td>
-                <td style="border:1px solid #111; padding:3pt 6pt"><span style="display:flex; gap:20pt"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('family_traveling', 'Yes') !!}Yes</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('family_traveling', 'No') !!}No</span></span></td>
-                <td style="border:1px solid #111; padding:3pt 6pt">No. of family members:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('family_members_count') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Family traveling with you?</td>
+                <td style="border:1px solid #111; padding:2pt 6pt"><span style="display:flex; gap:20pt"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('family_traveling', 'Yes') !!}Yes</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('family_traveling', 'No') !!}No</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt">No. of family members:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_members_count') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Family Member 1:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('family_member_1') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">Family Member 2:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('family_member_2') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Family Member 1:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_member_1') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Family Member 2:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_member_2') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Marital Status:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt"><span style="display:flex; gap:16pt"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Married') !!}Married</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Single') !!}Single</span></span></td>
-                <td style="border:1px solid #111; padding:3pt 6pt" colspan="2"><span style="display:flex; gap:20pt; justify-content:flex-end"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Divorced') !!}Divorced</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Widowed') !!}Widowed</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Marital Status:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt"><span style="display:flex; gap:16pt"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Married') !!}Married</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Single') !!}Single</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt" colspan="2"><span style="display:flex; gap:20pt; justify-content:flex-end"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Divorced') !!}Divorced</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('marital_status', 'Widowed') !!}Widowed</span></span></td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Home Address:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt" colspan="3">{!! $txt('home_address') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Home Address:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt" colspan="3">{!! $txt('home_address') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">City:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('city') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">State / ZIP:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('state_zip') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">City:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('city') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">State / ZIP:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('state_zip') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:3pt 6pt">Nearest Gurdwara:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('nearest_gurdwara') !!}</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">City / State:</td>
-                <td style="border:1px solid #111; padding:3pt 6pt">{!! $txt('gurdwara_city_state') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Nearest Gurdwara:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('nearest_gurdwara') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">City / State:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('gurdwara_city_state') !!}</td>
             </tr>
         </tbody>
     </table>
 
     <ul style="margin:0; padding-left:15pt; font-size:8.3pt; line-height:1.28; display:flex; flex-direction:column; gap:1.5pt">
-        <li>Price is guaranteed when booking is made at least 10 weeks in advance and paid in full.</li>
-        <li>Make payments available at <strong style="color:#1a3fa0">Konnect-US, Inc.</strong> &nbsp;&nbsp;<strong style="color:#e8112d">Zelle: 718-908-9464</strong>. Please send a $1 test payment first. Once the $1 payment is confirmed, send the remaining balance.</li>
-        <li>This application is valid through September 10, 2026. Add $100 for applications submitted from September 11 through October 15, 2026.</li>
+        <li>This application is valid through September 15, 2026. Add $100 for applications submitted from September 20 through October 15, 2026.</li>
         <li>You must follow all group rules and regulations.</li>
         <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
         <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
         <li>A separate application form is required for each traveler.</li>
     </ul>
 
-    <div style="display:flex; align-items:flex-end; gap:14pt; font-size:9pt; margin-top:auto">
-        <span style="display:flex; align-items:flex-end; gap:5pt; flex:1.5">Signature:<span class="qy-rule"></span></span>
-        <span style="display:flex; align-items:flex-end; gap:5pt; flex:0.9">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
-        <span style="display:flex; align-items:center; gap:11pt; font-size:8.4pt">Upload:
+    @php $qyBoxSize = '115pt'; @endphp
+    <div style="display:flex; align-items:flex-end; gap:12pt; font-size:8.6pt; margin-top:auto">
+        <div style="flex:1; display:flex; flex-direction:column; gap:3pt">
+            <span style="font-weight:700; color:#1a3fa0">Uploads:</span>
             <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_passport') !!}Passport</span>
             <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_green_card') !!}Green Card</span>
             <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_id_license') !!}ID / Driver&rsquo;s License</span>
-        </span>
+            <span style="display:flex; align-items:flex-end; gap:5pt; margin-top:2pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
+        </div>
+        {{-- Signature and QR are the same size on purpose — two matched boxes
+             filling the space at the foot of the page rather than a thin
+             strip with blank paper above it. --}}
+        <div style="flex:0 0 auto; width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; border:1px solid #111; border-radius:5pt; display:flex; align-items:flex-end; justify-content:center; padding-bottom:6pt; color:#8a93a5; font-size:8.5pt">Signature</div>
+        <div style="flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4pt">
+            <span style="font-size:8pt; font-weight:700; color:#1a3fa0">Scan Me</span>
+            {{-- Sized for a phone camera to actually read when printed —
+                 anything much smaller than this is unreliable to scan. --}}
+            @if($qrUrl)
+                <img src="{{ $qrUrl }}" alt="Zelle QR code" style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; object-fit:contain; border:1px solid #111; border-radius:4pt">
+            @else
+                <div style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; border:1px dashed #999; border-radius:4pt; display:flex; align-items:center; justify-content:center; font-size:7pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
+            @endif
+        </div>
     </div>
 </div>
