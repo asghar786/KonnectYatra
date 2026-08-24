@@ -99,6 +99,30 @@ class QuickYatriSheetTest extends TestCase
         $row->delete();
     }
 
+    public function test_page_2_carries_the_2026_08_24_wording_corrections()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $this->assertStringContainsString(
+            'Green Card, 2 Pages of passport, and Driver&rsquo;s License or State ID',
+            $body
+        );
+
+        // The heading dropped "Two-" since the fee now applies at one suitcase too.
+        $this->assertStringContainsString('<strong>Suitcase Baggage Handling:</strong>', $body);
+        $this->assertStringNotContainsString('Two-Suitcase Baggage Handling', $body);
+        $this->assertStringContainsString('carrying one or two suitcases', $body);
+
+        $this->assertStringContainsString('Approval is not guaranteed, due to security reasons.', $body);
+
+        $this->assertStringContainsString(
+            'may be changed, amended, canceled, or rescheduled when necessary',
+            $body
+        );
+    }
+
     public function test_a_since_deactivated_airport_is_preserved_as_current_rather_than_dropped()
     {
         $this->asAdmin();
