@@ -54,6 +54,9 @@ Auth::routes();
 // XML sitemap for search engines (public pages only — see SitemapController).
 Route::get('/sitemap.xml',[\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 
+// Machine-readable guide for AI agents (llmstxt.org convention).
+Route::get('/llms.txt',[\App\Http\Controllers\LlmsTxtController::class, 'index'])->name('llms-txt');
+
 // Route::view('/test', 'test');
 Route::get('/our-info',[HomeController::class, 'our_info'])->name('our_info');
 Route::get('/home',[HomeController::class,'index'])->name('home');
@@ -64,6 +67,7 @@ Route::get('/visa',[VisaController::class, 'index'])->name('visa');
 Route::get('/contactus',[ContactUsController::class, 'index'])->name('contactus');
 Route::post('/contactus',[ContactUsController::class, 'index'])->name('contactus');
 Route::get('/aboutus',[AboutUsController::class, 'index'])->name('aboutus');
+Route::get('/privacy',[\App\Http\Controllers\PrivacyController::class, 'index'])->name('privacy');
 Route::get('/itinerary',[IternaryController::class, 'index'])->name('itinerary');
 Route::post('itinerary',[IternaryController::class, 'store']);
 Route::get('/login', [HomeController::class, 'showLoginForm'])->name('login');

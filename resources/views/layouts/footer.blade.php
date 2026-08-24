@@ -75,6 +75,7 @@
                     <li><a href="{{ url('/home') }}">Home</a></li>
                     <li><a href="{{ url('/aboutus') }}">About</a></li>
                     <li><a href="{{ url('/contactus') }}">Contact</a></li>
+                    <li><a href="{{ url('/privacy') }}">Privacy Policy</a></li>
                 </ul>
             </div>
 

@@ -28,6 +28,7 @@ class SitemapController extends Controller
         'gurdwaras'         => ['weekly',  '0.8'],
         'aboutus'           => ['monthly', '0.7'],
         'contactus'         => ['monthly', '0.7'],
+        'privacy'           => ['yearly',  '0.3'],
         'pakistan-hotels'   => ['monthly', '0.7'],
         'popular-locations' => ['monthly', '0.7'],
         'our-info'          => ['monthly', '0.6'],

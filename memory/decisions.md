@@ -607,3 +607,73 @@ read the religious and historical content first, and it was run without that bei
   path rather than the only one. Validation moved from `date` to `date_format:Y-m-d` after strict
   parsing — under the looser rule an impossible `31-FEB-2026` was being stored as 3 March.
 - **Review:** see decisions.csv row dated 2026-08-21.
+
+## 2026-08-24 — Is Agentic (Ora/Vercel) audit: markdown negotiation, llms.txt, and Privacy
+
+**Context.** The site scored 84/100 on Vercel's public "Is Agentic" audit (run by Ora). Three
+checks were flagged, in priority order: no `Accept: text/markdown` content negotiation (and
+`Vary` never mentioned `Accept`, so a CDN could serve the wrong cached variant to the next
+request); no agent-instruction file with explicit "when to use this" guidance; and the
+About/Contact/Privacy trust-anchor set was only 2 of 3 — no Privacy page existed at all.
+
+**Decision — markdown negotiation.** A single global middleware,
+`App\Http\Middleware\NegotiateMarkdown`, added to the end of the `web` middleware group (so it
+also covers `/admin` and `/user`, which it then explicitly skips by path prefix — those routes
+are auth-walled and have nothing for an agent to read). For any GET/HEAD request whose successful
+`text/html` response it can act on, it: parses the `Accept` header per RFC 9110 (exact type, then
+`type/*`, then `*/*`, honouring q-values), always sets `Vary: Accept` on the response (merged with
+whatever the response already carried), serves plain HTML unchanged when the client prefers or
+defaults to it, returns **406** when the client's `Accept` excludes both `text/html` and
+`text/markdown`, and otherwise converts.
+
+The conversion does not run `html-to-markdown` over the full rendered page — that would dump the
+nav, footer, and every inline `<script>`/`<style>` block from the Bootstrap theme as noise. It
+parses the response with `DOMDocument`, extracts the page's own `<title>`, `<meta
+name="description">` and `<link rel="canonical">`, isolates the `#content` region every one of
+the 17 top-level views already renders inside (falling back to `<body>`), strips
+`script/style/noscript/svg/iframe` from it, and hands only that to
+`league/html-to-markdown` (new composer dependency — a pure-code addition, so it deploys cleanly
+through the existing git-push auto-deploy with no manual `composer install` step, unlike the
+DB-migration work tracked in [[konnectyatra-pending-prod-migrations]]).
+
+Alternatives considered:
+- *A static per-page Markdown file/route.* Rejected — same staleness problem the sitemap decision
+  already rejected for XML: every page would need its own hand-maintained twin.
+- *Serve the full raw page as Markdown.* Rejected — tested first, and the output was mostly
+  Bootstrap grid/carousel wreckage. Isolating `#content` was the fix.
+
+**Decision — `/llms.txt`.** A dynamic route (`LlmsTxtController`), the same reasoning as
+`/sitemap.xml` in [[konnectyatra-sitemap-robots]]: a static file goes stale, so the phone/email/
+address lines read from `App\Support\Business` and the package count from
+`Package::where('status', 1)->count()` — the same visibility gate `/all-packages` uses — so the
+file can never disagree with what the site actually shows. It carries an explicit **"When to
+use this"** section naming concrete jobs (booking a Sikh yatra from the US/Canada, the Pakistan
+pilgrim visa, finding the nearest Gurdwara by ZIP) and an explicit *don't* (general Pakistan
+tourism, travel outside the US/Canada corridor, same-day travel) — the audit's own complaint was
+that generic marketing copy doesn't read as guidance.
+
+**Decision — `/privacy`.** Built to the same template as `/aboutus` and `/contactus` (banner,
+breadcrumb, JSON-LD `WebPage` node — schema.org has no `PrivacyPolicyPage` subtype), added to the
+footer's Company list and to `SitemapController::STATIC_PAGES`. The content was written from what
+the codebase actually does, not boilerplate: it names the contact form, the "Near Gurdwara Sahib"
+popup, the newsletter, the visa-application document uploads (passport/Green Card/Driver's
+License/photo), the Special Land Package's wire-transfer routing/account fields (see the
+2026-08-13 entry above — that flow still collects bank details directly, unlike the Gurpurab
+flow's admin-configured Payment Settings), and the conditional GA4/Microsoft Clarity scripts in
+`layouts/header.blade.php`. **This is not legal advice and needs Rashad's review** — same caveat
+already on record for the visa FAQ and location-page copy.
+
+**A test-only artifact found, not fixed.** `App\Support\Schema::$canonicalOverride` is a plain
+static, reset only by process death — inert in production (every request is a fresh PHP-FPM
+process) but it leaks across `$this->get()` calls inside one PHPUnit run. Left alone rather than
+refactored: fixing a production non-issue to satisfy a test would be scope creep, so the test
+asserts the *mechanism* (the middleware forwards whatever canonical the page rendered) instead of
+an exact URL.
+
+**Verified:** `php artisan test` (13 new/existing tests, all green) plus an in-process HTTP-kernel
+script (`$kernel->handle()` directly — `php artisan serve`'s router.php would not load reliably in
+this shell on this box, unrelated to the change) confirmed on `/`, `/privacy`, `/llms.txt`,
+`/admin_login`, `/sitemap.xml`: correct `Content-Type`/`Vary`/406 behaviour, `/admin_login`
+unaffected, sitemap still valid XML and now lists `/privacy`.
+
+**Review:** see decisions.csv row dated 2026-08-24.
