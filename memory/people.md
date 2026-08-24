@@ -44,6 +44,12 @@ Format:
   luggage fee from $35 to $25 and the price-guarantee window from 3 months to 10 weeks, both of
   which contradicted copy already live on the site.
 - **How he specifies changes:** sends a screenshot of the live page plus a typed list of the fields/labels he wants, in his own line grouping (e.g. `Telephone:   Email:` on one line = put them side by side). Treat the grouping as the layout spec. His lists are not always exhaustive — the 2026-08-10 popup list silently dropped an existing field — so check what's in the current form but missing from his list and raise it rather than deleting it.
+- **Or, for corrections to an existing document: a hand-annotated photo** — strikethroughs, carets
+  inserting a word, circled text, arrows — with no typed list at all (first seen 2026-08-24, Quick
+  Yatri page 2). Read the markup as a set of concrete edits and confirm them back in plain English
+  before touching a file (see the "list corrections before editing" entry in `preferences.md`) —
+  one mark that session (a pen line trailing near the "Disclaimer & Copyright" heading) was
+  genuinely ambiguous, and asking first rather than guessing turned out to be the right call.
 
 ## Asghar (AsgharSHAH)
 - Role / relationship: Developer building/maintaining KonnectYatra. The person I work with directly.

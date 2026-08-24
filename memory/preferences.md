@@ -25,3 +25,11 @@ Format:
   `monthNamesShort`. Why: the user asked for exactly this on 2026-08-21 for Quick Yatri, and it is
   the same stamp the public apply form has always written — DD-MMM-YYYY is unambiguous where
   NN-NN-YYYY is not. See `memory/decisions.md` 2026-08-21 and the `konnectyatra-yatri-dates` note.
+- **List corrections before editing, when the source is a marked-up photo/screenshot.** When the
+  user sends a hand-annotated image (strikethroughs, carets, circled words, arrows) rather than a
+  typed list, read back the corrections as plain sentences — including how each ambiguous mark was
+  resolved — and wait for a yes before touching any file. Why: asked for explicitly on 2026-08-24
+  ("before proceed, list down the correction, so I can check if anything you missed") when marking
+  up the Quick Yatri page-2 terms. Handwriting is lossier than a typed list (a strikethrough can
+  mean several things, an arrow can point at the wrong line by accident), so confirming first here
+  matters more than it does for his usual typed-list change requests.
