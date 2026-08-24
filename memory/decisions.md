@@ -677,3 +677,58 @@ this shell on this box, unrelated to the change) confirmed on `/`, `/privacy`, `
 unaffected, sitemap still valid XML and now lists `/privacy`.
 
 **Review:** see decisions.csv row dated 2026-08-24.
+
+## 2026-08-24 (later) — Quick Yatri: a live departure-airport dropdown, and the option-bar boxes question answered
+
+Rashad sent a marked-up screenshot of the blank sheet with three requests.
+
+**1. The Round Trip route.** The trip band was hard-coded to one route,
+"Round Trip PHL-ISB/LHE-PHL (PA/DE/NJ-SO)" — Philadelphia only, baked into the label text with no
+field behind it at all. Added `departure_airport_code` (nullable string) to `quick_yatris` via a
+new migration, and a `<select>` in entry mode listing every **active USA** row from
+`departure_origins` — the same admin-managed table the public packages selector already reads, so
+this is not a second list to keep in sync. Options read `{code} — {state}` (e.g. "JFK — New York
+(NY · NJ · CT)"); the surrounding static text supplies "— ISB/LHE" once, since a round trip returns
+through the same airport it left from. A since-deactivated code already stored on a record is kept
+as a `"{code} (current)"` option rather than silently dropped — the exact pattern the admin package
+form already uses for `state`/`state_code`, so validation deliberately does **not** `Rule::in()`
+against the live list (see the comment in `QuickYatriController::payload()`).
+
+**A design gap only surfaced by having a printed line to fill in.** Paper can't render a
+`<select>`, so blank mode needed its own writable slot — first pass reused `.qy-fill`, which is
+what every other blank-mode field on the sheet uses, but every one of those sits inside a bordered
+`<td>` that supplies the writing box for free. This field sits in the free-standing trip band, so
+`.qy-fill` rendered as literally nothing to write on — caught only by screenshotting the blank
+sheet, not by reading the code. Switched to `.qy-rule` (a real underline), the same class the
+free-standing Signature line already uses for the identical reason.
+
+**2. Instructions 2 and 3 merged.** "2 Pages of Indian Passport" was its own bullet; moved onto the
+end of "Copy of passport valid for at least 6 months; copy of Green Card if you are not a U.S.
+citizen." verbatim, per the instruction — not rephrased. Four bullets instead of five.
+
+**3. The option-bar boxes question, now answered.** When the sheet shipped 2026-08-21, the note on
+this exact spot was: "the three blue option bars carry no tick box in the design... blank mode
+reproduces that exactly... worth asking Rashad whether the printed sheet should gain boxes there."
+This request is that answer — yes. Removed the `@unless($isBlank)` guard around the three
+`$check(...)` calls so Wheelchair at airport / Wheelchair throughout the trip / Meal preference
+all get a real box in blank mode too, not just entry and print.
+
+**The anticipated space problem didn't materialise.** Rashad asked to "make some space... to
+signature" in case the new boxes pushed the signature line onto page 2. Verified instead of
+guessed: rendered blank and print mode standalone (`view(...)->render()` with a manually bound
+`Request`, no auth needed — the print view pulls nothing from the app) and screenshotted both at
+real letter-page size with headless Chrome, the same technique logged in
+[[konnectyatra-quick-yatri]]. The three new boxes fit inside the existing 20pt icon-circle row
+height (no cost), and the merged instruction actually **removed** a bullet — net effect was a
+*wider* gap above the signature line than before, not an overflow. No CSS spacing was touched.
+
+**Deploy:** the migration is local-only so far — batched in
+[[konnectyatra-pending-prod-migrations]] per the standing preference, code pushed to `main`
+separately since it deploys via git regardless of the schema change.
+
+**Verified:** 5 new PHPUnit feature tests (`QuickYatriSheetTest`) — blank-mode box count and the
+merged instruction text, the entry dropdown listing all active USA airports, a real store/print
+round-trip through the controller (rows deleted after), and the stale-code "(current)" fallback —
+plus the three headless-Chrome screenshots above. Full suite green, 18/18.
+
+**Review:** see decisions.csv row dated 2026-08-24.

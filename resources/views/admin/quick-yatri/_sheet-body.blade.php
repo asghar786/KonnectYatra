@@ -77,6 +77,47 @@
         }
         return '<span class="qy-rule">' . ($isBlank ? '' : e($row->{$name})) . '</span>';
     };
+
+    // Round Trip used to be locked to one hard-coded route, "PHL-ISB/LHE-PHL
+    // (PA/DE/NJ-SO)". This offers every active USA departure airport instead —
+    // the same departure_origins table the public packages selector reads, so
+    // there is one admin-managed list rather than a second one invented here.
+    // Blank mode can't offer a dropdown on paper, so it gets a line to write on.
+    $usOrigins = \App\Models\DepartureOrigin::where('country', 'USA')->where('status', 1)
+        ->orderBy('sort_order')->orderBy('state')
+        ->get(['airport_code', 'airport_name', 'state']);
+
+    $airport = function () use ($row, $isEntry, $isBlank, $usOrigins) {
+        if ($isBlank) {
+            // Outside a table cell, unlike every other free-text field on the
+            // sheet, so it needs its own writing line — qy-rule, the same
+            // class the Signature line uses for the same reason.
+            return '<span class="qy-rule" style="min-width:110pt"></span>';
+        }
+        if (!$isEntry) {
+            $code = $row->departure_airport_code;
+            if (!$code) {
+                return '<span class="qy-val">&mdash;</span>';
+            }
+            $origin = $usOrigins->firstWhere('airport_code', $code);
+            $label = e($code) . ($origin ? ' &mdash; ' . e($origin->state) : '');
+            return '<span class="qy-val">' . $label . '</span>';
+        }
+
+        $selected = old('departure_airport_code', $row->departure_airport_code);
+        $html = '<select class="qy-in" name="departure_airport_code" style="max-width:145pt">';
+        $html .= '<option value="">Select airport&hellip;</option>';
+        if ($selected && !$usOrigins->contains('airport_code', $selected)) {
+            $html .= '<option value="' . e($selected) . '" selected>' . e($selected) . ' (current)</option>';
+        }
+        foreach ($usOrigins as $o) {
+            $sel = $selected === $o->airport_code ? ' selected' : '';
+            $label = e($o->airport_code) . ' &mdash; ' . e($o->state);
+            $html .= '<option value="' . e($o->airport_code) . '"' . $sel . '>' . $label . '</option>';
+        }
+        $html .= '</select>';
+        return $html;
+    };
 @endphp
 
 <div class="qy-page qy-page-1">
@@ -113,8 +154,8 @@
                     <div style="display:flex; align-items:flex-end; gap:5pt">LP#:{!! $ref('lp_no') !!}</div>
                 </div>
             </div>
-            <div style="border:1px solid #111; padding:5pt 10pt; display:flex; justify-content:space-between; align-items:center; gap:12pt; font-size:10.5pt">
-                <span style="display:flex; align-items:center; gap:7pt">{!! $radio('booking_type', 'round_trip_phl', 9) !!}Round Trip PHL-ISB/LHE-PHL (PA/DE/NJ-SO)</span>
+            <div style="border:1px solid #111; padding:5pt 10pt; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8pt 12pt; font-size:10.5pt">
+                <span style="display:flex; align-items:center; gap:6pt; flex-wrap:wrap">{!! $radio('booking_type', 'round_trip_phl', 9) !!}Round Trip {!! $airport() !!} &mdash; ISB/LHE</span>
                 <span style="display:flex; align-items:center; gap:7pt">{!! $radio('booking_type', 'land_package', 9) !!}Land Package</span>
             </div>
         </div>
@@ -149,20 +190,19 @@
         <div style="color:#1a3fa0; font-weight:700; font-size:10.5pt; margin-bottom:3pt">Instructions and documents required:</div>
         <ul style="margin:0; padding-left:16pt; font-size:8.8pt; line-height:1.3; display:flex; flex-direction:column; gap:2pt">
             <li>1 passport-size photograph with a white background. If the visa system does not recognize the photograph, additional photographs may be requested.</li>
-            <li>Copy of passport valid for at least 6 months; copy of Green Card if you are not a U.S. citizen.</li>
-            <li>2 Pages of Indian Passport</li>
+            <li>Copy of passport valid for at least 6 months; copy of Green Card if you are not a U.S. citizen. 2 Pages of Indian Passport.</li>
             <li>Copy of State ID card or Driver&rsquo;s License.</li>
             <li style="color:#e8112d">FALSE OR MISLEADING INFORMATION MAY CAUSE VISA REJECTION. FEES ARE NON-REFUNDABLE.</li>
         </ul>
     </div>
 
-    {{-- The three option bars. The approved design carries no tick box on these,
-         so the blank sheet reproduces them exactly as drawn; entry and print add
-         a white box, because a stored record has to say which were chosen. --}}
+    {{-- The three option bars. Blank mode now gets a real box too, so a candidate
+         filling the printed sheet by pen has something to tick — entry and print
+         already added one because a stored record has to say which were chosen. --}}
     <div style="display:grid; grid-template-columns:1fr 1.12fr 1.12fr; gap:9pt">
-        <div class="qy-bar">@unless($isBlank){!! $check('wheelchair_airport', 10, 'qy-box-light') !!}@endunless<span class="qy-bar-ico">&#9855;</span>Wheelchair at airport</div>
-        <div class="qy-bar">@unless($isBlank){!! $check('wheelchair_full_trip', 10, 'qy-box-light') !!}@endunless<span class="qy-bar-ico">&#9855;</span>Wheelchair throughout the trip (+$300)</div>
-        <div class="qy-bar">@unless($isBlank){!! $check('meal_vegetarian', 10, 'qy-box-light') !!}@endunless<span class="qy-bar-ico">&#127860;</span>Meal preference: Vegetarian meals only</div>
+        <div class="qy-bar">{!! $check('wheelchair_airport', 10, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair at airport</div>
+        <div class="qy-bar">{!! $check('wheelchair_full_trip', 10, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair throughout the trip (+$300)</div>
+        <div class="qy-bar">{!! $check('meal_vegetarian', 10, 'qy-box-light') !!}<span class="qy-bar-ico">&#127860;</span>Meal preference: Vegetarian meals only</div>
     </div>
 
     {{-- Applicant grid --}}

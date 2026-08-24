@@ -167,6 +167,11 @@ class QuickYatriController extends Controller
             'ow_no'                => ['nullable', 'string', 'max:50'],
             'lp_no'                => ['nullable', 'string', 'max:50'],
             'booking_type'         => ['nullable', 'string', 'in:round_trip_phl,land_package'],
+            // Not Rule::in() against the live departure_origins list on purpose — an
+            // airport an admin later deactivates must not block re-saving an existing
+            // record that already picked it, the same reasoning as the package form's
+            // "(current)" option (see the 2026-07-23 decision).
+            'departure_airport_code' => ['nullable', 'string', 'max:10'],
             'trip_option'          => ['nullable', 'string', 'in:round_trip_5star,one_way_5star,round_trip_land'],
             'applicant_name'       => ['required', 'string', 'max:255'],
             'gender'               => ['nullable', 'string', 'in:M,F'],

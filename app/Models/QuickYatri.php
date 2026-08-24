@@ -45,7 +45,7 @@ class QuickYatri extends Model
     const WHEELCHAIR_FULL_TRIP_FEE = 300;
 
     const BOOKING_TYPES = [
-        'round_trip_phl' => 'Round Trip PHL-ISB/LHE-PHL (PA/DE/NJ-SO)',
+        'round_trip_phl' => 'Round Trip (ISB/LHE)',
         'land_package'   => 'Land Package',
     ];
 
