@@ -177,7 +177,7 @@ class QuickYatriSheetTest extends TestCase
         // hand from time to time and isn't what this test is checking.
         $this->assertStringContainsString('This application is valid through', $body);
 
-        $this->assertStringContainsString('Uploads:', $body);
+        $this->assertStringContainsString('>Uploads<', $body);
         $this->assertStringContainsString('>Signature<', $body);
         $this->assertStringContainsString('Scan Me', $body);
     }
@@ -209,6 +209,62 @@ class QuickYatriSheetTest extends TestCase
         } finally {
             SiteSetting::put(PaymentSettingController::QR_KEY, (string) $original);
         }
+    }
+
+    public function test_print_mode_title_cases_names_and_formats_the_phone_number()
+    {
+        $this->asAdmin();
+
+        $row = QuickYatri::create([
+            'applicant_name' => 'BANTA SINGH',
+            'father_name'    => 'SANTA SINGH',
+            'mother_name'    => 'santi kaur',
+            'family_member_1' => 'HASNAT',
+            'cell_phone'     => '17189089464', // 11 digits, leading 1
+        ]);
+
+        $body = $this->get(route('quick-yatri-print', $row->id))->getContent();
+
+        $this->assertStringContainsString('>Banta Singh<', $body);
+        $this->assertStringContainsString('>Santa Singh<', $body);
+        $this->assertStringContainsString('>Santi Kaur<', $body);
+        $this->assertStringContainsString('>Hasnat<', $body);
+        $this->assertStringContainsString('>+1 (718) 908-9464<', $body);
+
+        $row->delete();
+    }
+
+    public function test_print_mode_leaves_an_unrecognisable_phone_number_untouched()
+    {
+        $this->asAdmin();
+
+        // 11 digits but no leading 1 — doesn't fit the US shape, so it must
+        // print exactly as typed rather than being forced into one.
+        $row = QuickYatri::create([
+            'applicant_name' => 'Test Applicant',
+            'cell_phone'     => '07182583690',
+        ]);
+
+        $body = $this->get(route('quick-yatri-print', $row->id))->getContent();
+
+        $this->assertStringContainsString('>07182583690<', $body);
+
+        $row->delete();
+    }
+
+    public function test_email_is_lowercased_on_save()
+    {
+        $this->asAdmin();
+
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Email Test',
+            'email'          => 'Asghar@BlueVisionAdv.COM',
+        ]);
+
+        $saved = QuickYatri::where('applicant_name', 'QA Email Test')->first();
+        $this->assertSame('asghar@bluevisionadv.com', $saved->email);
+
+        $saved->delete();
     }
 
     public function test_a_since_deactivated_airport_is_preserved_as_current_rather_than_dropped()

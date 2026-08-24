@@ -224,6 +224,13 @@ class QuickYatriController extends Controller
             'photo'                => ['nullable', 'image', 'max:4096'],
         ], $this->dateMessages());
 
+        // Email addresses are case-insensitive by convention — store the
+        // form the applicant is going to type back at us if they ever log
+        // in or reply, not whatever mix of case they happened to type here.
+        if (!empty($data['email'])) {
+            $data['email'] = strtolower($data['email']);
+        }
+
         // Tick boxes: absent means unticked, so read every one explicitly.
         foreach ([
             'wheelchair_airport', 'wheelchair_full_trip', 'meal_vegetarian',

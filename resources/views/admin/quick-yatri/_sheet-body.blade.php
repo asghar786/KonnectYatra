@@ -23,6 +23,35 @@
         return '<span class="qy-val">' . e($row->{$name}) . '</span>';
     };
 
+    // Person names print in proper Title Case ("Banta Singh") no matter how
+    // they were typed — passport-style ALL CAPS entry is common and still
+    // fine to type; this only changes how it prints, never what is stored.
+    $personName = function ($name, $extra = '') use ($row, $isEntry, $isBlank, $txt) {
+        if ($isEntry || $isBlank) {
+            return $txt($name, $extra);
+        }
+        $value = (string) $row->{$name};
+        return '<span class="qy-val">' . e($value === '' ? '' : \Illuminate\Support\Str::title($value)) . '</span>';
+    };
+
+    // A US/Canada cell number prints as "+1 (718) 908-9464". Only reshapes a
+    // clean 10-digit number (or 11 with a leading 1) — anything else prints
+    // exactly as typed rather than guessing at a shape that doesn't fit.
+    $phone = function ($name) use ($row, $isEntry, $isBlank, $txt) {
+        if ($isEntry || $isBlank) {
+            return $txt($name);
+        }
+        $digits = preg_replace('/\D/', '', (string) $row->{$name});
+        if (strlen($digits) === 11 && $digits[0] === '1') {
+            $digits = substr($digits, 1);
+        }
+        if (strlen($digits) === 10) {
+            $formatted = '+1 (' . substr($digits, 0, 3) . ') ' . substr($digits, 3, 3) . '-' . substr($digits, 6);
+            return '<span class="qy-val">' . e($formatted) . '</span>';
+        }
+        return $txt($name);
+    };
+
     // Dates read as DD-MMM-YYYY everywhere — 21-AUG-2026 — typed, shown and
     // printed. $picker names the jQuery UI class that ranges the calendar;
     // $onRule = the field sits on a writing line rather than in a bordered cell
@@ -226,7 +255,7 @@
         <tbody>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Name of Applicant:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt; width:29%">{!! $txt('applicant_name', ' required') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:29%">{!! $personName('applicant_name', ' required') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Gender:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:33%"><span style="display:flex; gap:22pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'M') !!}M</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'F') !!}F</span></span></td>
             </tr>
@@ -238,15 +267,15 @@
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Cell Phone No.:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('cell_phone') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $phone('cell_phone') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Email:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('email') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Father&rsquo;s Name:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('father_name') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('father_name') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Mother&rsquo;s Name:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('mother_name') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('mother_name') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Citizenship / Nationality:</td>
@@ -280,9 +309,9 @@
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Family Member 1:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_member_1') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('family_member_1') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Family Member 2:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_member_2') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('family_member_2') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Marital Status:</td>
@@ -316,27 +345,36 @@
         <li>A separate application form is required for each traveler.</li>
     </ul>
 
-    @php $qyBoxSize = '115pt'; @endphp
-    <div style="display:flex; align-items:flex-end; gap:12pt; font-size:8.6pt; margin-top:auto">
-        <div style="flex:1; display:flex; flex-direction:column; gap:3pt">
-            <span style="font-weight:700; color:#1a3fa0">Uploads:</span>
-            <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_passport') !!}Passport</span>
-            <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_green_card') !!}Green Card</span>
-            <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('upload_id_license') !!}ID / Driver&rsquo;s License</span>
-            <span style="display:flex; align-items:flex-end; gap:5pt; margin-top:2pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
+    @php
+        $qyBoxSize = '118pt';
+        $qyCaptionStyle = 'font-family:\'Archivo Narrow\',sans-serif; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; font-size:7.6pt; color:#1a3fa0';
+    @endphp
+    {{-- Three matched, bordered panels — Uploads no longer trails off as a
+         short list with blank paper beneath it; all three carry the same
+         footprint as Signature/QR, each using its own height on purpose:
+         Uploads spreads header/checklist/date top-to-bottom, Signature stays
+         a clear writing surface with the label pinned to the foot of it,
+         Scan Me labels the code from above so the code itself loses no area
+         to a caption competing for space inside it. --}}
+    <div style="display:flex; align-items:flex-end; gap:12pt; margin-top:auto">
+        <div style="flex:1; height:{{ $qyBoxSize }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:8pt 11pt; display:flex; flex-direction:column; justify-content:space-between; font-size:8.6pt">
+            <span style="{{ $qyCaptionStyle }}">Uploads</span>
+            <div style="display:flex; flex-direction:column; gap:7pt">
+                <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_passport', 10) !!}Passport</span>
+                <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_green_card', 10) !!}Green Card</span>
+                <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_id_license', 10) !!}ID / Driver&rsquo;s License</span>
+            </div>
+            <span style="display:flex; align-items:flex-end; gap:5pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
         </div>
-        {{-- Signature and QR are the same size on purpose — two matched boxes
-             filling the space at the foot of the page rather than a thin
-             strip with blank paper above it. --}}
-        <div style="flex:0 0 auto; width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; border:1px solid #111; border-radius:5pt; display:flex; align-items:flex-end; justify-content:center; padding-bottom:6pt; color:#8a93a5; font-size:8.5pt">Signature</div>
+        <div style="flex:0 0 auto; width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8pt; color:#8a93a5; font-size:8.5pt">Signature</div>
         <div style="flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4pt">
-            <span style="font-size:8pt; font-weight:700; color:#1a3fa0">Scan Me</span>
+            <span style="{{ $qyCaptionStyle }}">Scan Me</span>
             {{-- Sized for a phone camera to actually read when printed —
                  anything much smaller than this is unreliable to scan. --}}
             @if($qrUrl)
-                <img src="{{ $qrUrl }}" alt="Zelle QR code" style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; object-fit:contain; border:1px solid #111; border-radius:4pt">
+                <img src="{{ $qrUrl }}" alt="Zelle QR code" style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; object-fit:contain; border:1px solid #111; border-radius:6pt">
             @else
-                <div style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; border:1px dashed #999; border-radius:4pt; display:flex; align-items:center; justify-content:center; font-size:7pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
+                <div style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; box-sizing:border-box; border:1px dashed #999; border-radius:6pt; display:flex; align-items:center; justify-content:center; font-size:7pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
             @endif
         </div>
     </div>
