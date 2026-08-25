@@ -15,7 +15,10 @@
         print-color-adjust:exact;
         -webkit-print-color-adjust:exact;
     }
-    .qy-page-1{padding:0.2in 0.3in; gap:3pt; font-size:8.6pt; line-height:1.3}
+    .qy-page-1{padding:0.15in 0.3in; gap:2pt; font-size:8.6pt; line-height:1.3}  /* padding and gap are trimmed on purpose: page 1 is a fixed 11in box with
+     no slack, and the height freed here is what the Signature/QR boxes grew
+     into. The 17 field rows are deliberately NOT tightened - they are written
+     in by hand. */
     .qy-page-2{padding:0.3in 0.42in; gap:8pt; font-size:9.2pt; line-height:1.32}
     .qy-page a{color:#1a3fa0}
 

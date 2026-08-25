@@ -226,28 +226,28 @@
     <table style="width:100%; border-collapse:collapse; font-size:10pt">
         <thead>
             <tr style="background:#d99215; color:#111; font-weight:700; text-align:center">
-                <th style="border:1px solid #111; padding:5pt; width:34%">Trip</th>
-                <th style="border:1px solid #111; padding:5pt; width:33%">5-Star Package</th>
-                <th style="border:1px solid #111; padding:5pt; width:33%">Land Package</th>
+                <th style="border:1px solid #111; padding:3.5pt; width:34%">Trip</th>
+                <th style="border:1px solid #111; padding:3.5pt; width:33%">5-Star Package</th>
+                <th style="border:1px solid #111; padding:3.5pt; width:33%">Land Package</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="border:1px solid #111; padding:4pt 9pt"><span style="display:flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_5star', 10) !!}Round Trip</span></td>
-                <td style="border:1px solid #111; padding:4pt; text-align:center">$3,150</td>
-                <td style="border:1px solid #111; padding:4pt; text-align:center"><span style="display:inline-flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_land', 10) !!}$1,650</span></td>
+                <td style="border:1px solid #111; padding:3pt 9pt"><span style="display:flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_5star', 10) !!}Round Trip</span></td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center">$3,150</td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center"><span style="display:inline-flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_land', 10) !!}$1,650</span></td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:4pt 9pt"><span style="display:flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'one_way_5star', 10) !!}One-Way Trip</span></td>
-                <td style="border:1px solid #111; padding:4pt; text-align:center">$2,650</td>
-                <td style="border:1px solid #111; padding:4pt; text-align:center">&mdash;</td>
+                <td style="border:1px solid #111; padding:3pt 9pt"><span style="display:flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'one_way_5star', 10) !!}One-Way Trip</span></td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center">$2,650</td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center">&mdash;</td>
             </tr>
         </tbody>
     </table>
 
     <div>
         <div style="color:#1a3fa0; font-weight:700; font-size:10.5pt; margin-bottom:3pt">Instructions and documents required:</div>
-        <ul style="margin:0; padding-left:16pt; font-size:8.8pt; line-height:1.3; display:flex; flex-direction:column; gap:2pt">
+        <ul style="margin:0; padding-left:16pt; font-size:8.8pt; line-height:1.26; display:flex; flex-direction:column; gap:1pt">
             <li>1 passport-size photograph with a white background. If the visa system does not recognize the photograph, additional photographs may be requested.</li>
             <li>Copy of passport valid for at least 6 months; copy of Green Card if you are not a U.S. citizen. 2 Pages of Indian Passport.</li>
             <li>Copy of State ID card or Driver&rsquo;s License.</li>
@@ -351,7 +351,7 @@
         </tbody>
     </table>
 
-    <ul style="margin:0; padding-left:15pt; font-size:8.3pt; line-height:1.28; display:flex; flex-direction:column; gap:1.5pt">
+    <ul style="margin:0; padding-left:15pt; font-size:8.3pt; line-height:1.26; display:flex; flex-direction:column; gap:0.5pt">
         <li>This application is valid through September 15, 2026. Add $100 for applications submitted from September 20 through October 15, 2026.</li>
         <li>You must follow all group rules and regulations.</li>
         <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
@@ -360,7 +360,26 @@
     </ul>
 
     @php
-        $qyBoxSize = '118pt';
+        // Page 1 is a fixed 11in box carrying no slack, so these are measured
+        // rather than guessed: they are exactly what the trimmed padding above
+        // frees up. Raising either without taking the height from somewhere
+        // pushes the sheet onto a third page.
+        //
+        // Two numbers, not one. The row is as tall as the QR column, and the QR
+        // column is "Scan Me" plus the code — so Uploads and Signature can be
+        // that whole height while the QR box is that height less the caption.
+        // They used to share one size, which left Signature ~15pt short of its
+        // own row for no reason.
+        $qyPanelHeight = '164pt';   // Uploads + Signature, and the row itself
+        $qyQrSize      = '148pt';   // the QR box; Scan Me sits in the gap above
+
+        // The code is printed to be scanned off paper, and a scanner needs a
+        // white margin around it to find the thing at all. The uploaded PNG has
+        // none — its modules run straight into a dark edge — so the margin is
+        // added here. It costs the code a little area and is still well worth
+        // it. See the note by the <img> below.
+        $qyQuietZone = '8pt';
+
         $qyCaptionStyle = 'font-family:\'Archivo Narrow\',sans-serif; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; font-size:7.6pt; color:#1a3fa0';
     @endphp
     {{-- Three matched, bordered panels — Uploads no longer trails off as a
@@ -371,7 +390,7 @@
          Scan Me labels the code from above so the code itself loses no area
          to a caption competing for space inside it. --}}
     <div style="display:flex; align-items:flex-end; gap:12pt; margin-top:auto">
-        <div style="flex:1; height:{{ $qyBoxSize }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:8pt 11pt; display:flex; flex-direction:column; justify-content:space-between; font-size:8.6pt">
+        <div style="flex:1 1 auto; min-width:0; height:{{ $qyPanelHeight }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:8pt 11pt; display:flex; flex-direction:column; justify-content:space-between; font-size:8.6pt">
             <span style="{{ $qyCaptionStyle }}">Uploads</span>
             <div style="display:flex; flex-direction:column; gap:7pt">
                 <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_passport', 10) !!}Passport</span>
@@ -380,16 +399,27 @@
             </div>
             <span style="display:flex; align-items:flex-end; gap:5pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
         </div>
-        <div style="flex:0 0 auto; width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8pt; color:#8a93a5; font-size:8.5pt">Signature</div>
+        <div style="flex:0 0 auto; width:{{ $qyPanelHeight }}; height:{{ $qyPanelHeight }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8pt; color:#8a93a5; font-size:8.5pt">Signature</div>
         <div style="flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4pt">
             <span style="{{ $qyCaptionStyle }}">Scan Me</span>
-            {{-- Sized for a phone camera to actually read when printed —
-                 anything much smaller than this is unreliable to scan. --}}
-            @if($qrUrl)
-                <img src="{{ $qrUrl }}" alt="Zelle QR code" style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; object-fit:contain; border:1px solid #111; border-radius:6pt">
-            @else
-                <div style="width:{{ $qyBoxSize }}; height:{{ $qyBoxSize }}; box-sizing:border-box; border:1px dashed #999; border-radius:6pt; display:flex; align-items:center; justify-content:center; font-size:7pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
-            @endif
+            {{-- Sized for a phone camera to actually read off the printed
+                 sheet. Two things decide whether it does: how large the code
+                 lands on paper, and whether it has a white quiet zone around
+                 it. The uploaded PNG supplies neither — its modules run into a
+                 dark edge with no margin — so the box is padded white and the
+                 code is fitted inside that.
+
+                 The dark edge is baked into the image and cannot be fixed from
+                 here. A QR with a white border and a shorter payload (fewer,
+                 chunkier modules) re-uploaded in Admin > Payment Settings will
+                 scan better than any amount of enlarging in this template. --}}
+            <div style="width:{{ $qyQrSize }}; height:{{ $qyQrSize }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; background:#fff; padding:{{ $qyQuietZone }}">
+                @if($qrUrl)
+                    <img src="{{ $qrUrl }}" alt="Zelle QR code" style="width:100%; height:100%; object-fit:contain; display:block">
+                @else
+                    <div style="width:100%; height:100%; border:1px dashed #999; border-radius:4pt; display:flex; align-items:center; justify-content:center; font-size:7pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
