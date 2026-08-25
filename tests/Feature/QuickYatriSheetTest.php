@@ -320,6 +320,12 @@ class QuickYatriSheetTest extends TestCase
 
         $this->assertStringContainsString('name="cell_phone" value="+1 (786) 516 2525"', $body);
 
+        // Server-side shaping only runs at render time, so the field also
+        // carries the hook for the live mask that shapes it while it is typed.
+        // Behaviour of the mask itself is covered by the CDP script, not here.
+        $this->assertStringContainsString('class="qy-in qy-phone" name="cell_phone"', $body);
+        $this->assertStringContainsString(".querySelector('.qy-phone')", $body);
+
         $row->delete();
     }
 

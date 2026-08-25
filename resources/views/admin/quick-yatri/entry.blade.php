@@ -139,6 +139,78 @@
 </script>
 <script>
     (function () {
+        // Cell Phone No. takes its shape as it is typed — "+1 (786) 516 2525" —
+        // rather than only once the page is re-rendered. The same reshaping runs
+        // server-side in $phone (_sheet-body), which stays the authority: this is
+        // the typing affordance, not the rule.
+        //
+        // Capped at the 10 digits a US/Canada number has, so an international
+        // number cannot be entered here. That matches what the sheet is for; if
+        // that ever needs to change, the server-side formatter has to widen too.
+        var field = document.querySelector('.qy-phone');
+        if (!field) return;
+
+        var PREFIX = '+1 (';   // fixed, never typed — and it contains a digit
+
+        function shape(digits) {
+            if (!digits) return '';
+            var out = PREFIX + digits.slice(0, 3);
+            if (digits.length > 3) out += ') ' + digits.slice(3, 6);
+            if (digits.length > 6) out += ' ' + digits.slice(6, 10);
+            return out;
+        }
+
+        // The "1" in "+1" must be dropped before counting, or backspacing into
+        // the prefix reads it back as the first digit of the number.
+        function strippedOfPrefix(value) {
+            return value.slice(0, 2) === '+1' ? value.slice(2) : value;
+        }
+
+        function digitsOnly(value) {
+            var d = strippedOfPrefix(value).replace(/\D/g, '');
+            // A pasted "1 786…" is the same number, not an 11th digit.
+            if (d.length === 11 && d.charAt(0) === '1') d = d.slice(1);
+            return d.slice(0, 10);
+        }
+
+        // How many of the number's own digits sit left of the caret.
+        function digitsBefore(value, caret) {
+            return strippedOfPrefix(value.slice(0, caret)).replace(/\D/g, '').length;
+        }
+
+        // Where the caret goes to sit just after that many digits, counting from
+        // past the prefix so the "+1" is never a landing spot.
+        function caretAfter(shaped, n) {
+            if (n <= 0) return Math.min(PREFIX.length, shaped.length);
+            var seen = 0;
+            for (var i = PREFIX.length; i < shaped.length; i++) {
+                if (/\d/.test(shaped.charAt(i)) && ++seen === n) return i + 1;
+            }
+            return shaped.length;
+        }
+
+        function reformat() {
+            var before = field.value;
+            var wanted = digitsBefore(before, field.selectionStart);
+            var shaped = shape(digitsOnly(before));
+
+            // Nothing to restyle — leave the caret exactly where the browser put
+            // it, so deleting a separator behaves the way the typist expects.
+            if (shaped === before) return;
+
+            field.value = shaped;
+            var pos = caretAfter(shaped, wanted);
+            field.setSelectionRange(pos, pos);
+        }
+
+        field.addEventListener('input', reformat);
+        // Paste and autofill do not always raise a useful input event first.
+        field.addEventListener('change', reformat);
+        reformat();
+    })();
+</script>
+<script>
+    (function () {
         // Show the chosen photograph in the box straight away.
         var input = document.querySelector('.qy-photo-label input[type=file]');
         if (!input) return;

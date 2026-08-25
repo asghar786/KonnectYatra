@@ -42,6 +42,10 @@
     // anything else stays exactly as typed rather than guessing at a shape
     // that doesn't fit. Because the entry field shows the tidied form too,
     // re-saving a record stores it back in that shape.
+    //
+    // This runs at render time only, so it cannot shape a number while it is
+    // being typed. The .qy-phone class is the hook the live mask in
+    // entry.blade.php's @section('js') binds to for that.
     $phone = function ($name) use ($row, $isEntry, $isBlank, $txt) {
         if ($isBlank) {
             return $txt($name);
@@ -51,12 +55,16 @@
         if (strlen($digits) === 11 && $digits[0] === '1') {
             $digits = substr($digits, 1);
         }
-        if (strlen($digits) !== 10) {
-            return $txt($name);
-        }
-        $formatted = '+1 (' . substr($digits, 0, 3) . ') ' . substr($digits, 3, 3) . ' ' . substr($digits, 6);
+        $formatted = strlen($digits) === 10
+            ? '+1 (' . substr($digits, 0, 3) . ') ' . substr($digits, 3, 3) . ' ' . substr($digits, 6)
+            : null;
         if ($isEntry) {
-            return '<input type="text" class="qy-in" name="' . $name . '" value="' . e($formatted) . '">';
+            return '<input type="text" class="qy-in qy-phone" name="' . $name
+                . '" value="' . e($formatted === null ? $raw : $formatted)
+                . '" inputmode="tel" autocomplete="tel">';
+        }
+        if ($formatted === null) {
+            return $txt($name);
         }
         return '<span class="qy-val">' . e($formatted) . '</span>';
     };
