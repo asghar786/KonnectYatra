@@ -34,3 +34,5 @@ dump_err.txt
 
 # Quick Yatri applicant photographs — uploaded in the admin, never in git.
 /public/quick_yatri_uploads/
+# Added by code-review-graph
+.code-review-graph/
