@@ -3,15 +3,16 @@
 namespace Tests\Feature;
 
 use App\Http\Controllers\Admin\PaymentSettingController;
-use App\Models\DepartureOrigin;
 use App\Models\QuickYatri;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Support\UsAirports;
 use Tests\TestCase;
 
 /**
- * The Round Trip departure-airport dropdown, the merged instructions, and the
- * option-bar checkboxes added to the Quick Yatri sheet (2026-08-24).
+ * The Quick Yatri sheet: the "Travelling from" airport dropdown, the merged
+ * instructions, the option-bar checkboxes (2026-08-24), and the CAPS/email/
+ * phone reading rules (2026-08-25).
  */
 class QuickYatriSheetTest extends TestCase
 {
@@ -46,10 +47,10 @@ class QuickYatriSheetTest extends TestCase
         );
 
         // Blank mode can't offer a dropdown on paper — a line to write on instead.
-        $this->assertStringContainsString('Round Trip <span class="qy-rule"', $body);
+        $this->assertStringContainsString('Travelling from</span><span class="qy-rule"', $body);
     }
 
-    public function test_entry_screen_lists_active_usa_departure_airports()
+    public function test_entry_screen_lists_every_us_airport_grouped_by_state()
     {
         $this->asAdmin();
 
@@ -58,8 +59,41 @@ class QuickYatriSheetTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('name="departure_airport_code"', false);
 
-        foreach (DepartureOrigin::where('country', 'USA')->where('status', 1)->pluck('airport_code') as $code) {
-            $response->assertSee('value="' . $code . '"', false);
+        $body = $response->getContent();
+
+        // Every airport in the bundled list, in a per-state optgroup.
+        $groups = UsAirports::grouped();
+        $this->assertSame(count($groups), substr_count($body, '<optgroup label='));
+        foreach ($groups as $state => $airports) {
+            $this->assertStringContainsString('<optgroup label="' . $state . '">', $body);
+        }
+        foreach (array_keys(UsAirports::flat()) as $code) {
+            $this->assertStringContainsString('value="' . $code . '"', $body);
+        }
+
+        // Airports the curated departure_origins list never carried - the whole
+        // point of the switch - plus one from a territory.
+        foreach (['ANC', 'BZN', 'PVD', 'SJU'] as $code) {
+            $this->assertStringContainsString('value="' . $code . '"', $body);
+        }
+    }
+
+    /**
+     * The bar asks one plain question now. The Round Trip / Land Package
+     * radios, the hard-coded ISB/LHE destination, and the booking_type field
+     * they fed were all removed from it on 2026-08-25.
+     */
+    public function test_the_top_bar_is_a_single_travelling_from_question()
+    {
+        $this->asAdmin();
+
+        foreach ([route('quick-yatri-create'), route('quick-yatri-blank')] as $url) {
+            $body = $this->get($url)->getContent();
+
+            $this->assertStringContainsString('Travelling from', $body);
+            $this->assertStringNotContainsString('ISB/LHE', $body);
+            $this->assertStringNotContainsString('booking_type', $body);
+            $this->assertStringNotContainsString('round_trip_phl', $body);
         }
     }
 
@@ -69,7 +103,6 @@ class QuickYatriSheetTest extends TestCase
 
         $response = $this->post(route('quick-yatri-store'), [
             'applicant_name'          => 'QA Test Applicant',
-            'booking_type'            => 'round_trip_phl',
             'departure_airport_code'  => 'JFK',
         ]);
 
@@ -88,15 +121,14 @@ class QuickYatriSheetTest extends TestCase
 
         $row = QuickYatri::create([
             'applicant_name'         => 'QA Print Test',
-            'booking_type'           => 'round_trip_phl',
             'departure_airport_code' => 'PHL',
         ]);
 
         $response = $this->get(route('quick-yatri-print', $row->id));
 
         $response->assertStatus(200);
-        $response->assertSee('PHL', false);
-        $response->assertSee('Pennsylvania', false);
+        // "PHL — Philadelphia, PA": code, city, and state abbreviation.
+        $response->assertSee('PHL — Philadelphia, PA', false);
 
         $row->delete();
     }
@@ -133,8 +165,8 @@ class QuickYatriSheetTest extends TestCase
 
         // Pre-filled text, not the hand-writing line, and in the CODE/ST form
         // Rashad asked for.
-        $this->assertStringContainsString('Round Trip <span class="qy-val">MIA/FL</span>', $body);
-        $this->assertStringNotContainsString('Round Trip <span class="qy-rule"', $body);
+        $this->assertStringContainsString('<span class="qy-val qy-caps">MIA/FL</span>', $body);
+        $this->assertStringNotContainsString('Travelling from</span><span class="qy-rule"', $body);
     }
 
     public function test_blank_form_ignores_an_unknown_airport_code()
@@ -144,7 +176,7 @@ class QuickYatriSheetTest extends TestCase
         $body = $this->get(route('quick-yatri-blank', ['airport' => 'ZZZ']))->getContent();
 
         // Falls back to the writing line rather than printing a made-up code.
-        $this->assertStringContainsString('Round Trip <span class="qy-rule"', $body);
+        $this->assertStringContainsString('Travelling from</span><span class="qy-rule"', $body);
         $this->assertStringNotContainsString('ZZZ', $body);
     }
 
@@ -158,8 +190,10 @@ class QuickYatriSheetTest extends TestCase
         $response->assertSee('id="qyBlankAirport"', false);
         $response->assertSee('id="qyBlankLink"', false);
 
-        foreach (DepartureOrigin::where('country', 'USA')->where('status', 1)->pluck('airport_code') as $code) {
-            $response->assertSee('value="' . $code . '"', false);
+        $body = $response->getContent();
+        $this->assertSame(count(UsAirports::grouped()), substr_count($body, '<optgroup label='));
+        foreach (['PHL', 'ANC', 'BZN', 'SJU'] as $code) {
+            $this->assertStringContainsString('value="' . $code . '"', $body);
         }
     }
 
@@ -211,25 +245,80 @@ class QuickYatriSheetTest extends TestCase
         }
     }
 
-    public function test_print_mode_title_cases_names_and_formats_the_phone_number()
+    /**
+     * Every free-text answer reads in CAPS, email stays lowercase, and the cell
+     * number takes the house shape (2026-08-25). The capitals are a
+     * text-transform, so these assert the class the value carries rather than a
+     * re-cased string - the stored value is deliberately left untouched.
+     */
+    public function test_print_mode_caps_every_answer_except_email_and_formats_the_phone()
     {
         $this->asAdmin();
 
         $row = QuickYatri::create([
-            'applicant_name' => 'BANTA SINGH',
-            'father_name'    => 'SANTA SINGH',
-            'mother_name'    => 'santi kaur',
-            'family_member_1' => 'HASNAT',
-            'cell_phone'     => '17189089464', // 11 digits, leading 1
+            'applicant_name'  => 'BANTA SINGH',
+            'father_name'     => 'santa singh',
+            'mother_name'     => 'Santi Kaur',
+            'family_member_1' => 'hasnat',
+            'city'            => 'philadelphia',
+            'email'           => 'Banta.Singh@Gmail.COM',
+            'cell_phone'      => '17189089464', // 11 digits, leading 1
         ]);
 
         $body = $this->get(route('quick-yatri-print', $row->id))->getContent();
 
-        $this->assertStringContainsString('>Banta Singh<', $body);
-        $this->assertStringContainsString('>Santa Singh<', $body);
-        $this->assertStringContainsString('>Santi Kaur<', $body);
-        $this->assertStringContainsString('>Hasnat<', $body);
-        $this->assertStringContainsString('>+1 (718) 908-9464<', $body);
+        // Stored exactly as typed; the class does the capitalising.
+        foreach (['BANTA SINGH', 'santa singh', 'Santi Kaur', 'hasnat', 'philadelphia'] as $value) {
+            $this->assertStringContainsString('<span class="qy-val qy-caps">' . $value . '</span>', $body);
+        }
+
+        // Names are no longer singled out for Title Case - they are text like
+        // everything else, and all text is CAPS.
+        $this->assertStringNotContainsString('>Santa Singh<', $body);
+        $this->assertStringNotContainsString('>Hasnat<', $body);
+
+        // Email is the one field held the other way.
+        $this->assertStringContainsString(
+            '<span class="qy-val qy-lower">Banta.Singh@Gmail.COM</span>',
+            $body
+        );
+
+        // Spaces, not a hyphen, in the last two groups. Pinned to the whole
+        // formatted value: a bare '908-9464' also matches the footer's static
+        // contact line for Rashad, which is design copy and not this field.
+        $this->assertStringContainsString('>+1 (718) 908 9464<', $body);
+        $this->assertStringNotContainsString('>+1 (718) 908-9464<', $body);
+
+        $row->delete();
+    }
+
+    /** The two transform classes every mode hangs the reading rules on. */
+    public function test_the_sheet_stylesheet_defines_the_caps_and_lowercase_rules()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $this->assertStringContainsString('.qy-caps{text-transform:uppercase}', $body);
+        $this->assertStringContainsString('.qy-lower{text-transform:lowercase}', $body);
+    }
+
+    /**
+     * The entry form shows the tidied number too, not only the printed sheet,
+     * so re-saving a record stores it back in the house shape.
+     */
+    public function test_entry_form_shows_the_phone_in_the_house_format()
+    {
+        $this->asAdmin();
+
+        $row = QuickYatri::create([
+            'applicant_name' => 'QA Phone Test',
+            'cell_phone'     => '7865162525',
+        ]);
+
+        $body = $this->get(route('quick-yatri-edit', $row->id))->getContent();
+
+        $this->assertStringContainsString('name="cell_phone" value="+1 (786) 516 2525"', $body);
 
         $row->delete();
     }
