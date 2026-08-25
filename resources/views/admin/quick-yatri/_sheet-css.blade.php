@@ -41,6 +41,12 @@
     .qy-fill{display:inline-block; min-height:10pt}
     .qy-val{display:inline-block; min-height:10pt; word-break:break-word}
     .qy-in{width:100%; border:0; outline:0; background:transparent; font:inherit; color:#111; padding:0; min-width:0}
+    /* Every free-text answer reads in CAPS — while it is being typed and
+       in print — so the sheet is legible however it was filled in and
+       whatever state Caps Lock was in. Display only: the stored value is
+       whatever was typed. Email is the one field held the other way. */
+    .qy-caps{text-transform:uppercase}
+    .qy-lower{text-transform:lowercase}
     .qy-in.qy-rule{border-bottom:1px solid #111; height:13pt}
     .qy-in:focus{background:#eef4ff}
     .qy-grid td{vertical-align:middle}

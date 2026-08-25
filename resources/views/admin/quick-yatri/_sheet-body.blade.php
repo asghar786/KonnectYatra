@@ -12,44 +12,53 @@
     $isEntry = $mode === 'entry';
     $isBlank = $mode === 'blank';
 
-    // A free-text cell.
-    $txt = function ($name, $extra = '') use ($row, $isEntry, $isBlank) {
+    // A free-text cell. Every free-text answer on the sheet reads in CAPS —
+    // as it is typed, on screen and in print — so the sheet is legible
+    // whichever way the applicant filled it in and whatever state Caps Lock
+    // happened to be in. text-transform does that in one place for all three
+    // modes and leaves the stored value untouched; $mail below is the one
+    // exception. There is no separate Title Case treatment for person names
+    // any more — names are text, and all text is CAPS.
+    $txt = function ($name, $extra = '', $cls = ' qy-caps') use ($row, $isEntry, $isBlank) {
         if ($isEntry) {
-            return '<input type="text" class="qy-in" name="' . $name . '" value="' . e(old($name, $row->{$name})) . '"' . $extra . '>';
+            return '<input type="text" class="qy-in' . $cls . '" name="' . $name . '" value="' . e(old($name, $row->{$name})) . '"' . $extra . '>';
         }
         if ($isBlank) {
             return '<span class="qy-fill"></span>';
         }
-        return '<span class="qy-val">' . e($row->{$name}) . '</span>';
+        return '<span class="qy-val' . $cls . '">' . e($row->{$name}) . '</span>';
     };
 
-    // Person names print in proper Title Case ("Banta Singh") no matter how
-    // they were typed — passport-style ALL CAPS entry is common and still
-    // fine to type; this only changes how it prints, never what is stored.
-    $personName = function ($name, $extra = '') use ($row, $isEntry, $isBlank, $txt) {
-        if ($isEntry || $isBlank) {
-            return $txt($name, $extra);
-        }
-        $value = (string) $row->{$name};
-        return '<span class="qy-val">' . e($value === '' ? '' : \Illuminate\Support\Str::title($value)) . '</span>';
+    // Email is the one answer that stays lowercase: it gets read back and
+    // typed into a mail client, where CAPS only makes it harder to check.
+    // The controller already lower-cases it on save; this also tidies rows
+    // saved before it did.
+    $mail = function ($name) use ($txt) {
+        return $txt($name, '', ' qy-lower');
     };
 
-    // A US/Canada cell number prints as "+1 (718) 908-9464". Only reshapes a
-    // clean 10-digit number (or 11 with a leading 1) — anything else prints
-    // exactly as typed rather than guessing at a shape that doesn't fit.
+    // A US/Canada cell number reads "+1 (786) 516 2525" — typed, shown and
+    // printed. Only reshapes a clean 10-digit number (or 11 with a leading 1);
+    // anything else stays exactly as typed rather than guessing at a shape
+    // that doesn't fit. Because the entry field shows the tidied form too,
+    // re-saving a record stores it back in that shape.
     $phone = function ($name) use ($row, $isEntry, $isBlank, $txt) {
-        if ($isEntry || $isBlank) {
+        if ($isBlank) {
             return $txt($name);
         }
-        $digits = preg_replace('/\D/', '', (string) $row->{$name});
+        $raw = $isEntry ? (string) old($name, $row->{$name}) : (string) $row->{$name};
+        $digits = preg_replace('/\D/', '', $raw);
         if (strlen($digits) === 11 && $digits[0] === '1') {
             $digits = substr($digits, 1);
         }
-        if (strlen($digits) === 10) {
-            $formatted = '+1 (' . substr($digits, 0, 3) . ') ' . substr($digits, 3, 3) . '-' . substr($digits, 6);
-            return '<span class="qy-val">' . e($formatted) . '</span>';
+        if (strlen($digits) !== 10) {
+            return $txt($name);
         }
-        return $txt($name);
+        $formatted = '+1 (' . substr($digits, 0, 3) . ') ' . substr($digits, 3, 3) . ' ' . substr($digits, 6);
+        if ($isEntry) {
+            return '<input type="text" class="qy-in" name="' . $name . '" value="' . e($formatted) . '">';
+        }
+        return '<span class="qy-val">' . e($formatted) . '</span>';
     };
 
     // Dates read as DD-MMM-YYYY everywhere — 21-AUG-2026 — typed, shown and
@@ -120,7 +129,7 @@
             // page), so every sheet handed out there already reads e.g.
             // "MIA/FL" instead of leaving a line to write on.
             if ($row->departure_airport_code) {
-                return '<span class="qy-val">' . e(\App\Support\UsAirports::shortLabel($row->departure_airport_code)) . '</span>';
+                return '<span class="qy-val qy-caps">' . e(\App\Support\UsAirports::shortLabel($row->departure_airport_code)) . '</span>';
             }
             // Outside a table cell, unlike every other free-text field on the
             // sheet, so it needs its own writing line — qy-rule, the same
@@ -132,11 +141,11 @@
             if (!$code) {
                 return '<span class="qy-val">&mdash;</span>';
             }
-            return '<span class="qy-val">' . e(\App\Support\UsAirports::label($code)) . '</span>';
+            return '<span class="qy-val qy-caps">' . e(\App\Support\UsAirports::label($code)) . '</span>';
         }
 
         $selected = strtoupper((string) old('departure_airport_code', $row->departure_airport_code));
-        $html = '<select class="qy-in" name="departure_airport_code" style="max-width:250pt">';
+        $html = '<select class="qy-in qy-caps" name="departure_airport_code" style="max-width:250pt">';
         $html .= '<option value="">Select airport&hellip;</option>';
         // A code saved before this list existed (or since retired) would
         // otherwise vanish silently on the next save, so carry it as its own
@@ -252,7 +261,7 @@
         <tbody>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Name of Applicant:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt; width:29%">{!! $personName('applicant_name', ' required') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:29%">{!! $txt('applicant_name', ' required') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Gender:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:33%"><span style="display:flex; gap:22pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'M') !!}M</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'F') !!}F</span></span></td>
             </tr>
@@ -266,13 +275,13 @@
                 <td style="border:1px solid #111; padding:2pt 6pt">Cell Phone No.:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">{!! $phone('cell_phone') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Email:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('email') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $mail('email') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Father&rsquo;s Name:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('father_name') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('father_name') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Mother&rsquo;s Name:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('mother_name') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('mother_name') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Citizenship / Nationality:</td>
@@ -306,9 +315,9 @@
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Family Member 1:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('family_member_1') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_member_1') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Family Member 2:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $personName('family_member_2') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('family_member_2') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Marital Status:</td>
