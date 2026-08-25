@@ -70,8 +70,12 @@
                     <div class="qy-blank-picker">
                         <select id="qyBlankAirport" title="Pre-fill the departure airport on the blank form">
                             <option value="">Blank (write in)</option>
-                            @foreach($usOrigins as $o)
-                                <option value="{{ $o->airport_code }}">{{ $o->airport_code }} &mdash; {{ $o->airport_name }}</option>
+                            @foreach($airportGroups as $state => $airports)
+                                <optgroup label="{{ $state }}">
+                                    @foreach($airports as $code => $airport)
+                                        <option value="{{ $code }}">{{ $code }} &mdash; {{ $airport[0] }}</option>
+                                    @endforeach
+                                </optgroup>
                             @endforeach
                         </select>
                         <a href="{{ route('quick-yatri-blank') }}" target="_blank" rel="noopener" id="qyBlankLink" class="qy-cta dl"><i class="fa fa-download"></i> Download Blank Form</a>

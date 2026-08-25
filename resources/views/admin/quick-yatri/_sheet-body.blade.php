@@ -107,52 +107,50 @@
         return '<span class="qy-rule">' . ($isBlank ? '' : e($row->{$name})) . '</span>';
     };
 
-    // Round Trip used to be locked to one hard-coded route, "PHL-ISB/LHE-PHL
-    // (PA/DE/NJ-SO)". This offers every active USA departure airport instead —
-    // the same departure_origins table the public packages selector reads, so
-    // there is one admin-managed list rather than a second one invented here.
-    // Blank mode can't offer a dropdown on paper, so it gets a line to write on.
-    $usOrigins = \App\Models\DepartureOrigin::where('country', 'USA')->where('status', 1)
-        ->orderBy('sort_order')->orderBy('state')
-        ->get(['airport_code', 'airport_name', 'state']);
-
-    $airport = function () use ($row, $isEntry, $isBlank, $usOrigins) {
+    // "Travelling from" is a plain departure-airport question, so it offers
+    // every US airport with commercial service (App\Support\UsAirports),
+    // grouped by state — not the short departure_origins list, which is the
+    // curated set of routes the public packages selector sells and would be
+    // wrong to answer this with. Blank mode can't offer a dropdown on paper,
+    // so it gets a line to write on.
+    $airport = function () use ($row, $isEntry, $isBlank) {
         if ($isBlank) {
             // A representative working one region's signup event can pre-fill
             // this via ?airport=CODE on the blank-form link (Quick Yatri list
             // page), so every sheet handed out there already reads e.g.
             // "MIA/FL" instead of leaving a line to write on.
             if ($row->departure_airport_code) {
-                $origin = $usOrigins->firstWhere('airport_code', $row->departure_airport_code);
-                $abbr = $origin ? \App\Support\GurdwaraGeo::stateAbbreviation($origin->state) : '';
-                $label = e($row->departure_airport_code) . ($abbr !== '' ? '/' . e($abbr) : '');
-                return '<span class="qy-val">' . $label . '</span>';
+                return '<span class="qy-val">' . e(\App\Support\UsAirports::shortLabel($row->departure_airport_code)) . '</span>';
             }
             // Outside a table cell, unlike every other free-text field on the
             // sheet, so it needs its own writing line — qy-rule, the same
             // class the Signature line uses for the same reason.
-            return '<span class="qy-rule" style="min-width:110pt"></span>';
+            return '<span class="qy-rule" style="min-width:150pt"></span>';
         }
         if (!$isEntry) {
             $code = $row->departure_airport_code;
             if (!$code) {
                 return '<span class="qy-val">&mdash;</span>';
             }
-            $origin = $usOrigins->firstWhere('airport_code', $code);
-            $label = e($code) . ($origin ? ' &mdash; ' . e($origin->state) : '');
-            return '<span class="qy-val">' . $label . '</span>';
+            return '<span class="qy-val">' . e(\App\Support\UsAirports::label($code)) . '</span>';
         }
 
-        $selected = old('departure_airport_code', $row->departure_airport_code);
-        $html = '<select class="qy-in" name="departure_airport_code" style="max-width:145pt">';
+        $selected = strtoupper((string) old('departure_airport_code', $row->departure_airport_code));
+        $html = '<select class="qy-in" name="departure_airport_code" style="max-width:250pt">';
         $html .= '<option value="">Select airport&hellip;</option>';
-        if ($selected && !$usOrigins->contains('airport_code', $selected)) {
+        // A code saved before this list existed (or since retired) would
+        // otherwise vanish silently on the next save, so carry it as its own
+        // option rather than dropping the record's answer.
+        if ($selected !== '' && !\App\Support\UsAirports::has($selected)) {
             $html .= '<option value="' . e($selected) . '" selected>' . e($selected) . ' (current)</option>';
         }
-        foreach ($usOrigins as $o) {
-            $sel = $selected === $o->airport_code ? ' selected' : '';
-            $label = e($o->airport_code) . ' &mdash; ' . e($o->state);
-            $html .= '<option value="' . e($o->airport_code) . '"' . $sel . '>' . $label . '</option>';
+        foreach (\App\Support\UsAirports::grouped() as $state => $airports) {
+            $html .= '<optgroup label="' . e($state) . '">';
+            foreach ($airports as $code => $airport) {
+                $sel = $selected === $code ? ' selected' : '';
+                $html .= '<option value="' . $code . '"' . $sel . '>' . e($code . ' — ' . $airport[0]) . '</option>';
+            }
+            $html .= '</optgroup>';
         }
         $html .= '</select>';
         return $html;
@@ -199,9 +197,8 @@
                     <div style="display:flex; align-items:flex-end; gap:5pt">LP#:{!! $ref('lp_no') !!}</div>
                 </div>
             </div>
-            <div style="border:1px solid #111; padding:5pt 10pt; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8pt 12pt; font-size:10.5pt">
-                <span style="display:flex; align-items:center; gap:6pt; flex-wrap:wrap">{!! $radio('booking_type', 'round_trip_phl', 9) !!}Round Trip {!! $airport() !!} &mdash; ISB/LHE</span>
-                <span style="display:flex; align-items:center; gap:7pt">{!! $radio('booking_type', 'land_package', 9) !!}Land Package</span>
+            <div style="border:1px solid #111; padding:5pt 10pt; display:flex; align-items:center; flex-wrap:wrap; gap:8pt 10pt; font-size:10.5pt">
+                <span style="font-weight:600; white-space:nowrap">Travelling from</span>{!! $airport() !!}
             </div>
         </div>
     </div>

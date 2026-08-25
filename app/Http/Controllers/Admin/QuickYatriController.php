@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\DepartureOrigin;
 use App\Models\QuickYatri;
+use App\Support\UsAirports;
 use App\Support\YatriDate;
 use Illuminate\Http\Request;
 
@@ -28,12 +28,11 @@ class QuickYatriController extends Controller
 
         // Feeds the "Download Blank Form" airport picker — a representative
         // working one region (e.g. a Miami event) can hand out sheets that
-        // already show that departure airport instead of a blank line.
-        $usOrigins = DepartureOrigin::where('country', 'USA')->where('status', 1)
-            ->orderBy('sort_order')->orderBy('state')
-            ->get(['airport_code', 'airport_name', 'state']);
+        // already show that departure airport instead of a blank line. Same
+        // full US list the sheet's own "Travelling from" dropdown offers.
+        $airportGroups = UsAirports::grouped();
 
-        return view('admin.quick-yatri.index', compact('rows', 'usOrigins'));
+        return view('admin.quick-yatri.index', compact('rows', 'airportGroups'));
     }
 
     public function create()
@@ -91,14 +90,13 @@ class QuickYatriController extends Controller
     {
         $row = new QuickYatri();
 
-        // Optional ?airport=CODE pre-fills the Round Trip line on the printed
-        // blank sheet (e.g. "MIA/FL") instead of leaving a line to write on —
-        // for a representative handing out sheets at one region's event, where
-        // every candidate signing up there departs from the same airport.
-        // Never persisted; $row here only ever renders, it is not saved.
-        $airport = trim((string) request('airport'));
-        if ($airport !== '' && DepartureOrigin::where('country', 'USA')->where('status', 1)
-                ->where('airport_code', $airport)->exists()) {
+        // Optional ?airport=CODE pre-fills the "Travelling from" line on the
+        // printed blank sheet (e.g. "MIA/FL") instead of leaving a line to
+        // write on — for a representative handing out sheets at one region's
+        // event, where every candidate signing up there departs from the same
+        // airport. Never persisted; $row here only ever renders, it is not saved.
+        $airport = strtoupper(trim((string) request('airport')));
+        if (UsAirports::has($airport)) {
             $row->departure_airport_code = $airport;
         }
 
@@ -187,10 +185,14 @@ class QuickYatriController extends Controller
             'rt_no'                => ['nullable', 'string', 'max:50'],
             'ow_no'                => ['nullable', 'string', 'max:50'],
             'lp_no'                => ['nullable', 'string', 'max:50'],
-            'booking_type'         => ['nullable', 'string', 'in:round_trip_phl,land_package'],
-            // Not Rule::in() against the live departure_origins list on purpose — an
-            // airport an admin later deactivates must not block re-saving an existing
-            // record that already picked it, the same reasoning as the package form's
+            // booking_type is not listed: the Round Trip / Land Package radios it
+            // fed were removed from the sheet's top bar, so nothing posts it any
+            // more. Validating it here would write null over the value already
+            // stored on older records every time one of them is re-saved.
+            //
+            // Not Rule::in() against the UsAirports list on purpose — a code
+            // saved before that list existed must not block re-saving the record
+            // that already picked it, the same reasoning as the package form's
             // "(current)" option (see the 2026-07-23 decision).
             'departure_airport_code' => ['nullable', 'string', 'max:10'],
             'trip_option'          => ['nullable', 'string', 'in:round_trip_5star,one_way_5star,round_trip_land'],
