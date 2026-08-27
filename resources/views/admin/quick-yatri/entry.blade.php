@@ -228,4 +228,78 @@
         });
     })();
 </script>
+<script>
+    (function () {
+        // Amount / Paid / Balance, kept honest while the sheet is being typed.
+        // Only Paid is stored: Amount follows the ticked row of the grid (or
+        // this applicant's own agreed price, carried in data-base) plus the
+        // wheelchair surcharge, and Balance is the difference. The same three
+        // figures are computed server-side by QuickYatri::grandTotal() /
+        // balanceAmount(), which stay the authority — this is the typing
+        // affordance, so a price ticked and a deposit typed show their balance
+        // before the page is saved, not after.
+        var amountLine = document.getElementById('qyAmountLine');
+        var balanceLine = document.getElementById('qyBalanceLine');
+        var paid = document.querySelector('.qy-paid');
+        if (!amountLine || !balanceLine || !paid) return;
+
+        var prices = {};
+        try {
+            prices = JSON.parse(amountLine.getAttribute('data-prices')) || {};
+        } catch (e) {
+            return;
+        }
+        var fee = parseFloat(amountLine.getAttribute('data-fee')) || 0;
+        // Set only when this row was given its own price in the list page's
+        // price dialog. It is not editable here, so it overrides the grid for
+        // as long as the record carries it — matching baseAmount().
+        var customBase = parseFloat(amountLine.getAttribute('data-base'));
+        var hasCustomBase = !isNaN(customBase);
+
+        var trip = document.querySelectorAll('input[name=trip_option]');
+        var wheelchair = document.querySelector('input[name=wheelchair_full_trip]');
+
+        // "$3,150" — whole dollars, the shape QuickYatri::money() prints,
+        // negatives included: an overpayment reads "-$350", not "$-350".
+        function money(value) {
+            var n = Math.round(value);
+            return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US');
+        }
+
+        // What the office typed, however they typed it: "$1,200" and "1200" are
+        // the same deposit on a paper form. The controller normalises the same
+        // way on save; this only decides what Balance shows meanwhile.
+        function paidValue() {
+            var n = parseFloat(paid.value.replace(/[$,\s]/g, ''));
+            return isNaN(n) ? 0 : n;
+        }
+
+        // null until a price is settled — nothing ticked and no agreed price
+        // means there is no total yet, and a blank line says so better than $0.
+        function total() {
+            var surcharge = wheelchair && wheelchair.checked ? fee : 0;
+            if (hasCustomBase) return customBase + surcharge;
+            for (var i = 0; i < trip.length; i++) {
+                if (trip[i].checked && prices[trip[i].value] !== undefined) {
+                    return prices[trip[i].value] + surcharge;
+                }
+            }
+            return null;
+        }
+
+        function refresh() {
+            var sum = total();
+            amountLine.textContent = sum === null ? '' : money(sum);
+            balanceLine.textContent = sum === null ? '' : money(sum - paidValue());
+        }
+
+        for (var i = 0; i < trip.length; i++) {
+            trip[i].addEventListener('change', refresh);
+        }
+        if (wheelchair) wheelchair.addEventListener('change', refresh);
+        paid.addEventListener('input', refresh);
+        paid.addEventListener('change', refresh);
+        refresh();
+    })();
+</script>
 @endsection

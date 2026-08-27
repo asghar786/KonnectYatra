@@ -415,12 +415,27 @@
         $qyCaptionStyle = 'font-family:\'Archivo Narrow\',sans-serif; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; font-size:8pt; color:#1a3fa0';
     @endphp
     <div style="display:flex; align-items:stretch; gap:12pt; margin-top:auto">
-        {{-- 60% — the conditions of the application, and the date it was signed.
+        {{-- 60% — the conditions of the application, the money line, and the
+             date it was signed.
              The 7pt gap is measured like the square's side, and it is what pays
              for the first bullet being editable: at 8pt a five-line bullet drove
              the row 0.9px past the square, and page 1 has nothing to give. --}}
         <div style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:9pt 12pt; display:flex; flex-direction:column; justify-content:space-between; gap:7pt">
-            <ul style="margin:0; padding-left:15pt; font-size:9.2pt; line-height:1.34; display:flex; flex-direction:column; gap:11pt">
+            {{-- The bullets are spaced by *distributing* what the panel has
+                 left over, not by a fixed gap: this list shares a 218pt box
+                 with the money line and the payment line, and the first bullet
+                 is editable up to VALIDITY_NOTE_MAX characters — five lines
+                 when it is used in full. A fixed 11pt gap read beautifully at
+                 the default note and drove the panel 24.6px past the square at
+                 the longest one, which is a third printed page. So 5pt is the
+                 floor, flex:1 hands the list the panel's slack, and
+                 space-between spreads it back between the bullets: at ordinary
+                 note lengths the spacing lands back at ~11pt and the sheet
+                 looks exactly as it did, while a long note simply tightens
+                 instead of overflowing. Measured, not chosen — re-measure the
+                 panel against the square (see the $qyPanelSide note) before
+                 changing either number. --}}
+            <ul style="margin:0; padding-left:15pt; font-size:9.2pt; line-height:1.34; display:flex; flex-direction:column; justify-content:space-between; flex:1 1 auto; gap:5pt">
                 {{-- Edited in the admin (Quick Yatri → Update prices) rather
                      than typed here: the deadline and the late fee move every
                      season. Capped at QuickYatri::VALIDITY_NOTE_MAX characters
@@ -432,6 +447,57 @@
                 <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
                 <li>Minimum deposit of <strong>$500</strong> accepted.</li>
             </ul>
+            @php
+                // Amount / Paid / Balance. Only **Paid** is stored: Amount is
+                // the trip's price (the ticked row of the grid, or this
+                // applicant's own agreed price, plus the wheelchair surcharge)
+                // and Balance is the difference — three stored numbers would
+                // eventually contradict each other on a printed page.
+                $qyAmount  = $isBlank ? null : $row->grandTotal();
+                $qyPaid    = $isBlank ? null : $row->paidAmount();
+                $qyBalance = $isBlank ? null : $row->balanceAmount();
+
+                $qyMoney = function ($value) {
+                    return $value === null ? '' : \App\Models\QuickYatri::money($value);
+                };
+
+                // The sheet prints whole dollars, but the column stores cents,
+                // and the entry field has to hand back exactly what is stored:
+                // showing a stored 1200.50 as "1200" would quietly drop 50c the
+                // next time the record was saved.
+                $qyTyped = function ($value) {
+                    if ($value === null) {
+                        return '';
+                    }
+
+                    return $value == (int) $value ? (string) (int) $value : rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
+                };
+
+                // Entry mode recomputes Amount and Balance as the option is
+                // ticked and the payment typed (see entry.blade.php), so it
+                // needs today's grid and the surcharge to compute from.
+                $qyPrices = [];
+                foreach ($grid as $qyKey => $qyOpt) {
+                    $qyPrices[$qyKey] = (float) $qyOpt['amount'];
+                }
+                $qyCustomBase = ($row->custom_price && $row->package_amount !== null)
+                    ? (float) $row->package_amount
+                    : null;
+
+                $qyCell = 'display:flex; align-items:flex-end; gap:4pt; flex:1 1 0; min-width:0';
+            @endphp
+            {{-- The money line, in the space the conditions leave above the
+                 signature row. Amount and Balance are read-only everywhere —
+                 on paper they are writing lines, on a saved record they are
+                 computed — so a figure here can never contradict the grid. --}}
+            <span style="display:flex; align-items:flex-end; gap:11pt; font-size:9pt">
+                <span style="{{ $qyCell }}">Amount:<span class="qy-rule" id="qyAmountLine"
+                    data-prices="{{ json_encode($qyPrices) }}"
+                    data-fee="{{ $wcFee }}"
+                    data-base="{{ $qyCustomBase }}">{{ $qyMoney($qyAmount) }}</span></span>
+                <span style="{{ $qyCell }}">Paid:@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="amount_paid" value="{{ old('amount_paid', $qyTyped($qyPaid)) }}" placeholder="0" autocomplete="off">@else<span class="qy-rule">{{ $qyMoney($qyPaid) }}</span>@endif</span>
+                <span style="{{ $qyCell }}">Balance:<span class="qy-rule" id="qyBalanceLine">{{ $qyMoney($qyBalance) }}</span></span>
+            </span>
             {{-- How they are paying, and the date signed, on ONE line. The tick
                  boxes go beside the Date rather than on a row of their own
                  because page 1 has no height to give: a second row costs ~16pt

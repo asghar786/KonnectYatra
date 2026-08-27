@@ -151,10 +151,18 @@ class QuickYatri extends Model
         SiteSetting::put(self::VALIDITY_NOTE_KEY, trim((string) $text));
     }
 
-    /** "$3,150" — whole dollars, the way every price reads on the sheet. */
+    /**
+     * "$3,150" — whole dollars, the way every price reads on the sheet.
+     *
+     * A price is never negative, but a Balance is: an overpayment reads
+     * "-$350", not "$-350", so the one figure on the sheet that can go below
+     * zero is still a legible amount of money.
+     */
     public static function money($amount): string
     {
-        return '$' . number_format((float) $amount);
+        $amount = (float) $amount;
+
+        return ($amount < 0 ? '-$' : '$') . number_format(abs($amount));
     }
 
     const BOOKING_TYPES = [
@@ -200,6 +208,24 @@ class QuickYatri extends Model
         }
 
         return $base + ($this->wheelchair_full_trip ? self::wheelchairFee() : 0.0);
+    }
+
+    /** What has been handed over so far; null when nothing is recorded yet. */
+    public function paidAmount(): ?float
+    {
+        return $this->amount_paid === null ? null : (float) $this->amount_paid;
+    }
+
+    /**
+     * What is still owed. Derived, never stored: the sheet prints Amount, Paid
+     * and Balance side by side, and three stored numbers would eventually
+     * disagree with each other.
+     */
+    public function balanceAmount(): ?float
+    {
+        $total = $this->grandTotal();
+
+        return $total === null ? null : $total - (float) ($this->amount_paid ?? 0);
     }
 
     /** Write `package_amount` / `total_amount` from whatever the row now says. */

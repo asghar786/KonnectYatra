@@ -268,6 +268,33 @@ class QuickYatriController extends Controller
         }
     }
 
+    /**
+     * "$1,200" and "1200" are the same number on a paper form, and the office
+     * types both. Strip the currency dressing before validation; anything that
+     * is not a number after that is left as typed so the `numeric` rule tells
+     * the admin, rather than this storing a guess.
+     */
+    private function normaliseMoney(Request $request): void
+    {
+        $raw = $request->input('amount_paid');
+
+        // Nothing typed means nothing recorded, so the sheet prints a blank
+        // line rather than "$0". ConvertEmptyStringsToNull normally does this
+        // for us; it is done here too because '' would reach a decimal column
+        // and be stored as 0.00, which reads as "paid nothing" instead of
+        // "not asked yet".
+        if ($raw === null || trim((string) $raw) === '') {
+            $request->merge(['amount_paid' => null]);
+
+            return;
+        }
+
+        $clean = str_replace([',', '$', ' '], '', trim((string) $raw));
+        if (is_numeric($clean)) {
+            $request->merge(['amount_paid' => $clean]);
+        }
+    }
+
     /** "Date of Birth must be a real date, e.g. 21-AUG-2026." for each date field. */
     private function dateMessages(): array
     {
@@ -288,6 +315,7 @@ class QuickYatriController extends Controller
     private function payload(Request $request, QuickYatri $existing = null): array
     {
         $this->normaliseDates($request);
+        $this->normaliseMoney($request);
 
         $data = $request->validate([
             'sr_no'                => ['nullable', 'string', 'max:50'],
@@ -332,6 +360,9 @@ class QuickYatriController extends Controller
             'nearest_gurdwara'     => ['nullable', 'string', 'max:255'],
             'gurdwara_city_state'  => ['nullable', 'string', 'max:255'],
             'signature_date'       => ['nullable', 'date_format:Y-m-d'],
+            // Typed on paper, so "$1,200" and "1200" have to mean the same
+            // thing — normalised just above, the way the dates are.
+            'amount_paid'          => ['nullable', 'numeric', 'min:0', 'max:999999'],
             'photo'                => ['nullable', 'image', 'max:4096'],
         ], $this->dateMessages());
 
