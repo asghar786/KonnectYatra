@@ -86,6 +86,33 @@
         return '<span class="qy-val' . $cls . '">' . e($row->stamp($name)) . '</span>';
     };
 
+    // The grid's prices are edited in the admin (Quick Yatri → Update prices),
+    // not typed into this template — a fare change must not need a deploy, and
+    // the blank sheet handed out at an event has to carry today's price.
+    $grid  = \App\Models\QuickYatri::tripOptions();
+    $wcFee = \App\Models\QuickYatri::wheelchairFee();
+
+    // An applicant quoted their own price (group size, departure airport, a
+    // rate agreed at an event) must see *their* price on their own sheet. It
+    // goes inside the cell their option is ticked in, with the grid price
+    // struck through beside it, rather than on a line of its own: page 1 is a
+    // fixed 11in box and it currently measures 11in exactly, so one extra line
+    // anywhere here spills onto a third printed page. The reason for the price
+    // is not printed for the same reason — it shows on the entry screen, in
+    // the list and in the price dialog, none of which are height-capped.
+    $agreed = (!$isBlank && $row->custom_price && $row->package_amount !== null)
+        ? \App\Models\QuickYatri::money($row->package_amount)
+        : null;
+
+    $price = function ($key) use ($grid, $row, $agreed) {
+        $standard = \App\Models\QuickYatri::money($grid[$key]['amount']);
+        if ($agreed === null || $row->trip_option !== $key) {
+            return e($standard);
+        }
+
+        return '<s style="color:#777; font-weight:400">' . e($standard) . '</s> <b>' . e($agreed) . '</b>';
+    };
+
     // Box sizes vary by context in the design (8pt in the grid, 9pt in the trip
     // band, 10pt in the price table), so each caller passes its own.
     $boxStyle = function ($size) {
@@ -234,16 +261,28 @@
         <tbody>
             <tr>
                 <td style="border:1px solid #111; padding:3pt 9pt"><span style="display:flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_5star', 10) !!}Round Trip</span></td>
-                <td style="border:1px solid #111; padding:3pt; text-align:center">$3,150</td>
-                <td style="border:1px solid #111; padding:3pt; text-align:center"><span style="display:inline-flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_land', 10) !!}$1,650</span></td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center">{!! $price('round_trip_5star') !!}</td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center"><span style="display:inline-flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'round_trip_land', 10) !!}{!! $price('round_trip_land') !!}</span></td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:3pt 9pt"><span style="display:flex; align-items:center; gap:9pt">{!! $radio('trip_option', 'one_way_5star', 10) !!}One-Way Trip</span></td>
-                <td style="border:1px solid #111; padding:3pt; text-align:center">$2,650</td>
+                <td style="border:1px solid #111; padding:3pt; text-align:center">{!! $price('one_way_5star') !!}</td>
                 <td style="border:1px solid #111; padding:3pt; text-align:center">&mdash;</td>
             </tr>
         </tbody>
     </table>
+
+    @if($isEntry && $agreed !== null)
+        {{-- Entry only. The admin editing this sheet needs to see the agreed
+             price and why it was given; the printed page cannot afford the
+             line (see $agreed above), and the blank form belongs to nobody. --}}
+        <div style="border:1px solid #1a3fa0; background:#eef2fb; padding:3.5pt 9pt; font-size:9.5pt; display:flex; align-items:baseline; gap:7pt; flex-wrap:wrap">
+            <span style="font-weight:700; color:#1a3fa0">Agreed price for this applicant:</span>
+            <span style="font-weight:700">{{ $agreed }}</span>
+            @if($row->price_note)<span style="color:#444">&mdash; {{ $row->price_note }}</span>@endif
+            <span style="color:#777; margin-left:auto">Change it from the price column on the Quick Yatri list.</span>
+        </div>
+    @endif
 
     <div>
         <div style="color:#1a3fa0; font-weight:700; font-size:10.5pt; margin-bottom:3pt">Instructions and documents required:</div>
@@ -260,7 +299,7 @@
          already added one because a stored record has to say which were chosen. --}}
     <div style="display:grid; grid-template-columns:1fr 1.12fr 1.12fr; gap:9pt">
         <div class="qy-bar">{!! $check('wheelchair_airport', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair at airport</div>
-        <div class="qy-bar">{!! $check('wheelchair_full_trip', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair throughout the trip (+$300)</div>
+        <div class="qy-bar">{!! $check('wheelchair_full_trip', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#9855;</span>Wheelchair throughout the trip (+{{ \App\Models\QuickYatri::money($wcFee) }})</div>
         <div class="qy-bar">{!! $check('meal_vegetarian', 16, 'qy-box-light') !!}<span class="qy-bar-ico">&#127860;</span>Meal preference: Vegetarian meals only</div>
     </div>
 

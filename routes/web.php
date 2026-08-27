@@ -206,6 +206,8 @@ Route::group(['prefix' => 'admin',
     // flex/grid, which dompdf cannot lay out); Ctrl+P -> Save as PDF downloads it.
     Route::get('/quick-yatri',[\App\Http\Controllers\Admin\QuickYatriController::class, 'index'])->name('quick-yatri');
     Route::get('/quick-yatri/blank',[\App\Http\Controllers\Admin\QuickYatriController::class, 'blank'])->name('quick-yatri-blank');
+    Route::post('/quick-yatri/prices',[\App\Http\Controllers\Admin\QuickYatriController::class, 'updatePrices'])->name('quick-yatri-prices');
+    Route::post('/quick-yatri/{id}/price',[\App\Http\Controllers\Admin\QuickYatriController::class, 'updateRowPrice'])->name('quick-yatri-row-price');
     Route::get('/quick-yatri/create',[\App\Http\Controllers\Admin\QuickYatriController::class, 'create'])->name('quick-yatri-create');
     Route::post('/quick-yatri/store',[\App\Http\Controllers\Admin\QuickYatriController::class, 'store'])->name('quick-yatri-store');
     Route::get('/quick-yatri/{id}/edit',[\App\Http\Controllers\Admin\QuickYatriController::class, 'edit'])->name('quick-yatri-edit');

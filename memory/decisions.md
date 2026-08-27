@@ -732,3 +732,61 @@ round-trip through the controller (rows deleted after), and the stale-code "(cur
 plus the three headless-Chrome screenshots above. Full suite green, 18/18.
 
 **Review:** see decisions.csv row dated 2026-08-24.
+
+---
+
+## 2026-08-27 — Quick Yatri prices: an editable grid, plus a price of one's own
+
+**The ask (Rashad, via a marked-up screenshot of `/admin/quick-yatri`):** a red box drawn around
+an imagined `WO: RT: LP: [UPDATE]` widget in the toolbar — "provide me option to change the prices
+OW (One Way), RT (Return Trip), LP (Land Package), so upon click show the modal for updated new
+price, and make it sure, there could be different price for different people and that can be many
+reason, due to their group size, due to their departure location etc."
+
+**Two features, deliberately kept separate.** The second half of that sentence is a constraint on
+the first, not a second modal for the same number:
+
+1. **The grid is one editable set of prices.** OW / RT / LP and the wheelchair-throughout
+   surcharge move out of `QuickYatri::TRIP_OPTIONS` and into `site_settings` (keys
+   `qy_price_*`), read back through `QuickYatri::tripOptions()` / `amountFor()` /
+   `wheelchairFee()`. The constant stays as the fallback default, so a **blanked** field falls
+   back to 3150/2650/1650/300 rather than pricing a trip at $0. No migration — the standing
+   "settings belong in the admin" rule.
+2. **One applicant can be quoted their own price.** `custom_price` (bool) + `price_note`
+   (varchar) on `quick_yatris`; `package_amount` becomes that person's real per-person price.
+   Set from the list's **Amount** cell, which is now a button.
+
+**Why a free-text reason and not a pricing matrix.** "many reason… due to their group size, due to
+their departure location **etc**" is open-ended. A group-size × departure-airport rules engine
+would encode two of the reasons and lock out the rest (the event rate, the repeat yatri, the
+goodwill discount). A per-row amount plus a typed reason covers every case and is the smaller
+build. `PdfPackagesSeeder` already has a departure-city price matrix for the *main* packages if
+that ever needs to feed Quick Yatri too.
+
+**The guard that matters most: a negotiated price must not evaporate.** `payload()` now reads
+`custom_price` off the existing row and leaves `package_amount` alone — re-saving the sheet for
+any other reason (fixing a phone number, adding a passport) can never quietly restore the grid
+price. Same for a grid change: the price modal's "also re-price the N saved applications still on
+standard pricing" tick only touches rows *not* flagged custom.
+
+**Page 1 has exactly zero slack — measured, not assumed.** The first design put an "Agreed price
+for this applicant" band under the price grid. Measured with headless Chrome
+(`clientHeight` vs `scrollHeight` on `.qy-page-1`): the sheet is **1056px / 1056px, overflow 0** —
+the 2026-08-24 comment that "page 1 is a fixed 11in box with no slack" is literally true. The band
+cost 16px and would have spilled a sliver onto a third printed page. The price therefore goes
+*inside* the cell the applicant's option is ticked in — grid price struck through, theirs in bold
+(`$̶3̶,̶1̶5̶0̶ $2,900`) — which costs nothing. The **reason** is not printed at all; it shows on the
+entry screen (not height-capped), in the list, and in the price dialog. Re-measured after: 0.
+
+**Modals are hand-rolled**, not the admin theme's Bootstrap — the Quick Yatri screens are
+hand-styled throughout and shouldn't break if the theme's modal plugin moves.
+
+**Deploy:** one new migration, batched in [[konnectyatra-pending-prod-migrations]].
+
+**Verified:** 12 new PHPUnit tests (`QuickYatriPricingTest`) covering the toolbar, the settings
+round-trip, the blank-field fallback, apply-existing on/off, the override + note, reset, clearing,
+a fresh application priced from the current grid, and the sheet placement; every setting the tests
+touch is snapshotted and restored (they run on the real local DB). Full suite green, 47/47. Plus
+headless-Chrome screenshots of the toolbar, both modals, the print sheet and the entry screen.
+
+**Review:** see decisions.csv row dated 2026-08-27.

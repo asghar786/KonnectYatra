@@ -32,7 +32,16 @@ class QuickYatriController extends Controller
         // full US list the sheet's own "Travelling from" dropdown offers.
         $airportGroups = UsAirports::grouped();
 
-        return view('admin.quick-yatri.index', compact('rows', 'airportGroups'));
+        // The editable price grid behind the toolbar's OW / RT / LP pills, plus
+        // how many saved rows still sit on standard pricing — the "apply to
+        // existing applications" tick in the price modal counts those.
+        $prices        = QuickYatri::tripOptions();
+        $wheelchairFee = QuickYatri::wheelchairFee();
+        $standardCount = $rows->where('custom_price', false)->whereNotNull('trip_option')->count();
+
+        return view('admin.quick-yatri.index', compact(
+            'rows', 'airportGroups', 'prices', 'wheelchairFee', 'standardCount'
+        ));
     }
 
     public function create()
@@ -115,6 +124,84 @@ class QuickYatriController extends Controller
             'mode'      => 'print',
             'autoPrint' => request()->boolean('print'),
         ]);
+    }
+
+    /**
+     * The grid itself — One-Way / Round Trip / Land Package, and the wheelchair
+     * surcharge. Kept in `site_settings` so the office can move a fare without a
+     * deploy; a field left blank clears the setting and that row falls back to
+     * the constant in the model rather than being priced at $0.
+     */
+    public function updatePrices(Request $request)
+    {
+        $rules = ['nullable', 'numeric', 'min:0', 'max:99999'];
+
+        $data = $request->validate([
+            'round_trip_5star'     => $rules,
+            'one_way_5star'        => $rules,
+            'round_trip_land'      => $rules,
+            'wheelchair_full_trip' => $rules,
+        ]);
+
+        QuickYatri::putPrices($data);
+
+        // A saved row stores the price it was quoted at, so moving the grid does
+        // not move it on its own. Ticking "apply to existing" re-stamps every
+        // row that is still on standard pricing; rows carrying their own agreed
+        // price are never touched either way.
+        $repriced = 0;
+        if ($request->boolean('apply_existing')) {
+            foreach (QuickYatri::where('custom_price', false)->whereNotNull('trip_option')->get() as $row) {
+                $row->repriceFromOptions();
+                if ($row->isDirty()) {
+                    $row->save();
+                    $repriced++;
+                }
+            }
+        }
+
+        $message = 'Prices updated.';
+        if ($repriced) {
+            $message .= ' ' . $repriced . ' saved ' . ($repriced === 1 ? 'application was' : 'applications were') . ' re-priced.';
+        }
+
+        return redirect()->route('quick-yatri')->with('success', $message);
+    }
+
+    /**
+     * One applicant's own price. Two yatris on the same trip option are not
+     * always quoted the same thing — group size, departure airport, an event
+     * rate — so a row can carry its own amount and the reason for it.
+     * Submitting the form with "reset" puts the row back on the grid price.
+     */
+    public function updateRowPrice(Request $request, $id)
+    {
+        $row = QuickYatri::findOrFail($id);
+
+        $data = $request->validate([
+            'package_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
+            'price_note'     => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $clearing = $request->boolean('reset')
+            || $data['package_amount'] === null
+            || $data['package_amount'] === '';
+
+        if ($clearing) {
+            $row->custom_price = false;
+            $row->price_note   = null;
+        } else {
+            $row->custom_price   = true;
+            $row->package_amount = (float) $data['package_amount'];
+            $row->price_note     = $data['price_note'] ?: null;
+        }
+
+        $row->repriceFromOptions();
+        $row->save();
+
+        return redirect()->route('quick-yatri')->with('success', $clearing
+            ? $row->applicant_name . ' is back on the standard price.'
+            : 'Price set for ' . $row->applicant_name . '.');
     }
 
     /* ---------------- helpers ---------------- */
@@ -243,11 +330,21 @@ class QuickYatriController extends Controller
 
         // Price follows the ticked row of the grid; the full-trip wheelchair is
         // the only option on the sheet that adds to it.
-        $base = QuickYatri::amountFor($data['trip_option'] ?? null);
+        //
+        // Unless this applicant was quoted their own price — a family booking
+        // six seats, a cheaper departure airport, a rate agreed at a gurdwara
+        // event. That is set from the list's price modal and flagged on the row,
+        // and re-saving the sheet must never quietly put the grid price back.
+        $custom = $existing && $existing->custom_price;
+        $base   = $custom
+            ? ($existing->package_amount === null ? null : (float) $existing->package_amount)
+            : QuickYatri::amountFor($data['trip_option'] ?? null);
+
+        $data['custom_price']   = (bool) $custom;
         $data['package_amount'] = $base;
         $data['total_amount']   = $base === null
             ? null
-            : $base + ($data['wheelchair_full_trip'] ? QuickYatri::WHEELCHAIR_FULL_TRIP_FEE : 0);
+            : $base + ($data['wheelchair_full_trip'] ? QuickYatri::wheelchairFee() : 0);
 
         if ($request->hasFile('photo')) {
             $dir = public_path(self::PHOTO_DIR);

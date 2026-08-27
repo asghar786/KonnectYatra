@@ -51,6 +51,56 @@
     .qy-empty{padding:40px; text-align:center; color:#999; font-size:15px}
     .qy-blank-picker{display:inline-flex; align-items:center; gap:8px}
     .qy-blank-picker select{border:1px solid #d4e2ff; border-radius:24px; padding:9px 14px; font-size:13px; color:#1a3fa0; background:#eaf2ff; outline:none; max-width:190px}
+
+    /* The price grid, live in the toolbar: OW / RT / LP as they stand today,
+       with the button that opens the modal to move them. */
+    .qy-prices{display:inline-flex; align-items:center; background:#fff; border:1px solid #e3e7ef; border-radius:24px; padding:3px 3px 3px 4px; box-shadow:0 2px 10px rgba(28,37,65,.07)}
+    .qy-prices .p{display:inline-flex; align-items:baseline; gap:6px; padding:6px 12px; white-space:nowrap; border-right:1px solid #eef0f4}
+    .qy-prices .p em{font-style:normal; font-size:10.5px; font-weight:700; letter-spacing:.07em; color:#9aa0ac}
+    .qy-prices .p b{font-size:13.5px; font-weight:700; color:#1f2a44; font-variant-numeric:tabular-nums}
+    .qy-prices .upd{border:none; cursor:pointer; background:#1f2a44; color:#fff; border-radius:20px; padding:7px 15px; font-size:11.5px; font-weight:700; letter-spacing:.06em; margin-left:6px; transition:background .12s}
+    .qy-prices .upd:hover{background:#f54e18}
+
+    /* The Amount cell is the way in to one applicant's own price. */
+    .qy-amt-btn{border:none; background:none; padding:0; cursor:pointer; text-align:left; display:flex; align-items:center; gap:7px; border-radius:8px; transition:opacity .12s}
+    .qy-amt-btn:hover{opacity:.65}
+    .qy-chip.custom{background:#fff3e6; color:#a24a06}
+    .qy-note-sm{display:block; color:#9aa0ac; font-size:11px; margin-top:3px; max-width:190px}
+
+    /* Self-contained modal — the Quick Yatri screens are hand-styled rather
+       than themed, and this must not depend on the admin theme's Bootstrap. */
+    .qy-modal{position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; padding:20px}
+    .qy-modal.open{display:flex}
+    .qy-modal-back{position:absolute; inset:0; background:rgba(18,24,40,.55)}
+    .qy-modal-box{position:relative; width:100%; max-width:530px; max-height:90vh; display:flex; flex-direction:column; background:#fff; border-radius:16px; box-shadow:0 26px 60px rgba(15,23,42,.3); overflow:hidden}
+    .qy-modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:20px 22px 14px; border-bottom:1px solid #f0f2f6}
+    .qy-modal-head h5{margin:0; font-size:17px; font-weight:700; color:#1f2a44}
+    .qy-modal-head p{margin:5px 0 0; font-size:12.5px; color:#8b93a3; line-height:1.45}
+    .qy-modal-x{border:none; background:#f2f4f8; color:#5a6273; width:30px; height:30px; border-radius:9px; cursor:pointer; font-size:15px; line-height:1; flex:none}
+    .qy-modal-x:hover{background:#e6e9f0}
+    .qy-modal-body{padding:18px 22px; overflow:auto}
+    .qy-modal-foot{display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:14px 22px 18px; border-top:1px solid #f0f2f6; flex-wrap:wrap}
+    .qy-fld{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px dashed #eef0f4}
+    .qy-fld:last-of-type{border-bottom:none}
+    .qy-fld label{flex:1; font-size:13.5px; color:#2c3446; font-weight:600; margin:0}
+    .qy-fld label small{display:block; font-weight:400; color:#9aa0ac; font-size:11.5px; margin-top:2px}
+    .qy-money{position:relative; flex:none; width:132px}
+    .qy-money span{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9aa0ac; font-size:13.5px}
+    .qy-money input{width:100%; padding:9px 12px 9px 25px; border:1px solid #e2e6ee; border-radius:10px; font-size:14px; font-weight:600; color:#1f2a44; outline:none; font-variant-numeric:tabular-nums}
+    .qy-money input:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+    .qy-text{width:100%; padding:10px 12px; border:1px solid #e2e6ee; border-radius:10px; font-size:13.5px; color:#2c3446; outline:none}
+    .qy-text:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+    .qy-lbl{display:block; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8b93a3; margin:16px 0 7px}
+    .qy-tickline{display:flex; align-items:flex-start; gap:9px; margin-top:16px; background:#f7f9fc; border:1px solid #eef1f6; border-radius:10px; padding:11px 13px}
+    .qy-tickline input{margin-top:2px; flex:none}
+    .qy-tickline span{font-size:12.5px; color:#5a6273; line-height:1.45}
+    .qy-mbtn{border:none; border-radius:10px; padding:10px 20px; font-size:13.5px; font-weight:600; cursor:pointer; transition:transform .12s}
+    .qy-mbtn:hover{transform:translateY(-1px)}
+    .qy-mbtn.save{background:#f54e18; color:#fff; box-shadow:0 6px 16px rgba(245,78,24,.26)}
+    .qy-mbtn.ghost{background:#eef1f6; color:#5a6273}
+    .qy-mbtn.reset{background:#fff; color:#a24a06; border:1px solid #f3d9c0; margin-right:auto}
+    .qy-std{background:#f7f9fc; border:1px solid #eef1f6; border-radius:10px; padding:10px 13px; font-size:12.5px; color:#5a6273; line-height:1.5}
+    .qy-std b{color:#1f2a44}
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -81,6 +131,12 @@
                         <a href="{{ route('quick-yatri-blank') }}" target="_blank" rel="noopener" id="qyBlankLink" class="qy-cta dl"><i class="fa fa-download"></i> Download Blank Form</a>
                     </div>
                     <span class="qy-total"><i class="fa fa-bolt"></i> {{ count($rows) }} Applications</span>
+                    <div class="qy-prices">
+                        <span class="p"><em>OW</em><b>{{ \App\Models\QuickYatri::money($prices['one_way_5star']['amount']) }}</b></span>
+                        <span class="p"><em>RT</em><b>{{ \App\Models\QuickYatri::money($prices['round_trip_5star']['amount']) }}</b></span>
+                        <span class="p"><em>LP</em><b>{{ \App\Models\QuickYatri::money($prices['round_trip_land']['amount']) }}</b></span>
+                        <button type="button" class="upd" id="qyPricesOpen">UPDATE</button>
+                    </div>
                 </div>
                 <div class="qy-search">
                     <i class="fa fa-search"></i>
@@ -127,13 +183,27 @@
                             </td>
                             <td>@if($r->trip_option)<span class="qy-trip">{{ $r->tripLabel() }}</span>@else <span class="qy-sub">&mdash;</span> @endif</td>
                             <td>
-                                @if($r->total_amount !== null)
-                                    <span class="qy-amt">${{ number_format($r->total_amount) }}
-                                        @if($r->wheelchair_full_trip)<small>incl. +$300</small>@endif
-                                    </span>
-                                @else
-                                    <span class="qy-sub">&mdash;</span>
-                                @endif
+                                {{-- Click the amount to price this applicant on their own terms —
+                                     group size, departure airport, a rate agreed at an event. --}}
+                                <button type="button" class="qy-amt-btn qy-price-row"
+                                        data-id="{{ $r->id }}"
+                                        data-name="{{ $r->applicant_name }}"
+                                        data-trip="{{ $r->trip_option ? $r->tripLabel() : '' }}"
+                                        data-standard="{{ $r->trip_option && isset($prices[$r->trip_option]) ? (int) round($prices[$r->trip_option]['amount']) : '' }}"
+                                        data-amount="{{ $r->package_amount !== null ? (int) round($r->package_amount) : '' }}"
+                                        data-note="{{ $r->price_note }}"
+                                        data-custom="{{ $r->custom_price ? 1 : 0 }}"
+                                        title="Set this applicant&rsquo;s price">
+                                    @if($r->total_amount !== null)
+                                        <span class="qy-amt">${{ number_format($r->total_amount) }}
+                                            @if($r->wheelchair_full_trip)<small>incl. wheelchair</small>@endif
+                                        </span>
+                                    @else
+                                        <span class="qy-sub">&mdash;</span>
+                                    @endif
+                                    @if($r->custom_price)<span class="qy-chip custom">Custom</span>@endif
+                                </button>
+                                @if($r->custom_price && $r->price_note)<small class="qy-note-sm">{{ $r->price_note }}</small>@endif
                             </td>
                             <td>
                                 @if($r->wheelchair_airport)<span class="qy-chip wc">Wheelchair &mdash; airport</span>@endif
@@ -160,6 +230,87 @@
         </div>
     </div>
 </main>
+
+{{-- Update the grid: One-Way / Round Trip / Land Package, and the one
+     surcharge the sheet carries. Saved to site_settings, so the office moves a
+     fare without a deploy and the printed blank sheet picks it up at once. --}}
+<div class="qy-modal" id="qyPricesModal" role="dialog" aria-modal="true" aria-labelledby="qyPricesTitle">
+    <div class="qy-modal-back" data-qy-close></div>
+    <div class="qy-modal-box">
+        <form method="POST" action="{{ route('quick-yatri-prices') }}">
+            @csrf
+            <div class="qy-modal-head">
+                <div>
+                    <h5 id="qyPricesTitle">Update prices</h5>
+                    <p>The standard price of each row of the sheet&rsquo;s grid. New applications are priced from these, and the printed blank form shows them straight away.</p>
+                </div>
+                <button type="button" class="qy-modal-x" data-qy-close aria-label="Close">&times;</button>
+            </div>
+            <div class="qy-modal-body">
+                <div class="qy-fld">
+                    <label>OW &mdash; One-Way Trip<small>5-Star Package</small></label>
+                    <div class="qy-money"><span>$</span><input type="number" step="1" min="0" max="99999" name="one_way_5star" value="{{ (int) round($prices['one_way_5star']['amount']) }}"></div>
+                </div>
+                <div class="qy-fld">
+                    <label>RT &mdash; Round Trip<small>5-Star Package</small></label>
+                    <div class="qy-money"><span>$</span><input type="number" step="1" min="0" max="99999" name="round_trip_5star" value="{{ (int) round($prices['round_trip_5star']['amount']) }}"></div>
+                </div>
+                <div class="qy-fld">
+                    <label>LP &mdash; Land Package<small>Round Trip</small></label>
+                    <div class="qy-money"><span>$</span><input type="number" step="1" min="0" max="99999" name="round_trip_land" value="{{ (int) round($prices['round_trip_land']['amount']) }}"></div>
+                </div>
+                <div class="qy-fld">
+                    <label>Wheelchair throughout the trip<small>Added on top of the price above</small></label>
+                    <div class="qy-money"><span>$</span><input type="number" step="1" min="0" max="99999" name="wheelchair_full_trip" value="{{ (int) round($wheelchairFee) }}"></div>
+                </div>
+
+                <label class="qy-tickline">
+                    <input type="checkbox" name="apply_existing" value="1" checked>
+                    <span>Also re-price the <b>{{ $standardCount }}</b> saved {{ $standardCount === 1 ? 'application' : 'applications' }} still on standard pricing. Anyone given their own agreed price keeps it either way.</span>
+                </label>
+            </div>
+            <div class="qy-modal-foot">
+                <button type="button" class="qy-mbtn ghost" data-qy-close>Cancel</button>
+                <button type="submit" class="qy-mbtn save"><i class="fa fa-save"></i> Save prices</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- One applicant's own price. Two yatris on the same trip option are not
+     always quoted the same thing, so a row can carry its own amount and why. --}}
+<div class="qy-modal" id="qyRowModal" role="dialog" aria-modal="true" aria-labelledby="qyRowTitle">
+    <div class="qy-modal-back" data-qy-close></div>
+    <div class="qy-modal-box">
+        <form method="POST" action="" id="qyRowForm">
+            @csrf
+            <input type="hidden" name="reset" value="0" id="qyRowReset">
+            <div class="qy-modal-head">
+                <div>
+                    <h5 id="qyRowTitle">Price for this applicant</h5>
+                    <p id="qyRowWho"></p>
+                </div>
+                <button type="button" class="qy-modal-x" data-qy-close aria-label="Close">&times;</button>
+            </div>
+            <div class="qy-modal-body">
+                <div class="qy-std" id="qyRowStd"></div>
+
+                <span class="qy-lbl">Price for this applicant</span>
+                <div class="qy-money" style="width:100%"><span>$</span><input type="number" step="1" min="0" max="99999" name="package_amount" id="qyRowAmount" placeholder="Leave blank to use the standard price"></div>
+
+                <span class="qy-lbl">Why this price</span>
+                <input type="text" class="qy-text" name="price_note" id="qyRowNote" maxlength="255" placeholder="e.g. Group of 6 &mdash; family rate, or Departing MIA">
+                <p style="margin:8px 0 0; font-size:12px; color:#9aa0ac; line-height:1.5">Shown on this applicant&rsquo;s printed sheet and in the list, so anyone picking the file up later can see why the price differs.</p>
+            </div>
+            <div class="qy-modal-foot">
+                <button type="submit" class="qy-mbtn reset" id="qyRowResetBtn" style="display:none">Use standard price</button>
+                <button type="button" class="qy-mbtn ghost" data-qy-close>Cancel</button>
+                <button type="submit" class="qy-mbtn save"><i class="fa fa-save"></i> Save price</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="ttr-overlay"></div>
 @endsection
 @section('js')
@@ -175,6 +326,83 @@
             picker.addEventListener('change', function () {
                 link.setAttribute('href', this.value ? (baseHref + '?airport=' + encodeURIComponent(this.value)) : baseHref);
             });
+        }
+    })();
+    (function () {
+        // The two price dialogs. Plain DOM rather than the theme's Bootstrap:
+        // the Quick Yatri screens are hand-styled, and this page must not break
+        // if the theme's modal plugin moves.
+        var open = null;
+
+        function show(el) {
+            close();
+            open = el;
+            el.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            var first = el.querySelector('input:not([type=hidden]), button.upd');
+            if (first) first.focus();
+        }
+
+        function close() {
+            if (!open) return;
+            open.classList.remove('open');
+            document.body.style.overflow = '';
+            open = null;
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-qy-close]')) { e.preventDefault(); close(); }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') close();
+        });
+
+        var pricesBtn = document.getElementById('qyPricesOpen');
+        var pricesModal = document.getElementById('qyPricesModal');
+        if (pricesBtn && pricesModal) {
+            pricesBtn.addEventListener('click', function () { show(pricesModal); });
+        }
+
+        // One applicant's own price: the row's amount cell fills the form in.
+        var rowModal = document.getElementById('qyRowModal');
+        var rowForm = document.getElementById('qyRowForm');
+        var rowUrl = @json(route('quick-yatri-row-price', '__ID__'));
+        if (rowModal && rowForm) {
+            Array.prototype.forEach.call(document.querySelectorAll('.qy-price-row'), function (btn) {
+                btn.addEventListener('click', function () {
+                    var d = btn.dataset;
+                    rowForm.setAttribute('action', rowUrl.replace('__ID__', d.id));
+                    document.getElementById('qyRowReset').value = '0';
+
+                    document.getElementById('qyRowWho').textContent =
+                        d.name + (d.trip ? ' \u2014 ' + d.trip : ' \u2014 no trip option ticked yet');
+
+                    // What the grid says today, so the difference is visible
+                    // while the new number is being typed.
+                    var std = document.getElementById('qyRowStd');
+                    std.innerHTML = d.standard
+                        ? 'Standard price for this trip option: <b>$' + Number(d.standard).toLocaleString() + '</b>.'
+                          + (d.custom === '1'
+                                ? ' This applicant is currently on their own price.'
+                                : ' This applicant is on the standard price.')
+                        : 'No trip option is ticked on this sheet yet, so there is no standard price to compare against. Anything set here becomes this applicant\u2019s price.';
+
+                    document.getElementById('qyRowAmount').value = d.custom === '1' ? d.amount : '';
+                    document.getElementById('qyRowNote').value = d.note || '';
+                    document.getElementById('qyRowResetBtn').style.display = d.custom === '1' ? '' : 'none';
+
+                    show(rowModal);
+                });
+            });
+
+            // "Use standard price" posts the same form with the reset flag, so
+            // clearing a price and setting one are one round trip either way.
+            var resetBtn = document.getElementById('qyRowResetBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function () {
+                    document.getElementById('qyRowReset').value = '1';
+                });
+            }
         }
     })();
     (function () {
