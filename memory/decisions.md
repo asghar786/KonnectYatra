@@ -845,3 +845,55 @@ pages at every size tried and screenshots of the final blank sheet.
 **No migration.** Pure template/controller change — it deploys on push.
 
 **Review:** see decisions.csv row dated 2026-08-27.
+
+---
+
+## 2026-08-27 — The sheet's first condition becomes editable, and the per-traveller bullet goes
+
+**The ask (Rashad, screenshot of the printed footer with bullet one highlighted):** "plz provide
+me the option that the 1st point can be editable whenever it is required and this sentence option
+give me in the same popup modal (pricing update), and remove the option 'A separate application
+form is required for each traveler.' from the box."
+
+**Why it belongs with the prices and not in a settings screen of its own.** That bullet is the
+only other thing in the footer that is *dated*: it names a deadline and a late fee, both of which
+move every season exactly when the fares do. Putting it in the price dialog means one screen is
+opened when the season turns, not two. It follows the same shape as the grid — `site_settings`
+key `qy_validity_note`, `QuickYatri::VALIDITY_NOTE` as the fallback a blanked field returns to,
+so the sheet can never print an empty bullet. No migration, per the standing "settings belong in
+the admin" rule.
+
+**Two guards on the save.** The field is written only when the key is actually posted, so a
+caller that submits prices alone can never wipe the sentence; and the flash message names the
+condition only when it really changed, so "Prices updated." stays true.
+
+**One point of gap bought the whole fifth line.** The cap is the interesting part. Page 1 is a
+fixed 11in box, so an editable sentence is a way to spill the sheet onto a third printed page.
+Measured in headless Chrome against the real render:
+
+- Removing the per-traveller bullet gave the panel a line back — the first bullet could then wrap
+  to four lines with 15.5px spare, and a fifth overran the QR square by 0.9px.
+- 0.9px is nothing, and it was sitting in the panel's own `gap:8pt` between the list and the Date
+  line. Trimming that to **7pt** (1.33px) makes five lines fit with 0.4px to spare, with the
+  square still driving the row. Six lines pushes the row 14.6px past the page — the metric does
+  catch a real overrun, which is what makes the 0.4px trustworthy.
+- **`VALIDITY_NOTE_MAX` = 220 characters.** Not a round number: 220 held five lines at the worst
+  wrapping tried (17-character words, ~44 characters a line) and four lines in ordinary prose.
+  The default sentence is 132, so the office has room to rewrite rather than only re-date it.
+
+The dialog shows the count against that ceiling while it is typed, because a `maxlength` that
+silently stops accepting characters reads as a broken text box.
+
+**What the removed bullet did *not* touch.** "A separate application form is required for each
+traveller" still stands on the public apply form and the PDF — the ask was about the page-1 box.
+
+**Verified:** 6 new tests (5 in `QuickYatriPricingTest` — the dialog carries the sentence, a
+rewrite reaches the printed sheet, blank falls back, over-length is rejected and the old wording
+survives it, prices alone never wipe it; 1 in `QuickYatriSheetTest` for the retired bullet, with
+the older assertion retargeted from the hard-coded September date to `validityNote()`). Full
+suite green, 56/56. Plus headless-Chrome measurement at seven lengths and three wrapping
+profiles, and screenshots of the dialog and of page 1 at both the default and a worst-case 220.
+
+**No migration.** Template, controller and one `site_settings` key — it deploys on push.
+
+**Review:** see decisions.csv row dated 2026-08-27.

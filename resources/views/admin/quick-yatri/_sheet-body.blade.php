@@ -415,14 +415,21 @@
         $qyCaptionStyle = 'font-family:\'Archivo Narrow\',sans-serif; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; font-size:8pt; color:#1a3fa0';
     @endphp
     <div style="display:flex; align-items:stretch; gap:12pt; margin-top:auto">
-        {{-- 60% — the conditions of the application, and the date it was signed. --}}
-        <div style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:9pt 12pt; display:flex; flex-direction:column; justify-content:space-between; gap:8pt">
+        {{-- 60% — the conditions of the application, and the date it was signed.
+             The 7pt gap is measured like the square's side, and it is what pays
+             for the first bullet being editable: at 8pt a five-line bullet drove
+             the row 0.9px past the square, and page 1 has nothing to give. --}}
+        <div style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:9pt 12pt; display:flex; flex-direction:column; justify-content:space-between; gap:7pt">
             <ul style="margin:0; padding-left:15pt; font-size:9.2pt; line-height:1.34; display:flex; flex-direction:column; gap:11pt">
-                <li>This application is valid through September 15, 2026. Add $100 for applications submitted from September 20 through October 15, 2026.</li>
+                {{-- Edited in the admin (Quick Yatri → Update prices) rather
+                     than typed here: the deadline and the late fee move every
+                     season. Capped at QuickYatri::VALIDITY_NOTE_MAX characters
+                     because this box has a measured height budget — see the
+                     $qyPanelSide note above. --}}
+                <li>{{ \App\Models\QuickYatri::validityNote() }}</li>
                 <li>You must follow all group rules and regulations.</li>
                 <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
                 <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
-                <li>A separate application form is required for each traveler.</li>
                 <li>Minimum deposit of <strong>$500</strong> accepted.</li>
             </ul>
             <span style="display:flex; align-items:flex-end; gap:5pt; font-size:9pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>

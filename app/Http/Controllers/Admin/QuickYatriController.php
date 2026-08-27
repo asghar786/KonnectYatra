@@ -39,8 +39,13 @@ class QuickYatriController extends Controller
         $wheelchairFee = QuickYatri::wheelchairFee();
         $standardCount = $rows->where('custom_price', false)->whereNotNull('trip_option')->count();
 
+        // The sheet's first printed condition, pre-filled into the same dialog
+        // as the effective sentence (not the raw setting) so a date can be
+        // edited in place instead of retyped.
+        $validityNote = QuickYatri::validityNote();
+
         return view('admin.quick-yatri.index', compact(
-            'rows', 'airportGroups', 'prices', 'wheelchairFee', 'standardCount'
+            'rows', 'airportGroups', 'prices', 'wheelchairFee', 'standardCount', 'validityNote'
         ));
     }
 
@@ -131,6 +136,10 @@ class QuickYatriController extends Controller
      * surcharge. Kept in `site_settings` so the office can move a fare without a
      * deploy; a field left blank clears the setting and that row falls back to
      * the constant in the model rather than being priced at $0.
+     *
+     * The sheet's first printed condition (the validity date and the late fee)
+     * is saved here too — same dialog, same reason: it is dated copy the office
+     * rewrites each season, and it should not need a developer.
      */
     public function updatePrices(Request $request)
     {
@@ -141,9 +150,20 @@ class QuickYatriController extends Controller
             'one_way_5star'        => $rules,
             'round_trip_land'      => $rules,
             'wheelchair_full_trip' => $rules,
+            'validity_note'        => ['nullable', 'string', 'max:' . QuickYatri::VALIDITY_NOTE_MAX],
         ]);
 
         QuickYatri::putPrices($data);
+
+        // The sheet's first condition rides in the same dialog: it is the other
+        // thing printed on that footer that the office moves season to season.
+        // A blank field clears the setting, which restores the model default
+        // rather than printing an empty bullet. Guarded on the key being present
+        // so a caller posting prices alone can never wipe the sentence.
+        $noteWas = QuickYatri::validityNote();
+        if ($request->has('validity_note')) {
+            QuickYatri::putValidityNote($data['validity_note'] ?? null);
+        }
 
         // A saved row stores the price it was quoted at, so moving the grid does
         // not move it on its own. Ticking "apply to existing" re-stamps every
@@ -160,7 +180,9 @@ class QuickYatriController extends Controller
             }
         }
 
-        $message = 'Prices updated.';
+        $message = QuickYatri::validityNote() === $noteWas
+            ? 'Prices updated.'
+            : 'Prices and the sheet\'s first condition updated.';
         if ($repriced) {
             $message .= ' ' . $repriced . ' saved ' . ($repriced === 1 ? 'application was' : 'applications were') . ' re-priced.';
         }

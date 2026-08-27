@@ -105,6 +105,49 @@ class QuickYatri extends Model
         }
     }
 
+    /**
+     * The first condition printed in the sheet's footer box — how long the
+     * application is good for, and the late fee after that date.
+     *
+     * This is dated copy by nature: the deadline moves every season, and the
+     * office should not need a deploy to move it. So the sentence is edited in
+     * the admin (Quick Yatri → Update prices) and kept in `site_settings`, with
+     * this constant as the fallback a blanked field falls back to. Read it
+     * through `validityNote()`, never straight off the constant.
+     */
+    const VALIDITY_NOTE = 'This application is valid through September 15, 2026. Add $100 for applications submitted from September 20 through October 15, 2026.';
+
+    const VALIDITY_NOTE_KEY = 'qy_validity_note';
+
+    /**
+     * How long the sentence may run, in characters. MEASURED, not chosen.
+     *
+     * Page 1 is a fixed 11in box with no slack, and the footer panel this
+     * sentence heads has room for a bullet of **five** lines — measured in
+     * headless Chrome, 0.4px to spare, six lines pushes the row 14.6px past the
+     * page. Five lines held 220 characters at the worst wrapping tried (17-char
+     * words, ~44 chars a line); ordinary prose fits 220 in four. Raising this
+     * needs the measurement redone, not an estimate.
+     */
+    const VALIDITY_NOTE_MAX = 220;
+
+    /** The sentence as it stands today — the office's, or the constant's. */
+    public static function validityNote(): string
+    {
+        $stored = trim((string) SiteSetting::get(self::VALIDITY_NOTE_KEY));
+
+        return $stored !== '' ? $stored : self::VALIDITY_NOTE;
+    }
+
+    /**
+     * Save it. Blank clears the setting, which puts the sheet back on the
+     * constant above rather than printing a bullet with nothing in it.
+     */
+    public static function putValidityNote(?string $text): void
+    {
+        SiteSetting::put(self::VALIDITY_NOTE_KEY, trim((string) $text));
+    }
+
     /** "$3,150" — whole dollars, the way every price reads on the sheet. */
     public static function money($amount): string
     {

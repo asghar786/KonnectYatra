@@ -207,15 +207,36 @@ class QuickYatriSheetTest extends TestCase
         $this->assertStringNotContainsString('Please send a $1 test payment first', $body);
 
         // Still present, unaffected by the removal of the two bullets above it.
-        // Not pinned to a specific date — that line's deadline gets updated by
-        // hand from time to time and isn't what this test is checking.
-        $this->assertStringContainsString('This application is valid through', $body);
+        // Pinned to whatever the office has the sentence set to rather than to
+        // a date or a phrase: since 2026-08-27 it is edited in the admin, so
+        // this asserts the bullet is printed, not what season it names.
+        $this->assertStringContainsString(e(QuickYatri::validityNote()), $body);
 
         // Uploads was retired on 2026-08-27 with the rest of that row; Signature
         // still exists but has moved to page 2 (asserted below).
         $this->assertStringNotContainsString('>Uploads<', $body);
         $this->assertStringContainsString('>Signature<', $body);
         $this->assertStringContainsString('Scan Me', $body);
+    }
+
+    /**
+     * "A separate application form is required for each traveler" came out of
+     * the page-1 box on 2026-08-27 at Rashad's request. It is only that box —
+     * the public apply form carries its own version of the line, and this test
+     * is not about that one.
+     */
+    public function test_the_per_traveller_note_is_gone_from_the_page_one_box()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $this->assertStringNotContainsString('separate application form is required', $body);
+
+        // The bullets either side of it are untouched, so this reads as one
+        // line removed rather than the list being rebuilt.
+        $this->assertStringContainsString('You must follow all group rules and regulations.', $body);
+        $this->assertStringContainsString('Minimum deposit of <strong>$500</strong> accepted.', $body);
     }
 
     /**

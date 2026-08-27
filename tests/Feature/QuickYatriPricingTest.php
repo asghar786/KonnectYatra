@@ -52,7 +52,12 @@ class QuickYatriPricingTest extends TestCase
     /** @return string[] */
     private function settingKeys(): array
     {
-        return array_merge(array_values(QuickYatri::PRICE_KEYS), [QuickYatri::WHEELCHAIR_FEE_KEY]);
+        return array_merge(array_values(QuickYatri::PRICE_KEYS), [
+            QuickYatri::WHEELCHAIR_FEE_KEY,
+            // The sheet's first printed condition rides in the same dialog, so
+            // it is the same kind of live setting and needs the same put-back.
+            QuickYatri::VALIDITY_NOTE_KEY,
+        ]);
     }
 
     private function asAdmin()
@@ -379,5 +384,87 @@ class QuickYatriPricingTest extends TestCase
                 $row->delete();
             }
         }
+    }
+
+    /* ---- the sheet's first printed condition, edited in the same dialog ---- */
+
+    public function test_the_price_dialog_carries_the_sheets_first_condition()
+    {
+        $this->asAdmin();
+        SiteSetting::put(QuickYatri::VALIDITY_NOTE_KEY, '');
+
+        $body = $this->get(route('quick-yatri'))->getContent();
+
+        // Pre-filled with the sentence in force, not the raw setting, so a date
+        // can be edited in place rather than retyped from memory.
+        $this->assertStringContainsString('name="validity_note"', $body);
+        $this->assertStringContainsString(e(QuickYatri::VALIDITY_NOTE) . '</textarea>', $body);
+        $this->assertStringContainsString('maxlength="' . QuickYatri::VALIDITY_NOTE_MAX . '"', $body);
+    }
+
+    public function test_the_first_condition_can_be_rewritten_from_the_price_dialog()
+    {
+        $this->asAdmin();
+
+        $new = 'This application is valid through 30-NOV-2026. Add $150 after that date.';
+
+        $this->post(route('quick-yatri-prices'), [
+            'one_way_5star' => 2650,
+            'validity_note' => $new,
+        ])->assertRedirect(route('quick-yatri'));
+
+        $this->assertSame($new, QuickYatri::validityNote());
+
+        // It is printed copy, so the sheet is what actually has to change.
+        $sheet = $this->get(route('quick-yatri-blank'))->getContent();
+        $this->assertStringContainsString(e($new), $sheet);
+        $this->assertStringNotContainsString('valid through September 15, 2026', $sheet);
+    }
+
+    public function test_a_blank_first_condition_falls_back_to_the_standard_wording()
+    {
+        $this->asAdmin();
+
+        $this->post(route('quick-yatri-prices'), ['validity_note' => 'Something temporary.']);
+        $this->post(route('quick-yatri-prices'), ['validity_note' => '']);
+
+        // Same rule the prices follow: cleared means "back to the default",
+        // never "print an empty bullet".
+        $this->assertSame(QuickYatri::VALIDITY_NOTE, QuickYatri::validityNote());
+        $this->assertStringContainsString(
+            e(QuickYatri::VALIDITY_NOTE),
+            $this->get(route('quick-yatri-blank'))->getContent()
+        );
+    }
+
+    public function test_a_condition_longer_than_the_page_allows_is_rejected()
+    {
+        $this->asAdmin();
+
+        $kept = 'The wording that must survive a rejected edit.';
+        $this->post(route('quick-yatri-prices'), ['validity_note' => $kept]);
+
+        // Page 1 is a fixed 11in box: past this length the footer row grows
+        // past the QR square and the sheet spills onto a third printed page.
+        $this->post(route('quick-yatri-prices'), [
+            'validity_note' => str_repeat('a', QuickYatri::VALIDITY_NOTE_MAX + 1),
+        ])->assertSessionHasErrors('validity_note');
+
+        $this->assertSame($kept, QuickYatri::validityNote());
+    }
+
+    public function test_saving_prices_alone_never_wipes_the_condition()
+    {
+        $this->asAdmin();
+
+        $mine = 'Valid through 01-DEC-2026. Add $100 from 05-DEC-2026.';
+        $this->post(route('quick-yatri-prices'), ['validity_note' => $mine]);
+
+        // A post without the field at all — the sentence is not that caller's
+        // to clear, so an absent key must leave it exactly where it was.
+        $this->post(route('quick-yatri-prices'), ['round_trip_5star' => 3200]);
+
+        $this->assertSame($mine, QuickYatri::validityNote());
+        $this->assertSame(3200.0, QuickYatri::amountFor('round_trip_5star'));
     }
 }

@@ -90,6 +90,10 @@
     .qy-money input:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
     .qy-text{width:100%; padding:10px 12px; border:1px solid #e2e6ee; border-radius:10px; font-size:13.5px; color:#2c3446; outline:none}
     .qy-text:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+    .qy-area{min-height:84px; resize:vertical; line-height:1.5; font-family:inherit}
+    .qy-note-hint{margin:8px 0 0; font-size:12px; color:#9aa0ac; line-height:1.5}
+    .qy-note-hint b{color:#5a6273; font-variant-numeric:tabular-nums}
+    .qy-note-hint.over b{color:#c0392b}
     .qy-lbl{display:block; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8b93a3; margin:16px 0 7px}
     .qy-tickline{display:flex; align-items:flex-start; gap:9px; margin-top:16px; background:#f7f9fc; border:1px solid #eef1f6; border-radius:10px; padding:11px 13px}
     .qy-tickline input{margin-top:2px; flex:none}
@@ -242,7 +246,7 @@
             <div class="qy-modal-head">
                 <div>
                     <h5 id="qyPricesTitle">Update prices</h5>
-                    <p>The standard price of each row of the sheet&rsquo;s grid. New applications are priced from these, and the printed blank form shows them straight away.</p>
+                    <p>The standard price of each row of the sheet&rsquo;s grid &mdash; new applications are priced from these, and the printed blank form shows them straight away. The sheet&rsquo;s first printed condition is edited here too.</p>
                 </div>
                 <button type="button" class="qy-modal-x" data-qy-close aria-label="Close">&times;</button>
             </div>
@@ -268,6 +272,15 @@
                     <input type="checkbox" name="apply_existing" value="1" checked>
                     <span>Also re-price the <b>{{ $standardCount }}</b> saved {{ $standardCount === 1 ? 'application' : 'applications' }} still on standard pricing. Anyone given their own agreed price keeps it either way.</span>
                 </label>
+
+                {{-- Not a price, but it lives in this dialog on purpose: it is
+                     the other thing on the printed footer that the office
+                     rewrites season to season, and it was asked for here. --}}
+                <span class="qy-lbl">First condition printed on the sheet</span>
+                <textarea class="qy-text qy-area" name="validity_note" id="qyValidityNote"
+                          maxlength="{{ \App\Models\QuickYatri::VALIDITY_NOTE_MAX }}"
+                          placeholder="{{ \App\Models\QuickYatri::VALIDITY_NOTE }}">{{ $validityNote }}</textarea>
+                <p class="qy-note-hint" id="qyNoteHint">Bullet one in the box at the foot of page&nbsp;1 &mdash; the date the application is good until, and the late fee after it. <b><span id="qyNoteCount">0</span>/{{ \App\Models\QuickYatri::VALIDITY_NOTE_MAX }}</b> characters: page&nbsp;1 is a fixed page, and a longer sentence would push the sheet onto a third printed one. Leave it empty to go back to the standard wording.</p>
             </div>
             <div class="qy-modal-foot">
                 <button type="button" class="qy-mbtn ghost" data-qy-close>Cancel</button>
@@ -404,6 +417,25 @@
                 });
             }
         }
+    })();
+    (function () {
+        // The sentence prints into a page with no spare height, so the budget
+        // is shown while it is being typed rather than only enforced on save.
+        var box  = document.getElementById('qyValidityNote');
+        var out  = document.getElementById('qyNoteCount');
+        var hint = document.getElementById('qyNoteHint');
+        if (!box || !out) return;
+        var max = parseInt(box.getAttribute('maxlength'), 10) || 0;
+
+        function count() {
+            out.textContent = box.value.length;
+            // Empty is not "nothing printed" — it is the standard wording
+            // coming back, which the hint says, so only the ceiling warns.
+            if (hint) hint.classList.toggle('over', max > 0 && box.value.length >= max);
+        }
+
+        box.addEventListener('input', count);
+        count();
     })();
     (function () {
         var input = document.getElementById('qySearch');
