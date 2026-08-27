@@ -897,3 +897,45 @@ profiles, and screenshots of the dialog and of page 1 at both the default and a 
 **No migration.** Template, controller and one `site_settings` key — it deploys on push.
 
 **Review:** see decisions.csv row dated 2026-08-27.
+
+---
+
+## 2026-08-27 — Payment method: three tick boxes sharing the Date's line
+
+**The ask (Rashad, typed):** "there could be three way of payment / I need 3 checkbox before the
+date and here are 3 options 1. Cash, 2. Zelle, 3. Checque."
+
+**Three booleans, not one choice.** `pay_cash` / `pay_zelle` / `pay_check` on `quick_yatris`
+(migration `2026_08_27_100000_…`). He said checkboxes, and the paper form should allow what
+actually happens: a $500 deposit paid in cash with the balance by check is ordinary. A single
+`payment_method` column would have forced a lie in that case.
+
+**They share the Date's line, and that was not a style choice.** "Before the date" reads either
+as a row above it or as the same line; only one of those is affordable. Page 1 is a fixed 11in
+box, and the first bullet in that panel was just made editable up to a measured cap that consumes
+every spare pixel — a second row costs ~16pt, which does not exist. Putting the boxes to the left
+of `Date:` on the same flex row costs **zero** height, and it is also the more literal reading.
+
+**The first attempt cost 1.9px, which was already too much.** A `padding-bottom:1.5pt` added to
+nudge the boxes up drove the row 292.2px against the square's 290.7 — page over by 0.2px with the
+sentence at its 220-character cap. Dropping the padding puts the group's height back on the text
+line box (the 9pt tick box is shorter than the 9pt line, so it never drives height): measured
+free space returned to **33.2px / 16.8px / 0.4px** at three, four and five bullet lines —
+identical to before the boxes existed. The 220-character cap therefore still stands untouched.
+
+**"Check", not "Checque".** His spelling is neither the US nor the UK form; the sheet is a US
+document and already says "traveler", so it reads Check. Flagged to him rather than silently
+chosen. A "Payment:" label was added in front of the three boxes so a blank sheet handed to a
+candidate says what they are for — also flagged, and one word to remove.
+
+**Verified:** 2 new tests in `QuickYatriSheetTest` (the three boxes render unticked on the blank
+sheet and sit before the Date on the same row; a stored record keeps cash+check and prints ticks
+in exactly those two). Full suite green, 58/58. Headless-Chrome measurement at three sentence
+lengths before and after the padding fix, plus screenshots of the footer in blank, print and
+entry mode.
+
+**Deploy:** one migration, and it is a hard dependency — `payload()` writes all three flags on
+every save, so an unmigrated prod breaks every Quick Yatri save, not just a ticked one. Batched
+in [[konnectyatra-pending-prod-migrations]] with the price-override one.
+
+**Review:** see decisions.csv row dated 2026-08-27.

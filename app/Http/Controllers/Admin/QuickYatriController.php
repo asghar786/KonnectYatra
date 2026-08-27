@@ -353,6 +353,10 @@ class QuickYatriController extends Controller
         // them is re-saved. The columns and their data are left alone.
         foreach ([
             'wheelchair_airport', 'wheelchair_full_trip', 'meal_vegetarian',
+            // How they are paying, ticked at the foot of page 1. Three boxes
+            // rather than one choice: a deposit paid one way and the balance
+            // another is ordinary, and the paper sheet allows it.
+            'pay_cash', 'pay_zelle', 'pay_check',
         ] as $flag) {
             $data[$flag] = $request->boolean($flag);
         }

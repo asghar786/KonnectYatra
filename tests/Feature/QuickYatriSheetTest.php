@@ -494,4 +494,61 @@ class QuickYatriSheetTest extends TestCase
 
         $row->delete();
     }
+
+    /**
+     * How the applicant is paying — Cash / Zelle / Check, ticked at the foot of
+     * page 1. They share the Date's line rather than taking one of their own:
+     * page 1 is a fixed 11in box and a second row costs height the first bullet
+     * is already allowed to grow into.
+     */
+    public function test_the_footer_offers_three_payment_boxes_on_the_date_line()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $this->assertStringContainsString('Payment:', $body);
+        $this->assertStringContainsString('></span>Cash', $body);
+        $this->assertStringContainsString('></span>Zelle', $body);
+        $this->assertStringContainsString('></span>Check', $body);
+
+        // Same line, in the asked-for order: the boxes come before the Date and
+        // nothing closes the row between them.
+        $payment = strpos($body, 'Payment:');
+        $date    = strpos($body, 'Date:', $payment);
+        $this->assertNotFalse($payment);
+        $this->assertNotFalse($date);
+        $this->assertStringNotContainsString('</ul>', substr($body, $payment, $date - $payment));
+    }
+
+    public function test_a_saved_sheet_records_and_prints_the_payment_method()
+    {
+        $this->asAdmin();
+
+        // Three tick boxes, not one choice: a deposit paid one way and the
+        // balance another has to be recordable.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Payment Test',
+            'pay_cash'       => 1,
+            'pay_check'      => 1,
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Payment Test')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertTrue($row->pay_cash);
+            $this->assertFalse($row->pay_zelle);
+            $this->assertTrue($row->pay_check);
+
+            $printed = $this->get(route('quick-yatri-print', $row->id))->getContent();
+            $this->assertStringContainsString('&#10003;</span>Cash', $printed);
+            $this->assertStringContainsString('></span>Zelle', $printed);
+            $this->assertStringContainsString('&#10003;</span>Check', $printed);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
 }

@@ -432,7 +432,20 @@
                 <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
                 <li>Minimum deposit of <strong>$500</strong> accepted.</li>
             </ul>
-            <span style="display:flex; align-items:flex-end; gap:5pt; font-size:9pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
+            {{-- How they are paying, and the date signed, on ONE line. The tick
+                 boxes go beside the Date rather than on a row of their own
+                 because page 1 has no height to give: a second row costs ~16pt
+                 and the first bullet is already allowed to grow into all of it.
+                 Three boxes, not a choice of one — a deposit paid one way and
+                 the balance another is ordinary. --}}
+            <span style="display:flex; align-items:flex-end; gap:9pt; font-size:9pt">
+                <span style="display:flex; align-items:center; gap:9pt; white-space:nowrap">Payment:
+                    <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('pay_cash', 9) !!}Cash</span>
+                    <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('pay_zelle', 9) !!}Zelle</span>
+                    <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('pay_check', 9) !!}Check</span>
+                </span>
+                <span style="display:flex; align-items:flex-end; gap:5pt; flex:1 1 auto; min-width:0">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
+            </span>
         </div>
 
         {{-- 40% — a square panel with the code inside it, captioned in place so
