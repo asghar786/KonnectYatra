@@ -211,9 +211,103 @@ class QuickYatriSheetTest extends TestCase
         // hand from time to time and isn't what this test is checking.
         $this->assertStringContainsString('This application is valid through', $body);
 
-        $this->assertStringContainsString('>Uploads<', $body);
+        // Uploads was retired on 2026-08-27 with the rest of that row; Signature
+        // still exists but has moved to page 2 (asserted below).
+        $this->assertStringNotContainsString('>Uploads<', $body);
         $this->assertStringContainsString('>Signature<', $body);
         $this->assertStringContainsString('Scan Me', $body);
+    }
+
+    /**
+     * The page-1 footer, redesigned 2026-08-27: one 60/40 row — the conditions
+     * and the Date on the left, a square panel holding the Zelle QR on the
+     * right. The Uploads tick boxes are gone and the signature moved to page 2.
+     */
+    public function test_the_page_one_footer_is_a_sixty_forty_split_with_a_square_qr_panel()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        // The square is declared once as $qyPanelSide and used for both axes,
+        // so width and height cannot drift apart into a rectangle.
+        $this->assertMatchesRegularExpression(
+            '/width:(\d+)pt; height:\1pt;[^"]*padding:9pt[^"]*"[^>]*>\s*<span[^>]*>Scan Me<\/span>/',
+            $body,
+            'The QR panel should be a square with the caption inside it.'
+        );
+
+        // The three upload tick boxes went with the panel they lived in.
+        foreach (['upload_passport', 'upload_green_card', 'upload_id_license'] as $flag) {
+            $this->assertStringNotContainsString($flag, $body);
+        }
+        $this->assertStringNotContainsString('Green Card</span>', $body);
+
+        // The Date stayed behind on page 1, in the left panel with the notes.
+        // Asserted as the printed label, not the field name: blank mode renders
+        // a writing rule with no `name` at all — signature_date only appears as
+        // an attribute in entry and print mode.
+        $this->assertStringContainsString('This application is valid through', $body);
+        $this->assertStringContainsString('Date:', $body);
+        $this->assertStringContainsString('Minimum deposit of <strong>$500</strong> accepted.', $body);
+    }
+
+    /**
+     * The applicant signs *after* the terms, not above them — so the signature
+     * line lives at the foot of page 2 now, and nowhere on page 1.
+     */
+    public function test_the_signature_line_is_on_page_two_and_not_on_page_one()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $split = strpos($body, 'qy-page qy-page-2');
+        $this->assertNotFalse($split, 'Page 2 should render on the blank sheet.');
+
+        $pageOne = substr($body, 0, $split);
+        $pageTwo = substr($body, $split);
+
+        // Pinned to the rendered label, not the bare word: _sheet-css still
+        // carries the word in a comment about where that height went.
+        $this->assertStringNotContainsString('>Signature<', $pageOne);
+        $this->assertStringContainsString('>Signature<', $pageTwo);
+
+        // Pinned to the foot, which is also what puts the page's spare height
+        // above the line as clear space to sign into.
+        $this->assertStringContainsString('margin-top:auto', $pageTwo);
+    }
+
+    /**
+     * The upload flags stopped being posted when their tick boxes were removed.
+     * They must therefore stop being *read* too — otherwise re-saving any older
+     * record silently writes false over what it already carries. Same trap, and
+     * same fix, as booking_type on 2026-08-25.
+     */
+    public function test_resaving_a_sheet_preserves_the_retired_upload_flags()
+    {
+        $this->asAdmin();
+
+        $row = QuickYatri::create([
+            'applicant_name'    => 'QA Upload Flags',
+            'upload_passport'   => true,
+            'upload_green_card' => true,
+            'upload_id_license' => true,
+        ]);
+
+        try {
+            $this->post(route('quick-yatri-update', $row->id), [
+                'applicant_name' => 'QA Upload Flags',
+                'city'           => 'FRESNO',
+            ]);
+
+            $row->refresh();
+            $this->assertTrue((bool) $row->upload_passport);
+            $this->assertTrue((bool) $row->upload_green_card);
+            $this->assertTrue((bool) $row->upload_id_license);
+        } finally {
+            $row->delete();
+        }
     }
 
     /**

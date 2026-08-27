@@ -390,73 +390,64 @@
         </tbody>
     </table>
 
-    <ul style="margin:0; padding-left:15pt; font-size:8.3pt; line-height:1.26; display:flex; flex-direction:column; gap:0.5pt">
-        <li>This application is valid through September 15, 2026. Add $100 for applications submitted from September 20 through October 15, 2026.</li>
-        <li>You must follow all group rules and regulations.</li>
-        <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
-        <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
-        <li>A separate application form is required for each traveler.</li>
-    </ul>
-
     @php
-        // Page 1 is a fixed 11in box carrying no slack, so these are measured
-        // rather than guessed: they are exactly what the trimmed padding above
-        // frees up. Raising either without taking the height from somewhere
-        // pushes the sheet onto a third page.
+        // Page 1 bottom, redesigned 2026-08-27: a 60/40 split. The notes and the
+        // Date sit in the left panel; the right panel is a square holding the
+        // Zelle QR. It replaces the old three-panel Uploads / Signature / QR
+        // row — the upload tick boxes are gone (page 2 already lists the
+        // documents required, and their columns are left untouched in the DB),
+        // and the signature moved to the foot of page 2, after the terms it is
+        // actually signing to.
         //
-        // Two numbers, not one. The row is as tall as the QR column, and the QR
-        // column is "Scan Me" plus the code — so Uploads and Signature can be
-        // that whole height while the QR box is that height less the caption.
-        // They used to share one size, which left Signature ~15pt short of its
-        // own row for no reason.
-        $qyPanelHeight = '164pt';   // Uploads + Signature, and the row itself
-        $qyQrSize      = '148pt';   // the QR box; Scan Me sits in the gap above
+        // $qyPanelSide is the square's side *and* the row's height, and it is
+        // MEASURED, not chosen: page 1 is a fixed 11in box that runs full to
+        // within a pixel or two, so this is the largest square the freed height
+        // pays for. Raising it spills the sheet onto a third printed page.
+        // Re-measure (.qy-page-1 client vs. content bottom) before touching it.
+        $qyPanelSide = '218pt';
 
         // The code is printed to be scanned off paper, and a scanner needs a
         // white margin around it to find the thing at all. The uploaded PNG has
         // none — its modules run straight into a dark edge — so the margin is
-        // added here. It costs the code a little area and is still well worth
-        // it. See the note by the <img> below.
-        $qyQuietZone = '8pt';
+        // added here. See the note by the <img> below.
+        $qyQuietZone = '9pt';
 
-        $qyCaptionStyle = 'font-family:\'Archivo Narrow\',sans-serif; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; font-size:7.6pt; color:#1a3fa0';
+        $qyCaptionStyle = 'font-family:\'Archivo Narrow\',sans-serif; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; font-size:8pt; color:#1a3fa0';
     @endphp
-    {{-- Three matched, bordered panels — Uploads no longer trails off as a
-         short list with blank paper beneath it; all three carry the same
-         footprint as Signature/QR, each using its own height on purpose:
-         Uploads spreads header/checklist/date top-to-bottom, Signature stays
-         a clear writing surface with the label pinned to the foot of it,
-         Scan Me labels the code from above so the code itself loses no area
-         to a caption competing for space inside it. --}}
-    <div style="display:flex; align-items:flex-end; gap:12pt; margin-top:auto">
-        <div style="flex:1 1 auto; min-width:0; height:{{ $qyPanelHeight }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:8pt 11pt; display:flex; flex-direction:column; justify-content:space-between; font-size:8.6pt">
-            <span style="{{ $qyCaptionStyle }}">Uploads</span>
-            <div style="display:flex; flex-direction:column; gap:7pt">
-                <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_passport', 10) !!}Passport</span>
-                <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_green_card', 10) !!}Green Card</span>
-                <span style="display:inline-flex; align-items:center; gap:6pt">{!! $check('upload_id_license', 10) !!}ID / Driver&rsquo;s License</span>
-            </div>
-            <span style="display:flex; align-items:flex-end; gap:5pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
+    <div style="display:flex; align-items:stretch; gap:12pt; margin-top:auto">
+        {{-- 60% — the conditions of the application, and the date it was signed. --}}
+        <div style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:9pt 12pt; display:flex; flex-direction:column; justify-content:space-between; gap:8pt">
+            <ul style="margin:0; padding-left:15pt; font-size:9.2pt; line-height:1.34; display:flex; flex-direction:column; gap:11pt">
+                <li>This application is valid through September 15, 2026. Add $100 for applications submitted from September 20 through October 15, 2026.</li>
+                <li>You must follow all group rules and regulations.</li>
+                <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
+                <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
+                <li>A separate application form is required for each traveler.</li>
+                <li>Minimum deposit of <strong>$500</strong> accepted.</li>
+            </ul>
+            <span style="display:flex; align-items:flex-end; gap:5pt; font-size:9pt">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
         </div>
-        <div style="flex:0 0 auto; width:{{ $qyPanelHeight }}; height:{{ $qyPanelHeight }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8pt; color:#8a93a5; font-size:8.5pt">Signature</div>
-        <div style="flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4pt">
+
+        {{-- 40% — a square panel with the code inside it, captioned in place so
+             the caption costs the row no extra height. --}}
+        <div style="flex:0 0 {{ $qyPanelSide }}; width:{{ $qyPanelSide }}; height:{{ $qyPanelSide }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; background:#fff; padding:{{ $qyQuietZone }}; display:flex; flex-direction:column; align-items:center; gap:5pt">
             <span style="{{ $qyCaptionStyle }}">Scan Me</span>
             {{-- Sized for a phone camera to actually read off the printed
                  sheet. Two things decide whether it does: how large the code
                  lands on paper, and whether it has a white quiet zone around
                  it. The uploaded PNG supplies neither — its modules run into a
-                 dark edge with no margin — so the box is padded white and the
+                 dark edge with no margin — so the panel is padded white and the
                  code is fitted inside that.
 
                  The dark edge is baked into the image and cannot be fixed from
                  here. A QR with a white border and a shorter payload (fewer,
                  chunkier modules) re-uploaded in Admin > Payment Settings will
                  scan better than any amount of enlarging in this template. --}}
-            <div style="width:{{ $qyQrSize }}; height:{{ $qyQrSize }}; box-sizing:border-box; border:1px solid #111; border-radius:6pt; background:#fff; padding:{{ $qyQuietZone }}">
+            <div style="flex:1 1 auto; min-height:0; width:100%; display:flex; align-items:center; justify-content:center">
                 @if($qrUrl)
-                    <img src="{{ $qrUrl }}" alt="Zelle QR code" style="width:100%; height:100%; object-fit:contain; display:block">
+                    <img src="{{ $qrUrl }}" alt="Zelle QR code" style="max-width:100%; max-height:100%; object-fit:contain; display:block">
                 @else
-                    <div style="width:100%; height:100%; border:1px dashed #999; border-radius:4pt; display:flex; align-items:center; justify-content:center; font-size:7pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
+                    <div style="width:100%; height:100%; border:1px dashed #999; border-radius:4pt; display:flex; align-items:center; justify-content:center; font-size:7.5pt; color:#999; text-align:center; line-height:1.2">QR not set</div>
                 @endif
             </div>
         </div>

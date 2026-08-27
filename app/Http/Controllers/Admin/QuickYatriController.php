@@ -321,9 +321,16 @@ class QuickYatriController extends Controller
         }
 
         // Tick boxes: absent means unticked, so read every one explicitly.
+        //
+        // upload_passport / upload_green_card / upload_id_license are NOT in
+        // this list any more, and that is deliberate — the same reasoning as
+        // booking_type above. The Uploads panel they lived in was removed from
+        // the sheet on 2026-08-27 (page 2 already lists the documents
+        // required), so nothing posts them; reading them here would write false
+        // over the value every older record already carries, every time one of
+        // them is re-saved. The columns and their data are left alone.
         foreach ([
             'wheelchair_airport', 'wheelchair_full_trip', 'meal_vegetarian',
-            'upload_passport', 'upload_green_card', 'upload_id_license',
         ] as $flag) {
             $data[$flag] = $request->boolean($flag);
         }

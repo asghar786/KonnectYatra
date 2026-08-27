@@ -790,3 +790,58 @@ touch is snapshotted and restored (they run on the real local DB). Full suite gr
 headless-Chrome screenshots of the toolbar, both modals, the print sheet and the entry screen.
 
 **Review:** see decisions.csv row dated 2026-08-27.
+
+---
+
+## 2026-08-27 — Page-1 footer: a 60/40 split, and the signature moves to page 2
+
+**The ask (Rashad, red boxes on a screenshot of the printed footer):** "divide the 1st page bottom
+part in 60-40 ratio, and on the left side add the text with bullets and date and remove the
+checkboxes; on right side it should be squrer and zelle qr code would be inside; and move the
+signature at the end of the 2nd page right bottom with some space upper side of signature line."
+Mid-build he added: "one more option minmum deposit $500 accepted, and add some extra spaces
+between lines."
+
+**What went, and why it was safe.** The old row was three panels — Uploads (three tick boxes +
+Date) / Signature / QR. The tick boxes duplicated the document list page 2 already carries, so they
+went; the Date stayed. **Their columns are untouched in the DB**, and the three flags came out of
+`payload()`'s boolean loop for exactly the `booking_type` reason: nothing posts them any more, so
+reading them would write `false` over every older record on its next save. There is a test for that
+now (`test_resaving_a_sheet_preserves_the_retired_upload_flags`).
+
+**Every size on this page is measured, not chosen.** Page 1 is a fixed 11in box. Baseline
+measurement before touching anything: **page 1 had −1.6px free at the foot, page 2 had 87px
+(65.3pt)** — so the signature could only move *down*, never up, and the new row could only grow
+into whatever the old standalone bullet list gave back.
+
+Two numbers were then bisected against the real render, not estimated:
+- **`$qyPanelSide` = 218pt.** 220pt measured −1.3px; 222pt measured −4.0px. 218pt is the largest
+  square that leaves page 1 clean. That lands the split at 60.8 / 39.2 — the asked-for 60/40 to
+  within a point, because the square's side and the row's height are the same number and the height
+  is the binding constraint.
+- **Bullet type = 9.2pt.** At the requested wider `gap:11pt` plus the sixth ($500 deposit) bullet,
+  the *left* panel overtook the square and started driving the row (−5.0px). The spacing was the
+  point of the request, so the height came out of the type instead: 9.6 → 9.2pt returns it to 0.0.
+
+**"Scan Me" moved inside the square.** Outside it, the caption plus its gap cost the row ~15pt on
+top of the square — which is precisely the budget that did not exist. Inside, the panel's height is
+its width, and the caption is free.
+
+**The signature is pinned with `margin-top:auto`, and that is doing two jobs.** It puts the line at
+the foot of page 2, and it hands the page's entire spare height to the gap *above* the line — which
+is the "some space upper side" that was asked for, without a magic padding number that would need
+re-tuning whenever page 2's text changes.
+
+**A stale comment was caught by a test, not by reading.** `test_the_signature_line_is_on_page_two`
+failed asserting page 1 contains no "Signature" — because `_sheet-css` still had a comment saying
+the trimmed height "is what the Signature/QR boxes grew into". Comment corrected; the assertion is
+pinned to `>Signature<` so it tests the rendered label rather than the word.
+
+**Verified:** 4 new/retargeted tests in `QuickYatriSheetTest` (the square panel via a regex whose
+backreference proves width == height, the retired tick boxes, page-1-vs-page-2 signature placement,
+and the upload-flag preservation), full suite green 50/50, plus headless-Chrome measurement of both
+pages at every size tried and screenshots of the final blank sheet.
+
+**No migration.** Pure template/controller change — it deploys on push.
+
+**Review:** see decisions.csv row dated 2026-08-27.

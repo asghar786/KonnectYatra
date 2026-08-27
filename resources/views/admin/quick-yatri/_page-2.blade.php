@@ -36,4 +36,16 @@
     <div style="font-family:'Archivo',sans-serif; font-weight:700; font-size:12pt; color:#1a3fa0">Disclaimer &amp; Copyright</div>
     <div>The content of this page, including its text, format, policies, and instructions, is the property of <strong>Konnect.US, Inc., doing business as Konnect Yatra USA.</strong> Unauthorized copying, reproduction, distribution, modification, or alteration of this content is prohibited and may result in legal action.</div>
     <div style="font-weight:700">Updated: August 17, 2026 Konnect Yatra USA</div>
+
+    {{-- The signature, moved here 2026-08-27 from the page-1 footer row: the
+         applicant signs *after* the terms, not above them. `margin-top:auto`
+         pins it to the foot of the page, which also puts every bit of page 2's
+         spare height above the line — the clear space asked for to sign into.
+         Page 2 measured ~65pt free at the foot before this was added. --}}
+    <div style="margin-top:auto; display:flex; justify-content:flex-end">
+        <div style="width:2.9in; display:flex; flex-direction:column; align-items:center; gap:4pt">
+            <span style="width:100%; border-bottom:1px solid #111"></span>
+            <span style="font-size:9pt; color:#555">Signature</span>
+        </div>
+    </div>
 </div>
