@@ -25,6 +25,15 @@ Format:
   `monthNamesShort`. Why: the user asked for exactly this on 2026-08-21 for Quick Yatri, and it is
   the same stamp the public apply form has always written — DD-MMM-YYYY is unambiguous where
   NN-NN-YYYY is not. See `memory/decisions.md` 2026-08-21 and the `konnectyatra-yatri-dates` note.
+- **The confirm-first rule above applies to marks that *carry* the instruction, not marks that
+  merely point at it.** On 2026-08-27 Rashad sent a screenshot with two red boxes drawn on it plus
+  a typed sentence saying what to do ("divide the 1st page bottom part in 60-40 ratio…"). The boxes
+  only said *where*; nothing had to be decoded from them, so the work went ahead without a
+  read-back and the reading turned out correct — his follow-up added a requirement rather than
+  correcting one. Why: the cost the rule guards against is *lossy handwriting* (a strikethrough
+  that could mean several things, an arrow landing on the wrong line). A typed instruction plus a
+  locational box has no such loss. Still confirm when the marks themselves are the content.
+
 - **List corrections before editing, when the source is a marked-up photo/screenshot.** When the
   user sends a hand-annotated image (strikethroughs, carets, circled words, arrows) rather than a
   typed list, read back the corrections as plain sentences — including how each ambiguous mark was
