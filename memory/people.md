@@ -55,3 +55,15 @@ Format:
 - Role / relationship: Developer building/maintaining KonnectYatra. The person I work with directly.
 - Context: git user `AsgharSHAH <asghar786@hotmail.com>`; contact asghar786@gmail.com.
 - Notes: Works on Windows + XAMPP locally; deploys to Rashad's cPanel host.
+- **Refines a change over several short messages while I am still working.** On 2026-08-31 one
+  Quick Yatri field arrived as five messages in a row: add a receipt number → make it 6 digits →
+  now handle partial payments, up to 3 receipts → you can tighten the bullets → you can shrink the
+  QR 10-15% → use "R#" not "#" → there is space after Check, add Check # and compact the Date.
+  Each was a genuine refinement, not a correction. Expect the shape of a footer/layout request to
+  keep moving, and prefer a design that has somewhere to grow over one that spends every pixel on
+  the first ask.
+- **Grants explicit budget when he wants something to fit, and the budget is a ceiling, not a
+  target.** "you can reduce the space between the bullets points as well", "you are allow to reduce
+  the size of QR Code max 10 to 15%". Measure what the change actually needs and spend the minimum
+  — on 2026-08-31 a sweep showed 6.4% of the QR was enough where 15% was allowed, and the smaller
+  cut left a better-scanning code. Report back what was actually spent against what was offered.

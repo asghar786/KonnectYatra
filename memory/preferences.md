@@ -42,3 +42,20 @@ Format:
   up the Quick Yatri page-2 terms. Handwriting is lossier than a typed list (a strikethrough can
   mean several things, an arrow can point at the wrong line by accident), so confirming first here
   matters more than it does for his usual typed-list change requests.
+
+- **Handing over a NEW prod migration: lead with the heredoc that writes the file, never with
+  `artisan migrate`.** A brand-new migration only reaches the server via the git deploy, so
+  `php artisan migrate --path=...` on prod fails with `File does not exist at path ...` until the
+  push has landed. Why: this fired on 2026-08-31 — the migrate commands were put at the top of the
+  message and the explanation below them, the user pasted the commands, and got three "File does
+  not exist" errors. The knowledge was already written down; the *message shape* was the bug. Put
+  the `cat > …migration.php <<'PHP'` block first and the migrate line after it, as one paste-able
+  sequence. See [[konnectyatra-pending-prod-migrations]] for the zero-window recipe.
+- **Hold the push when a migration is a hard dependency, and say why.** If `payload()` (or any
+  save path) writes the new columns unconditionally, an unmigrated prod fails *every* save, not
+  just one using the new field. Commit, tell the user the push is being held, hand over the
+  file-writing + migrate block, and push only once they report `Migrated`. Why: done this way on
+  2026-08-31 and it worked — zero broken window, against the days-long outage the same pattern
+  caused in August when the pending list was handed over at the end of a session instead.
+- **Run multi-column migrations in the order given.** Each `->after('...')` column has to already
+  exist, so a batch that builds on itself cannot be pasted out of sequence or run in parallel.
