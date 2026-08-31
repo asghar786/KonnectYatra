@@ -484,18 +484,54 @@
                     ? (float) $row->package_amount
                     : null;
 
-                $qyCell = 'display:flex; align-items:flex-end; gap:4pt; flex:1 1 0; min-width:0';
+                // The money line's four cells do NOT share the row equally, and
+                // the weights are measured rather than chosen. Each cell spends
+                // a fixed amount on its label and gives the rest to its writing
+                // line, so equal cells would hand the longest label
+                // ("Receipt #:") the shortest line. The weights buy every rule
+                // more room than the longest value it can print — at 8.6pt
+                // "-$1,500" measures 39.5px and a six-digit "123454" 33px.
+                $qyCellW = function ($grow) {
+                    return 'display:flex; align-items:flex-end; gap:3pt; flex:' . $grow . ' 1 0; min-width:0';
+                };
+                // Paid carries a deposit, never a five-figure total, so it is
+                // the cell that can afford to give room to Receipt #.
+                $qyCell     = $qyCellW(1);
+                $qyCellPaid = $qyCellW(0.85);
+                $qyCellRcpt = $qyCellW(1.15);
             @endphp
             {{-- The money line, in the space the conditions leave above the
                  signature row. Amount and Balance are read-only everywhere —
                  on paper they are writing lines, on a saved record they are
-                 computed — so a figure here can never contradict the grid. --}}
-            <span style="display:flex; align-items:flex-end; gap:11pt; font-size:9pt">
+                 computed — so a figure here can never contradict the grid.
+
+                 Four labelled writing lines in the width three used to have, so
+                 the row buys the space back three ways, all MEASURED against
+                 the 417.8px the panel gives it (see the $qyPanelSide note): the
+                 gap drops 11pt -> 6pt, the label sits 3pt off its line instead
+                 of 4pt, and .qy-money-line lifts .qy-rule's 36pt floor —
+                 without that last one the four cells demand 435px, overrun the
+                 panel's border by 17px and take the QR square with them. The
+                 text is the page's own 8.6pt rather than 9pt for the same
+                 reason. Costs zero height, which is the only reason the receipt
+                 number is on this row at all: page 1 measures 11in exactly and
+                 a fourth line in this panel is a third printed page. --}}
+            <span class="qy-money-line" style="display:flex; align-items:flex-end; gap:6pt; font-size:8.6pt">
                 <span style="{{ $qyCell }}">Amount:<span class="qy-rule" id="qyAmountLine"
                     data-prices="{{ json_encode($qyPrices) }}"
                     data-fee="{{ $wcFee }}"
                     data-base="{{ $qyCustomBase }}">{{ $qyMoney($qyAmount) }}</span></span>
-                <span style="{{ $qyCell }}">Paid:@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="amount_paid" value="{{ old('amount_paid', $qyTyped($qyPaid)) }}" placeholder="0" autocomplete="off">@else<span class="qy-rule">{{ $qyMoney($qyPaid) }}</span>@endif</span>
+                <span style="{{ $qyCellPaid }}">Paid:@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="amount_paid" value="{{ old('amount_paid', $qyTyped($qyPaid)) }}" placeholder="0" autocomplete="off">@else<span class="qy-rule">{{ $qyMoney($qyPaid) }}</span>@endif</span>
+                {{-- Next to the money it was written for, which is how the
+                     office reads the two: a receipt with no amount beside it
+                     traces nothing.
+
+                     Six digits, the number the receipt book prints ("No.
+                     123454"). maxlength and inputmode only steer the typing —
+                     the controller strips a copied-out "No." / "#" and the
+                     `digits:6` rule is what actually decides, so a number that
+                     came off a phone keyboard is held to the same shape. --}}
+                <span style="{{ $qyCellRcpt }}">Receipt #:@if($isEntry)<input type="text" class="qy-in qy-rule" name="receipt_no" value="{{ old('receipt_no', $row->receipt_no) }}" maxlength="6" inputmode="numeric" placeholder="123454" autocomplete="off">@else<span class="qy-rule">{{ $isBlank ? '' : $row->receipt_no }}</span>@endif</span>
                 <span style="{{ $qyCell }}">Balance:<span class="qy-rule" id="qyBalanceLine">{{ $qyMoney($qyBalance) }}</span></span>
             </span>
             {{-- How they are paying, and the date signed, on ONE line. The tick

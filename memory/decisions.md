@@ -939,3 +939,61 @@ every save, so an unmigrated prod breaks every Quick Yatri save, not just a tick
 in [[konnectyatra-pending-prod-migrations]] with the price-override one.
 
 **Review:** see decisions.csv row dated 2026-08-27.
+
+---
+
+## 2026-08-31 — Receipt # joins the money line, six digits wide
+
+**The ask (typed, with a screenshot of the footer):** "when we receive payment under quick yatri,
+I wanted to add Payment Receipt number alongwith receiving amount plz adjust receipt number",
+then, with a photo of the receipt book: "plz check our receipt number format it should be only 6
+digit number".
+
+**Beside the money, on the row that was already there.** The money line becomes
+`Amount / Paid / Receipt # / Balance`. It is not a row of its own for the reason every other
+addition to this panel has landed on an existing line: page 1 measures 11in exactly, and the
+conditions bullet above it is editable up to a measured 220-character cap that already consumes
+the panel's slack. A fourth row costs ~16pt plus a 7pt panel gap — about 25px against the ~24px
+the panel has left at the worst allowed sentence length. That is a third printed page.
+
+**Four labelled writing lines in the width three had, and the width was the real constraint —
+not the height.** The panel gives the row 417.8px. Naively adding a fourth cell demands 435px:
+`.qy-rule` carries a 36pt minimum, sensible for a lone writing line, and honoured four times it
+pushes the row through the panel's own border and into the QR square. The row buys the space back
+four ways, all measured: the gap drops 11pt → 6pt, the label sits 3pt off its line instead of 4pt,
+the text drops to the page's own 8.6pt from 9pt, and `.qy-money-line` lifts the 36pt floor on this
+row only. The cells then take **unequal** shares (1 / 0.85 / 1.15 / 1) because each spends a fixed
+amount on its label — equal cells would hand the longest label, "Receipt #:", the shortest line.
+Rules land at 48.5 / 53.5 / 56.4 / 49.4px against longest values of 35.7 ("$3,450"), 39.4
+("-$1,200") and 39.3 ("123454") — 10px of margin at the tightest.
+
+**Six digits, char(6), not an integer.** A receipt number is an identifier, not a quantity —
+nothing adds it up — and a book that starts at 000001 must keep its leading zeros, which an
+integer column eats. `digits:6` validates it. The controller strips a copied-out "No." / "#" so
+"No. 123454" and "123454" are the one receipt, but it does **not** pad: turning a typed "1234"
+into "001234" would invent a receipt nobody wrote, so the office is told instead.
+
+**Deliberately not `balance.raseed_no`.** That column is the older yatri_visas booking flow, where
+one booking has many payment rows. A Quick Yatri sheet is one printed page with one money line, so
+the number lives on the row the way `amount_paid` does.
+
+**Verified:** 6 new tests in `QuickYatriSheetTest` (placement and order on the money line, the
+6-digit entry field, "No. 123454" → `123454` stored and printed, a leading zero surviving the
+round trip, a 4-digit number refused rather than padded, a blank storing null). Full suite green,
+64/64. Measured over CDP in all three modes: the money row stays 417.8px wide and 15.7px tall, page
+1's free height stays 0, and every printed value fits inside its rule. The pre-change sheet was
+measured with the same probe for comparison and came back byte-identical, so the receipt cell costs
+no height at any sentence length.
+
+**Found while measuring, not introduced here and not fixed here:** the 220-character cap on the
+editable first bullet has a hole. Under harsher wrapping than the original measurement tried
+(17-character all-caps words), a 200-character sentence takes six lines and the panel overflows its
+square by 9.1px. The default sentence is 133 characters with 40.2px to spare, so nothing is wrong
+today, but the cap is not the guarantee it reads as.
+
+**Deploy:** one migration, `2026_08_31_000000_add_receipt_no_to_quick_yatris_table`, and it is a
+**hard dependency** — `payload()` writes `receipt_no` on every save, so an unmigrated prod breaks
+every Quick Yatri save, not just one with a receipt typed. Use the zero-window recipe in
+[[konnectyatra-pending-prod-migrations]]: write the file onto prod, migrate, *then* push.
+
+**Review:** see decisions.csv row dated 2026-08-31.

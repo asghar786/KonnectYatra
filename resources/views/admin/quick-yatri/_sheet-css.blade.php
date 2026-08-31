@@ -51,6 +51,13 @@
     .qy-caps{text-transform:uppercase}
     .qy-lower{text-transform:lowercase}
     .qy-in.qy-rule{border-bottom:1px solid #111; height:13pt}
+    /* Amount / Paid / Receipt # / Balance — four labelled writing lines in a
+       417.8px row. The 36pt floor above is a sensible minimum for a lone
+       writing line and an overflow here: honoured on all four it demands
+       435px, which pushes the panel through its own border. The floor is
+       lifted only on this row, where every rule is still measured to be wider
+       than the longest value it prints. */
+    .qy-money-line .qy-rule{min-width:0}
     .qy-in:focus{background:#eef4ff}
     .qy-grid td{vertical-align:middle}
     /* Label columns size to their text, as in the approved render — without this

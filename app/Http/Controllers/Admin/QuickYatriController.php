@@ -295,6 +295,29 @@ class QuickYatriController extends Controller
         }
     }
 
+    /**
+     * The receipt book prints "No. 123454", and that is what gets copied out —
+     * label and all. Keep the digits and drop the dressing, so "No. 123454",
+     * "#123454" and "123454" are the one receipt.
+     *
+     * Only the dressing: a number with too few or too many digits is left as
+     * typed so the `digits:6` rule below says so, rather than this padding or
+     * truncating it into a receipt that was never written.
+     */
+    private function normaliseReceipt(Request $request): void
+    {
+        $raw = $request->input('receipt_no');
+
+        if ($raw === null || trim((string) $raw) === '') {
+            $request->merge(['receipt_no' => null]);
+
+            return;
+        }
+
+        $clean = preg_replace('/^(no\.?|#|no\.?\s*#)\s*/i', '', trim((string) $raw));
+        $request->merge(['receipt_no' => str_replace([' ', '-'], '', $clean)]);
+    }
+
     /** "Date of Birth must be a real date, e.g. 21-AUG-2026." for each date field. */
     private function dateMessages(): array
     {
@@ -316,6 +339,7 @@ class QuickYatriController extends Controller
     {
         $this->normaliseDates($request);
         $this->normaliseMoney($request);
+        $this->normaliseReceipt($request);
 
         $data = $request->validate([
             'sr_no'                => ['nullable', 'string', 'max:50'],
@@ -363,8 +387,14 @@ class QuickYatriController extends Controller
             // Typed on paper, so "$1,200" and "1200" have to mean the same
             // thing — normalised just above, the way the dates are.
             'amount_paid'          => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            // The receipt written for that money: the six digits the office's
+            // book prints. `digits` keeps a leading zero, which is why the
+            // column is a char(6) string and not an integer.
+            'receipt_no'           => ['nullable', 'digits:6'],
             'photo'                => ['nullable', 'image', 'max:4096'],
-        ], $this->dateMessages());
+        ], $this->dateMessages() + [
+            'receipt_no.digits' => 'Receipt # must be the 6-digit number printed on the receipt, e.g. 123454.',
+        ]);
 
         // Email addresses are case-insensitive by convention — store the
         // form the applicant is going to type back at us if they ever log

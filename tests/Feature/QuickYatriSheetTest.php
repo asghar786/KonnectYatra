@@ -551,4 +551,138 @@ class QuickYatriSheetTest extends TestCase
             }
         }
     }
+
+    /* ------------------- the receipt number for a payment ------------------- */
+
+    /**
+     * Receipt # sits on the money line, beside the amount it was written for.
+     *
+     * On the money line and not on a row of its own, for the reason every other
+     * addition to this panel has landed on an existing line: page 1 measures
+     * 11in exactly, and a fourth row here is a third printed page.
+     */
+    public function test_the_money_line_carries_a_receipt_number_beside_the_amount()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $this->assertStringContainsString('Receipt #:', $body);
+
+        // Paid, then Receipt #, then Balance — the receipt reads with the money
+        // it receipts, and Amount/Paid/Balance keep their order.
+        $money   = strpos($body, 'Amount:');
+        $paid    = strpos($body, 'Paid:', $money);
+        $receipt = strpos($body, 'Receipt #:', $paid);
+        $balance = strpos($body, 'Balance:', $receipt);
+        $this->assertNotFalse($receipt);
+        $this->assertNotFalse($balance);
+
+        // One line, not two: nothing closes the row between the four cells.
+        $this->assertStringNotContainsString('qy-money-line', substr($body, $money, $balance - $money));
+    }
+
+    public function test_the_entry_screen_asks_for_six_digits()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-create'))->getContent();
+
+        $this->assertStringContainsString('name="receipt_no"', $body);
+        // The receipt book prints six digits, so the field will not take a
+        // seventh and offers a number pad on a phone.
+        $this->assertStringContainsString('maxlength="6"', $body);
+        $this->assertStringContainsString('inputmode="numeric"', $body);
+    }
+
+    public function test_a_receipt_number_is_stored_and_printed_with_the_payment()
+    {
+        $this->asAdmin();
+
+        // "No. 123454" is what the book prints and what gets copied out, label
+        // and all — the digits are the receipt.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Receipt Test',
+            'amount_paid'    => '$1,200',
+            'receipt_no'     => 'No. 123454',
+            'pay_cash'       => 1,
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Receipt Test')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertSame('123454', $row->receipt_no);
+            $this->assertSame(1200.0, (float) $row->amount_paid);
+
+            $printed = $this->get(route('quick-yatri-print', $row->id))->getContent();
+            $this->assertStringContainsString('123454', $printed);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    public function test_a_leading_zero_survives_the_round_trip()
+    {
+        $this->asAdmin();
+
+        // Why the column is a char(6) string and not an integer: a book that
+        // starts at 000001 must keep its zeros.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Receipt Zeros',
+            'receipt_no'     => '000123',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Receipt Zeros')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertSame('000123', $row->receipt_no);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    public function test_a_number_that_is_not_six_digits_is_refused_rather_than_padded()
+    {
+        $this->asAdmin();
+
+        // Guessing that "1234" meant "001234" would invent a receipt nobody
+        // wrote. The office is told instead.
+        $this->from(route('quick-yatri-create'))
+            ->post(route('quick-yatri-store'), [
+                'applicant_name' => 'QA Receipt Short',
+                'receipt_no'     => '1234',
+            ])
+            ->assertSessionHasErrors('receipt_no');
+
+        $this->assertNull(QuickYatri::where('applicant_name', 'QA Receipt Short')->first());
+    }
+
+    public function test_a_blank_receipt_stores_nothing_at_all()
+    {
+        $this->asAdmin();
+
+        // Not "000000" and not an empty string — a sheet where no money has
+        // been taken yet prints an empty writing line.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Receipt Blank',
+            'receipt_no'     => '',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Receipt Blank')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertNull($row->receipt_no);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
 }
