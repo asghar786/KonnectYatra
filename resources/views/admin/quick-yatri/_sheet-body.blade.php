@@ -404,7 +404,23 @@
         // within a pixel or two, so this is the largest square the freed height
         // pays for. Raising it spills the sheet onto a third printed page.
         // Re-measure (.qy-page-1 client vs. content bottom) before touching it.
-        $qyPanelSide = '218pt';
+        //
+        // Cut from 218pt to 204pt on 2026-08-31 to pay for the Receipts row.
+        // The office allowed 10-15%; this is 6.4%, because a sweep showed that
+        // is all it takes and a bigger square is a better-scanning code.
+        //
+        // The square's side is also its *width*, and that is the half that
+        // matters: the 14pt goes to the conditions panel, whose bullets — being
+        // wider — wrap into fewer lines. That is where the height for a third
+        // row comes from, not from the square being shorter.
+        //
+        // MEASURED, and it sits near a cliff. Swept against the worst-case
+        // sentence: 192-210pt all leave the page 3.8px spare, and at **216pt**
+        // the first bullet tips into a sixth line and the page goes 12.6px
+        // over. 204pt keeps 12pt of margin from that edge while giving the
+        // bullets ~11px of spacing at the live sentence. Re-run the sweep
+        // before changing it — the cliff moves with the font and the sentence.
+        $qyPanelSide = '204pt';
 
         // The code is printed to be scanned off paper, and a scanner needs a
         // white margin around it to find the thing at all. The uploaded PNG has
@@ -420,22 +436,24 @@
              The 7pt gap is measured like the square's side, and it is what pays
              for the first bullet being editable: at 8pt a five-line bullet drove
              the row 0.9px past the square, and page 1 has nothing to give. --}}
-        <div style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:9pt 12pt; display:flex; flex-direction:column; justify-content:space-between; gap:7pt">
+        <div style="flex:1 1 auto; min-width:0; box-sizing:border-box; border:1px solid #111; border-radius:6pt; padding:9pt 12pt; display:flex; flex-direction:column; justify-content:space-between; gap:6pt">
             {{-- The bullets are spaced by *distributing* what the panel has
                  left over, not by a fixed gap: this list shares a 218pt box
-                 with the money line and the payment line, and the first bullet
-                 is editable up to VALIDITY_NOTE_MAX characters — five lines
-                 when it is used in full. A fixed 11pt gap read beautifully at
-                 the default note and drove the panel 24.6px past the square at
-                 the longest one, which is a third printed page. So 5pt is the
-                 floor, flex:1 hands the list the panel's slack, and
+                 with the money line, the Receipts row and the payment line,
+                 and the first bullet is editable up to VALIDITY_NOTE_MAX
+                 characters — five lines when it is used in full. A fixed 11pt
+                 gap read beautifully at the default note and drove the panel
+                 24.6px past the square at the longest one, which is a third
+                 printed page. So 2pt is the floor (5pt until the Receipts row
+                 arrived and the office said the bullets could close up),
+                 flex:1 hands the list the panel's slack, and
                  space-between spreads it back between the bullets: at ordinary
                  note lengths the spacing lands back at ~11pt and the sheet
                  looks exactly as it did, while a long note simply tightens
                  instead of overflowing. Measured, not chosen — re-measure the
                  panel against the square (see the $qyPanelSide note) before
                  changing either number. --}}
-            <ul style="margin:0; padding-left:15pt; font-size:9.2pt; line-height:1.34; display:flex; flex-direction:column; justify-content:space-between; flex:1 1 auto; gap:5pt">
+            <ul style="margin:0; padding-left:15pt; font-size:9.2pt; line-height:1.34; display:flex; flex-direction:column; justify-content:space-between; flex:1 1 auto; gap:2pt">
                 {{-- Edited in the admin (Quick Yatri → Update prices) rather
                      than typed here: the deadline and the late fee move every
                      season. Capped at QuickYatri::VALIDITY_NOTE_MAX characters
@@ -448,11 +466,13 @@
                 <li>Minimum deposit of <strong>$500</strong> accepted.</li>
             </ul>
             @php
-                // Amount / Paid / Balance. Only **Paid** is stored: Amount is
-                // the trip's price (the ticked row of the grid, or this
-                // applicant's own agreed price, plus the wheelchair surcharge)
-                // and Balance is the difference — three stored numbers would
-                // eventually contradict each other on a printed page.
+                // Amount / Paid / Balance, over the payment slots they are made
+                // of. NONE of these three is stored: Amount is the trip's price
+                // (the ticked row of the grid, or this applicant's own agreed
+                // price, plus the wheelchair surcharge), Paid is the sum of the
+                // payments taken, and Balance is the difference. Only the parts
+                // on the Receipts row below are typed — a total stored beside
+                // its own parts eventually contradicts them on a printed page.
                 $qyAmount  = $isBlank ? null : $row->grandTotal();
                 $qyPaid    = $isBlank ? null : $row->paidAmount();
                 $qyBalance = $isBlank ? null : $row->balanceAmount();
@@ -484,69 +504,87 @@
                     ? (float) $row->package_amount
                     : null;
 
-                // The money line's four cells do NOT share the row equally, and
-                // the weights are measured rather than chosen. Each cell spends
-                // a fixed amount on its label and gives the rest to its writing
-                // line, so equal cells would hand the longest label
-                // ("Receipt #:") the shortest line. The weights buy every rule
-                // more room than the longest value it can print — at 8.6pt
-                // "-$1,500" measures 39.5px and a six-digit "123454" 33px.
-                $qyCellW = function ($grow) {
-                    return 'display:flex; align-items:flex-end; gap:3pt; flex:' . $grow . ' 1 0; min-width:0';
-                };
-                // Paid carries a deposit, never a five-figure total, so it is
-                // the cell that can afford to give room to Receipt #.
-                $qyCell     = $qyCellW(1);
-                $qyCellPaid = $qyCellW(0.85);
-                $qyCellRcpt = $qyCellW(1.15);
-            @endphp
-            {{-- The money line, in the space the conditions leave above the
-                 signature row. Amount and Balance are read-only everywhere —
-                 on paper they are writing lines, on a saved record they are
-                 computed — so a figure here can never contradict the grid.
+                $qyCell = 'display:flex; align-items:flex-end; gap:4pt; flex:1 1 0; min-width:0';
 
-                 Four labelled writing lines in the width three used to have, so
-                 the row buys the space back three ways, all MEASURED against
-                 the 417.8px the panel gives it (see the $qyPanelSide note): the
-                 gap drops 11pt -> 6pt, the label sits 3pt off its line instead
-                 of 4pt, and .qy-money-line lifts .qy-rule's 36pt floor —
-                 without that last one the four cells demand 435px, overrun the
-                 panel's border by 17px and take the QR square with them. The
-                 text is the page's own 8.6pt rather than 9pt for the same
-                 reason. Costs zero height, which is the only reason the receipt
-                 number is on this row at all: page 1 measures 11in exactly and
-                 a fourth line in this panel is a third printed page. --}}
-            <span class="qy-money-line" style="display:flex; align-items:flex-end; gap:6pt; font-size:8.6pt">
+                // The three payment slots, read through the model so this
+                // template never has to know that slot 1's columns are the
+                // unsuffixed originals.
+                $qySlots = $row->payments();
+            @endphp
+            {{-- The money line — the totals only. All three are read-only in
+                 every mode: on paper they are writing lines, on a saved record
+                 they are computed from the grid and from the Receipts row
+                 below, so no figure here can contradict what was actually
+                 taken. --}}
+            <span style="display:flex; align-items:flex-end; gap:11pt; font-size:9pt">
                 <span style="{{ $qyCell }}">Amount:<span class="qy-rule" id="qyAmountLine"
                     data-prices="{{ json_encode($qyPrices) }}"
                     data-fee="{{ $wcFee }}"
                     data-base="{{ $qyCustomBase }}">{{ $qyMoney($qyAmount) }}</span></span>
-                <span style="{{ $qyCellPaid }}">Paid:@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="amount_paid" value="{{ old('amount_paid', $qyTyped($qyPaid)) }}" placeholder="0" autocomplete="off">@else<span class="qy-rule">{{ $qyMoney($qyPaid) }}</span>@endif</span>
-                {{-- Next to the money it was written for, which is how the
-                     office reads the two: a receipt with no amount beside it
-                     traces nothing.
-
-                     Six digits, the number the receipt book prints ("No.
-                     123454"). maxlength and inputmode only steer the typing —
-                     the controller strips a copied-out "No." / "#" and the
-                     `digits:6` rule is what actually decides, so a number that
-                     came off a phone keyboard is held to the same shape. --}}
-                <span style="{{ $qyCellRcpt }}">Receipt #:@if($isEntry)<input type="text" class="qy-in qy-rule" name="receipt_no" value="{{ old('receipt_no', $row->receipt_no) }}" maxlength="6" inputmode="numeric" placeholder="123454" autocomplete="off">@else<span class="qy-rule">{{ $isBlank ? '' : $row->receipt_no }}</span>@endif</span>
+                {{-- Paid is no longer typed here: it is the sum of the
+                     Receipts row, kept live while the sheet is being filled in
+                     (see entry.blade.php). One figure, one source. --}}
+                <span style="{{ $qyCell }}">Paid:<span class="qy-rule" id="qyPaidLine">{{ $qyMoney($qyPaid) }}</span></span>
                 <span style="{{ $qyCell }}">Balance:<span class="qy-rule" id="qyBalanceLine">{{ $qyMoney($qyBalance) }}</span></span>
             </span>
-            {{-- How they are paying, and the date signed, on ONE line. The tick
-                 boxes go beside the Date rather than on a row of their own
-                 because page 1 has no height to give: a second row costs ~16pt
-                 and the first bullet is already allowed to grow into all of it.
-                 Three boxes, not a choice of one — a deposit paid one way and
-                 the balance another is ordinary. --}}
-            <span style="display:flex; align-items:flex-end; gap:9pt; font-size:9pt">
-                <span style="display:flex; align-items:center; gap:9pt; white-space:nowrap">Payment:
-                    <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('pay_cash', 9) !!}Cash</span>
-                    <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('pay_zelle', 9) !!}Zelle</span>
-                    <span style="display:inline-flex; align-items:center; gap:4pt">{!! $check('pay_check', 9) !!}Check</span>
+            {{-- The Receipts row: up to three payments, each an amount and the
+                 six-digit number of the receipt written for it.
+
+                 A yatri paying in parts is ordinary — a deposit at a gurdwara
+                 event, the balance nearer departure — and the office comes back
+                 to the same record to add the next one. Three slots, because
+                 that is what was asked for and what this row can print legibly.
+
+                 The amount sits with its own receipt rather than in a column of
+                 its own: a receipt number with no amount beside it traces
+                 nothing. "$" and "R#" mark which is which in the width a pair
+                 of words would have cost — this row had to be paid for out of
+                 the panel's height (see the $qyPanelSide note) and there was
+                 none to spare. The R# side takes the larger share of each slot
+                 (1.4 to 1): a six-digit receipt is wider than the amounts this
+                 sheet prices, and it carries a two-character marker. Measured
+                 at 8.6pt, "123454" is 39.3px and "3,450" is 29.2px, so the
+                 shares leave roughly 8px of margin on each — even the split. --}}
+            <span class="qy-receipts" style="display:flex; align-items:flex-end; gap:7pt; font-size:8.6pt">
+                <span style="white-space:nowrap">Receipts:</span>
+@foreach($qySlots as $qySlot)
+                <span style="display:flex; align-items:flex-end; gap:4pt; flex:1 1 0; min-width:0">
+                    <span style="display:flex; align-items:flex-end; gap:2pt; flex:1 1 0; min-width:0">$@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="{{ $qySlot['amount_field'] }}" value="{{ old($qySlot['amount_field'], $qyTyped($qySlot['amount'])) }}" autocomplete="off">@else<span class="qy-rule">{{ $isBlank || $qySlot['amount'] === null ? '' : number_format($qySlot['amount']) }}</span>@endif</span>
+                    <span style="display:flex; align-items:flex-end; gap:2pt; flex:1.4 1 0; min-width:0">R#@if($isEntry)<input type="text" class="qy-in qy-rule" name="{{ $qySlot['receipt_field'] }}" value="{{ old($qySlot['receipt_field'], $qySlot['receipt']) }}" maxlength="6" inputmode="numeric" autocomplete="off">@else<span class="qy-rule">{{ $isBlank ? '' : $qySlot['receipt'] }}</span>@endif</span>
                 </span>
-                <span style="display:flex; align-items:flex-end; gap:5pt; flex:1 1 auto; min-width:0">Date:{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
+@endforeach
+            </span>
+            {{-- How they are paying, which check it came in on, and the date
+                 signed — on ONE line. The tick boxes go beside the Date rather
+                 than on a row of their own because page 1 has no height to
+                 give: a second row costs ~16pt and the first bullet is already
+                 allowed to grow into all of it. Three boxes, not a choice of
+                 one — a deposit paid one way and the balance another is
+                 ordinary.
+
+                 Check # went in beside them because the Date was holding far
+                 more line than it prints on: at 8.6pt "21-AUG-2026" measures
+                 70.7px and the rule was 154. The row now reads 8.6pt like the
+                 Receipts row above it, and the tick group's gaps close from 9pt
+                 to 6pt. What that frees is split 1.2 to 1 in the Date's favour
+                 — it is the longest value on the row — which MEASURES 82.7px
+                 for the date against 46.8px for the check, each comfortably
+                 past the 70.7 and 39.3 they have to print.
+
+                 Both labels are nowrap and .qy-payline lifts .qy-rule's 36pt
+                 floor. Without either, the cells squeeze until "Check #:" wraps
+                 and the row grows a second line — 14.1px page 1 has not got. --}}
+            <span class="qy-payline" style="display:flex; align-items:flex-end; gap:5pt; font-size:8.6pt">
+                <span style="display:flex; align-items:center; gap:6pt; white-space:nowrap">Payment:
+                    <span style="display:inline-flex; align-items:center; gap:3pt">{!! $check('pay_cash', 9) !!}Cash</span>
+                    <span style="display:inline-flex; align-items:center; gap:3pt">{!! $check('pay_zelle', 9) !!}Zelle</span>
+                    <span style="display:inline-flex; align-items:center; gap:3pt">{!! $check('pay_check', 9) !!}Check</span>
+                </span>
+                {{-- Which check the money came in on. Not held to a digit count
+                     the way the receipt numbers are: a check is the payer's and
+                     carries whatever their bank printed on it. --}}
+                <span style="display:flex; align-items:flex-end; gap:3pt; flex:1 1 0; min-width:0"><span style="white-space:nowrap">Check #:</span>@if($isEntry)<input type="text" class="qy-in qy-rule qy-caps" name="check_no" value="{{ old('check_no', $row->check_no) }}" maxlength="20" autocomplete="off">@else<span class="qy-rule qy-caps">{{ $isBlank ? '' : $row->check_no }}</span>@endif</span>
+                <span style="display:flex; align-items:flex-end; gap:3pt; flex:1.2 1 0; min-width:0"><span style="white-space:nowrap">Date:</span>{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
             </span>
         </div>
 

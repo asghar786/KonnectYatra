@@ -555,44 +555,57 @@ class QuickYatriSheetTest extends TestCase
     /* ------------------- the receipt number for a payment ------------------- */
 
     /**
-     * Receipt # sits on the money line, beside the amount it was written for.
+     * The totals line carries Amount / Paid / Balance, and the Receipts row
+     * under it carries the payments those totals are made of.
      *
-     * On the money line and not on a row of its own, for the reason every other
-     * addition to this panel has landed on an existing line: page 1 measures
-     * 11in exactly, and a fourth row here is a third printed page.
+     * On a row of the panel's own rather than anywhere else on page 1: the page
+     * measures 11in exactly, and the row was paid for by tightening the bullets
+     * and taking 14pt off the QR square (see the $qyPanelSide note).
      */
-    public function test_the_money_line_carries_a_receipt_number_beside_the_amount()
+    public function test_the_footer_carries_a_receipts_row_under_the_totals()
     {
         $this->asAdmin();
 
         $body = $this->get(route('quick-yatri-blank'))->getContent();
 
-        $this->assertStringContainsString('Receipt #:', $body);
+        // Amount, Paid and Balance keep their order, and the Receipts row
+        // follows them — the parts read under the totals they add up to.
+        $amount   = strpos($body, 'Amount:');
+        $paid     = strpos($body, 'Paid:', $amount);
+        $balance  = strpos($body, 'Balance:', $paid);
+        $receipts = strpos($body, 'Receipts:', $balance);
+        $payment  = strpos($body, 'Payment:', $receipts);
 
-        // Paid, then Receipt #, then Balance — the receipt reads with the money
-        // it receipts, and Amount/Paid/Balance keep their order.
-        $money   = strpos($body, 'Amount:');
-        $paid    = strpos($body, 'Paid:', $money);
-        $receipt = strpos($body, 'Receipt #:', $paid);
-        $balance = strpos($body, 'Balance:', $receipt);
-        $this->assertNotFalse($receipt);
         $this->assertNotFalse($balance);
+        $this->assertNotFalse($receipts, 'The Receipts row must follow the totals line.');
+        $this->assertNotFalse($payment, 'The Cash/Zelle/Check line must follow the Receipts row.');
 
-        // One line, not two: nothing closes the row between the four cells.
-        $this->assertStringNotContainsString('qy-money-line', substr($body, $money, $balance - $money));
+        // Three slots, each marked "$" for the money and "R#" for the receipt —
+        // a bare "#" beside a figure could be anything.
+        $this->assertSame(3, substr_count(substr($body, $receipts, $payment - $receipts), 'R#'));
     }
 
-    public function test_the_entry_screen_asks_for_six_digits()
+    public function test_the_entry_screen_offers_three_payment_slots()
     {
         $this->asAdmin();
 
         $body = $this->get(route('quick-yatri-create'))->getContent();
 
-        $this->assertStringContainsString('name="receipt_no"', $body);
+        // An amount and a receipt for each of the three, so a payment taken in
+        // parts is recorded as parts.
+        foreach (['amount_paid', 'receipt_no', 'amount_paid_2', 'receipt_no_2', 'amount_paid_3', 'receipt_no_3'] as $field) {
+            $this->assertStringContainsString('name="' . $field . '"', $body);
+        }
+
         // The receipt book prints six digits, so the field will not take a
         // seventh and offers a number pad on a phone.
-        $this->assertStringContainsString('maxlength="6"', $body);
-        $this->assertStringContainsString('inputmode="numeric"', $body);
+        $this->assertSame(3, substr_count($body, 'maxlength="6"'));
+        $this->assertSame(3, substr_count($body, 'inputmode="numeric"'));
+
+        // Paid is no longer typed — it is the sum of the slots, computed both
+        // here (qyPaidLine, live) and server-side by paidAmount().
+        $this->assertStringContainsString('id="qyPaidLine"', $body);
+        $this->assertStringNotContainsString('name="amount_paid" placeholder="0"', $body);
     }
 
     public function test_a_receipt_number_is_stored_and_printed_with_the_payment()
@@ -679,6 +692,187 @@ class QuickYatriSheetTest extends TestCase
         try {
             $this->assertNotNull($row);
             $this->assertNull($row->receipt_no);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    public function test_paid_is_the_sum_of_the_parts_and_balance_follows_it()
+    {
+        $this->asAdmin();
+        SiteSetting::put(QuickYatri::PRICE_KEYS['round_trip_land'], 1650);
+        SiteSetting::put(QuickYatri::WHEELCHAIR_FEE_KEY, 300);
+
+        // A deposit at an event, an instalment, and the rest nearer departure.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Partial Sum',
+            'trip_option'    => 'round_trip_land',
+            'amount_paid'    => '$500',   'receipt_no'    => '123454',
+            'amount_paid_2'  => '400',    'receipt_no_2'  => '123455',
+            'amount_paid_3'  => '250',    'receipt_no_3'  => '123456',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Partial Sum')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertSame(1150.0, $row->paidAmount());
+            $this->assertSame(500.0, $row->balanceAmount());
+
+            // And the sheet prints the totals, not three figures to add up.
+            $printed = $this->get(route('quick-yatri-print', $row->id))->getContent();
+            $this->assertStringContainsString('$1,150', $printed);
+            $this->assertStringContainsString('$500', $printed);
+            foreach (['123454', '123455', '123456'] as $receipt) {
+                $this->assertStringContainsString($receipt, $printed);
+            }
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    /**
+     * The workflow that was asked for: take a deposit now, come back to the
+     * same record later and add the next receipt.
+     */
+    public function test_a_later_edit_adds_a_second_receipt_without_disturbing_the_first()
+    {
+        $this->asAdmin();
+
+        $row = QuickYatri::create([
+            'applicant_name' => 'QA Partial Later',
+            'amount_paid'    => 500,
+            'receipt_no'     => '123454',
+        ]);
+
+        try {
+            $this->post(route('quick-yatri-update', $row->id), [
+                'applicant_name' => 'QA Partial Later',
+                'amount_paid'    => '500', 'receipt_no'   => '123454',
+                'amount_paid_2'  => '750', 'receipt_no_2' => '123455',
+            ])->assertRedirect(route('quick-yatri'));
+
+            $row->refresh();
+            $this->assertSame(500.0, (float) $row->amount_paid);
+            $this->assertSame('123454', $row->receipt_no);
+            $this->assertSame(750.0, (float) $row->amount_paid_2);
+            $this->assertSame('123455', $row->receipt_no_2);
+            // Untouched slot 3 stays empty rather than becoming 0.00.
+            $this->assertNull($row->amount_paid_3);
+            $this->assertNull($row->receipt_no_3);
+            $this->assertSame(1250.0, $row->paidAmount());
+        } finally {
+            $row->delete();
+        }
+    }
+
+    public function test_a_sheet_with_no_payment_yet_shows_an_empty_paid_line()
+    {
+        $this->asAdmin();
+
+        // Null, not 0.0 — "$0" reads as "paid nothing" where the office means
+        // "not asked yet", and the printed sheet wants a line to write on.
+        $row = new QuickYatri(['applicant_name' => 'QA Partial None']);
+
+        $this->assertNull($row->paidAmount());
+    }
+
+    public function test_a_bad_receipt_in_the_second_slot_names_that_slot()
+    {
+        $this->asAdmin();
+
+        $this->from(route('quick-yatri-create'))
+            ->post(route('quick-yatri-store'), [
+                'applicant_name' => 'QA Partial Bad',
+                'amount_paid'    => '500', 'receipt_no'   => '123454',
+                'amount_paid_2'  => '750', 'receipt_no_2' => '12345',
+            ])
+            ->assertSessionHasErrors(['receipt_no_2' => 'Receipt # 2 must be the 6-digit number printed on the receipt, e.g. 123454.']);
+
+        $this->assertNull(QuickYatri::where('applicant_name', 'QA Partial Bad')->first());
+    }
+
+    /* ----------------- the check a payment came in on ----------------- */
+
+    /**
+     * Check # sits between the tick boxes and the Date, in the space the Date
+     * was not using: at 8.6pt a date prints 70.7px on a rule that was 154.
+     */
+    public function test_the_payment_line_carries_a_check_number_before_the_date()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        $payment = strpos($body, 'Payment:');
+        $check   = strpos($body, 'Check #:', $payment);
+        $date    = strpos($body, 'Date:', $check);
+
+        $this->assertNotFalse($check, 'The payment line must offer a Check # line.');
+        $this->assertNotFalse($date, 'Check # comes before the Date, beside the box it belongs to.');
+
+        // One row, and it stays one row. Both cells hang off the single
+        // .qy-payline flex row, and both labels are nowrap — without that the
+        // cells squeeze until "Check #:" breaks over two lines and the row
+        // grows 14.1px page 1 has not got. (That it *renders* on one line is a
+        // measurement, not a string match — see the decisions entry.)
+        $this->assertSame(1, substr_count($body, 'class="qy-payline"'));
+        $this->assertStringContainsString('white-space:nowrap">Check #:</span>', $body);
+        $this->assertStringContainsString('white-space:nowrap">Date:</span>', $body);
+
+        // A writing line in blank mode too — $txt would have rendered a
+        // borderless qy-fill here and left nothing to write on.
+        $this->assertStringContainsString('<span class="qy-rule qy-caps"></span>', $body);
+    }
+
+    public function test_a_check_number_is_stored_and_printed()
+    {
+        $this->asAdmin();
+
+        // Copied off the check the way a receipt number is copied off a
+        // receipt — "#104287" and "104287" are the one check.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Check Test',
+            'pay_check'      => 1,
+            'check_no'       => '#104287',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Check Test')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertSame('104287', $row->check_no);
+            $this->assertTrue($row->pay_check);
+
+            $printed = $this->get(route('quick-yatri-print', $row->id))->getContent();
+            $this->assertStringContainsString('104287', $printed);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    public function test_a_check_number_is_not_held_to_the_receipt_books_six_digits()
+    {
+        $this->asAdmin();
+
+        // The receipt book is the office's own and prints six digits; a check
+        // is the payer's and carries whatever their bank printed on it.
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'QA Check Short',
+            'check_no'       => '1042',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA Check Short')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertSame('1042', $row->check_no);
         } finally {
             if ($row) {
                 $row->delete();

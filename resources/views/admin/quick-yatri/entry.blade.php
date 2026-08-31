@@ -231,17 +231,20 @@
 <script>
     (function () {
         // Amount / Paid / Balance, kept honest while the sheet is being typed.
-        // Only Paid is stored: Amount follows the ticked row of the grid (or
-        // this applicant's own agreed price, carried in data-base) plus the
-        // wheelchair surcharge, and Balance is the difference. The same three
-        // figures are computed server-side by QuickYatri::grandTotal() /
+        // None of the three is stored: Amount follows the ticked row of the
+        // grid (or this applicant's own agreed price, carried in data-base)
+        // plus the wheelchair surcharge, Paid is the sum of the Receipts row's
+        // amounts, and Balance is the difference. The same three figures are
+        // computed server-side by QuickYatri::grandTotal() / paidAmount() /
         // balanceAmount(), which stay the authority — this is the typing
         // affordance, so a price ticked and a deposit typed show their balance
         // before the page is saved, not after.
         var amountLine = document.getElementById('qyAmountLine');
+        var paidLine = document.getElementById('qyPaidLine');
         var balanceLine = document.getElementById('qyBalanceLine');
-        var paid = document.querySelector('.qy-paid');
-        if (!amountLine || !balanceLine || !paid) return;
+        // One per payment slot — a yatri can pay in up to three parts.
+        var paidInputs = document.querySelectorAll('.qy-paid');
+        if (!amountLine || !paidLine || !balanceLine || !paidInputs.length) return;
 
         var prices = {};
         try {
@@ -268,10 +271,17 @@
 
         // What the office typed, however they typed it: "$1,200" and "1200" are
         // the same deposit on a paper form. The controller normalises the same
-        // way on save; this only decides what Balance shows meanwhile.
+        // way on save; this only decides what Paid and Balance show meanwhile.
+        //
+        // null when not one slot has a number in it — an untouched sheet shows
+        // an empty Paid line rather than "$0", matching paidAmount().
         function paidValue() {
-            var n = parseFloat(paid.value.replace(/[$,\s]/g, ''));
-            return isNaN(n) ? 0 : n;
+            var sum = 0, any = false;
+            for (var i = 0; i < paidInputs.length; i++) {
+                var n = parseFloat(paidInputs[i].value.replace(/[$,\s]/g, ''));
+                if (!isNaN(n)) { sum += n; any = true; }
+            }
+            return any ? sum : null;
         }
 
         // null until a price is settled — nothing ticked and no agreed price
@@ -289,16 +299,20 @@
 
         function refresh() {
             var sum = total();
+            var paid = paidValue();
             amountLine.textContent = sum === null ? '' : money(sum);
-            balanceLine.textContent = sum === null ? '' : money(sum - paidValue());
+            paidLine.textContent = paid === null ? '' : money(paid);
+            balanceLine.textContent = sum === null ? '' : money(sum - (paid || 0));
         }
 
         for (var i = 0; i < trip.length; i++) {
             trip[i].addEventListener('change', refresh);
         }
         if (wheelchair) wheelchair.addEventListener('change', refresh);
-        paid.addEventListener('input', refresh);
-        paid.addEventListener('change', refresh);
+        for (var j = 0; j < paidInputs.length; j++) {
+            paidInputs[j].addEventListener('input', refresh);
+            paidInputs[j].addEventListener('change', refresh);
+        }
         refresh();
     })();
 </script>

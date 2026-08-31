@@ -210,22 +210,66 @@ class QuickYatri extends Model
         return $base + ($this->wheelchair_full_trip ? self::wheelchairFee() : 0.0);
     }
 
-    /** What has been handed over so far; null when nothing is recorded yet. */
-    public function paidAmount(): ?float
+    /**
+     * The three payment slots the sheet carries, in order: what was handed
+     * over, and the receipt written for it.
+     *
+     * A yatri paying in parts is ordinary — a deposit now, the balance nearer
+     * departure — so the sheet records the parts rather than one running total
+     * somebody has to keep re-adding by hand.
+     *
+     * Slot 1 is the original `amount_paid` / `receipt_no` pair; only slots 2
+     * and 3 carry the `_2` / `_3` suffix. That asymmetry is deliberate (it
+     * saved renaming live production data) and it stops here: everything
+     * outside this model reads the slots through this list.
+     */
+    const PAYMENT_SLOTS = [
+        ['amount' => 'amount_paid',   'receipt' => 'receipt_no'],
+        ['amount' => 'amount_paid_2', 'receipt' => 'receipt_no_2'],
+        ['amount' => 'amount_paid_3', 'receipt' => 'receipt_no_3'],
+    ];
+
+    /** The slots as data: `[['amount' => ?float, 'receipt' => ?string], ...]`. */
+    public function payments(): array
     {
-        return $this->amount_paid === null ? null : (float) $this->amount_paid;
+        return array_map(function ($slot) {
+            $amount = $this->{$slot['amount']};
+
+            return [
+                'amount'       => $amount === null ? null : (float) $amount,
+                'receipt'      => $this->{$slot['receipt']} ?: null,
+                'amount_field' => $slot['amount'],
+                'receipt_field' => $slot['receipt'],
+            ];
+        }, self::PAYMENT_SLOTS);
     }
 
     /**
-     * What is still owed. Derived, never stored: the sheet prints Amount, Paid
-     * and Balance side by side, and three stored numbers would eventually
-     * disagree with each other.
+     * What has been handed over so far — the parts added up.
+     *
+     * Null, not 0.0, when no part has been recorded: a sheet where no money has
+     * been taken yet prints an empty writing line rather than "$0", which reads
+     * as "paid nothing" instead of "not asked yet".
+     */
+    public function paidAmount(): ?float
+    {
+        $amounts = array_filter(array_column($this->payments(), 'amount'), function ($a) {
+            return $a !== null;
+        });
+
+        return $amounts === [] ? null : array_sum($amounts);
+    }
+
+    /**
+     * What is still owed. Derived, never stored — as Paid now is too: the sheet
+     * prints Amount, Paid and Balance side by side over the parts they are made
+     * of, and stored totals would eventually disagree with their own parts.
      */
     public function balanceAmount(): ?float
     {
         $total = $this->grandTotal();
 
-        return $total === null ? null : $total - (float) ($this->amount_paid ?? 0);
+        return $total === null ? null : $total - (float) ($this->paidAmount() ?? 0);
     }
 
     /** Write `package_amount` / `total_amount` from whatever the row now says. */

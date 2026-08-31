@@ -276,22 +276,25 @@ class QuickYatriController extends Controller
      */
     private function normaliseMoney(Request $request): void
     {
-        $raw = $request->input('amount_paid');
+        foreach (QuickYatri::PAYMENT_SLOTS as $slot) {
+            $field = $slot['amount'];
+            $raw   = $request->input($field);
 
-        // Nothing typed means nothing recorded, so the sheet prints a blank
-        // line rather than "$0". ConvertEmptyStringsToNull normally does this
-        // for us; it is done here too because '' would reach a decimal column
-        // and be stored as 0.00, which reads as "paid nothing" instead of
-        // "not asked yet".
-        if ($raw === null || trim((string) $raw) === '') {
-            $request->merge(['amount_paid' => null]);
+            // Nothing typed means nothing recorded, so the sheet prints a blank
+            // line rather than "$0". ConvertEmptyStringsToNull normally does
+            // this for us; it is done here too because '' would reach a decimal
+            // column and be stored as 0.00, which reads as "paid nothing"
+            // instead of "not asked yet".
+            if ($raw === null || trim((string) $raw) === '') {
+                $request->merge([$field => null]);
 
-            return;
-        }
+                continue;
+            }
 
-        $clean = str_replace([',', '$', ' '], '', trim((string) $raw));
-        if (is_numeric($clean)) {
-            $request->merge(['amount_paid' => $clean]);
+            $clean = str_replace([',', '$', ' '], '', trim((string) $raw));
+            if (is_numeric($clean)) {
+                $request->merge([$field => $clean]);
+            }
         }
     }
 
@@ -306,16 +309,36 @@ class QuickYatriController extends Controller
      */
     private function normaliseReceipt(Request $request): void
     {
-        $raw = $request->input('receipt_no');
+        $fields = array_column(QuickYatri::PAYMENT_SLOTS, 'receipt');
+        // The check number is copied off a check the same way a receipt number
+        // is copied off a receipt — "#1042" and "1042" are the one check.
+        $fields[] = 'check_no';
 
-        if ($raw === null || trim((string) $raw) === '') {
-            $request->merge(['receipt_no' => null]);
+        foreach ($fields as $field) {
+            $raw = $request->input($field);
 
-            return;
+            if ($raw === null || trim((string) $raw) === '') {
+                $request->merge([$field => null]);
+
+                continue;
+            }
+
+            $clean = preg_replace('/^(no\.?|#|no\.?\s*#)\s*/i', '', trim((string) $raw));
+            $request->merge([$field => str_replace([' ', '-'], '', $clean)]);
+        }
+    }
+
+    /** "Receipt # 2 must be the 6-digit number..." for each payment slot. */
+    private function receiptMessages(): array
+    {
+        $messages = [];
+        foreach (QuickYatri::PAYMENT_SLOTS as $i => $slot) {
+            $which = $i === 0 ? 'Receipt #' : 'Receipt # ' . ($i + 1);
+            $messages[$slot['receipt'] . '.digits'] =
+                $which . ' must be the 6-digit number printed on the receipt, e.g. 123454.';
         }
 
-        $clean = preg_replace('/^(no\.?|#|no\.?\s*#)\s*/i', '', trim((string) $raw));
-        $request->merge(['receipt_no' => str_replace([' ', '-'], '', $clean)]);
+        return $messages;
     }
 
     /** "Date of Birth must be a real date, e.g. 21-AUG-2026." for each date field. */
@@ -384,17 +407,25 @@ class QuickYatriController extends Controller
             'nearest_gurdwara'     => ['nullable', 'string', 'max:255'],
             'gurdwara_city_state'  => ['nullable', 'string', 'max:255'],
             'signature_date'       => ['nullable', 'date_format:Y-m-d'],
-            // Typed on paper, so "$1,200" and "1200" have to mean the same
-            // thing — normalised just above, the way the dates are.
+            // The three payment slots: what was handed over, and the receipt
+            // written for it. Typed on paper, so "$1,200" and "1200" have to
+            // mean the same thing — normalised just above, the way the dates
+            // are. The receipt is the six digits the office's book prints, and
+            // `digits` keeps a leading zero, which is why those columns are
+            // char(6) strings and not integers.
             'amount_paid'          => ['nullable', 'numeric', 'min:0', 'max:999999'],
-            // The receipt written for that money: the six digits the office's
-            // book prints. `digits` keeps a leading zero, which is why the
-            // column is a char(6) string and not an integer.
             'receipt_no'           => ['nullable', 'digits:6'],
+            'amount_paid_2'        => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'receipt_no_2'         => ['nullable', 'digits:6'],
+            'amount_paid_3'        => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'receipt_no_3'         => ['nullable', 'digits:6'],
+            // Which check the money came in on. No digit rule, unlike the
+            // receipts above: the receipt book is the office's own and prints
+            // six digits, but a check is the payer's and carries whatever
+            // their bank printed on it.
+            'check_no'             => ['nullable', 'string', 'max:20'],
             'photo'                => ['nullable', 'image', 'max:4096'],
-        ], $this->dateMessages() + [
-            'receipt_no.digits' => 'Receipt # must be the 6-digit number printed on the receipt, e.g. 123454.',
-        ]);
+        ], $this->dateMessages() + $this->receiptMessages());
 
         // Email addresses are case-insensitive by convention — store the
         // form the applicant is going to type back at us if they ever log

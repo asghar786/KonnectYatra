@@ -997,3 +997,96 @@ every Quick Yatri save, not just one with a receipt typed. Use the zero-window r
 [[konnectyatra-pending-prod-migrations]]: write the file onto prod, migrate, *then* push.
 
 **Review:** see decisions.csv row dated 2026-08-31.
+
+---
+
+## 2026-08-31 — A payment taken in parts: three slots, and Paid stops being typed
+
+**The ask (typed, over four messages):** "if someone paid the amount in partial, then how to show on
+this page? so can you provide the option to add upto 3 receipts number on the form, we will edit and
+add another receipt number as well and can save", then "you can reduce the space between the bullets
+points as well", "you are allow to reduce the size of QR Code max 10 to 15% and increase the size of
+left box", and "can you type R# instead of only # for Receipt Number".
+
+**Each receipt carries its own amount, and Paid becomes their sum.** Three slots of
+`amount + receipt`, because a receipt number with no amount beside it traces nothing — the question
+being answered is *how much* was taken against *which* receipt. That makes Paid derived, like Amount
+and Balance already were: nothing on the footer is stored except the parts. The single figure the
+office used to type could disagree with the receipts under it; now it cannot.
+
+**The columns are asymmetric on purpose.** Slot 1 is the existing `amount_paid` / `receipt_no`;
+only 2 and 3 carry a suffix. Renaming slot 1 for symmetry would mean moving live production data to
+buy nothing but tidier names, so `QuickYatri::payments()` hands the slots back as a list and the
+asymmetry stops at the model.
+
+**Where the third row came from — three concessions, each measured.** Page 1 had none: it is a
+fixed 11in box that ran to within 1.4px of full.
+- **The bullet gap floor, 5pt → 2pt.** Load-bearing, not cosmetic: at a 5pt floor the worst-case
+  sentence overflows by 12.1px. `space-between` still spreads the bullets when there is slack, so
+  the live sentence reads at ~11px spacing and only a maximum-length one closes up.
+- **The QR square, 218pt → 204pt.** The office allowed 10–15%; this is **6.4%**, because a sweep
+  showed that is all it takes and a bigger square scans better. The square's side is also its
+  *width*, and that is the half that mattered — a wider conditions panel wraps the bullets into
+  fewer lines, which is where the height actually came from, not from the square being shorter.
+  **It sits near a cliff:** 192–210pt all leave the page 3.8px spare; at **216pt** the first bullet
+  tips into a sixth line and the page goes 12.6px over. 204pt keeps 12pt of margin from that edge.
+- The panel's own gap, 7pt → 6pt, for the extra child.
+
+**Net: the page has more headroom than before, not less.** At the worst-case sentence the page now
+sits 3.8px inside its 11in against **−7.6px** before — so the 220-character hole flagged earlier
+today is closed as a side effect. The money line also came back *wider* than it originally was
+(rules 82.3 / 103 / 83.3px against 76.1 / 96.7 / 77 before any of this), because the panel gained
+34.9px and the Receipt # cell left it.
+
+**"R#", not "#".** A bare "#" beside a figure could be anything. It costs ~7px a slot, taken back
+by weighting the receipt side of each slot 1.4 to the amount's 1 — a six-digit receipt (39.3px) is
+wider than the amounts this sheet prices (29.2px). Both sides land with ~10px of margin.
+
+**Verified:** 10 tests in `QuickYatriSheetTest` covering the row's placement and order, the three
+slots in entry mode, Paid as the sum with Balance following it, adding a second receipt by a later
+edit without disturbing the first or filling slot 3, a blank sheet's empty Paid line, and a bad
+receipt in slot 2 naming *that* slot. Full suite green, 69/69. Measured over CDP in all three modes
+and driven interactively: typing "$500", "1,200" and "950" into the three slots walks Paid to
+$2,650 and Balance to $800, and an overpayment reads "-$250".
+
+**Deploy:** one further migration, `2026_08_31_100000_add_partial_payments_to_quick_yatris_table`,
+with the same hard dependency as the receipt-number one — `payload()` writes all four new columns on
+every save. Both are batched in [[konnectyatra-pending-prod-migrations]].
+
+**Review:** see decisions.csv row dated 2026-08-31.
+
+---
+
+## 2026-08-31 — Check #, in the space the Date was not using
+
+**The ask (typed, with a screenshot):** "as of you can see there is planty of space after Check, plz
+add the option of check #________ and compact the date accordingly."
+
+**He was right about the space, and the measurement says where it was.** The Date's rule held 154px
+for a value that prints 70.7px at 8.6pt. Dropping the row to 8.6pt (matching the Receipts row above
+it), closing the tick group's gaps from 9pt to 6pt and splitting what that frees 1.2 to 1 in the
+Date's favour gives Check # a 46.5px line and leaves the Date 83.1px — still 12px more than the
+longest date it can print. No new row, no change to the page's height budget.
+
+**Two things stop that row growing a second line, and both are load-bearing.** `.qy-payline` lifts
+`.qy-rule`'s 36pt floor, and both labels are `white-space:nowrap`. Without them the cells squeeze
+until "Check #:" breaks over two lines — measured at **29.8px** against the row's 15.7px, which page
+1 has not got. The test asserts the mechanism (one `.qy-payline`, both labels nowrap); that it
+*renders* on one line is a measurement, because a string match cannot see a wrap.
+
+**A plain string, not six digits.** `receipt_no` is held to `digits:6` because the receipt book is
+the office's own and prints exactly that. A check is the payer's and carries whatever their bank
+printed on it, so `check_no` is `varchar(20)` with no shape rule — copying it exactly matters more.
+It shares the receipt normaliser, so "#104287" and "104287" are the one check.
+
+**Not conditional on the Check box being ticked.** A paper form should record what is written on it;
+refusing a check number because a box above is unticked would be the form arguing with the office.
+
+**Verified:** 3 tests (placement between the boxes and the Date, "#104287" stored as `104287` and
+printed, a 4-digit number accepted where a 4-digit *receipt* is refused). Full suite green, 72/72.
+Measured and screenshotted in blank, entry and print.
+
+**Deploy:** `2026_08_31_110000_add_check_no_to_quick_yatris_table`, same hard dependency as the
+other two — batched in [[konnectyatra-pending-prod-migrations]].
+
+**Review:** see decisions.csv row dated 2026-08-31.
