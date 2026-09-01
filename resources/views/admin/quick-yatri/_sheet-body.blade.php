@@ -535,22 +535,22 @@
                  to the same record to add the next one. Three slots, because
                  that is what was asked for and what this row can print legibly.
 
-                 The amount sits with its own receipt rather than in a column of
-                 its own: a receipt number with no amount beside it traces
-                 nothing. "$" and "R#" mark which is which in the width a pair
-                 of words would have cost — this row had to be paid for out of
-                 the panel's height (see the $qyPanelSide note) and there was
-                 none to spare. The R# side takes the larger share of each slot
-                 (1.4 to 1): a six-digit receipt is wider than the amounts this
-                 sheet prices, and it carries a two-character marker. Measured
-                 at 8.6pt, "123454" is 39.3px and "3,450" is 29.2px, so the
-                 shares leave roughly 8px of margin on each — even the split. --}}
+                 Each slot reads **R# first, then the amount** — the receipt is
+                 what the office looks a payment up by, so it leads and the
+                 money it covers follows. The two sit together rather than in
+                 columns of their own: a receipt number with no amount beside it
+                 traces nothing. "R#" and "$" mark which is which in the width a
+                 pair of words would have cost — this row had to be paid for out
+                 of the panel's height (see the $qyPanelSide note) and there was
+                 none to spare. R# keeps the larger share of each slot (1.4 to
+                 1) whichever side it sits: measured at 8.6pt "123454" is 39.3px
+                 against "3,450" at 29.2px, and it carries the wider marker. --}}
             <span class="qy-receipts" style="display:flex; align-items:flex-end; gap:7pt; font-size:8.6pt">
                 <span style="white-space:nowrap">Receipts:</span>
 @foreach($qySlots as $qySlot)
                 <span style="display:flex; align-items:flex-end; gap:4pt; flex:1 1 0; min-width:0">
-                    <span style="display:flex; align-items:flex-end; gap:2pt; flex:1 1 0; min-width:0">$@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="{{ $qySlot['amount_field'] }}" value="{{ old($qySlot['amount_field'], $qyTyped($qySlot['amount'])) }}" autocomplete="off">@else<span class="qy-rule">{{ $isBlank || $qySlot['amount'] === null ? '' : number_format($qySlot['amount']) }}</span>@endif</span>
                     <span style="display:flex; align-items:flex-end; gap:2pt; flex:1.4 1 0; min-width:0">R#@if($isEntry)<input type="text" class="qy-in qy-rule" name="{{ $qySlot['receipt_field'] }}" value="{{ old($qySlot['receipt_field'], $qySlot['receipt']) }}" maxlength="6" inputmode="numeric" autocomplete="off">@else<span class="qy-rule">{{ $isBlank ? '' : $qySlot['receipt'] }}</span>@endif</span>
+                    <span style="display:flex; align-items:flex-end; gap:2pt; flex:1 1 0; min-width:0">$@if($isEntry)<input type="text" class="qy-in qy-rule qy-paid" name="{{ $qySlot['amount_field'] }}" value="{{ old($qySlot['amount_field'], $qyTyped($qySlot['amount'])) }}" autocomplete="off">@else<span class="qy-rule">{{ $isBlank || $qySlot['amount'] === null ? '' : number_format($qySlot['amount']) }}</span>@endif</span>
                 </span>
 @endforeach
             </span>

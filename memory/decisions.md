@@ -1090,3 +1090,29 @@ Measured and screenshotted in blank, entry and print.
 other two — batched in [[konnectyatra-pending-prod-migrations]].
 
 **Review:** see decisions.csv row dated 2026-08-31.
+
+---
+
+## 2026-09-01 — The receipt leads its amount
+
+**The ask (typed, with the row boxed in red):** "plz change the order R#______ $: _______ / receipt
+number then amount and follow all three R#s."
+
+Each slot was `$ ____ R# ____`; it is now `R# ____ $ ____`, all three. His reason is the office's:
+a payment gets looked up **by its receipt number**, so that is what should lead, with the money it
+covers following. Yesterday's markup put the money first because the row grew out of the Amount /
+Paid / Balance line above it — that was the layout's history showing through, not how the row is
+read.
+
+Markup order only. The 1.4-to-1 flex share stays with R# whichever side it sits on, because it is
+still the wider value (39.3px against 29.2px at 8.6pt). Re-measured after the swap: the rules simply
+trade places (49.8 / 38.6 per slot), the row is the same 15.7px tall, and page 1 keeps its 20px
+spare at the live sentence and 3.8px at the worst case.
+
+**Verified:** the placement test now walks all three slots and asserts the R# comes before its
+amount in each, so the order cannot quietly revert. Suite green, 71/71.
+
+**Deploy:** view-only, no migration.
+
+**Review:** no csv row — this is a refinement of the 2026-08-31 partial-payments decision, logged
+against that one.

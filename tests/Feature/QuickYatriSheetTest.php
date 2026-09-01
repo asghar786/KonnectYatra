@@ -580,9 +580,21 @@ class QuickYatriSheetTest extends TestCase
         $this->assertNotFalse($receipts, 'The Receipts row must follow the totals line.');
         $this->assertNotFalse($payment, 'The Cash/Zelle/Check line must follow the Receipts row.');
 
-        // Three slots, each marked "$" for the money and "R#" for the receipt —
+        // Three slots, each marked "R#" for the receipt and "$" for the money —
         // a bare "#" beside a figure could be anything.
-        $this->assertSame(3, substr_count(substr($body, $receipts, $payment - $receipts), 'R#'));
+        $row = substr($body, $receipts, $payment - $receipts);
+        $this->assertSame(3, substr_count($row, 'R#'));
+
+        // And within every slot the receipt LEADS: it is what a payment gets
+        // looked up by, and the money it covers follows.
+        $at = 0;
+        for ($slot = 1; $slot <= 3; $slot++) {
+            $receipt = strpos($row, 'R#', $at);
+            $amount  = strpos($row, '>$', $receipt);
+            $this->assertNotFalse($receipt, "Slot {$slot} must carry an R# marker.");
+            $this->assertNotFalse($amount, "Slot {$slot}'s amount must follow its R#.");
+            $at = $amount;
+        }
     }
 
     public function test_the_entry_screen_offers_three_payment_slots()
