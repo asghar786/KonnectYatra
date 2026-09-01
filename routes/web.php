@@ -147,6 +147,9 @@ Route::group(['prefix' => 'admin',
     Route::get('/yatri-visa',[PackagesController::class, 'yatri_visa'])->name('yatri-visa');
     Route::get('/yatri-visa-create',[PackagesController::class, 'create_yatri_visa'])->name('yatri-visa-create');
     Route::post('/yatri-visa-store',[PackagesController::class, 'store_yatri_visa_admin'])->name('yatri-visa-store');
+    Route::get('/yatri-visa-store', function () {
+        return redirect()->route('yatri-visa');
+    });
     Route::get('/yatri-visa-delete/{id}',[PackagesController::class, 'delete_yatri'])->name('yatri-visa-delete');
     Route::get('/yatri-visa-edit/{id}',[PackagesController::class, 'edit_yatri_visa'])->name('yatri-visa-edit');
     Route::get('/yatri-visa-status/{id}/{status}',[PackagesController::class, 'update_visa_status'])->name('yatri-visa-status');
