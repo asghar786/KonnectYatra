@@ -138,6 +138,81 @@
     });
 </script>
 <script>
+    $(function () {
+        // A passport runs ten years to the day before the anniversary, so an
+        // issue date of 15-JAN-2020 means an expiry of 14-JAN-2030. The office
+        // was doing that arithmetic by hand on every sheet; it is filled in
+        // here as the issue date is picked or typed instead.
+        //
+        // Only ever a suggestion. The Expiry box stays an ordinary field, and
+        // once it holds anything this did not put there — typed by hand, or
+        // loaded off a saved record — nothing here overwrites it again. It has
+        // to stay overridable: a passport issued to a minor runs five years,
+        // some countries issue other terms, and the document in front of the
+        // office is the authority either way.
+        var issue  = document.querySelector('.ky-date-issue');
+        var expiry = document.querySelector('.ky-date-expiry');
+        if (!issue || !expiry) return;
+
+        var MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+        // DD-MMM-YYYY, the one format this sheet writes. Anything else reads
+        // back as null and nothing is suggested — a half-typed date must not
+        // put a guessed expiry on the form. The round-trip check rejects
+        // 31-FEB-2026 and friends, which Date otherwise rolls into March.
+        function parse(value) {
+            var m = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec((value || '').trim());
+            if (!m) return null;
+
+            var month = MONTHS.indexOf(m[2].toUpperCase());
+            var day   = parseInt(m[1], 10);
+            if (month < 0) return null;
+
+            var d = new Date(parseInt(m[3], 10), month, day);
+
+            return (d.getDate() === day && d.getMonth() === month) ? d : null;
+        }
+
+        function stamp(d) {
+            return ('0' + d.getDate()).slice(-2) + '-' + MONTHS[d.getMonth()] + '-' + d.getFullYear();
+        }
+
+        // Ten years on, less a day. A 29-FEB issue has no anniversary in a
+        // common year: setFullYear lands on 1 March and taking the day back off
+        // gives 28-FEB, which is the date such a passport actually carries.
+        function expiryOf(d) {
+            var out = new Date(d.getTime());
+            out.setFullYear(out.getFullYear() + 10);
+            out.setDate(out.getDate() - 1);
+
+            return out;
+        }
+
+        // The last date this filled in, so an untouched suggestion can be
+        // recognised and refreshed while a hand-typed one is left alone.
+        var suggested = null;
+
+        function suggest() {
+            var current = expiry.value.trim();
+            if (current !== '' && current !== suggested) return;
+
+            var from = parse(issue.value);
+            if (!from) return;
+
+            suggested    = stamp(expiryOf(from));
+            expiry.value = suggested;
+        }
+
+        issue.addEventListener('change', suggest);
+        issue.addEventListener('blur', suggest);
+        // Picking off the calendar sets the value from inside jQuery UI, which
+        // does not raise a plain change event, so the picker calls in as well.
+        // Registered as an option rather than at build time because the picker
+        // above is what owns this field's configuration.
+        $(issue).datepicker('option', 'onSelect', suggest);
+    });
+</script>
+<script>
     (function () {
         // Cell Phone No. takes its shape as it is typed — "+1 (786) 516 2525" —
         // rather than only once the page is re-rendered. The same reshaping runs

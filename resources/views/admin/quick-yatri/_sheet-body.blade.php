@@ -16,9 +16,13 @@
     // as it is typed, on screen and in print — so the sheet is legible
     // whichever way the applicant filled it in and whatever state Caps Lock
     // happened to be in. text-transform does that in one place for all three
-    // modes and leaves the stored value untouched; $mail below is the one
-    // exception. There is no separate Title Case treatment for person names
-    // any more — names are text, and all text is CAPS.
+    // modes; $mail below is the one exception. There is no separate Title Case
+    // treatment for person names any more — names are text, and all text is CAPS.
+    //
+    // The capitals are stored as well as shown: the controller upper-cases
+    // QuickYatri::CAPS_FIELDS on save, so the record says what the form said
+    // rather than what the keyboard was doing. This class still earns its keep
+    // for rows saved before that (and for the blank sheet's own headings).
     $txt = function ($name, $extra = '', $cls = ' qy-caps') use ($row, $isEntry, $isBlank) {
         if ($isEntry) {
             return '<input type="text" class="qy-in' . $cls . '" name="' . $name . '" value="' . e(old($name, $row->{$name})) . '"' . $extra . '>';
@@ -331,10 +335,10 @@
                 <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('mother_name') !!}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #111; padding:2pt 6pt">Citizenship / Nationality:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('citizenship') !!}</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">Passport No.:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('passport_no') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">Citizenship / Nationality:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('citizenship') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Date of Issue:</td>

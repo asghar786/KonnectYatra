@@ -364,7 +364,12 @@ class QuickYatriSheetTest extends TestCase
      * Every free-text answer reads in CAPS, email stays lowercase, and the cell
      * number takes the house shape (2026-08-25). The capitals are a
      * text-transform, so these assert the class the value carries rather than a
-     * re-cased string - the stored value is deliberately left untouched.
+     * re-cased string.
+     *
+     * These rows are written straight through the model, which is why they can
+     * still be mixed case at all: saving through the form upper-cases them
+     * (2026-09-02, covered below). The class is what renders rows saved before
+     * that, so it is still the thing worth pinning here.
      */
     public function test_print_mode_caps_every_answer_except_email_and_formats_the_phone()
     {
@@ -890,5 +895,126 @@ class QuickYatriSheetTest extends TestCase
                 $row->delete();
             }
         }
+    }
+
+    /**
+     * The sheet shows every free-text answer in CAPS while it is being typed,
+     * so that is what gets stored (2026-09-02). Before this, `.qy-caps` only
+     * restyled the glyphs and whatever Caps Lock happened to be doing went into
+     * the database — a form reading "BANTA SINGH" saved as "banta singh".
+     */
+    public function test_free_text_answers_are_stored_in_caps_the_way_the_form_shows_them()
+    {
+        $this->asAdmin();
+
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name'      => 'banta singh',
+            'father_name'         => 'Santa Singh',
+            'place_of_birth'      => 'amritsar',
+            'citizenship'         => 'u.s. citizen',
+            'passport_no'         => 'a1234567',
+            'profession'          => 'taxi driver',
+            'home_address'        => '148-36 Guy R Brewers Blvd',
+            'city'                => 'philadelphia',
+            'state_zip'           => 'pa 19104',
+            'nearest_gurdwara'    => 'gurdwara sahib philadelphia',
+            'gurdwara_city_state' => 'millbourne, pa',
+            'check_no'            => '1042',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('passport_no', 'A1234567')->first();
+
+        try {
+            $this->assertNotNull($row);
+
+            $this->assertSame('BANTA SINGH', $row->applicant_name);
+            $this->assertSame('SANTA SINGH', $row->father_name);
+            $this->assertSame('AMRITSAR', $row->place_of_birth);
+            $this->assertSame('U.S. CITIZEN', $row->citizenship);
+            $this->assertSame('A1234567', $row->passport_no);
+            $this->assertSame('TAXI DRIVER', $row->profession);
+            $this->assertSame('148-36 GUY R BREWERS BLVD', $row->home_address);
+            $this->assertSame('PHILADELPHIA', $row->city);
+            $this->assertSame('PA 19104', $row->state_zip);
+            $this->assertSame('GURDWARA SAHIB PHILADELPHIA', $row->nearest_gurdwara);
+            $this->assertSame('MILLBOURNE, PA', $row->gurdwara_city_state);
+            $this->assertSame('1042', $row->check_no);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    /**
+     * Email is the one answer held the other way, and the CAPS pass must not
+     * reach it — an address is read back and typed into a mail client, where
+     * capitals only make it harder to check.
+     */
+    public function test_the_caps_pass_leaves_the_email_lowercase()
+    {
+        $this->asAdmin();
+
+        $this->post(route('quick-yatri-store'), [
+            'applicant_name' => 'qa caps email',
+            'email'          => 'Banta.Singh@Gmail.COM',
+        ])->assertRedirect(route('quick-yatri'));
+
+        $row = QuickYatri::where('applicant_name', 'QA CAPS EMAIL')->first();
+
+        try {
+            $this->assertNotNull($row);
+            $this->assertSame('QA CAPS EMAIL', $row->applicant_name);
+            $this->assertSame('banta.singh@gmail.com', $row->email);
+        } finally {
+            if ($row) {
+                $row->delete();
+            }
+        }
+    }
+
+    /**
+     * Passport No. leads its row and Citizenship / Nationality follows it
+     * (2026-09-02, asked for on the sheet itself). One template, so the order
+     * has to be the same on the entry screen, the blank sheet and the print.
+     */
+    public function test_passport_number_comes_before_citizenship_on_the_sheet()
+    {
+        $this->asAdmin();
+
+        foreach ([route('quick-yatri-blank'), route('quick-yatri-create')] as $url) {
+            $body = $this->get($url)->getContent();
+
+            // Matched on the whole cell, not the bare label: the stylesheet
+            // names "Citizenship / Nationality:" in a comment above the rule
+            // that keeps it off a second line, and that sits earlier in the
+            // page than the grid does.
+            $passport    = strpos($body, '>Passport No.:</td>');
+            $citizenship = strpos($body, '>Citizenship / Nationality:</td>');
+
+            $this->assertNotFalse($passport, 'Passport No. is missing from ' . $url);
+            $this->assertNotFalse($citizenship, 'Citizenship is missing from ' . $url);
+            $this->assertLessThan($citizenship, $passport, 'The two are the wrong way round on ' . $url);
+        }
+    }
+
+    /**
+     * A passport runs ten years to the day before the anniversary, so the entry
+     * screen fills the expiry in from the issue date rather than making the
+     * office do the arithmetic on every sheet. It stays an ordinary editable
+     * field — this pins the rule and the fact that it only ever suggests.
+     */
+    public function test_the_entry_screen_derives_the_passport_expiry_from_the_issue_date()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-create'))->getContent();
+
+        $this->assertStringContainsString('out.setFullYear(out.getFullYear() + 10);', $body);
+        $this->assertStringContainsString('out.setDate(out.getDate() - 1);', $body);
+
+        // The guard that keeps a hand-typed expiry: anything the script did not
+        // itself write is left alone.
+        $this->assertStringContainsString("if (current !== '' && current !== suggested) return;", $body);
     }
 }

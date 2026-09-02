@@ -211,6 +211,27 @@ class QuickYatri extends Model
     }
 
     /**
+     * Every free-text answer the sheet renders in CAPS — and therefore stores
+     * in CAPS too.
+     *
+     * `.qy-caps` only restyles the glyphs, so until now a sheet that read
+     * "BANTA SINGH" while it was being typed could be sitting in the database
+     * as "banta singh", depending on nothing more than what Caps Lock happened
+     * to be doing. The record has to say what the form said, because the
+     * database is what a list column, a search or an export reads back.
+     *
+     * `email` is deliberately absent: it is the one answer held the other way,
+     * lower-cased on save. So are the four reference numbers across the top
+     * (SR#/RT#/OW#/LP#) and the dates, none of which the sheet capitalises.
+     */
+    const CAPS_FIELDS = [
+        'applicant_name', 'place_of_birth', 'father_name', 'mother_name',
+        'citizenship', 'passport_no', 'profession', 'family_members_count',
+        'family_member_1', 'family_member_2', 'home_address', 'city',
+        'state_zip', 'nearest_gurdwara', 'gurdwara_city_state', 'check_no',
+    ];
+
+    /**
      * The three payment slots the sheet carries, in order: what was handed
      * over, and the receipt written for it.
      *

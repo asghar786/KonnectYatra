@@ -434,6 +434,18 @@ class QuickYatriController extends Controller
             $data['email'] = strtolower($data['email']);
         }
 
+        // And every other free-text answer is stored the way the form showed
+        // it while it was typed: in CAPS. `.qy-caps` restyles the glyphs but
+        // posts whatever was keyed, so a sheet reading "BANTA SINGH" on screen
+        // was landing in the database as "banta singh" whenever Caps Lock was
+        // off. What is stored is what a list column, a search and an export
+        // read back, so it has to match the sheet rather than the keyboard.
+        foreach (QuickYatri::CAPS_FIELDS as $field) {
+            if (!empty($data[$field])) {
+                $data[$field] = mb_strtoupper((string) $data[$field], 'UTF-8');
+            }
+        }
+
         // Tick boxes: absent means unticked, so read every one explicitly.
         //
         // upload_passport / upload_green_card / upload_id_license are NOT in
