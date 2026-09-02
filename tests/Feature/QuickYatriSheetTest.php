@@ -1017,4 +1017,78 @@ class QuickYatriSheetTest extends TestCase
         // itself write is left alone.
         $this->assertStringContainsString("if (current !== '' && current !== suggested) return;", $body);
     }
+
+    /**
+     * The list opens oldest first, so the newest application is the row at the
+     * foot of the table and the # column counts up like a register (2026-09-02).
+     * `id` breaks the tie because several sheets are routinely keyed in inside
+     * the same minute and `created_at` alone would let them shuffle.
+     */
+    public function test_the_list_opens_with_the_oldest_application_first()
+    {
+        $this->asAdmin();
+
+        $stamp = '2026-01-0';
+        $ids   = [];
+        foreach ([['ZZ ORDER MIDDLE', $stamp . '2 09:00:00'],
+                  ['ZZ ORDER OLDEST', $stamp . '1 09:00:00'],
+                  ['ZZ ORDER NEWEST', $stamp . '3 09:00:00']] as [$name, $when]) {
+            $row = QuickYatri::create(['applicant_name' => $name]);
+            $row->forceFill(['created_at' => $when])->save();
+            $ids[] = $row->id;
+        }
+
+        try {
+            $body = $this->get(route('quick-yatri'))->getContent();
+
+            $oldest = strpos($body, 'ZZ ORDER OLDEST');
+            $middle = strpos($body, 'ZZ ORDER MIDDLE');
+            $newest = strpos($body, 'ZZ ORDER NEWEST');
+
+            $this->assertLessThan($middle, $oldest, 'The oldest application is not at the top.');
+            $this->assertLessThan($newest, $middle, 'The newest application is not at the foot.');
+        } finally {
+            QuickYatri::whereIn('id', $ids)->delete();
+        }
+    }
+
+    /**
+     * Every column that holds a value can be sorted on, and each cell carries
+     * the key it sorts by — what a cell prints will not sort on its own (a name
+     * sits under a father's name, a date prints as "25 Aug 2026").
+     */
+    public function test_the_list_offers_a_sort_on_every_column_that_holds_a_value()
+    {
+        $this->asAdmin();
+
+        $row = QuickYatri::create([
+            'applicant_name' => 'ZZ SORT KEYS',
+            'father_name'    => 'ZZ SORT FATHER',
+            'passport_no'    => 'X7654321',
+            'trip_option'    => 'round_trip_5star',
+            'total_amount'   => 3400,
+        ]);
+
+        try {
+            $body = $this->get(route('quick-yatri'))->getContent();
+
+            // Seven sortable headers: everything but # (a position, renumbered
+            // after a sort) and Action (no data at all).
+            $this->assertSame(7, substr_count($body, '<th class="srt"'));
+            $this->assertStringContainsString('data-type="num" tabindex="0" role="columnheader" aria-sort="ascending">Entered On', $body);
+
+            // The name alone, not the "S/o father" line printed under it.
+            $this->assertStringContainsString('<td data-sort="ZZ SORT KEYS">', $body);
+            $this->assertStringContainsString('<td data-sort="X7654321">', $body);
+
+            // The amount as a number, so 900 orders before 3,400 rather than after.
+            $this->assertStringContainsString('<td data-sort="3400">', $body);
+
+            // The date as a timestamp, since "25 Aug 2026, 03:55 PM" sorts
+            // alphabetically and would file August ahead of January.
+            $this->assertStringContainsString('<td data-sort="' . $row->created_at->getTimestamp() . '">', $body);
+        } finally {
+            $row->delete();
+        }
+    }
 }

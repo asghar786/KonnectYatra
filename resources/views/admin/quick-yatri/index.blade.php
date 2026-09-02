@@ -20,6 +20,16 @@
     .qy-table{width:100%; border-collapse:separate; border-spacing:0; margin:0}
     .qy-table thead th{background:#1f2a44; color:#fff; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:15px 18px; text-align:left; white-space:nowrap; border:none}
     .qy-table thead th.tc{text-align:center}
+    /* Sortable headers. The caret is always in the box — faint until the column
+       is the one being sorted on — so a click never changes the header's width
+       and shunts the whole table sideways. */
+    .qy-table thead th.srt{cursor:pointer; user-select:none}
+    .qy-table thead th.srt:hover{background:#27334f}
+    .qy-table thead th.srt:focus-visible{outline:2px solid #f54e18; outline-offset:-2px}
+    .qy-table thead th.srt::after{content:'95'; margin-left:7px; font-size:11px; opacity:.35}
+    .qy-table thead th.srt[aria-sort=ascending]::after{content:'91'; opacity:1}
+    .qy-table thead th.srt[aria-sort=descending]::after{content:'93'; opacity:1}
+    .qy-table thead th.srt[aria-sort]{background:#27334f}
     .qy-table tbody td{padding:14px 18px; font-size:14px; color:#2c3446; border-bottom:1px solid #f0f2f6; vertical-align:middle}
     .qy-table tbody tr:last-child td{border-bottom:none}
     .qy-table tbody tr:hover{background:#f9fafc}
@@ -152,14 +162,17 @@
                 <table class="qy-table">
                     <thead>
                         <tr>
+                            {{-- # is the position in the table, not a value, so it
+                                 renumbers after a sort rather than being sortable
+                                 itself. Action holds no data at all. --}}
                             <th class="tc">#</th>
-                            <th>Applicant</th>
-                            <th>Contact</th>
-                            <th>Passport</th>
-                            <th>Trip</th>
-                            <th>Amount</th>
-                            <th>Options</th>
-                            <th>Entered On</th>
+                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Applicant</th>
+                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Contact</th>
+                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Passport</th>
+                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Trip</th>
+                            <th class="srt" data-type="num" tabindex="0" role="columnheader">Amount</th>
+                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Options</th>
+                            <th class="srt" data-type="num" tabindex="0" role="columnheader" aria-sort="ascending">Entered On</th>
                             <th class="tc">Action</th>
                         </tr>
                     </thead>
@@ -167,17 +180,22 @@
                         @forelse($rows as $i => $r)
                         <tr class="qy-row" data-search="{{ strtolower(trim($r->applicant_name.' '.$r->father_name.' '.$r->cell_phone.' '.$r->email.' '.$r->passport_no.' '.$r->city.' '.$r->state_zip.' '.$r->nearest_gurdwara)) }}">
                             <td class="tc"><span class="qy-idx">{{ $i + 1 }}</span></td>
-                            <td>
+                            {{-- Each cell carries the key it sorts on, because what
+                                 it prints will not sort: a name sits under a father's
+                                 name, an amount under a "$", a date under "25 Aug 2026".
+                                 The header script reads data-sort and falls back to the
+                                 cell's own text. --}}
+                            <td data-sort="{{ $r->applicant_name }}">
                                 <span class="qy-name">{{ $r->applicant_name }}
                                     @if($r->father_name)<small>S/o {{ $r->father_name }}</small>@endif
                                 </span>
                             </td>
-                            <td>
+                            <td data-sort="{{ trim($r->cell_phone.' '.$r->email) }}">
                                 @if($r->cell_phone)<a class="qy-link" href="tel:{{ $r->cell_phone }}"><i class="fa fa-phone"></i> {{ $r->cell_phone }}</a>@endif
                                 @if($r->email)<a class="qy-link mail" href="mailto:{{ $r->email }}"><i class="fa fa-envelope"></i> {{ $r->email }}</a>@endif
                                 @if(!$r->cell_phone && !$r->email)<span class="qy-sub">&mdash;</span>@endif
                             </td>
-                            <td>
+                            <td data-sort="{{ $r->passport_no }}">
                                 @if($r->passport_no)
                                     <span class="qy-pp">{{ $r->passport_no }}</span>
                                     @if($r->date_of_expiry)<small class="qy-sub" style="display:block">exp {{ $r->stamp('date_of_expiry') }}</small>@endif
@@ -185,8 +203,8 @@
                                     <span class="qy-sub">&mdash;</span>
                                 @endif
                             </td>
-                            <td>@if($r->trip_option)<span class="qy-trip">{{ $r->tripLabel() }}</span>@else <span class="qy-sub">&mdash;</span> @endif</td>
-                            <td>
+                            <td data-sort="{{ $r->trip_option ? $r->tripLabel() : '' }}">@if($r->trip_option)<span class="qy-trip">{{ $r->tripLabel() }}</span>@else <span class="qy-sub">&mdash;</span> @endif</td>
+                            <td data-sort="{{ $r->total_amount !== null ? (int) round($r->total_amount) : '' }}">
                                 {{-- Click the amount to price this applicant on their own terms —
                                      group size, departure airport, a rate agreed at an event. --}}
                                 <button type="button" class="qy-amt-btn qy-price-row"
@@ -209,13 +227,13 @@
                                 </button>
                                 @if($r->custom_price && $r->price_note)<small class="qy-note-sm">{{ $r->price_note }}</small>@endif
                             </td>
-                            <td>
+                            <td data-sort="{{ trim(($r->wheelchair_airport ? 'Wheelchair airport ' : '').($r->wheelchair_full_trip ? 'Wheelchair full trip ' : '').($r->meal_vegetarian ? 'Vegetarian' : '')) }}">
                                 @if($r->wheelchair_airport)<span class="qy-chip wc">Wheelchair &mdash; airport</span>@endif
                                 @if($r->wheelchair_full_trip)<span class="qy-chip wc">Wheelchair &mdash; full trip</span>@endif
                                 @if($r->meal_vegetarian)<span class="qy-chip">Vegetarian</span>@endif
                                 @if(!$r->wheelchair_airport && !$r->wheelchair_full_trip && !$r->meal_vegetarian)<span class="qy-sub">&mdash;</span>@endif
                             </td>
-                            <td><span class="qy-sub">{{ optional($r->created_at)->format('d M Y, h:i A') ?: '—' }}</span></td>
+                            <td data-sort="{{ optional($r->created_at)->getTimestamp() }}"><span class="qy-sub">{{ optional($r->created_at)->format('d M Y, h:i A') ?: '—' }}</span></td>
                             <td class="tc">
                                 <div class="qy-actions">
                                     <a href="{{ route('quick-yatri-print', $r->id) }}" target="_blank" rel="noopener" class="qy-btn prn" title="Print / Save as PDF"><i class="fa fa-print"></i></a>
@@ -438,19 +456,104 @@
         count();
     })();
     (function () {
+        // Search and column sorting share the table, so they share one place:
+        // filtering hides rows, sorting reorders every row including the hidden
+        // ones, and the # column is renumbered down whatever is left showing.
         var input = document.getElementById('qySearch');
-        var rows = Array.prototype.slice.call(document.querySelectorAll('.qy-row'));
+        var table = document.querySelector('.qy-table');
+        var rows  = Array.prototype.slice.call(document.querySelectorAll('.qy-row'));
         var noRes = document.getElementById('qyNoResults');
-        if (!input) return;
-        input.addEventListener('input', function () {
-            var q = this.value.toLowerCase().trim(), visible = 0;
+        if (!table || !rows.length) return;
+
+        var tbody   = table.tBodies[0];
+        var headers = Array.prototype.slice.call(table.querySelectorAll('thead th'));
+
+        // # counts the rows actually on screen, so a filtered table reads 1..n
+        // rather than keeping the gaps where the hidden rows were.
+        function renumber() {
+            var n = 0;
             rows.forEach(function (el) {
-                var m = el.getAttribute('data-search').indexOf(q) !== -1;
-                el.style.display = m ? '' : 'none';
-                if (m) visible++;
+                if (el.style.display === 'none') return;
+                var idx = el.querySelector('.qy-idx');
+                if (idx) idx.textContent = ++n;
             });
-            noRes.style.display = (visible === 0 && rows.length) ? '' : 'none';
+            return n;
+        }
+
+        function filter() {
+            var q = input ? input.value.toLowerCase().trim() : '';
+            rows.forEach(function (el) {
+                el.style.display = el.getAttribute('data-search').indexOf(q) !== -1 ? '' : 'none';
+            });
+            if (noRes) noRes.style.display = renumber() === 0 ? '' : 'none';
+        }
+
+        // What a cell sorts on: the key it was given, or failing that whatever
+        // it prints. An em dash is a cell with no answer in it, not a value.
+        function key(row, column) {
+            var cell = row.children[column];
+            if (!cell) return '';
+            var raw = cell.hasAttribute('data-sort')
+                ? cell.getAttribute('data-sort')
+                : cell.textContent;
+
+            return raw.replace(/—/g, '').trim();
+        }
+
+        function sortBy(th) {
+            var column = headers.indexOf(th);
+            var numeric = th.getAttribute('data-type') === 'num';
+            // Third click is not "off" — the table always has an order, so a
+            // header only ever toggles between the two directions.
+            var dir = th.getAttribute('aria-sort') === 'ascending' ? -1 : 1;
+
+            headers.forEach(function (h) { h.removeAttribute('aria-sort'); });
+            th.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+
+            var decorated = rows.map(function (row, i) {
+                var raw = key(row, column);
+                return {
+                    row: row,
+                    i: i,                        // keeps equal rows in their entered order
+                    empty: raw === '',           // "—" rows sit at the foot either way
+                    value: numeric ? parseFloat(raw.replace(/[$,\s]/g, '')) : raw.toLowerCase()
+                };
+            });
+
+            decorated.sort(function (a, b) {
+                // An unanswered cell is not a small value, it is a missing one,
+                // so it goes last whichever way the column is pointing rather
+                // than crowding the top of a descending sort.
+                if (a.empty !== b.empty) return a.empty ? 1 : -1;
+                if (a.empty) return a.i - b.i;
+
+                var cmp = numeric
+                    ? (a.value - b.value)
+                    : a.value.localeCompare(b.value, undefined, { numeric: true, sensitivity: 'base' });
+
+                return cmp ? cmp * dir : a.i - b.i;
+            });
+
+            var frag = document.createDocumentFragment();
+            decorated.forEach(function (d) { frag.appendChild(d.row); });
+            tbody.appendChild(frag);
+
+            rows = decorated.map(function (d) { return d.row; });
+            renumber();
+        }
+
+        headers.forEach(function (th) {
+            if (!th.classList.contains('srt')) return;
+            th.addEventListener('click', function () { sortBy(th); });
+            th.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    sortBy(th);
+                }
+            });
         });
+
+        if (input) input.addEventListener('input', filter);
     })();
 </script>
 @endsection

@@ -24,7 +24,15 @@ class QuickYatriController extends Controller
 
     public function index()
     {
-        $rows = QuickYatri::orderBy('created_at', 'desc')->get();
+        // Oldest first, so the newest application is the one at the foot of the
+        // table — the list reads like the pile of sheets it stands in for, and
+        // the # column counts up the way a register does.
+        //
+        // `id` breaks the tie because several applications are routinely keyed
+        // in inside the same minute, and `created_at` alone would let them
+        // shuffle between page loads. The table can be re-sorted on any column
+        // from the header; this is only what it opens on.
+        $rows = QuickYatri::orderBy('created_at', 'asc')->orderBy('id', 'asc')->get();
 
         // Feeds the "Download Blank Form" airport picker — a representative
         // working one region (e.g. a Miami event) can hand out sheets that
