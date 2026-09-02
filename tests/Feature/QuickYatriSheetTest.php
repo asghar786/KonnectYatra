@@ -7,6 +7,7 @@ use App\Models\QuickYatri;
 use App\Models\SiteSetting;
 use App\Models\User;
 use App\Support\UsAirports;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -1092,6 +1093,71 @@ class QuickYatriSheetTest extends TestCase
             // The date as a timestamp, since "25 Aug 2026, 03:55 PM" sorts
             // alphabetically and would file August ahead of January.
             $this->assertStringContainsString('<td data-sort="' . $row->created_at->getTimestamp() . '">', $body);
+        } finally {
+            $row->delete();
+        }
+    }
+
+    /* ------------- catching up the rows saved before the CAPS rule ------------- */
+
+    /**
+     * Applications saved before the form started upper-casing (2026-09-02) are
+     * brought up to the sheet's own reading by `quick-yatri:caps`. It is a
+     * re-casing of what is already there, not an edit anybody made, so
+     * `updated_at` must not move — and a second run must find nothing to do.
+     */
+    public function test_the_caps_backfill_recases_older_rows_without_touching_their_timestamps()
+    {
+        $row = QuickYatri::create(['applicant_name' => 'ZZ BACKFILL PROBE']);
+
+        // Written straight to the table, so the row looks like one saved back
+        // when the controller was not upper-casing anything.
+        DB::table('quick_yatris')->where('id', $row->id)->update([
+            'applicant_name' => 'zz backfill probe',
+            'father_name'    => 'Santa Singh',
+            'email'          => 'banta.singh@gmail.com',
+            'updated_at'     => '2026-01-01 09:00:00',
+        ]);
+
+        try {
+            $this->artisan('quick-yatri:caps')->assertSuccessful();
+
+            $after = DB::table('quick_yatris')->where('id', $row->id)->first();
+
+            $this->assertSame('ZZ BACKFILL PROBE', $after->applicant_name);
+            $this->assertSame('SANTA SINGH', $after->father_name);
+
+            // Email is held the other way, and the backfill must not reach it.
+            $this->assertSame('banta.singh@gmail.com', $after->email);
+
+            // Re-casing is not an edit, so the record must not claim one.
+            $this->assertSame('2026-01-01 09:00:00', (string) $after->updated_at);
+
+            // Idempotent: a second pass finds nothing to change, and in
+            // particular does not re-stamp the row it already left alone.
+            $this->artisan('quick-yatri:caps')->assertSuccessful();
+
+            $again = DB::table('quick_yatris')->where('id', $row->id)->first();
+            $this->assertEquals((array) $after, (array) $again);
+        } finally {
+            $row->delete();
+        }
+    }
+
+    /** A dry run reports the work and writes nothing. */
+    public function test_the_caps_backfill_dry_run_writes_nothing()
+    {
+        $row = QuickYatri::create(['applicant_name' => 'ZZ DRY RUN PROBE']);
+
+        DB::table('quick_yatris')->where('id', $row->id)->update([
+            'applicant_name' => 'zz dry run probe',
+        ]);
+
+        try {
+            $this->artisan('quick-yatri:caps --dry-run')->assertSuccessful();
+
+            $after = DB::table('quick_yatris')->where('id', $row->id)->first();
+            $this->assertSame('zz dry run probe', $after->applicant_name);
         } finally {
             $row->delete();
         }

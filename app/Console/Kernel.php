@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         Commands\ReminderEmail::class,
         Commands\PassportReminder::class,
         Commands\ResolveVisitGeo::class,
+        Commands\QuickYatriCaps::class,
     ];
 
     /**
