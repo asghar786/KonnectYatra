@@ -1081,6 +1081,17 @@ class QuickYatriSheetTest extends TestCase
             // Seven sortable headers: everything but # (a position, renumbered
             // after a sort) and Action (no data at all).
             $this->assertSame(7, substr_count($body, '<th class="srt"'));
+
+            // The direction carets are the arrow characters themselves. Written
+            // as CSS \XXXX escapes they shipped mangled once — one lost
+            // backslash and every header read "95", the sorted one "91" — so
+            // these assert the real codepoints, and that no bare hex is left.
+            $this->assertStringContainsString("content:'\u{2195}'", $body);
+            $this->assertStringContainsString("content:'\u{2191}'", $body);
+            $this->assertStringContainsString("content:'\u{2193}'", $body);
+            $this->assertStringNotContainsString("content:'95'", $body);
+            $this->assertStringNotContainsString("content:'91'", $body);
+            $this->assertStringNotContainsString("content:'93'", $body);
             $this->assertStringContainsString('data-type="num" tabindex="0" role="columnheader" aria-sort="ascending">Entered On', $body);
 
             // The name alone, not the "S/o father" line printed under it.

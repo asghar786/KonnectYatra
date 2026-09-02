@@ -26,9 +26,14 @@
     .qy-table thead th.srt{cursor:pointer; user-select:none}
     .qy-table thead th.srt:hover{background:#27334f}
     .qy-table thead th.srt:focus-visible{outline:2px solid #f54e18; outline-offset:-2px}
-    .qy-table thead th.srt::after{content:'95'; margin-left:7px; font-size:11px; opacity:.35}
-    .qy-table thead th.srt[aria-sort=ascending]::after{content:'91'; opacity:1}
-    .qy-table thead th.srt[aria-sort=descending]::after{content:'93'; opacity:1}
+    {{-- The arrows are the characters themselves, not CSS \XXXX escapes. An
+         escape here is one mangled backslash away from printing its own hex
+         digits in the header — which is exactly what shipped earlier today,
+         where every column read "95" and the sorted one read "91". The file
+         is UTF-8 and the layout declares it, so the glyph is the safer literal. --}}
+    .qy-table thead th.srt::after{content:'↕'; margin-left:7px; font-size:11px; opacity:.4}
+    .qy-table thead th.srt[aria-sort=ascending]::after{content:'↑'; opacity:1}
+    .qy-table thead th.srt[aria-sort=descending]::after{content:'↓'; opacity:1}
     .qy-table thead th.srt[aria-sort]{background:#27334f}
     .qy-table tbody td{padding:14px 18px; font-size:14px; color:#2c3446; border-bottom:1px solid #f0f2f6; vertical-align:middle}
     .qy-table tbody tr:last-child td{border-bottom:none}
