@@ -1116,3 +1116,86 @@ amount in each, so the order cannot quietly revert. Suite green, 71/71.
 
 **Review:** no csv row — this is a refinement of the 2026-08-31 partial-payments decision, logged
 against that one.
+
+---
+
+## 2026-09-02 — The record says what the form said
+
+**The ask (typed):** "if capslock off then the entry only show in the form but save into data upper
+and lower, it shouldnt be like that / you need to save data as it looks like in the form."
+
+The sheet has shown every free-text answer in capitals since 2026-08-25, but that was `.qy-caps` — a
+`text-transform`. The browser posts what was keyed, so the same application read `JAGWINDER SINGH`
+on the form and `Kanwaljit singh` in the table. The admin list prints the *stored* value, which is
+where Rashad saw the mix. The 16 columns in `QuickYatri::CAPS_FIELDS` are now upper-cased in
+`payload()`, beside the `strtolower` that email has always had. The class stays: it is what renders
+the older rows and the blank sheet.
+
+`php artisan quick-yatri:caps` catches those older rows up. It writes through the query builder
+rather than the model on purpose — a re-casing is not an edit anybody made, so `updated_at` must not
+move and no model event should fire. `--dry-run` first, `-v` names every field, idempotent.
+
+**Alternative rejected:** upper-casing in the list's Blade instead. That fixes the one screen Rashad
+was looking at and leaves the search index, any export and the sheet itself reading the mixed value.
+The database is what those read; the display was never the problem.
+
+**Review:** csv row dated 2026-09-02, due 2026-10-02.
+
+---
+
+## 2026-09-02 — Passport expiry is derived, but only ever suggested
+
+**The ask (typed):** "why I type passport issue date, then you need to add expiry date +10 years -1
+day automatically, and editable."
+
+Filled in from the issue date as it is typed or picked. The "editable" half is the design constraint,
+not a nicety: a minor's US passport runs five years, other countries issue other terms, and the
+document in front of the office is the authority. So the script remembers the value it last wrote and
+refuses to overwrite anything else — a hand-typed expiry survives a later change of issue date.
+
+Wired both ways because jQuery UI sets the field from inside and raises no plain change event:
+a `change`/`blur` listener for typing, plus `datepicker('option', 'onSelect', …)`. Driven in a real
+browser: 15-JAN-2020 → 14-JAN-2030, 01-MAR-2019 → 28-FEB-2029, 29-FEB-2020 → 28-FEB-2030, and
+`31-FEB-2020` suggests nothing rather than rolling into March.
+
+**Deploy:** view-only, no migration.
+
+**Review:** no csv row — a field-level convenience, not a decision with an outcome to test.
+
+---
+
+## 2026-09-02 — The list reads like the pile of sheets it stands in for
+
+**The ask (typed, list boxed):** "it should be ascending order, mean latest entry should be at the
+end and also give me the option on this table to sort any coloum."
+
+Ordering flipped to oldest-first. `id` breaks the tie and is load-bearing, not decoration: four of
+the ten rows on his screen shared the same minute, and `created_at` alone let them shuffle between
+page loads, which makes the `#` column meaningless.
+
+Sorting is client-side on the rows already rendered — there is no pagination, so the alternative
+(round-tripping a `?sort=` parameter) would cost a page load per click and buy nothing. Each `<td>`
+carries `data-sort`, because what a cell prints will not sort: a name sits above a father's name, an
+amount behind a `$`, a date as "25 Aug 2026" which files August ahead of January. Sorting and the
+search share one place, so filtering hides rows, sorting reorders all of them, and `#` renumbers down
+whatever is showing.
+
+**Judgement call, worth keeping:** an empty cell sorts to the foot whichever way the column points.
+A missing amount is not a small amount, and a descending sort crowded with dashes is useless.
+
+**Deploy:** view-only, no migration.
+
+---
+
+## 2026-09-02 — "Check" printed twice looked like a duplicated field
+
+**The ask (typed, box drawn round it):** "there is two times check number, plz remove the 2nd one."
+
+Genuinely ambiguous — drop the repeated word, or drop the whole Check # writing line — and the two
+readings differ by a stored field, so it was put back to him rather than guessed. He chose the word.
+The tick box is what says Check; the writing line's label is now bare `#:`.
+
+This only loosens the row that 2026-08-31 spent so much height on: the label is narrower, so the rule
+went 46.8px → 81.7px and the page's natural height is unchanged at 1036px.
+
+**Deploy:** view-only, no migration.
