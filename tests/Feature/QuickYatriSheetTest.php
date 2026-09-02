@@ -826,19 +826,24 @@ class QuickYatriSheetTest extends TestCase
         $body = $this->get(route('quick-yatri-blank'))->getContent();
 
         $payment = strpos($body, 'Payment:');
-        $check   = strpos($body, 'Check #:', $payment);
+        $check   = strpos($body, '>#:<', $payment);
         $date    = strpos($body, 'Date:', $check);
 
-        $this->assertNotFalse($check, 'The payment line must offer a Check # line.');
-        $this->assertNotFalse($date, 'Check # comes before the Date, beside the box it belongs to.');
+        $this->assertNotFalse($check, 'The payment line must offer a check-number line.');
+        $this->assertNotFalse($date, 'The check number comes before the Date, beside the box it belongs to.');
+
+        // The label is bare "#:" — the tick box beside it already says Check,
+        // and the word printed twice in a row read as a duplicated field
+        // (2026-09-02). Exactly one "Check" on the whole payment line.
+        $this->assertSame(1, substr_count(substr($body, $payment, $date - $payment), 'Check'));
 
         // One row, and it stays one row. Both cells hang off the single
         // .qy-payline flex row, and both labels are nowrap — without that the
-        // cells squeeze until "Check #:" breaks over two lines and the row
-        // grows 14.1px page 1 has not got. (That it *renders* on one line is a
+        // cells squeeze until a label breaks over two lines and the row grows
+        // 14.1px page 1 has not got. (That it *renders* on one line is a
         // measurement, not a string match — see the decisions entry.)
         $this->assertSame(1, substr_count($body, 'class="qy-payline"'));
-        $this->assertStringContainsString('white-space:nowrap">Check #:</span>', $body);
+        $this->assertStringContainsString('white-space:nowrap">#:</span>', $body);
         $this->assertStringContainsString('white-space:nowrap">Date:</span>', $body);
 
         // A writing line in blank mode too — $txt would have rendered a

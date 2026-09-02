@@ -571,13 +571,21 @@
                  70.7px and the rule was 154. The row now reads 8.6pt like the
                  Receipts row above it, and the tick group's gaps close from 9pt
                  to 6pt. What that frees is split 1.2 to 1 in the Date's favour
-                 — it is the longest value on the row — which MEASURES 82.7px
-                 for the date against 46.8px for the check, each comfortably
-                 past the 70.7 and 39.3 they have to print.
+                 — it is the longest value on the row — and dropping the word
+                 "Check" from the second label (below) gave the rest of that
+                 label's width back to the rules: they now MEASURE 83.1px for
+                 the date and 81.7px for the check (was 82.7 and 46.8), each
+                 comfortably past the 70.7 and 39.3 they have to print.
+
+                 Its label is bare "#:" rather than "Check #:" — the tick box
+                 immediately to its left already says Check, and printing the
+                 word twice in a row read as a duplicated field (2026-09-02).
 
                  Both labels are nowrap and .qy-payline lifts .qy-rule's 36pt
-                 floor. Without either, the cells squeeze until "Check #:" wraps
-                 and the row grows a second line — 14.1px page 1 has not got. --}}
+                 floor. Without either, the cells squeeze until a label wraps
+                 and the row grows a second line — 14.1px page 1 has not got.
+                 Dropping the word only ever loosens that: the label is
+                 narrower, so the rule it sits on is wider than it was. --}}
             <span class="qy-payline" style="display:flex; align-items:flex-end; gap:5pt; font-size:8.6pt">
                 <span style="display:flex; align-items:center; gap:6pt; white-space:nowrap">Payment:
                     <span style="display:inline-flex; align-items:center; gap:3pt">{!! $check('pay_cash', 9) !!}Cash</span>
@@ -587,7 +595,7 @@
                 {{-- Which check the money came in on. Not held to a digit count
                      the way the receipt numbers are: a check is the payer's and
                      carries whatever their bank printed on it. --}}
-                <span style="display:flex; align-items:flex-end; gap:3pt; flex:1 1 0; min-width:0"><span style="white-space:nowrap">Check #:</span>@if($isEntry)<input type="text" class="qy-in qy-rule qy-caps" name="check_no" value="{{ old('check_no', $row->check_no) }}" maxlength="20" autocomplete="off">@else<span class="qy-rule qy-caps">{{ $isBlank ? '' : $row->check_no }}</span>@endif</span>
+                <span style="display:flex; align-items:flex-end; gap:3pt; flex:1 1 0; min-width:0"><span style="white-space:nowrap">#:</span>@if($isEntry)<input type="text" class="qy-in qy-rule qy-caps" name="check_no" value="{{ old('check_no', $row->check_no) }}" maxlength="20" autocomplete="off">@else<span class="qy-rule qy-caps">{{ $isBlank ? '' : $row->check_no }}</span>@endif</span>
                 <span style="display:flex; align-items:flex-end; gap:3pt; flex:1.2 1 0; min-width:0"><span style="white-space:nowrap">Date:</span>{!! $dat('signature_date', 'ky-date-past', true) !!}</span>
             </span>
         </div>
