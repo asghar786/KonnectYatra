@@ -243,9 +243,54 @@ class QuickYatriPricingTest extends TestCase
             $entry = $this->get(route('quick-yatri-edit', $row->id))->getContent();
             $this->assertStringContainsString('Agreed price for this applicant:', $entry);
             $this->assertStringContainsString('Group of 6 — departing MIA', $entry);
+
+            // The custom price can also be changed from this screen, not only
+            // from the list's Amount cell — the button posts to the same row
+            // price route the list uses.
+            $this->assertStringContainsString('Edit price', $entry);
+            $this->assertStringContainsString('action="' . route('quick-yatri-row-price', $row->id) . '"', $entry);
+            $this->assertStringContainsString('id="qyRowModal"', $entry);
         } finally {
             $row->delete();
         }
+    }
+
+    public function test_the_entry_screen_offers_to_set_a_custom_price_when_none_is_set()
+    {
+        $this->asAdmin();
+        $this->standardGrid();
+
+        $row = QuickYatri::create([
+            'applicant_name' => 'QA Pricing No Custom Yet',
+            'trip_option'    => 'round_trip_5star',
+            'package_amount' => 3150,
+            'total_amount'   => 3150,
+        ]);
+
+        try {
+            $entry = $this->get(route('quick-yatri-edit', $row->id))->getContent();
+
+            $this->assertStringContainsString('This applicant is on the standard price.', $entry);
+            $this->assertStringContainsString('Set custom price', $entry);
+            $this->assertStringNotContainsString('Agreed price for this applicant', $entry);
+        } finally {
+            $row->delete();
+        }
+    }
+
+    public function test_a_new_unsaved_application_offers_no_price_button()
+    {
+        $this->asAdmin();
+
+        // Nothing to price yet — the row has no id for the price route to
+        // attach to until it is saved once. The CSS class and the modal's own
+        // wiring script are always in the page (harmless — nothing on the
+        // page matches their selectors), so check for the button and the
+        // modal markup itself, not text that also appears inside that script.
+        $entry = $this->get(route('quick-yatri-create'))->getContent();
+
+        $this->assertStringNotContainsString('Set custom price', $entry);
+        $this->assertStringNotContainsString('id="qyRowModal"', $entry);
     }
 
     public function test_a_standard_priced_sheet_shows_the_grid_price_unstruck()
