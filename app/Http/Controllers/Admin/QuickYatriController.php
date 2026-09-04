@@ -229,7 +229,12 @@ class QuickYatriController extends Controller
         $row->repriceFromOptions();
         $row->save();
 
-        return redirect()->route('quick-yatri')->with('success', $clearing
+        // back() rather than a fixed route: this form is reachable both from
+        // the list's Amount cell and from the applicant's own entry/edit
+        // screen, and each should return the admin to where they were.
+        // Falls back to the list only if there is no previous URL at all
+        // (no Referer header), matching the old behaviour in that case.
+        return redirect()->back(302, [], route('quick-yatri'))->with('success', $clearing
             ? $row->applicant_name . ' is back on the standard price.'
             : 'Price set for ' . $row->applicant_name . '.');
     }

@@ -18,6 +18,38 @@
     .qy-note{color:#6b7280; font-size:13px; margin-right:auto}
     .qy-errors{background:#feeceb; border:1px solid #f6c9c4; color:#b3261e; border-radius:12px; padding:14px 18px; margin-bottom:18px; font-size:14px}
     .qy-errors ul{margin:8px 0 0; padding-left:18px}
+
+    .qy-edit-price-btn{border:1px solid #1a3fa0; background:#fff; color:#1a3fa0; border-radius:20px; padding:5px 13px; font-size:9.5pt; font-weight:600; cursor:pointer; white-space:nowrap; transition:background .12s, color .12s}
+    .qy-edit-price-btn:hover{background:#1a3fa0; color:#fff}
+
+    {{-- Self-contained modal for the "own price" form — same chrome as the
+         Quick Yatri list's price dialog (kept in sync by eye; this screen is
+         a separate Blade file so the styles cannot be shared automatically). --}}
+    .qy-modal{position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; padding:20px}
+    .qy-modal.open{display:flex}
+    .qy-modal-back{position:absolute; inset:0; background:rgba(18,24,40,.55)}
+    .qy-modal-box{position:relative; width:100%; max-width:530px; max-height:90vh; display:flex; flex-direction:column; background:#fff; border-radius:16px; box-shadow:0 26px 60px rgba(15,23,42,.3); overflow:hidden}
+    .qy-modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:20px 22px 14px; border-bottom:1px solid #f0f2f6}
+    .qy-modal-head h5{margin:0; font-size:17px; font-weight:700; color:#1f2a44}
+    .qy-modal-head p{margin:5px 0 0; font-size:12.5px; color:#8b93a3; line-height:1.45}
+    .qy-modal-x{border:none; background:#f2f4f8; color:#5a6273; width:30px; height:30px; border-radius:9px; cursor:pointer; font-size:15px; line-height:1; flex:none}
+    .qy-modal-x:hover{background:#e6e9f0}
+    .qy-modal-body{padding:18px 22px; overflow:auto}
+    .qy-modal-foot{display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:14px 22px 18px; border-top:1px solid #f0f2f6; flex-wrap:wrap}
+    .qy-money{position:relative; flex:none; width:132px}
+    .qy-money span{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9aa0ac; font-size:13.5px}
+    .qy-money input{width:100%; padding:9px 12px 9px 25px; border:1px solid #e2e6ee; border-radius:10px; font-size:14px; font-weight:600; color:#1f2a44; outline:none; font-variant-numeric:tabular-nums}
+    .qy-money input:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+    .qy-text{width:100%; padding:10px 12px; border:1px solid #e2e6ee; border-radius:10px; font-size:13.5px; color:#2c3446; outline:none}
+    .qy-text:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
+    .qy-lbl{display:block; font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#8b93a3; margin:16px 0 7px}
+    .qy-mbtn{border:none; border-radius:10px; padding:10px 20px; font-size:13.5px; font-weight:600; cursor:pointer; transition:transform .12s}
+    .qy-mbtn:hover{transform:translateY(-1px)}
+    .qy-mbtn.save{background:#f54e18; color:#fff; box-shadow:0 6px 16px rgba(245,78,24,.26)}
+    .qy-mbtn.ghost{background:#eef1f6; color:#5a6273}
+    .qy-mbtn.reset{background:#fff; color:#a24a06; border:1px solid #f3d9c0; margin-right:auto}
+    .qy-std{background:#f7f9fc; border:1px solid #eef1f6; border-radius:10px; padding:10px 13px; font-size:12.5px; color:#5a6273; line-height:1.5}
+    .qy-std b{color:#1f2a44}
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -50,6 +82,44 @@
                     <button type="submit" class="qy-btn save"><i class="fa fa-save"></i> {{ $row->exists ? 'Update Application' : 'Save Application' }}</button>
                 </div>
             </form>
+
+            @if($row->exists)
+            {{-- This applicant's own price — same form the Quick Yatri list's
+                 Amount cell posts to (POST /quick-yatri/{id}/price), reached
+                 here too so a price can be set or changed without leaving the
+                 sheet being edited. --}}
+            <div class="qy-modal" id="qyRowModal" role="dialog" aria-modal="true" aria-labelledby="qyRowTitle">
+                <div class="qy-modal-back" data-qy-close></div>
+                <div class="qy-modal-box">
+                    <form method="POST" action="{{ route('quick-yatri-row-price', $row->id) }}" id="qyRowForm">
+                        @csrf
+                        <input type="hidden" name="reset" value="0" id="qyRowReset">
+                        <div class="qy-modal-head">
+                            <div>
+                                <h5 id="qyRowTitle">Price for this applicant</h5>
+                                <p id="qyRowWho"></p>
+                            </div>
+                            <button type="button" class="qy-modal-x" data-qy-close aria-label="Close">&times;</button>
+                        </div>
+                        <div class="qy-modal-body">
+                            <div class="qy-std" id="qyRowStd"></div>
+
+                            <span class="qy-lbl">Price for this applicant</span>
+                            <div class="qy-money" style="width:100%"><span>$</span><input type="number" step="1" min="0" max="99999" name="package_amount" id="qyRowAmount" placeholder="Leave blank to use the standard price"></div>
+
+                            <span class="qy-lbl">Why this price</span>
+                            <input type="text" class="qy-text" name="price_note" id="qyRowNote" maxlength="255" placeholder="e.g. Group of 6 &mdash; family rate, or Departing MIA">
+                            <p style="margin:8px 0 0; font-size:12px; color:#9aa0ac; line-height:1.5">Shown on this applicant&rsquo;s printed sheet and in the list, so anyone picking the file up later can see why the price differs.</p>
+                        </div>
+                        <div class="qy-modal-foot">
+                            <button type="submit" class="qy-mbtn reset" id="qyRowResetBtn" style="display:none">Use standard price</button>
+                            <button type="button" class="qy-mbtn ghost" data-qy-close>Cancel</button>
+                            <button type="submit" class="qy-mbtn save"><i class="fa fa-save"></i> Save price</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
 
         </div>
     </div>
@@ -389,6 +459,65 @@
             paidInputs[j].addEventListener('change', refresh);
         }
         refresh();
+    })();
+</script>
+<script>
+    (function () {
+        // The "own price" modal — same behaviour as the Quick Yatri list's
+        // price dialog (index.blade.php), reached here from the button the
+        // sheet body renders next to the price grid in entry mode.
+        var modal = document.getElementById('qyRowModal');
+        var form = document.getElementById('qyRowForm');
+        if (!modal || !form) return;
+
+        function show() {
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            var first = modal.querySelector('input:not([type=hidden])');
+            if (first) first.focus();
+        }
+
+        function close() {
+            modal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-qy-close]')) { e.preventDefault(); close(); }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') close();
+        });
+
+        Array.prototype.forEach.call(document.querySelectorAll('.qy-edit-price-btn'), function (btn) {
+            btn.addEventListener('click', function () {
+                var d = btn.dataset;
+                document.getElementById('qyRowReset').value = '0';
+                document.getElementById('qyRowWho').textContent =
+                    d.name + (d.trip ? ' — ' + d.trip : ' — no trip option ticked yet');
+
+                var std = document.getElementById('qyRowStd');
+                std.innerHTML = d.standard
+                    ? 'Standard price for this trip option: <b>$' + Number(d.standard).toLocaleString() + '</b>.'
+                      + (d.custom === '1'
+                            ? ' This applicant is currently on their own price.'
+                            : ' This applicant is on the standard price.')
+                    : 'No trip option is ticked on this sheet yet, so there is no standard price to compare against. Anything set here becomes this applicant’s price.';
+
+                document.getElementById('qyRowAmount').value = d.custom === '1' ? d.amount : '';
+                document.getElementById('qyRowNote').value = d.note || '';
+                document.getElementById('qyRowResetBtn').style.display = d.custom === '1' ? '' : 'none';
+
+                show();
+            });
+        });
+
+        var resetBtn = document.getElementById('qyRowResetBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                document.getElementById('qyRowReset').value = '1';
+            });
+        }
     })();
 </script>
 @endsection

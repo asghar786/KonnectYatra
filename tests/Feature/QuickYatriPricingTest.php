@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\QuickYatri;
 use App\Models\SiteSetting;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 /**
@@ -22,12 +23,20 @@ use Tests\TestCase;
  *    flagged on the row and must survive both a re-save of the sheet and a
  *    later change to the grid.
  *
- * These run against the local database, so every setting touched here is
- * snapshotted and put back — the site's real prices must not be left on
- * whatever the last assertion needed.
+ * These run against the local database (there is no sqlite test connection
+ * configured — see phpunit.xml), so DatabaseTransactions wraps every test in
+ * a transaction rolled back on tearDown. This is load-bearing, not tidiness:
+ * without it, test_applying_a_new_grid_reprices_standard_rows_but_never_an_agreed_price
+ * posts apply_existing=1, which reprices *every* real row still on standard
+ * pricing — not just the two rows the test creates — and that once silently
+ * rewrote two real, already-quoted applications (2026-09-04) because the old
+ * setUp/tearDown pair only snapshotted the `site_settings` grid, never the
+ * individual rows the grid change swept along with it.
  */
 class QuickYatriPricingTest extends TestCase
 {
+    use DatabaseTransactions;
+
     /** @var array<string,string|null> */
     private $originalPrices = [];
 

@@ -276,15 +276,29 @@
         </tbody>
     </table>
 
-    @if($isEntry && $agreed !== null)
-        {{-- Entry only. The admin editing this sheet needs to see the agreed
-             price and why it was given; the printed page cannot afford the
-             line (see $agreed above), and the blank form belongs to nobody. --}}
-        <div style="border:1px solid #1a3fa0; background:#eef2fb; padding:3.5pt 9pt; font-size:9.5pt; display:flex; align-items:baseline; gap:7pt; flex-wrap:wrap">
-            <span style="font-weight:700; color:#1a3fa0">Agreed price for this applicant:</span>
-            <span style="font-weight:700">{{ $agreed }}</span>
-            @if($row->price_note)<span style="color:#444">&mdash; {{ $row->price_note }}</span>@endif
-            <span style="color:#777; margin-left:auto">Change it from the price column on the Quick Yatri list.</span>
+    @if($isEntry && $row->exists)
+        {{-- Entry only, and only once the sheet has an id to price against — a
+             brand-new unsaved application has nothing yet for a custom price
+             to attach to. The printed page cannot afford this line either way
+             (see $agreed above), and the blank form belongs to nobody. --}}
+        <div style="border:1px solid {{ $agreed !== null ? '#1a3fa0' : '#e2e6ee' }}; background:{{ $agreed !== null ? '#eef2fb' : '#f7f9fc' }}; padding:3.5pt 9pt; font-size:9.5pt; display:flex; align-items:baseline; gap:7pt; flex-wrap:wrap">
+            @if($agreed !== null)
+                <span style="font-weight:700; color:#1a3fa0">Agreed price for this applicant:</span>
+                <span style="font-weight:700">{{ $agreed }}</span>
+                @if($row->price_note)<span style="color:#444">&mdash; {{ $row->price_note }}</span>@endif
+            @else
+                <span style="color:#5a6273">This applicant is on the standard price.</span>
+            @endif
+            <button type="button" class="qy-edit-price-btn" style="margin-left:auto"
+                    data-id="{{ $row->id }}"
+                    data-name="{{ $row->applicant_name ?: 'this applicant' }}"
+                    data-trip="{{ $row->trip_option ? $row->tripLabel() : '' }}"
+                    data-standard="{{ $row->trip_option && isset($grid[$row->trip_option]) ? (int) round($grid[$row->trip_option]['amount']) : '' }}"
+                    data-amount="{{ $row->package_amount !== null ? (int) round($row->package_amount) : '' }}"
+                    data-note="{{ $row->price_note }}"
+                    data-custom="{{ $row->custom_price ? 1 : 0 }}">
+                <i class="fa fa-pen"></i> {{ $agreed !== null ? 'Edit price' : 'Set custom price' }}
+            </button>
         </div>
     @endif
 
