@@ -1199,3 +1199,65 @@ This only loosens the row that 2026-08-31 spent so much height on: the label is 
 went 46.8px → 81.7px and the page's natural height is unchanged at 1036px.
 
 **Deploy:** view-only, no migration.
+
+---
+
+## 2026-09-04 — Quick Yatri: the re-price checkbox default, a price-editing button on the sheet itself, and a real test-isolation bug caught mid-session
+
+**The report that started it.** A screenshot of the Quick Yatri list showed 2 saved applications
+re-priced after an ordinary OW/RT/LP grid update — Rashad had not asked for that. The cause: the
+"Also re-price the N saved applications still on standard pricing" checkbox in the price dialog
+(shipped 2026-08-27, above) was hardcoded `checked` in the markup, so every grid save silently swept
+every standard-priced row unless the admin noticed and unticked it. **Fixed by defaulting it
+unchecked** — a price change now only prices new applications going forward unless the box is
+deliberately ticked. One already-affected row (BANTA SINGH, id 1) had its stored price hand-restored
+via tinker from $3,333 back to $3,150.
+
+**The follow-up ask.** Rashad wanted to set an applicant's own price *from the entry/edit screen
+itself*, not only from the list's Amount cell — editing a sheet meant leaving it to go price the
+person. The entry/edit screen (`_sheet-body.blade.php` + `entry.blade.php`) now shows the same
+"own price" panel the list already had: **"Set custom price"** when the applicant is on the
+standard rate, **"Edit price"** when they already have their own, both opening a modal that posts to
+the existing `POST /quick-yatri/{id}/price` route. Only rendered once the row has an id — a
+brand-new unsaved application must be saved once first. `updateRowPrice()`'s redirect changed from a
+fixed `route('quick-yatri')` to `redirect()->back(...)` (positional args — the project targets
+PHP 7.3, no named arguments) with that route as the fallback, so either caller returns to where it
+started rather than always landing on the list.
+
+**A same-day follow-up removed the struck-through standard price** that used to sit beside the
+agreed one in the grid cell (`$̶3̶,̶1̶5̶0̶ $3,232`) — Rashad asked to see just the agreed amount. One
+shared closure (`$price()`), so the change applies to entry, edit and the printed sheet alike.
+
+**The bug that mattered more than any of the above.** Verifying the new button by running
+`php artisan test --filter=QuickYatri` **silently corrupted two real applications** —
+`test_applying_a_new_grid_reprices_standard_rows_but_never_an_agreed_price` posts
+`apply_existing=1`, and the controller's reprice loop is a bare `WHERE custom_price = false AND
+trip_option IS NOT NULL` **over the whole real table**, not scoped to the two rows the test creates.
+There is no sqlite test connection configured (`phpunit.xml`), so `QuickYatriPricingTest` runs
+straight against the real local MySQL database, and its `site_settings` snapshot/restore in
+`setUp`/`tearDown` protected the *grid setting* but not the *real rows* the setting change swept
+along with it. BANTA SINGH (id 1) and HELLO SIGN (id 864) were both silently repriced to whatever
+figure that test posted — first noticed when a rendered screenshot showed a price ($3,125) that
+matched nothing anyone had actually set. Both restored by hand a second time. **Fixed properly this
+time**, not by patching the symptom again: added `use
+Illuminate\Foundation\Testing\DatabaseTransactions;` to the test class, so every write the file
+makes — including any future collateral hit on a row it never created — rolls back on tearDown.
+Verified by snapshotting the two real rows' prices, running the full suite twice, and confirming
+they read back byte-identical both times.
+
+**Worth carrying forward:** any Quick Yatri test that posts `apply_existing=1`, or otherwise saves a
+bulk `QuickYatri::where(...)` query, needs the same transaction wrapping — a setting-only
+snapshot/restore is not enough once the setting change fans out to real rows. `QuickYatriSheetTest`
+was checked and does not exercise `apply_existing`, so it was left as-is.
+
+**Verified:** 63/63 Quick Yatri tests green (up from 61, two new assertions on the entry-screen
+button's markup and its absence on a brand-new unsaved application); headless-Chrome screenshots of
+the entry screen before and after the strikethrough removal, rendered via `view(...)->render()`
+against the real `admin.quick-yatri.entry` template with a manually bound request (no login needed —
+the same technique logged in [[konnectyatra-quick-yatri]]).
+
+**Deploy:** pure code, no migration — pushed straight to `main` in four small commits (checkbox
+default, price-button feature + `DatabaseTransactions` fix, its test coverage, strikethrough
+removal).
+
+**Review:** see decisions.csv rows dated 2026-09-04.
