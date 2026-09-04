@@ -232,11 +232,13 @@ class QuickYatriPricingTest extends TestCase
             $this->assertStringContainsString('Group of 6 — departing MIA', $list);
 
             // Page 1 of the printed sheet is a fixed 11in box that already
-            // measures 11in exactly, so the agreed price goes *inside* the cell
-            // their option is ticked in — grid price struck through, theirs in
-            // bold — rather than on a line of its own.
+            // measures 11in exactly, so the agreed price goes *inside* the
+            // cell their option is ticked in, replacing the grid price —
+            // rather than on a line of its own. The standard rate they are no
+            // longer paying is not shown at all, struck through or otherwise.
             $sheet = $this->get(route('quick-yatri-print', $row->id))->getContent();
-            $this->assertStringContainsString('<s style="color:#777; font-weight:400">$3,150</s> <b>$2,900</b>', $sheet);
+            $this->assertStringContainsString('<b>$2,900</b>', $sheet);
+            $this->assertStringNotContainsString('$3,150', $sheet);
             $this->assertStringNotContainsString('Agreed price for this applicant', $sheet);
 
             // The entry screen is not height-capped, so it carries the reason.

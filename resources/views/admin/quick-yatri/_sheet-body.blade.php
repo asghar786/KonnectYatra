@@ -97,24 +97,24 @@
     $wcFee = \App\Models\QuickYatri::wheelchairFee();
 
     // An applicant quoted their own price (group size, departure airport, a
-    // rate agreed at an event) must see *their* price on their own sheet. It
-    // goes inside the cell their option is ticked in, with the grid price
-    // struck through beside it, rather than on a line of its own: page 1 is a
-    // fixed 11in box and it currently measures 11in exactly, so one extra line
-    // anywhere here spills onto a third printed page. The reason for the price
-    // is not printed for the same reason — it shows on the entry screen, in
-    // the list and in the price dialog, none of which are height-capped.
+    // rate agreed at an event) must see *their* price on their own sheet, not
+    // the grid's — the standard rate they are no longer paying is not worth
+    // printing. It goes inside the cell their option is ticked in, rather
+    // than on a line of its own: page 1 is a fixed 11in box and it currently
+    // measures 11in exactly, so one extra line anywhere here spills onto a
+    // third printed page. The reason for the price is not printed for the
+    // same reason — it shows on the entry screen, in the list and in the
+    // price dialog, none of which are height-capped.
     $agreed = (!$isBlank && $row->custom_price && $row->package_amount !== null)
         ? \App\Models\QuickYatri::money($row->package_amount)
         : null;
 
     $price = function ($key) use ($grid, $row, $agreed) {
-        $standard = \App\Models\QuickYatri::money($grid[$key]['amount']);
         if ($agreed === null || $row->trip_option !== $key) {
-            return e($standard);
+            return e(\App\Models\QuickYatri::money($grid[$key]['amount']));
         }
 
-        return '<s style="color:#777; font-weight:400">' . e($standard) . '</s> <b>' . e($agreed) . '</b>';
+        return '<b>' . e($agreed) . '</b>';
     };
 
     // Box sizes vary by context in the design (8pt in the grid, 9pt in the trip
