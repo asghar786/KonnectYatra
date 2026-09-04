@@ -292,8 +292,8 @@
                 </div>
 
                 <label class="qy-tickline">
-                    <input type="checkbox" name="apply_existing" value="1" checked>
-                    <span>Also re-price the <b>{{ $standardCount }}</b> saved {{ $standardCount === 1 ? 'application' : 'applications' }} still on standard pricing. Anyone given their own agreed price keeps it either way.</span>
+                    <input type="checkbox" name="apply_existing" value="1">
+                    <span>Also re-price the <b>{{ $standardCount }}</b> saved {{ $standardCount === 1 ? 'application' : 'applications' }} still on standard pricing. Anyone given their own agreed price keeps it either way. Leave unticked to only price new applications going forward.</span>
                 </label>
 
                 {{-- Not a price, but it lives in this dialog on purpose: it is
