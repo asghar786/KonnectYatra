@@ -27,6 +27,7 @@
     .gm-contact{text-align:center; font-size:12.5px; color:#1f2a44; background:#eef2fb; padding:8px 14px; border-bottom:1px solid #d7dce6}
     .gm-contact b{color:#1a3fa0}
     .gm-count{display:inline-block; background:#fff; border:1px solid #c9d4ea; border-radius:20px; padding:1px 10px; font-size:11.5px; font-weight:700; color:#1a3fa0; margin-left:8px}
+    .gm-count.pend{background:#fff8ec; border-color:#f3ddb8; color:#8a5a08}
 
     .gm-table{width:100%; border-collapse:collapse; font-size:12.5px}
     .gm-table th{background:#f2f5fa; color:#1f2a44; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:9px 8px; border:1px solid #c9d4ea; white-space:nowrap; text-align:left}
@@ -85,17 +86,11 @@
 
             @if($missing->count())
                 <div class="gm-missing">
-                    <h6><i class="fa fa-exclamation-triangle"></i> {{ $missing->count() }} {{ $missing->count() === 1 ? 'application is' : 'applications are' }} not in any group yet</h6>
-                    <p style="margin:0 0 8px">A traveller joins a group automatically once their sheet has a departure airport <em>and</em> both travel dates. These are missing at least one:</p>
+                    <h6><i class="fa fa-exclamation-triangle"></i> {{ $missing->count() }} {{ $missing->count() === 1 ? 'application has' : 'applications have' }} no departure city</h6>
+                    <p style="margin:0 0 8px">A traveller joins a group as soon as their sheet says where they are flying from &mdash; the travel dates can follow when the flight is booked. These have no airport on the &ldquo;Travelling from&rdquo; line:</p>
                     <ul>
                         @foreach($missingShown as $row)
-                            @php
-                                $needs = [];
-                                if (!$row->departure_airport_code) { $needs[] = 'departure airport'; }
-                                if (!$row->departure_date) { $needs[] = 'departure date'; }
-                                if (!$row->return_date) { $needs[] = 'return date'; }
-                            @endphp
-                            <li><a href="{{ route('quick-yatri-edit', $row->id) }}">{{ $row->applicant_name ?: 'Unnamed application #' . $row->id }}</a> &mdash; needs {{ implode(', ', $needs) }}</li>
+                            <li><a href="{{ route('quick-yatri-edit', $row->id) }}">{{ $row->applicant_name ?: 'Unnamed application #' . $row->id }}</a> &mdash; needs a departure airport</li>
                         @endforeach
                         @if($missing->count() > $missingShown->count())
                             <li>&hellip; and {{ $missing->count() - $missingShown->count() }} more, on the <a href="{{ route('quick-yatri') }}">applications list</a>.</li>
@@ -106,16 +101,27 @@
 
             @forelse($groups as $group)
                 <div class="gm-group">
+                    {{-- The dates are only part of the heading once the flight is
+                         booked. Until then the group is named by its city alone,
+                         which is how the office's own sheet writes it while
+                         deposits are still coming in. --}}
                     <div class="gm-title">
                         {{ $group['city'] }} ({{ $group['airport_code'] }}) Group
-                        leaving {{ $group['departure_date']->format('j F') }}
-                        and returning {{ $group['return_date']->format('j F') }}
+                        @if($group['departure_date'] && $group['return_date'])
+                            leaving {{ $group['departure_date']->format('j F') }}
+                            and returning {{ $group['return_date']->format('j F') }}
+                        @elseif($group['mixed_dates'])
+                            &mdash; travelling on more than one date
+                        @else
+                            &mdash; flight not booked yet
+                        @endif
                     </div>
                     <div class="gm-contact">
                         EMAIL ADDRESS: <b>{{ \App\Models\QuickYatri::CONTACT_EMAIL }}</b>
                         &nbsp; Tel: <b>{{ \App\Models\QuickYatri::CONTACT_PHONE }}</b>
                         &nbsp; Pakistan No. <b>{{ $pakistanContact }}</b>
                         <span class="gm-count">{{ $group['rows']->count() }} {{ $group['rows']->count() === 1 ? 'traveller' : 'travellers' }}</span>
+                        @if($group['undated'])<span class="gm-count pend">{{ $group['undated'] }} awaiting flight dates</span>@endif
                     </div>
                     <div class="table-responsive">
                         <table class="gm-table">
@@ -156,7 +162,7 @@
             @empty
                 <div class="gm-empty">
                     <p style="margin:0 0 6px"><b>No groups yet.</b></p>
-                    <p style="margin:0">A traveller appears here once their sheet carries a departure airport and both travel dates &mdash; the three fields on the &ldquo;Travelling from&rdquo; line. Fill those in on an application and it joins a group automatically.</p>
+                    <p style="margin:0">A traveller appears here as soon as their sheet says which airport they are flying from &mdash; the travel dates can wait until the flight is booked. Set the airport on the &ldquo;Travelling from&rdquo; line and they join a group automatically.</p>
                 </div>
             @endforelse
         </div>

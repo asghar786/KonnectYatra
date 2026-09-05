@@ -91,15 +91,74 @@ class QuickYatriGroupsTest extends TestCase
         $this->assertSame('LHE-PHL 1 DEC', $row->returnSector());
     }
 
-    public function test_a_sector_needs_both_an_airport_and_that_legs_date()
+    /**
+     * The date is the optional half of a sector: the route is known as soon as
+     * the city is, and the day is added when the flight is booked. Only a
+     * missing airport leaves nothing to print.
+     */
+    public function test_a_sector_prints_its_route_before_the_flight_is_booked()
     {
         $noAirport = $this->traveller(['departure_airport_code' => null]);
         $noReturn  = $this->traveller(['return_date' => null]);
+        $noDates   = $this->traveller(['departure_date' => null, 'return_date' => null]);
 
         $this->assertNull($noAirport->outboundSector());
         $this->assertNull($noAirport->returnSector());
+
         $this->assertSame('PHL-ISB 19 NOV', $noReturn->outboundSector());
-        $this->assertNull($noReturn->returnSector());
+        $this->assertSame('LHE-PHL', $noReturn->returnSector());
+
+        $this->assertSame('PHL-ISB', $noDates->outboundSector());
+        $this->assertSame('LHE-PHL', $noDates->returnSector());
+    }
+
+    /**
+     * The whole point of the 2026-09-05 revision: applications arrive and pay
+     * deposits for months before a flight is booked, so a city's group has to
+     * exist without dates. Requiring them left the report empty all season.
+     */
+    public function test_a_city_forms_a_group_before_any_flight_is_booked()
+    {
+        $this->asAdmin();
+
+        $this->traveller(['applicant_name' => 'QA UNBOOKED ONE', 'departure_date' => null, 'return_date' => null]);
+        $this->traveller(['applicant_name' => 'QA UNBOOKED TWO', 'departure_date' => null, 'return_date' => null]);
+
+        $body = $this->get(route('quick-yatri-groups'))->assertStatus(200)->getContent();
+
+        $this->assertStringContainsString('Philadelphia (PHL) Group', $body);
+        $this->assertStringContainsString('flight not booked yet', $body);
+        // The route still prints, just without a day against it.
+        $this->assertStringContainsString('PHL-ISB', $body);
+        $this->assertStringContainsString('LHE-PHL', $body);
+        // And they are travellers in a group, not a data-entry warning.
+        $this->assertStringNotContainsString('QA UNBOOKED ONE</a>', $body);
+    }
+
+    /**
+     * Dates describe a group, they do not split it — but two genuinely
+     * different dates out of one city must not have either one printed over
+     * the other on a manifest somebody flies on.
+     */
+    public function test_a_city_travelling_on_two_different_dates_states_no_single_date()
+    {
+        $this->asAdmin();
+
+        $this->traveller(['applicant_name' => 'QA NOV FLIGHT']);
+        $this->traveller([
+            'applicant_name' => 'QA JAN FLIGHT',
+            'departure_date' => '2027-01-10',
+            'return_date'    => '2027-01-24',
+        ]);
+
+        $body = $this->get(route('quick-yatri-groups'))->getContent();
+
+        // One city, one block.
+        $this->assertSame(1, substr_count($body, 'Philadelphia (PHL) Group'));
+        $this->assertStringContainsString('travelling on more than one date', $body);
+        // Each traveller still carries their own dates in their sectors.
+        $this->assertStringContainsString('PHL-ISB 19 NOV', $body);
+        $this->assertStringContainsString('PHL-ISB 10 JAN', $body);
     }
 
     /**
@@ -127,30 +186,22 @@ class QuickYatriGroupsTest extends TestCase
         }
     }
 
-    public function test_travellers_are_grouped_by_city_and_by_the_two_travel_dates()
+    public function test_travellers_are_grouped_by_the_city_they_fly_from()
     {
         $this->asAdmin();
 
-        // Two out of Philadelphia on the same flight...
+        // Two out of Philadelphia...
         $this->traveller(['applicant_name' => 'QA PHL ONE']);
         $this->traveller(['applicant_name' => 'QA PHL TWO']);
-        // ...one out of New York on the same dates — a different group...
+        // ...and one out of New York — a different city, a different group.
         $this->traveller(['applicant_name' => 'QA JFK ONE', 'departure_airport_code' => 'JFK']);
-        // ...and one out of Philadelphia on later dates — different again.
-        $this->traveller([
-            'applicant_name' => 'QA PHL LATER',
-            'departure_date' => '2027-01-10',
-            'return_date'    => '2027-01-24',
-        ]);
 
         $body = $this->get(route('quick-yatri-groups'))->assertStatus(200)->getContent();
 
-        // Three groups, each headed by its own city and dates.
         $this->assertStringContainsString('Philadelphia (PHL) Group', $body);
         $this->assertStringContainsString('New York (JFK) Group', $body);
         $this->assertStringContainsString('leaving 19 November', $body);
         $this->assertStringContainsString('and returning 1 December', $body);
-        $this->assertStringContainsString('leaving 10 January', $body);
 
         // The sectors each group flies.
         $this->assertStringContainsString('PHL-ISB 19 NOV', $body);
@@ -159,10 +210,24 @@ class QuickYatriGroupsTest extends TestCase
         $this->assertStringContainsString('LHE-JFK 1 DEC', $body);
 
         // Everyone is on it.
-        foreach (['QA PHL ONE', 'QA PHL TWO', 'QA JFK ONE', 'QA PHL LATER'] as $name) {
+        foreach (['QA PHL ONE', 'QA PHL TWO', 'QA JFK ONE'] as $name) {
             $parts = (new QuickYatri(['applicant_name' => $name]))->nameParts();
             $this->assertStringContainsString($parts['last'], $body);
         }
+    }
+
+    /** The block of HTML for one city's group, so a test can read it alone. */
+    private function groupBlock(string $body, string $heading): string
+    {
+        $blocks = array_slice(explode('<div class="gm-group">', $body), 1);
+
+        foreach ($blocks as $block) {
+            if (strpos($block, $heading) !== false) {
+                return $block;
+            }
+        }
+
+        $this->fail('No group block found for ' . $heading);
     }
 
     /**
@@ -174,36 +239,30 @@ class QuickYatriGroupsTest extends TestCase
     {
         $this->asAdmin();
 
-        $this->traveller(['applicant_name' => 'QA ALPHA ONE']);
-        $this->traveller(['applicant_name' => 'QA ALPHA TWO']);
-        $this->traveller(['applicant_name' => 'QA BRAVO ONE', 'departure_airport_code' => 'JFK']);
+        // Two airports no real application uses, so these blocks hold only the
+        // rows this test made — these run against the real local database, and
+        // any city already in it forms a group of its own now.
+        $this->traveller(['applicant_name' => 'QA ALPHA ONE', 'departure_airport_code' => 'BFF']);
+        $this->traveller(['applicant_name' => 'QA ALPHA TWO', 'departure_airport_code' => 'BFF']);
+        $this->traveller(['applicant_name' => 'QA BRAVO ONE', 'departure_airport_code' => 'CDR']);
 
         $body = $this->get(route('quick-yatri-groups'))->getContent();
 
-        // Read the SR numbers block by block rather than across the whole page:
-        // groups are ordered by date and then airport code, so which of these
-        // two comes first is JFK before PHL — not something this test should
-        // pin, when what it is actually about is each block starting again.
-        $blocks = array_slice(explode('<div class="gm-group">', $body), 1);
-        $this->assertCount(2, $blocks, 'expected one block per departure city');
+        $counts = [];
+        foreach (['Scottsbluff (BFF)' => 2, 'Chadron (CDR)' => 1] as $heading => $expected) {
+            preg_match_all('/<td class="gm-sr">(\d+)<\/td>/', $this->groupBlock($body, $heading), $m);
 
-        $numbering = array_map(function ($block) {
-            preg_match_all('/<td class="gm-sr">(\d+)<\/td>/', $block, $m);
-
-            return $m[1];
-        }, $blocks);
-
-        // Every block counts 1..n from its own first traveller.
-        foreach ($numbering as $srs) {
-            $this->assertSame(range(1, count($srs)), array_map('intval', $srs));
+            // Each block counts 1..n from its own first traveller, rather than
+            // continuing the numbering of the block above it.
+            $this->assertSame(range(1, $expected), array_map('intval', $m[1]), $heading);
+            $counts[] = count($m[1]);
         }
 
-        // And between them they account for all three travellers, so nobody
-        // was dropped in the name of restarting the count.
-        $this->assertSame(3, array_sum(array_map('count', $numbering)));
+        // And nobody was dropped in the name of restarting the count.
+        $this->assertSame(3, array_sum($counts));
     }
 
-    public function test_an_application_without_an_airport_or_dates_is_listed_as_ungrouped()
+    public function test_only_an_application_without_a_departure_city_is_listed_as_ungrouped()
     {
         $this->asAdmin();
 
@@ -217,13 +276,15 @@ class QuickYatriGroupsTest extends TestCase
 
         $body = $this->get(route('quick-yatri-groups'))->getContent();
 
-        $this->assertStringContainsString('not in any group yet', $body);
-        $this->assertStringContainsString('AAA QA NO DATES', $body);
-        $this->assertStringContainsString('needs departure date, return date', $body);
+        $this->assertStringContainsString('no departure city', $body);
         $this->assertStringContainsString('AAA QA NO AIRPORT', $body);
-        $this->assertStringContainsString('needs departure airport', $body);
+        $this->assertStringContainsString('needs a departure airport', $body);
 
-        // The one that *is* groupable is on the manifest, not in the panel.
+        // Having no dates is NOT a reason to be listed here any more — that
+        // application is in its city's group, waiting on a booking.
+        $this->assertStringNotContainsString('AAA QA NO DATES</a>', $body);
+
+        // The ones that do have a city are on the manifest.
         $this->assertStringContainsString('Philadelphia (PHL) Group', $body);
     }
 
@@ -244,9 +305,8 @@ class QuickYatriGroupsTest extends TestCase
         // the cap would be spent on data this test did not create.
         for ($i = 0; $i < $named + $extra; $i++) {
             $this->traveller([
-                'applicant_name' => sprintf('AAA UNGROUPED %02d', $i),
-                'departure_date' => null,
-                'return_date'    => null,
+                'applicant_name'         => sprintf('AAA UNGROUPED %02d', $i),
+                'departure_airport_code' => null,
             ]);
         }
 

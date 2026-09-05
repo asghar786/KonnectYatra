@@ -8,10 +8,11 @@
 @section('content')
 <style type="text/css">
     .qd-hero{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; background:linear-gradient(120deg,#1f2a44,#1a3fa0); border-radius:16px; box-shadow:0 10px 30px rgba(28,37,65,.18); padding:22px 26px; margin-bottom:20px; color:#fff}
-    /* The colour is restated here because the admin theme styles h4 globally
-       and beats the container's inherited white. */
-    .qd-hero h4{font-family:Archivo,sans-serif; font-weight:800; font-size:20px; margin:0; color:#fff}
-    .qd-hero p{margin:5px 0 0; font-size:13px; color:#c9d4ea; max-width:560px; line-height:1.5}
+    /* Both colours are forced: the admin theme styles h4 and p globally with
+       selectors that outrank this block, and on the hero's dark gradient its
+       near-black body colour is unreadable. */
+    .qd-hero h4{font-family:Archivo,sans-serif; font-weight:800; font-size:20px; margin:0; color:#fff !important}
+    .qd-hero p{margin:5px 0 0; font-size:13px; color:#e8eefb !important; max-width:560px; line-height:1.5}
     .qd-hero .cta{display:inline-flex; align-items:center; gap:8px; background:#f54e18; color:#fff; border-radius:24px; padding:11px 22px; font-size:13.5px; font-weight:600; text-decoration:none; box-shadow:0 6px 16px rgba(245,78,24,.3); transition:transform .12s}
     .qd-hero .cta:hover{transform:translateY(-2px); color:#fff}
 
@@ -85,13 +86,15 @@
                     <small>{{ $stats['wheelchair'] }} wheelchair &middot; {{ $stats['vegetarian'] }} vegetarian</small>
                 </div>
                 <div class="qd-stat {{ $stats['missing_travel'] ? 'warn' : '' }}">
-                    <em>Not in a group yet</em>
+                    <em>No departure city</em>
                     <b>{{ $stats['missing_travel'] }}</b>
                     <small>
                         @if($stats['missing_travel'])
-                            <a href="{{ route('quick-yatri-groups') }}">missing airport or travel dates</a>
+                            <a href="{{ route('quick-yatri-groups') }}">not in a group yet</a>
+                        @elseif($stats['awaiting_dates'])
+                            everyone is grouped &middot; {{ $stats['awaiting_dates'] }} awaiting flight dates
                         @else
-                            everyone has their airport and dates
+                            everyone is grouped and booked
                         @endif
                     </small>
                 </div>
@@ -137,7 +140,15 @@
                     <div class="qd-trip">
                         <span class="qd-city">
                             {{ $group['city'] }} ({{ $group['airport_code'] }})
-                            <small>{{ $group['departure_date']->format('j M Y') }} &rarr; {{ $group['return_date']->format('j M Y') }}</small>
+                            <small>
+                                @if($group['departure_date'] && $group['return_date'])
+                                    {{ $group['departure_date']->format('j M Y') }} &rarr; {{ $group['return_date']->format('j M Y') }}
+                                @elseif($group['mixed_dates'])
+                                    travelling on more than one date
+                                @else
+                                    flight not booked yet
+                                @endif
+                            </small>
                         </span>
                         <span class="qd-sector">{{ $group['rows']->first()->outboundSector() }}</span>
                         <span class="qd-sector">{{ $group['rows']->first()->returnSector() }}</span>
@@ -145,8 +156,8 @@
                     </div>
                 @empty
                     <div class="qd-none">
-                        No groups yet. An application joins one automatically once its sheet carries a
-                        departure airport and both travel dates.
+                        No groups yet. An application joins one as soon as its sheet says which airport
+                        the traveller is flying from &mdash; the dates can follow with the booking.
                     </div>
                 @endforelse
             </div>

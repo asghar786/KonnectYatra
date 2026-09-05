@@ -83,11 +83,17 @@ class QuickYatriController extends Controller
             'custom_price'   => $rows->where('custom_price', true)->count(),
             'wheelchair'     => $rows->where('wheelchair_airport', true)->count() + $rows->where('wheelchair_full_trip', true)->count(),
             'vegetarian'     => $rows->where('meal_vegetarian', true)->count(),
-            // How many still cannot appear on the Group Manifest — missing a
-            // departure airport, or either travel date. Surfaced here so the
-            // office notices data-entry gaps without opening that report.
+            // How many cannot appear on the Group Manifest — no departure
+            // airport, the one field a group needs. Travel dates are not
+            // counted: they arrive with the booking, and a group is worth
+            // seeing well before that.
             'missing_travel' => $rows->filter(function ($row) {
-                return !$row->departure_airport_code || !$row->departure_date || !$row->return_date;
+                return !$row->departure_airport_code;
+            })->count(),
+            // Booked vs still waiting on a flight, across every application
+            // that has a city.
+            'awaiting_dates' => $rows->filter(function ($row) {
+                return $row->departure_airport_code && (!$row->departure_date || !$row->return_date);
             })->count(),
         ];
 
@@ -193,12 +199,10 @@ class QuickYatriController extends Controller
     {
         $groups = $this->buildManifestGroups();
 
+        // Only a missing airport keeps someone out of a group now — the dates
+        // arrive with the booking, long after the group is worth seeing.
         $missing = QuickYatri::query()
-            ->where(function ($q) {
-                $q->whereNull('departure_airport_code')
-                    ->orWhereNull('departure_date')
-                    ->orWhereNull('return_date');
-            })
+            ->whereNull('departure_airport_code')
             ->orderBy('applicant_name')
             ->get();
 
@@ -213,38 +217,71 @@ class QuickYatriController extends Controller
     }
 
     /**
-     * Every applicant with a departure airport and both travel dates set,
-     * bucketed by that exact triple. Shared by the full Group Manifest report
-     * and the dashboard's upcoming-groups snapshot so the two can never
-     * disagree about what counts as a group.
+     * Every applicant with a departure airport, bucketed by that airport.
+     * Shared by the full Group Manifest report and the dashboard's
+     * upcoming-groups snapshot, so the two can never disagree about what
+     * counts as a group.
+     *
+     * **The city alone makes the group; the dates are not a condition of it.**
+     * A group exists as soon as people from that city are applying — deposits
+     * and balances come in against it long before the flight is booked, and
+     * requiring dates meant the whole report read "no groups yet" through the
+     * entire selling season (2026-09-05).
+     *
+     * Dates are therefore reported *about* a group rather than defining it:
+     * `departure_date` / `return_date` are filled in only when every member
+     * carrying dates agrees on one pair, and `undated` counts the members
+     * still waiting for a booking.
      */
     private function buildManifestGroups()
     {
         $rows = QuickYatri::whereNotNull('departure_airport_code')
-            ->whereNotNull('departure_date')
-            ->whereNotNull('return_date')
             ->orderBy('applicant_name')
             ->get();
 
         return $rows
             ->groupBy(function ($row) {
-                return $row->departure_date->format('Y-m-d') . '|' . $row->return_date->format('Y-m-d') . '|' . strtoupper($row->departure_airport_code);
+                return strtoupper($row->departure_airport_code);
             })
-            ->map(function ($members) {
-                $first = $members->first();
+            ->map(function ($members, $code) {
+                // One pair of dates for the group only if the members who have
+                // them do not disagree. Two different pairs out of one city
+                // means two trips, and printing either one over the other
+                // would be a lie on a manifest somebody flies on — so the
+                // header simply says nothing and each row keeps its own.
+                $pairs = $members
+                    ->filter(function ($row) {
+                        return $row->departure_date || $row->return_date;
+                    })
+                    ->map(function ($row) {
+                        return optional($row->departure_date)->format('Y-m-d') . '|' . optional($row->return_date)->format('Y-m-d');
+                    })
+                    ->unique();
+
+                $agreed = $pairs->count() === 1
+                    ? $members->first(function ($row) {
+                        return $row->departure_date || $row->return_date;
+                    })
+                    : null;
 
                 return [
-                    'departure_date' => $first->departure_date,
-                    'return_date'    => $first->return_date,
-                    'airport_code'   => strtoupper($first->departure_airport_code),
-                    'city'           => UsAirports::city($first->departure_airport_code),
+                    'airport_code'   => $code,
+                    'city'           => UsAirports::city($code),
+                    'departure_date' => $agreed ? $agreed->departure_date : null,
+                    'return_date'    => $agreed ? $agreed->return_date : null,
+                    'mixed_dates'    => $pairs->count() > 1,
+                    'undated'        => $members->filter(function ($row) {
+                        return !$row->departure_date || !$row->return_date;
+                    })->count(),
                     'rows'           => $members->values(),
                 ];
             })
             ->sortBy(function ($group) {
-                // Soonest trip first; airport code as a stable tiebreaker for
-                // two groups leaving on the exact same day.
-                return $group['departure_date']->format('Y-m-d') . '|' . $group['airport_code'];
+                // Booked trips first, soonest at the top, then the cities still
+                // waiting on a booking — alphabetically, so the order of the
+                // report does not shuffle as dates are filled in.
+                return ($group['departure_date'] ? '0' . $group['departure_date']->format('Y-m-d') : '1')
+                    . '|' . $group['city'];
             })
             ->values();
     }

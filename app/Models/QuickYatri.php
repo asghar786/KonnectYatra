@@ -386,26 +386,38 @@ class QuickYatri extends Model
      * out / Lahore back is fixed, the same pair the older Passenger List
      * report (packages/YatriVisa flow) already hardcodes for every booking.
      *
-     * Null when either half is missing (no departure airport, or that leg's
-     * date not filled in yet) — the manifest only groups applicants who have
-     * both, so a null here means this record does not belong in a group yet.
+     * **The date is the optional half.** A group forms as soon as people are
+     * applying from a city; the flight is booked later, while deposits and
+     * balances are still coming in. Until then the sector reads "PHL-ISB" and
+     * gains its date when the booking is made — which is exactly how the
+     * office's own spreadsheet writes it.
+     *
+     * Null only without an airport, since there is no route to name at all.
      */
     public function outboundSector(): ?string
     {
-        if (!$this->departure_airport_code || !$this->departure_date) {
+        if (!$this->departure_airport_code) {
             return null;
         }
 
-        return strtoupper($this->departure_airport_code) . '-ISB ' . strtoupper($this->departure_date->format('j M'));
+        $sector = strtoupper($this->departure_airport_code) . '-ISB';
+
+        return $this->departure_date
+            ? $sector . ' ' . strtoupper($this->departure_date->format('j M'))
+            : $sector;
     }
 
     public function returnSector(): ?string
     {
-        if (!$this->departure_airport_code || !$this->return_date) {
+        if (!$this->departure_airport_code) {
             return null;
         }
 
-        return 'LHE-' . strtoupper($this->departure_airport_code) . ' ' . strtoupper($this->return_date->format('j M'));
+        $sector = 'LHE-' . strtoupper($this->departure_airport_code);
+
+        return $this->return_date
+            ? $sector . ' ' . strtoupper($this->return_date->format('j M'))
+            : $sector;
     }
 
     /** Where the applicant's photograph lives on disk, or null. */
