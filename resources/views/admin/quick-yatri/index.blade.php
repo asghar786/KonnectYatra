@@ -51,7 +51,18 @@
     .qy-amt{font-weight:700; color:#1f2a44; font-variant-numeric:tabular-nums; white-space:nowrap}
     .qy-amt small{display:block; font-weight:400; color:#9aa0ac; font-size:11px}
     .qy-chip{display:inline-block; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; background:#e7f8ec; color:#157f3d; margin:1px 2px 1px 0; white-space:nowrap}
-    .qy-chip.wc{background:#eaf2ff; color:#1a3fa0}
+    /* The option pills sit directly under the Trip pill, so they are teal and
+       green against its purple — three chips in one cell have to be tellable
+       apart at a glance, not read as one run. */
+    .qy-chip.wc{background:#d9f2ee; color:#0f766e}
+    .qy-chip.veg{background:#e7f8ec; color:#157f3d}
+    .qy-opts{display:block; margin-top:5px}
+    /* Travelling From: the airport code leads, its city and the travel dates
+       sit under it. A row with no dates cannot be grouped yet, so it says so
+       here rather than only on the Group Manifest. */
+    .qy-from{display:inline-block; font-family:monospace; font-weight:700; font-size:12.5px; letter-spacing:.04em; color:#1a3fa0; background:#eef2fb; border:1px solid #d7e2f5; border-radius:7px; padding:2px 9px}
+    .qy-dates{display:block; margin-top:3px; font-size:11.5px; color:#5a6273; white-space:nowrap}
+    .qy-nodates{display:block; margin-top:3px; font-size:11px; font-weight:600; color:#a97708; white-space:nowrap}
     .qy-pp{font-variant-numeric:tabular-nums}
 
     .qy-actions{display:flex; gap:8px; justify-content:center; align-items:center}
@@ -178,14 +189,16 @@
                             <th class="srt" data-type="text" tabindex="0" role="columnheader">Passport</th>
                             <th class="srt" data-type="text" tabindex="0" role="columnheader">Trip</th>
                             <th class="srt" data-type="num" tabindex="0" role="columnheader">Amount</th>
-                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Options</th>
+                            <th class="srt" data-type="text" tabindex="0" role="columnheader">Travelling From</th>
                             <th class="srt" data-type="num" tabindex="0" role="columnheader" aria-sort="ascending">Entered On</th>
                             <th class="tc">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($rows as $i => $r)
-                        <tr class="qy-row" data-search="{{ strtolower(trim($r->applicant_name.' '.$r->father_name.' '.$r->cell_phone.' '.$r->email.' '.$r->passport_no.' '.$r->city.' '.$r->state_zip.' '.$r->nearest_gurdwara)) }}">
+                        {{-- The departure airport and its city are searchable too, so
+                             "PHL" or "philadelphia" pulls up everyone on that flight. --}}
+                        <tr class="qy-row" data-search="{{ strtolower(trim($r->applicant_name.' '.$r->father_name.' '.$r->cell_phone.' '.$r->email.' '.$r->passport_no.' '.$r->city.' '.$r->state_zip.' '.$r->nearest_gurdwara.' '.$r->departure_airport_code.' '.($r->departure_airport_code ? \App\Support\UsAirports::city($r->departure_airport_code) : ''))) }}">
                             <td class="tc"><span class="qy-idx">{{ $i + 1 }}</span></td>
                             {{-- Each cell carries the key it sorts on, because what
                                  it prints will not sort: a name sits under a father's
@@ -210,7 +223,23 @@
                                     <span class="qy-sub">&mdash;</span>
                                 @endif
                             </td>
-                            <td data-sort="{{ $r->trip_option ? $r->tripLabel() : '' }}">@if($r->trip_option)<span class="qy-trip">{{ $r->tripLabel() }}</span>@else <span class="qy-sub">&mdash;</span> @endif</td>
+                            {{-- The trip, and under it whatever this applicant asked
+                                 for on the sheet's three option bars — the options
+                                 had a column of their own until 2026-09-05, but it
+                                 was empty on nearly every row while the Trip column
+                                 had space going spare. Different colours from the
+                                 trip pill above them, so the two do not read as one
+                                 run of chips. --}}
+                            <td data-sort="{{ $r->trip_option ? $r->tripLabel() : '' }}">
+                                @if($r->trip_option)<span class="qy-trip">{{ $r->tripLabel() }}</span>@else <span class="qy-sub">&mdash;</span> @endif
+                                @if($r->wheelchair_airport || $r->wheelchair_full_trip || $r->meal_vegetarian)
+                                    <span class="qy-opts">
+                                        @if($r->wheelchair_airport)<span class="qy-chip wc">&#9855; Wheelchair &mdash; airport</span>@endif
+                                        @if($r->wheelchair_full_trip)<span class="qy-chip wc">&#9855; Wheelchair &mdash; full trip</span>@endif
+                                        @if($r->meal_vegetarian)<span class="qy-chip veg">&#127860; Vegetarian</span>@endif
+                                    </span>
+                                @endif
+                            </td>
                             <td data-sort="{{ $r->total_amount !== null ? (int) round($r->total_amount) : '' }}">
                                 {{-- Click the amount to price this applicant on their own terms —
                                      group size, departure airport, a rate agreed at an event. --}}
@@ -234,11 +263,25 @@
                                 </button>
                                 @if($r->custom_price && $r->price_note)<small class="qy-note-sm">{{ $r->price_note }}</small>@endif
                             </td>
-                            <td data-sort="{{ trim(($r->wheelchair_airport ? 'Wheelchair airport ' : '').($r->wheelchair_full_trip ? 'Wheelchair full trip ' : '').($r->meal_vegetarian ? 'Vegetarian' : '')) }}">
-                                @if($r->wheelchair_airport)<span class="qy-chip wc">Wheelchair &mdash; airport</span>@endif
-                                @if($r->wheelchair_full_trip)<span class="qy-chip wc">Wheelchair &mdash; full trip</span>@endif
-                                @if($r->meal_vegetarian)<span class="qy-chip">Vegetarian</span>@endif
-                                @if(!$r->wheelchair_airport && !$r->wheelchair_full_trip && !$r->meal_vegetarian)<span class="qy-sub">&mdash;</span>@endif
+                            {{-- Where and when they fly — the three values the Group
+                                 Manifest buckets on. Sorted by airport then departure
+                                 date, so the list clusters into the same groups the
+                                 manifest prints. Replaced the Options column
+                                 (wheelchair / vegetarian) on 2026-09-05: the
+                                 wheelchair surcharge still shows under Amount, and
+                                 nothing was ticked on any application. --}}
+                            <td data-sort="{{ trim(($r->departure_airport_code ?: 'ZZZ') . ' ' . ($r->departure_date ? $r->departure_date->format('Y-m-d') : '')) }}">
+                                @if($r->departure_airport_code)
+                                    <span class="qy-from">{{ strtoupper($r->departure_airport_code) }}</span>
+                                    <small class="qy-sub" style="display:block; margin-top:3px">{{ \App\Support\UsAirports::city($r->departure_airport_code) }}</small>
+                                    @if($r->departure_date && $r->return_date)
+                                        <small class="qy-dates">{{ $r->departure_date->format('j M') }} &rarr; {{ $r->return_date->format('j M Y') }}</small>
+                                    @else
+                                        <small class="qy-nodates">no travel dates</small>
+                                    @endif
+                                @else
+                                    <span class="qy-sub">&mdash;</span>
+                                @endif
                             </td>
                             <td data-sort="{{ optional($r->created_at)->getTimestamp() }}"><span class="qy-sub">{{ optional($r->created_at)->format('d M Y, h:i A') ?: '—' }}</span></td>
                             <td class="tc">

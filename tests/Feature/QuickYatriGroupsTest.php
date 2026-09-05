@@ -328,6 +328,63 @@ class QuickYatriGroupsTest extends TestCase
             ->assertRedirect(route('quick-yatri'));
     }
 
+    /**
+     * The list's Options column became Travelling From on 2026-09-05 — the
+     * options were empty on nearly every application, and where a traveller
+     * flies from is what the office now works by. The options moved under the
+     * Trip pill rather than being dropped.
+     */
+    public function test_the_list_shows_where_and_when_each_applicant_flies()
+    {
+        $this->asAdmin();
+
+        $row = $this->traveller([
+            'applicant_name'       => 'QA LIST COLUMN',
+            'trip_option'          => 'round_trip_5star',
+            'wheelchair_full_trip' => true,
+            'meal_vegetarian'      => true,
+        ]);
+
+        $body = $this->get(route('quick-yatri'))->getContent();
+
+        $this->assertStringContainsString('>Travelling From<', $body);
+        $this->assertStringNotContainsString('>Options<', $body);
+
+        // The airport, its city and the dates.
+        $this->assertStringContainsString('<span class="qy-from">PHL</span>', $body);
+        $this->assertStringContainsString('Philadelphia', $body);
+        $this->assertStringContainsString('19 Nov', $body);
+
+        // Sorted by airport then departure date, so the list clusters into the
+        // same groups the manifest prints.
+        $this->assertStringContainsString('data-sort="PHL 2026-11-19"', $body);
+
+        // The options did not go away, they moved under the trip pill.
+        $this->assertStringContainsString('Wheelchair &mdash; full trip', $body);
+        $this->assertStringContainsString('Vegetarian', $body);
+
+        // And the airport is searchable, so "PHL" finds everyone on that flight.
+        $this->assertStringContainsString('phl philadelphia', $body);
+
+        $row->delete();
+    }
+
+    /** A row with an airport but no dates says so — it cannot be grouped yet. */
+    public function test_the_list_flags_an_applicant_with_no_travel_dates()
+    {
+        $this->asAdmin();
+
+        $row = $this->traveller([
+            'applicant_name' => 'QA NO DATES YET',
+            'departure_date' => null,
+            'return_date'    => null,
+        ]);
+
+        $this->assertStringContainsString('no travel dates', $this->get(route('quick-yatri'))->getContent());
+
+        $row->delete();
+    }
+
     public function test_an_airport_code_resolves_to_its_city()
     {
         $this->assertSame('Philadelphia', UsAirports::city('PHL'));
