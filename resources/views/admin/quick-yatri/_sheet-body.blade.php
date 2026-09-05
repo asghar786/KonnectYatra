@@ -173,7 +173,14 @@
             // Outside a table cell, unlike every other free-text field on the
             // sheet, so it needs its own writing line — qy-rule, the same
             // class the Signature line uses for the same reason.
-            return '<span class="qy-rule" style="min-width:150pt"></span>';
+            //
+            // 90pt, not the 150pt it carried while it had the trip band to
+            // itself: the two travel dates share that band now, and at 150pt
+            // the four fields wrap onto three lines (measured — 651.5px of
+            // children against 573.3px of band). .qy-rule is flex:1, so this
+            // is only the floor; the rule still grows into whatever the dates
+            // leave over.
+            return '<span class="qy-rule" style="min-width:90pt"></span>';
         }
         if (!$isEntry) {
             $code = $row->departure_airport_code;
@@ -183,8 +190,14 @@
             return '<span class="qy-val qy-caps">' . e(\App\Support\UsAirports::label($code)) . '</span>';
         }
 
+        // 130pt, down from 250pt: the trip band carries the two travel dates as
+        // well since 2026-09-05, and at 250pt this select alone pushed them
+        // onto their own line. Measured, not chosen — the band has 573.3px and
+        // the four fields need every bit of it. The full airport name is still
+        // there when the list is open; the closed control only has to show
+        // enough of the code to confirm the choice.
         $selected = strtoupper((string) old('departure_airport_code', $row->departure_airport_code));
-        $html = '<select class="qy-in qy-caps" name="departure_airport_code" style="max-width:250pt">';
+        $html = '<select class="qy-in qy-caps" name="departure_airport_code" style="max-width:130pt">';
         $html .= '<option value="">Select airport&hellip;</option>';
         // A code saved before this list existed (or since retired) would
         // otherwise vanish silently on the next save, so carry it as its own
@@ -245,8 +258,19 @@
                     <div style="display:flex; align-items:flex-end; gap:5pt">LP#:{!! $ref('lp_no') !!}</div>
                 </div>
             </div>
-            <div style="border:1px solid #111; padding:5pt 10pt; display:flex; align-items:center; flex-wrap:wrap; gap:8pt 10pt; font-size:10.5pt">
+            {{-- The trip band: where they fly from, and (since 2026-09-05) when.
+                 The dates sit here rather than with the SR#/RT#/OW#/LP#
+                 reference numbers above for a measured reason — that block is a
+                 2-column grid, so two more fields make a third row, and at the
+                 worst-case validity note that pushed page 1 13.5px onto a third
+                 printed page. On this band they cost nothing: a date rule is no
+                 taller than the airport control already setting the row's
+                 height. They also belong here, being the other two values the
+                 Group Manifest groups an applicant by. --}}
+            <div class="qy-tripband" style="border:1px solid #111; padding:5pt 10pt; display:flex; align-items:center; flex-wrap:wrap; gap:8pt 10pt; font-size:10.5pt">
                 <span style="font-weight:600; white-space:nowrap">Travelling from</span>{!! $airport() !!}
+                <span style="display:flex; align-items:flex-end; gap:5pt; white-space:nowrap"><span style="font-weight:600">Dep:</span>{!! $dat('departure_date', 'ky-date-any', true) !!}</span>
+                <span style="display:flex; align-items:flex-end; gap:5pt; white-space:nowrap"><span style="font-weight:600">Ret:</span>{!! $dat('return_date', 'ky-date-any', true) !!}</span>
             </div>
         </div>
     </div>
@@ -480,7 +504,7 @@
                 <li>{{ \App\Models\QuickYatri::validityNote() }}</li>
                 <li>You must follow all group rules and regulations.</li>
                 <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
-                <li>Contact: <strong style="color:#1a3fa0">Rashad Mahmood</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">+1 718-908-9464</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">konnectus.inc@gmail.com</strong></li>
+                <li>Contact: <strong style="color:#1a3fa0">{{ \App\Models\QuickYatri::CONTACT_NAME }}</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">{{ \App\Models\QuickYatri::CONTACT_PHONE }}</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">{{ \App\Models\QuickYatri::CONTACT_EMAIL }}</strong></li>
                 <li>Minimum deposit of <strong>$500</strong> accepted.</li>
             </ul>
             @php

@@ -63,6 +63,19 @@
        labels until "Check #:" wraps and the row grows a second line, which
        page 1 has no height for. */
     .qy-payline .qy-rule{min-width:0}
+    /* Same reasoning again on the trip band, which since 2026-09-05 carries the
+       Departure and Return dates beside "Travelling from". flex-wrap decides
+       where to break on each item's *hypothetical* size, so the 36pt floor made
+       the band wrap onto a second line even though the laid-out children fit
+       inside it with room over. The airport's own rule keeps an inline floor,
+       so lifting this one only frees the two dates. */
+    .qy-tripband .qy-rule{min-width:0}
+    /* Entry mode's date fields are <input class="qy-in qy-rule">, and an input
+       carries an intrinsic ~20-character width on top of .qy-in's width:100%.
+       Either one makes the band's wrap calculation think a single date needs
+       the whole row, which broke it onto three lines. Held to a fixed basis
+       instead: 70pt prints DD-MMM-YYYY (~75px at this size) with room over. */
+    .qy-tripband .qy-in.qy-rule{width:70pt; flex:0 0 70pt}
     .qy-in:focus{background:#eef4ff}
     .qy-grid td{vertical-align:middle}
     /* Label columns size to their text, as in the approved render — without this

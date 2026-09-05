@@ -124,10 +124,11 @@
 <main class="ttr-wrapper">
     <div class="container-fluid">
         <div class="db-breadcrumb">
-            <h4 class="breadcrumb-title">Quick Yatri</h4>
+            <h4 class="breadcrumb-title">Applications</h4>
             <ul class="db-breadcrumb-list">
                 <li><a href="{{ url('/admin/dashboard') }}"><i class="fa fa-home"></i>Home</a></li>
-                <li>Quick Yatri</li>
+                <li><a href="{{ route('quick-yatri-dashboard') }}">Quick Yatri</a></li>
+                <li>Applications</li>
             </ul>
         </div>
         <div class="main-body">
@@ -136,6 +137,7 @@
             <div class="qy-toolbar">
                 <div class="qy-toolbar-left">
                     <a href="{{ route('quick-yatri-create') }}" class="qy-cta add"><i class="fa fa-plus"></i> Add New</a>
+                    <a href="{{ route('quick-yatri-groups') }}" class="qy-cta dl"><i class="fa fa-users"></i> Group Manifest</a>
                     <div class="qy-blank-picker">
                         <select id="qyBlankAirport" title="Pre-fill the departure airport on the blank form">
                             <option value="">Blank (write in)</option>
@@ -304,6 +306,15 @@
                           maxlength="{{ \App\Models\QuickYatri::VALIDITY_NOTE_MAX }}"
                           placeholder="{{ \App\Models\QuickYatri::VALIDITY_NOTE }}">{{ $validityNote }}</textarea>
                 <p class="qy-note-hint" id="qyNoteHint">Bullet one in the box at the foot of page&nbsp;1 &mdash; the date the application is good until, and the late fee after it. <b><span id="qyNoteCount">0</span>/{{ \App\Models\QuickYatri::VALIDITY_NOTE_MAX }}</b> characters: page&nbsp;1 is a fixed page, and a longer sentence would push the sheet onto a third printed one. Leave it empty to go back to the standard wording.</p>
+
+                {{-- Also not a price, and here for the same reason as the
+                     sentence above: it is office contact detail that should
+                     never need a developer to change. --}}
+                <span class="qy-lbl">Pakistan contact number</span>
+                <input type="text" class="qy-text" name="pakistan_contact" maxlength="30"
+                       value="{{ \App\Models\QuickYatri::pakistanContact() }}"
+                       placeholder="{{ \App\Models\QuickYatri::PAKISTAN_CONTACT }}">
+                <p class="qy-note-hint">Printed on every group&rsquo;s header in the <a href="{{ route('quick-yatri-groups') }}">Group Manifest</a>, beside the US number. Leave it empty to go back to {{ \App\Models\QuickYatri::PAKISTAN_CONTACT }}.</p>
             </div>
             <div class="qy-modal-foot">
                 <button type="button" class="qy-mbtn ghost" data-qy-close>Cancel</button>

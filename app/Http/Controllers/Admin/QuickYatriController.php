@@ -22,6 +22,14 @@ class QuickYatriController extends Controller
     /** Where applicant photographs are written. Kept out of git. */
     const PHOTO_DIR = 'quick_yatri_uploads';
 
+    /**
+     * How many not-yet-groupable applications the Group Manifest names before
+     * it falls back to a count. Before a season's tickets are booked that list
+     * is essentially the whole table, and a page of it buries the manifest the
+     * report exists to show.
+     */
+    const MISSING_NAMED = 8;
+
     public function index()
     {
         // Oldest first, so the newest application is the one at the foot of the
@@ -55,6 +63,39 @@ class QuickYatriController extends Controller
         return view('admin.quick-yatri.index', compact(
             'rows', 'airportGroups', 'prices', 'wheelchairFee', 'standardCount', 'validityNote'
         ));
+    }
+
+    /**
+     * The Quick Yatri landing page — headline counts and a snapshot of the
+     * nearest upcoming group, with cards out to Add New / Download Blank /
+     * Group Manifest / the applications list. Its own page rather than
+     * folded into index(): that page is the applications list (search, sort,
+     * the two price dialogs) and stays exactly as it was — nothing that
+     * already redirects there needs to know this exists.
+     */
+    public function dashboard()
+    {
+        $rows = QuickYatri::all();
+
+        $stats = [
+            'total'          => $rows->count(),
+            'priced'         => $rows->whereNotNull('trip_option')->count(),
+            'custom_price'   => $rows->where('custom_price', true)->count(),
+            'wheelchair'     => $rows->where('wheelchair_airport', true)->count() + $rows->where('wheelchair_full_trip', true)->count(),
+            'vegetarian'     => $rows->where('meal_vegetarian', true)->count(),
+            // How many still cannot appear on the Group Manifest — missing a
+            // departure airport, or either travel date. Surfaced here so the
+            // office notices data-entry gaps without opening that report.
+            'missing_travel' => $rows->filter(function ($row) {
+                return !$row->departure_airport_code || !$row->departure_date || !$row->return_date;
+            })->count(),
+        ];
+
+        // Just the nearest couple of groups for the snapshot — the full
+        // report (quick-yatri-groups) lists every one.
+        $upcomingGroups = $this->buildManifestGroups()->take(3);
+
+        return view('admin.quick-yatri.dashboard', compact('stats', 'upcomingGroups'));
     }
 
     public function create()
@@ -140,6 +181,75 @@ class QuickYatriController extends Controller
     }
 
     /**
+     * Tourists fly in from different US cities on the same two dates, so they
+     * can be met and toured together once they land — this splits every
+     * applicant who has both travel dates and a departure airport set into
+     * one printable block per city, fully automatic (same departure_date +
+     * return_date + departure_airport_code = the same group). No manual
+     * assignment step: an applicant belongs wherever those three values put
+     * them, and moves groups on its own if any of the three is edited.
+     */
+    public function groups()
+    {
+        $groups = $this->buildManifestGroups();
+
+        $missing = QuickYatri::query()
+            ->where(function ($q) {
+                $q->whereNull('departure_airport_code')
+                    ->orWhereNull('departure_date')
+                    ->orWhereNull('return_date');
+            })
+            ->orderBy('applicant_name')
+            ->get();
+
+        // The panel naming them is a nudge to finish the data entry, not a
+        // second list of every application — and early in a season that is
+        // most of the table. Name the first handful, count the rest.
+        $missingShown = $missing->take(self::MISSING_NAMED);
+
+        $pakistanContact = QuickYatri::pakistanContact();
+
+        return view('admin.quick-yatri.groups', compact('groups', 'missing', 'missingShown', 'pakistanContact'));
+    }
+
+    /**
+     * Every applicant with a departure airport and both travel dates set,
+     * bucketed by that exact triple. Shared by the full Group Manifest report
+     * and the dashboard's upcoming-groups snapshot so the two can never
+     * disagree about what counts as a group.
+     */
+    private function buildManifestGroups()
+    {
+        $rows = QuickYatri::whereNotNull('departure_airport_code')
+            ->whereNotNull('departure_date')
+            ->whereNotNull('return_date')
+            ->orderBy('applicant_name')
+            ->get();
+
+        return $rows
+            ->groupBy(function ($row) {
+                return $row->departure_date->format('Y-m-d') . '|' . $row->return_date->format('Y-m-d') . '|' . strtoupper($row->departure_airport_code);
+            })
+            ->map(function ($members) {
+                $first = $members->first();
+
+                return [
+                    'departure_date' => $first->departure_date,
+                    'return_date'    => $first->return_date,
+                    'airport_code'   => strtoupper($first->departure_airport_code),
+                    'city'           => UsAirports::city($first->departure_airport_code),
+                    'rows'           => $members->values(),
+                ];
+            })
+            ->sortBy(function ($group) {
+                // Soonest trip first; airport code as a stable tiebreaker for
+                // two groups leaving on the exact same day.
+                return $group['departure_date']->format('Y-m-d') . '|' . $group['airport_code'];
+            })
+            ->values();
+    }
+
+    /**
      * The grid itself — One-Way / Round Trip / Land Package, and the wheelchair
      * surcharge. Kept in `site_settings` so the office can move a fare without a
      * deploy; a field left blank clears the setting and that row falls back to
@@ -159,6 +269,9 @@ class QuickYatriController extends Controller
             'round_trip_land'      => $rules,
             'wheelchair_full_trip' => $rules,
             'validity_note'        => ['nullable', 'string', 'max:' . QuickYatri::VALIDITY_NOTE_MAX],
+            // The Pakistan-side contact number the Group Manifest report
+            // prints on every group's header, alongside Rashad's US number.
+            'pakistan_contact'     => ['nullable', 'string', 'max:30'],
         ]);
 
         QuickYatri::putPrices($data);
@@ -171,6 +284,10 @@ class QuickYatriController extends Controller
         $noteWas = QuickYatri::validityNote();
         if ($request->has('validity_note')) {
             QuickYatri::putValidityNote($data['validity_note'] ?? null);
+        }
+
+        if ($request->has('pakistan_contact')) {
+            QuickYatri::putPakistanContact($data['pakistan_contact'] ?? null);
         }
 
         // A saved row stores the price it was quoted at, so moving the grid does
@@ -248,6 +365,8 @@ class QuickYatriController extends Controller
         'date_of_expiry'      => 'Date of Expiry',
         'previous_visit_date' => 'Previous Visit Date',
         'signature_date'      => 'Signature Date',
+        'departure_date'      => 'Departure Date',
+        'return_date'         => 'Return Date',
     ];
 
     /**
@@ -382,6 +501,12 @@ class QuickYatriController extends Controller
             'rt_no'                => ['nullable', 'string', 'max:50'],
             'ow_no'                => ['nullable', 'string', 'max:50'],
             'lp_no'                => ['nullable', 'string', 'max:50'],
+            // When the applicant is actually flying — filled in once a ticket
+            // is booked, same as the reference numbers above. The Group
+            // Manifest report keys its per-city grouping on these two plus
+            // departure_airport_code.
+            'departure_date'      => ['nullable', 'date_format:Y-m-d'],
+            'return_date'         => ['nullable', 'date_format:Y-m-d'],
             // booking_type is not listed: the Round Trip / Land Package radios it
             // fed were removed from the sheet's top bar, so nothing posts it any
             // more. Validating it here would write null over the value already

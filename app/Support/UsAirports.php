@@ -650,6 +650,17 @@ class UsAirports
         return $code !== '' && isset($flat[$code]);
     }
 
+    /** "Philadelphia" — just the city, for a group manifest's header. Falls
+     *  back to the bare code for one this list does not recognise, the same
+     *  as label()/shortLabel() do. */
+    public static function city($code)
+    {
+        $code = strtoupper(trim((string) $code));
+        $flat = self::flat();
+
+        return isset($flat[$code]) ? $flat[$code]['city'] : $code;
+    }
+
     /** "PHL — Philadelphia, PA" — the dropdown option and the printed value. */
     public static function label($code)
     {

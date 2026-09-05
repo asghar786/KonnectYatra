@@ -36,6 +36,8 @@ class QuickYatri extends Model
         'date_of_expiry'       => 'date',
         'previous_visit_date'  => 'date',
         'signature_date'       => 'date',
+        'departure_date'       => 'date',
+        'return_date'          => 'date',
     ];
 
     /**
@@ -149,6 +151,41 @@ class QuickYatri extends Model
     public static function putValidityNote(?string $text): void
     {
         SiteSetting::put(self::VALIDITY_NOTE_KEY, trim((string) $text));
+    }
+
+    /**
+     * The office's own contact details, printed on the sheet's footer and on
+     * every Group Manifest header. Constants rather than two copies of the
+     * same strings in two Blade files — the manifest was about to become the
+     * second place they appeared.
+     */
+    const CONTACT_NAME  = 'Rashad Mahmood';
+    const CONTACT_PHONE = '+1 718-908-9464';
+    const CONTACT_EMAIL = 'konnectus.inc@gmail.com';
+
+    /**
+     * The Pakistan-side contact number printed on the Group Manifest report
+     * (see QuickYatriController::groups()), alongside Rashad's US number. Kept
+     * in `site_settings` for the same reason as the validity note above: it is
+     * the office's own contact detail, not something that should need a
+     * deploy to change.
+     */
+    const PAKISTAN_CONTACT = '+92-321-074-0202';
+
+    const PAKISTAN_CONTACT_KEY = 'qy_pakistan_contact';
+
+    /** The number as it stands today — the office's, or the constant's. */
+    public static function pakistanContact(): string
+    {
+        $stored = trim((string) SiteSetting::get(self::PAKISTAN_CONTACT_KEY));
+
+        return $stored !== '' ? $stored : self::PAKISTAN_CONTACT;
+    }
+
+    /** Save it. Blank clears the setting, back to the constant above. */
+    public static function putPakistanContact(?string $text): void
+    {
+        SiteSetting::put(self::PAKISTAN_CONTACT_KEY, trim((string) $text));
     }
 
     /**
@@ -311,6 +348,64 @@ class QuickYatri extends Model
         return $this->{$field}
             ? strtoupper($this->{$field}->format('d-M-Y'))
             : '';
+    }
+
+    /**
+     * The applicant's name, split into First / Middle / Last for reports (the
+     * Group Manifest) built to match the other booking flow's column layout.
+     *
+     * `applicant_name` itself stays one field everywhere else on Quick Yatri —
+     * the paper sheet has one writing box for it, and splitting the box would
+     * mean a bigger change than any report needs (see the 2026-09-05 decision
+     * to keep it that way). This only ever *reads* the stored name; nothing is
+     * written back differently. First word is First, last word is Last,
+     * everything between is Middle — a single-word name has no middle or
+     * last, and a two-word name has no middle.
+     */
+    public function nameParts(): array
+    {
+        $words = preg_split('/\s+/', trim((string) $this->applicant_name), -1, PREG_SPLIT_NO_EMPTY);
+
+        if ($words === []) {
+            return ['first' => '', 'middle' => '', 'last' => ''];
+        }
+        if (count($words) === 1) {
+            return ['first' => $words[0], 'middle' => '', 'last' => ''];
+        }
+
+        return [
+            'first'  => $words[0],
+            'middle' => implode(' ', array_slice($words, 1, -1)),
+            'last'   => $words[count($words) - 1],
+        ];
+    }
+
+    /**
+     * The two flight legs the Group Manifest prints per city group —
+     * "PHL-ISB 19 NOV" outbound, "LHE-PHL 1 DEC" on the way back. Islamabad
+     * out / Lahore back is fixed, the same pair the older Passenger List
+     * report (packages/YatriVisa flow) already hardcodes for every booking.
+     *
+     * Null when either half is missing (no departure airport, or that leg's
+     * date not filled in yet) — the manifest only groups applicants who have
+     * both, so a null here means this record does not belong in a group yet.
+     */
+    public function outboundSector(): ?string
+    {
+        if (!$this->departure_airport_code || !$this->departure_date) {
+            return null;
+        }
+
+        return strtoupper($this->departure_airport_code) . '-ISB ' . strtoupper($this->departure_date->format('j M'));
+    }
+
+    public function returnSector(): ?string
+    {
+        if (!$this->departure_airport_code || !$this->return_date) {
+            return null;
+        }
+
+        return 'LHE-' . strtoupper($this->departure_airport_code) . ' ' . strtoupper($this->return_date->format('j M'));
     }
 
     /** Where the applicant's photograph lives on disk, or null. */

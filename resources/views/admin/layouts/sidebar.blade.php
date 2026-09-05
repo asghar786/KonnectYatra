@@ -44,8 +44,8 @@
                 </li>
 
                 <!-- Quick Yatri -->
-                <li class="{{ $isCur(route('quick-yatri')) ? 'show' : '' }}">
-                    <a href="{{route('quick-yatri')}}" class="ttr-material-button">
+                <li class="{{ $groupOpen([route('quick-yatri-dashboard'), route('quick-yatri')]) ? 'show' : '' }}">
+                    <a href="{{route('quick-yatri-dashboard')}}" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-bolt text-warning"></i></span>
                         <span class="ttr-label">Quick Yatri</span>
                     </a>
