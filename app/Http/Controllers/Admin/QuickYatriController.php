@@ -409,6 +409,7 @@ class QuickYatriController extends Controller
             'port_of_entry'        => ['nullable', 'string', 'in:Wagah,Islamabad,Lahore'],
             'previous_visit_date'  => ['nullable', 'date_format:Y-m-d'],
             'profession'           => ['nullable', 'string', 'max:255'],
+            'id_driving_license_no' => ['nullable', 'string', 'max:60'],
             'family_traveling'     => ['nullable', 'string', 'in:Yes,No'],
             'family_members_count' => ['nullable', 'string', 'max:10'],
             'family_member_1'      => ['nullable', 'string', 'max:255'],

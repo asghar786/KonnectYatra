@@ -327,8 +327,8 @@
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Name of Applicant:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt; width:29%">{!! $txt('applicant_name', ' required') !!}</td>
-                <td style="border:1px solid #111; padding:2pt 6pt; width:19%">Gender:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt; width:33%"><span style="display:flex; gap:22pt; justify-content:center"><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'M') !!}M</span><span style="display:inline-flex; align-items:center; gap:5pt">{!! $radio('gender', 'F') !!}F</span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:19%"><span style="display:flex; align-items:center; gap:8pt; white-space:nowrap">Gender:<span style="display:flex; gap:14pt"><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('gender', 'M') !!}M</span><span style="display:inline-flex; align-items:center; gap:4pt">{!! $radio('gender', 'F') !!}F</span></span></span></td>
+                <td style="border:1px solid #111; padding:2pt 6pt; width:33%"><span style="display:flex; align-items:flex-end; gap:6pt"><span style="white-space:nowrap">Profession:</span>{!! $txt('profession') !!}</span></td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Date of Birth (D/M/Y):</td>
@@ -369,8 +369,8 @@
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">If No - Previous Visit Date:</td>
                 <td style="border:1px solid #111; padding:2pt 6pt">{!! $dat('previous_visit_date', 'ky-date-past') !!}</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">Profession:</td>
-                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('profession') !!}</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">ID / Driving Lic#:</td>
+                <td style="border:1px solid #111; padding:2pt 6pt">{!! $txt('id_driving_license_no') !!}</td>
             </tr>
             <tr>
                 <td style="border:1px solid #111; padding:2pt 6pt">Family traveling with you?</td>

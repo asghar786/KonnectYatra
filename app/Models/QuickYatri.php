@@ -226,9 +226,10 @@ class QuickYatri extends Model
      */
     const CAPS_FIELDS = [
         'applicant_name', 'place_of_birth', 'father_name', 'mother_name',
-        'citizenship', 'passport_no', 'profession', 'family_members_count',
-        'family_member_1', 'family_member_2', 'home_address', 'city',
-        'state_zip', 'nearest_gurdwara', 'gurdwara_city_state', 'check_no',
+        'citizenship', 'passport_no', 'profession', 'id_driving_license_no',
+        'family_members_count', 'family_member_1', 'family_member_2',
+        'home_address', 'city', 'state_zip', 'nearest_gurdwara',
+        'gurdwara_city_state', 'check_no',
     ];
 
     /**

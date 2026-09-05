@@ -920,6 +920,7 @@ class QuickYatriSheetTest extends TestCase
             'citizenship'         => 'u.s. citizen',
             'passport_no'         => 'a1234567',
             'profession'          => 'taxi driver',
+            'id_driving_license_no' => 'ny1234567890',
             'home_address'        => '148-36 Guy R Brewers Blvd',
             'city'                => 'philadelphia',
             'state_zip'           => 'pa 19104',
@@ -939,6 +940,7 @@ class QuickYatriSheetTest extends TestCase
             $this->assertSame('U.S. CITIZEN', $row->citizenship);
             $this->assertSame('A1234567', $row->passport_no);
             $this->assertSame('TAXI DRIVER', $row->profession);
+            $this->assertSame('NY1234567890', $row->id_driving_license_no);
             $this->assertSame('148-36 GUY R BREWERS BLVD', $row->home_address);
             $this->assertSame('PHILADELPHIA', $row->city);
             $this->assertSame('PA 19104', $row->state_zip);
@@ -1001,6 +1003,45 @@ class QuickYatriSheetTest extends TestCase
             $this->assertNotFalse($passport, 'Passport No. is missing from ' . $url);
             $this->assertNotFalse($citizenship, 'Citizenship is missing from ' . $url);
             $this->assertLessThan($citizenship, $passport, 'The two are the wrong way round on ' . $url);
+        }
+    }
+
+    /**
+     * Gender moved into the same cell as its M/F boxes (2026-09-05), freeing
+     * the cell beside it for Profession — which used to sit in the row below,
+     * beside "If No - Previous Visit Date:". That row now asks for
+     * "ID / Driving Lic#:" instead. One template, so the order has to hold on
+     * the entry screen, the blank sheet and the print.
+     */
+    public function test_gender_and_profession_share_the_first_row_and_the_id_field_takes_professions_old_place()
+    {
+        $this->asAdmin();
+
+        foreach ([route('quick-yatri-blank'), route('quick-yatri-create')] as $url) {
+            $body = $this->get($url)->getContent();
+
+            $applicant  = strpos($body, '>Name of Applicant:</td>');
+            $gender     = strpos($body, 'Gender:');
+            $profession = strpos($body, 'Profession:');
+            $idLicense  = strpos($body, '>ID / Driving Lic#:</td>');
+            $previous   = strpos($body, '>If No - Previous Visit Date:</td>');
+
+            $this->assertNotFalse($applicant, 'Name of Applicant is missing from ' . $url);
+            $this->assertNotFalse($gender, 'Gender is missing from ' . $url);
+            $this->assertNotFalse($profession, 'Profession is missing from ' . $url);
+            $this->assertNotFalse($idLicense, 'ID / Driving Lic# is missing from ' . $url);
+            $this->assertNotFalse($previous, 'If No - Previous Visit Date is missing from ' . $url);
+
+            // Gender and Profession now both sit on the Name of Applicant row,
+            // ahead of the Previous Visit Date row that used to carry Profession.
+            $this->assertLessThan($gender, $applicant, 'Gender should follow Name of Applicant on ' . $url);
+            $this->assertLessThan($profession, $gender, 'Profession should follow Gender on ' . $url);
+            $this->assertLessThan($previous, $profession, 'Profession should come before the Previous Visit Date row on ' . $url);
+            $this->assertLessThan($idLicense, $previous, 'ID / Driving Lic# should follow Previous Visit Date on ' . $url);
+
+            // Only one Profession label on the sheet — it must not still be
+            // printing in its old spot too.
+            $this->assertSame(1, substr_count($body, 'Profession:'));
         }
     }
 
