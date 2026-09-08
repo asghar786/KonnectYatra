@@ -43,12 +43,7 @@
   .idcards .barcode .n{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--navy);}
   .idcards .legal{grid-column:1 / -1;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--muted);border-top:1px dashed var(--line);padding:9px 0 16px;text-align:center;}
 
-  @media print{
-    body{background:#fff;}
-    .id-deck{display:block;gap:0;padding:0;}
-    .id-slot{width:auto;height:auto;overflow:visible;page-break-after:always;text-align:center;}
-    .id-slot .card{transform:none;display:inline-block;}
-  }
+@include('admin.ids._print')
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -60,7 +55,7 @@
                 <li>Back View</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                <button class="btn btn-success" type="button" onclick="printDiv('idDeck')">Print</button>
+                <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
                 <a class="btn btn-info ml-2" href="{{ url('admin/staff_ids', $page ?? 1) }}">Front View</a>
             </div>
         </div>
@@ -122,14 +117,6 @@
 @endsection
 @section('js')
 <script type="text/javascript">
-    function printDiv(divName) {
-        var printContents = document.getElementById(divName).innerHTML;
-        var originalContents = document.body.innerHTML;
-        document.body.innerHTML = printContents;
-        window.print();
-        document.body.innerHTML = originalContents;
-        location.reload();
-    }
 
     function makeRnd(seed){ return function(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }; }
     (function(){

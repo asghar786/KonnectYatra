@@ -39,12 +39,7 @@
   .idcards .foot .web{color:#fff;font-weight:600;}
   .idcards .foot .web b{color:var(--orange-soft);}
 
-  @media print{
-    body{background:#fff;}
-    .id-deck{display:block;gap:0;padding:0;}
-    .id-slot{width:auto;height:auto;overflow:visible;page-break-after:always;text-align:center;}
-    .id-slot .card{transform:none;display:inline-block;}
-  }
+@include('admin.ids._print')
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -56,7 +51,7 @@
                 <li>Crew IDs</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                <button class="btn btn-success" type="button" onclick="printDiv('idDeck')">Print</button>
+                <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
                 <a class="btn btn-info ml-2" href="{{ url('admin/back-view', $page ?? 1) }}">Back View</a>
             </div>
         </div>
@@ -119,16 +114,4 @@
     </div>
 </main>
 <div class="ttr-overlay"></div>
-@endsection
-@section('js')
-<script type="text/javascript">
-    function printDiv(divName) {
-        var printContents = document.getElementById(divName).innerHTML;
-        var originalContents = document.body.innerHTML;
-        document.body.innerHTML = printContents;
-        window.print();
-        document.body.innerHTML = originalContents;
-        location.reload();
-    }
-</script>
 @endsection
