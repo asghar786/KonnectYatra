@@ -1,12 +1,13 @@
 {
   "mcpServers": {
     "code-review-graph": {
-      "command": "uvx",
+      "command": "code-review-graph",
       "args": [
-        "code-review-graph",
-        "serve"
+        "serve",
+        "--repo",
+        "D:/production/konnectyatra"
       ],
-      "cwd": "D:\\production\\konnectyatra",
+      "cwd": "D:/production/konnectyatra",
       "type": "stdio"
     }
   }
