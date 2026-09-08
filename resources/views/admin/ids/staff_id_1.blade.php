@@ -16,7 +16,11 @@
   .idcards .side .wm{position:absolute;right:-70px;bottom:-50px;width:280px;opacity:.07;filter:brightness(2);pointer-events:none;}
   .idcards .photo{width:206px;height:236px;border-radius:14px;object-fit:cover;border:4px solid #fff;background:#dfe3ea;box-shadow:0 14px 26px -12px rgba(0,0,0,.55);position:relative;z-index:1;}
   .idcards .side .name{margin-top:20px;font-size:25px;font-weight:800;letter-spacing:-.01em;text-align:center;z-index:1;}
-  .idcards .side .sub{margin-top:5px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:#aebbd4;text-align:center;z-index:1;}
+  /* Name reads "<name> s/o <father>" down the panel — one line each, because at
+     25px a combined string wraps awkwardly on longer names ("Mohammad Kabir Ali"). */
+  .idcards .side .sof{margin-top:7px;font-size:15px;font-weight:600;line-height:1.25;color:#c9d5ea;text-align:center;z-index:1;}
+  .idcards .side .sof i{font-style:normal;color:#8f9fc0;font-weight:500;}
+  .idcards .side .sub{margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:#aebbd4;text-align:center;z-index:1;}
   .idcards .crew{margin-top:auto;margin-bottom:26px;z-index:1;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(180deg,var(--orange-soft),var(--orange));color:#fff;padding:11px 20px;border-radius:999px;font-weight:800;letter-spacing:.16em;font-size:13px;text-transform:uppercase;box-shadow:0 10px 22px -10px rgba(232,96,28,.8);}
   .idcards .crew .dot{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.9;}
   .idcards .main{display:flex;flex-direction:column;}
@@ -72,6 +76,9 @@
                             <img class="wm" src="{{ asset('assets2/id/globe.png') }}" alt="" />
                             <img class="photo" src="{{ asset('ids/'.@$value->photo) }}" onerror="this.src='{{ asset('assets2/id/logo.png') }}'" alt="Cardholder photo" />
                             <div class="name">{{ @$value->name }}</div>
+                            @if(@$value->father_name)
+                            <div class="sof"><i>s/o</i> {{ $value->father_name }}</div>
+                            @endif
                             <div class="sub">CNIC {{ $fmtCnic(@$value->cnic) }}</div>
                             <div class="crew"><span class="dot"></span>{{ @$value->type ?: 'Crew Member' }}</div>
                         </div>
