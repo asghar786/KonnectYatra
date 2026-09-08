@@ -34,8 +34,10 @@
   .idcards .field .val{margin-top:5px;font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.15;}
   .idcards .field .val.mono{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:.01em;}
   .idcards .foot{height:54px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 30px;color:#dbe2f0;font-family:'IBM Plex Mono',monospace;font-size:12px;}
-  .idcards .foot .addr{display:flex;align-items:center;gap:11px;}
-  .idcards .foot .addr img{height:24px;width:auto;filter:brightness(2);}
+  /* The footer bar spans only the right column (580px), so the full street
+     address needs two lines. Sized and leaded to sit centred rather than cramped. */
+  .idcards .foot .addr{display:flex;align-items:center;gap:11px;font-size:11px;line-height:1.32;padding-right:14px;}
+  .idcards .foot .addr img{height:24px;width:auto;flex:0 0 auto;filter:brightness(2);}
   .idcards .foot .web{color:#fff;font-weight:600;}
   .idcards .foot .web b{color:var(--orange-soft);}
 
@@ -100,7 +102,10 @@
                                 </div>
                             </div>
                             <div class="foot">
-                                <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" />18502 Hillside Ave, Jamaica, NY 11432</div>
+                                {{-- Canonical office address, matching config/schema.php, the site
+                                     header and the Contact page. The old 18502 Hillside Ave was
+                                     superseded on 2026-08-17; keep all four byte-identical. --}}
+                                <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" />148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434</div>
                                 <div class="web"><b>www.</b>konnectyatra.org</div>
                             </div>
                         </div>

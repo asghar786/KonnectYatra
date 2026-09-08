@@ -11,37 +11,53 @@
   .idcards .card{width:880px;height:555px;border-radius:22px;overflow:hidden;background:var(--paper);position:relative;font-family:'Archivo',system-ui,sans-serif;color:var(--ink);
     box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 24px 48px -18px rgba(22,41,77,.45),0 6px 16px -8px rgba(22,41,77,.3);}
   .idcards .back{display:flex;flex-direction:column;}
-  .idcards .back-head{background:radial-gradient(120% 140% at 14% 0%,var(--navy-2),var(--navy) 55%,var(--navy-deep));color:#fff;padding:22px 30px;display:flex;align-items:center;gap:16px;}
-  .idcards .back-head .gmark{height:50px;width:auto;filter:brightness(2);}
+
+  /* Header mirrors the front's navy panel so the two faces read as one card. */
+  .idcards .back-head{flex:0 0 84px;background:radial-gradient(120% 140% at 14% 0%,var(--navy-2),var(--navy) 55%,var(--navy-deep));color:#fff;padding:0 30px;display:flex;align-items:center;gap:15px;}
+  .idcards .back-head .gmark{height:46px;width:auto;filter:brightness(2);}
   .idcards .back-head .ht{flex:1;}
-  .idcards .back-head .ht .o{font-size:22px;font-weight:900;letter-spacing:.01em;}
+  .idcards .back-head .ht .o{font-size:21px;font-weight:900;letter-spacing:.01em;line-height:1.1;}
   .idcards .back-head .ht .o em{color:var(--orange-soft);font-style:normal;}
-  .idcards .back-head .ht .t{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:#aebbd4;margin-top:3px;}
-  .idcards .back-head .web{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;}
-  .idcards .back-head .web b{color:var(--orange-soft);display:block;font-size:11px;letter-spacing:.06em;}
-  .idcards .magstripe{height:44px;background:repeating-linear-gradient(90deg,#0c1426 0 3px,#13203a 3px 6px);}
-  .idcards .back-body{flex:1;display:grid;grid-template-columns:1fr 230px;gap:26px;padding:26px 30px 18px;}
-  .idcards .terms h4{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--navy);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-  .idcards .terms h4::before{content:"";width:14px;height:2px;background:var(--orange);display:inline-block;}
-  .idcards .terms ul{list-style:none;display:flex;flex-direction:column;gap:7px;padding:0;margin:0;}
+  .idcards .back-head .ht .t{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:#aebbd4;margin-top:3px;}
+  .idcards .back-head .web{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;line-height:1.35;}
+  .idcards .back-head .web b{color:var(--orange-soft);display:block;font-size:9.5px;letter-spacing:.16em;font-weight:600;}
+  .idcards .magstripe{flex:0 0 34px;background:repeating-linear-gradient(90deg,#0c1426 0 3px,#13203a 3px 6px);}
+
+  /* Two columns: what to do in an emergency, and the terms of the credential. */
+  .idcards .back-body{flex:1;display:grid;grid-template-columns:1fr 316px;min-height:0;}
+  /* Both columns are flex so the trailing block in each can be pinned to the
+     bottom edge with margin-top:auto, rather than leaving a ragged gap. */
+  .idcards .bcol{padding:24px 26px 20px 30px;min-width:0;display:flex;flex-direction:column;}
+  .idcards .bcol+.bcol{padding:24px 30px 20px 26px;border-left:1px solid var(--line);}
+  .idcards .btitle{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--navy);font-weight:600;display:flex;align-items:center;gap:8px;}
+  .idcards .btitle::before{content:"";width:14px;height:2px;background:var(--orange);flex:0 0 auto;}
+
+  /* The reason the back exists: one phone number, big enough to read in a hurry. */
+  .idcards .who{margin-top:13px;font-size:24px;font-weight:800;color:var(--navy);line-height:1.15;}
+  .idcards .who span{display:block;font-size:14.5px;font-weight:600;color:var(--muted);margin-top:4px;}
+  .idcards .tel{margin-top:15px;display:flex;align-items:center;gap:13px;background:linear-gradient(180deg,#fff5f0,#ffece1);border:1px solid #f7cdb4;border-left:4px solid var(--orange);border-radius:12px;padding:15px 18px;}
+  .idcards .tel .ico{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .idcards .tel .num{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;color:var(--navy);letter-spacing:.01em;line-height:1;}
+  /* Pinned to the bottom of its column so the panel reads as two anchored blocks. */
+  .idcards .stay{margin-top:auto;padding-top:18px;}
+  .idcards .stay ul{list-style:none;margin:11px 0 0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  .idcards .stay li{font-size:16px;font-weight:600;color:var(--navy);padding-left:18px;position:relative;line-height:1.3;}
+  .idcards .stay li::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:2px;background:var(--orange);}
+
+  .idcards .terms ul{list-style:none;margin:11px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;}
   .idcards .terms li{font-size:12px;line-height:1.45;color:#42506a;padding-left:14px;position:relative;}
-  .idcards .terms li::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--orange);}
-  .idcards .return{margin-top:18px;border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:10px;padding:13px 15px;background:#fafbfd;}
-  .idcards .return .l{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);font-weight:600;}
-  .idcards .return .a{margin-top:6px;font-size:13px;font-weight:600;color:var(--navy);line-height:1.4;}
-  .idcards .qrcol{display:flex;flex-direction:column;align-items:center;gap:10px;}
-  .idcards .qr{width:150px;height:150px;border-radius:12px;background:#fff;border:1px solid var(--line);padding:10px;box-shadow:0 8px 18px -12px rgba(22,41,77,.4);}
-  .idcards .qr canvas{display:block;width:100%;height:100%;image-rendering:pixelated;}
-  .idcards .qrcap{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
-  .idcards .cardno{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--navy);letter-spacing:.04em;}
-  .idcards .back-foot{border-top:1px solid var(--line);padding:14px 30px 0;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:end;}
-  .idcards .sig{display:flex;flex-direction:column;}
+  .idcards .terms li::before{content:"";position:absolute;left:0;top:6.5px;width:5px;height:5px;border-radius:50%;background:var(--orange);}
+  /* A signature belongs on the bottom edge, not floating mid-column. */
+  .idcards .sig{margin-top:auto;padding-top:20px;}
   .idcards .sig .line{height:1px;background:var(--navy);opacity:.35;margin-bottom:6px;}
-  .idcards .sig .l{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
-  .idcards .barcode{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-  .idcards .barcode canvas{height:46px;width:230px;}
-  .idcards .barcode .n{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--navy);}
-  .idcards .legal{grid-column:1 / -1;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--muted);border-top:1px dashed var(--line);padding:9px 0 16px;text-align:center;}
+  .idcards .sig .l{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+  /* Return address sits in the navy foot, matching the front's footer bar. */
+  .idcards .back-foot{flex:0 0 74px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));color:#dbe2f0;padding:0 30px;display:flex;align-items:center;gap:16px;}
+  .idcards .back-foot .rl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange-soft);font-weight:600;line-height:1.35;flex:0 0 74px;}
+  .idcards .back-foot .ra{font-size:13px;line-height:1.35;color:#fff;font-weight:600;}
+  /* Block, or the phone/web run on from the end of the street address. */
+  .idcards .back-foot .ra b{display:block;margin-top:3px;color:#aebbd4;font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;}
 
 @include('admin.ids._print')
 </style>
@@ -60,6 +76,10 @@
             </div>
         </div>
         <div class="main-body pt-3 idcards">
+            {{-- Every back is identical. The front already carries the name, photo, CNIC,
+                 ID No. and role, so repeating them here tells the holder nothing new and
+                 would force the back sheet to print mirrored to survive a duplex flip.
+                 A uniform back lines up whichever way the printer turns the paper. --}}
             <div class="id-deck" id="idDeck">
                 @forelse($staff_ids as $value)
                 <div class="id-slot">
@@ -74,35 +94,45 @@
                         </div>
                         <div class="magstripe"></div>
                         <div class="back-body">
-                            <div class="terms">
-                                <h4>Conditions of Use</h4>
+                            <div class="bcol">
+                                <div class="btitle">Emergency Contact</div>
+                                {{-- Admin > IDs > Back IDs writes these (yatri_ids_back). --}}
+                                <div class="who">{{ @$back_ids->name ?: 'Konnect Yatra Office' }}
+                                    <span>{{ @$back_ids->role ?: 'Tour Management' }}</span>
+                                </div>
+                                <div class="tel">
+                                    <span class="ico"><i class="fa fa-phone"></i></span>
+                                    <span class="num">{{ @$back_ids->phone ?: '+1 (718) 908-9464' }}</span>
+                                </div>
+                                @if(@$back_ids->hotel || @$back_ids->hotel1)
+                                <div class="stay">
+                                    <div class="btitle">Staying At</div>
+                                    <ul>
+                                        @if(@$back_ids->hotel)<li>{{ $back_ids->hotel }}</li>@endif
+                                        @if(@$back_ids->hotel1)<li>{{ $back_ids->hotel1 }}</li>@endif
+                                    </ul>
+                                </div>
+                                @endif
+                            </div>
+                            <div class="bcol terms">
+                                <div class="btitle">Conditions of Use</div>
                                 <ul>
-                                    <li>This card is the property of Konnect.US Inc. and remains valid only while the holder is in active service.</li>
-                                    <li>It is non-transferable and must be presented on request to authorized personnel.</li>
-                                    <li>Misuse, alteration, or unauthorized duplication will result in immediate revocation.</li>
+                                    <li>Property of Konnect.US Inc. Valid only while the holder is in active service.</li>
+                                    <li>Non-transferable. Present on request to authorized personnel.</li>
+                                    <li>Misuse, alteration or duplication voids this card immediately.</li>
                                     <li>Report a lost or stolen card to the office within 24 hours.</li>
                                 </ul>
-                                <div class="return">
-                                    <div class="l">If found, please return to</div>
-                                    <div class="a">Konnect.US Inc. — 18502 Hillside Avenue, Jamaica, NY 11432</div>
+                                <div class="sig">
+                                    <div class="line"></div>
+                                    <div class="l">Authorized Signatory</div>
                                 </div>
-                            </div>
-                            <div class="qrcol">
-                                <div class="qr"><canvas class="qrc" width="130" height="130" data-seed="11"></canvas></div>
-                                <div class="qrcap">Scan to verify</div>
-                                <div class="cardno">www.konnectyatra.org</div>
                             </div>
                         </div>
                         <div class="back-foot">
-                            <div class="sig">
-                                <div class="line"></div>
-                                <div class="l">Authorized Signatory</div>
+                            <div class="rl">If found<br>return to</div>
+                            <div class="ra">Konnect.US Inc. — 148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434
+                                <b>+1 (718) 908-9464 · www.konnectyatra.org</b>
                             </div>
-                            <div class="barcode">
-                                <canvas class="barc" width="230" height="46" data-seed="42"></canvas>
-                                <div class="n">KONNECT YATRA · USA</div>
-                            </div>
-                            <div class="legal">© {{ date('Y') }} Konnect.US Inc. · Explore and Discover the Globe · This credential is issued for identification purposes only.</div>
                         </div>
                     </div>
                 </div>
@@ -114,30 +144,4 @@
     </div>
 </main>
 <div class="ttr-overlay"></div>
-@endsection
-@section('js')
-<script type="text/javascript">
-
-    function makeRnd(seed){ return function(){ seed=(seed*1103515245+12345)&0x7fffffff; return seed/0x7fffffff; }; }
-    (function(){
-        document.querySelectorAll('canvas.qrc').forEach(function(c){
-            var ctx=c.getContext('2d'); var N=29, s=c.width/N;
-            var rnd=makeRnd(parseInt(c.dataset.seed||'7',10)*1000+7);
-            ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle=c.dataset.color||'#16294d';
-            var grid=Array.from({length:N},function(){return Array(N).fill(false);});
-            for(var y=0;y<N;y++)for(var x=0;x<N;x++) grid[y][x]=rnd()>0.5;
-            function finder(ox,oy){
-                for(var y=0;y<7;y++)for(var x=0;x<7;x++){ var edge=(x===0||x===6||y===0||y===6),core=(x>=2&&x<=4&&y>=2&&y<=4); grid[oy+y][ox+x]=edge||core; }
-                for(var y=-1;y<8;y++)for(var x=-1;x<8;x++){ var gx=ox+x,gy=oy+y; if(gx<0||gy<0||gx>=N||gy>=N)continue; if(x===-1||x===7||y===-1||y===7) grid[gy][gx]=false; }
-            }
-            finder(0,0);finder(N-7,0);finder(0,N-7);
-            for(var y=0;y<N;y++)for(var x=0;x<N;x++) if(grid[y][x]) ctx.fillRect(Math.floor(x*s),Math.floor(y*s),Math.ceil(s),Math.ceil(s));
-        });
-        document.querySelectorAll('canvas.barc').forEach(function(c){
-            var ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle=c.dataset.color||'#16294d';
-            var rnd=makeRnd(parseInt(c.dataset.seed||'42',10)*131+5); var x=2;
-            while(x<c.width-2){ var w=1+Math.floor(rnd()*3); if(rnd()>0.45) ctx.fillRect(x,0,w,c.height); x+=w+1+Math.floor(rnd()*2); }
-        });
-    })();
-</script>
 @endsection
