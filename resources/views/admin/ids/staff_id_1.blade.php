@@ -30,7 +30,11 @@
   .idcards .flag{width:50px;height:33px;border-radius:4px;overflow:hidden;flex:0 0 auto;box-shadow:0 2px 6px rgba(0,0,0,.18);position:relative;background:repeating-linear-gradient(180deg,#c1283d 0 2.54px,#fff 2.54px 5.08px);border:1px solid rgba(0,0,0,.08);}
   .idcards .flag .canton{position:absolute;top:0;left:0;width:55%;height:53.8%;background:#16294d;background-image:radial-gradient(circle,rgba(255,255,255,.95) .9px,transparent 1.1px);background-size:6px 5.4px;background-position:2px 2px;}
   .idcards .eyebrow{margin-top:22px;display:flex;align-items:center;gap:12px;}
-  .idcards .eyebrow b{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--navy);}
+  /* NB: no <b> or <p> inside the card. adminassets/css/form.css carries
+     `b{color:black!important}`, which outranks any selector here - it was
+     rendering the footer's "www." black on the navy bar, i.e. invisible.
+     Style spans with classes instead. */
+  .idcards .eyebrow .eb{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--navy);}
   .idcards .eyebrow .rule{height:2px;flex:1;background:linear-gradient(90deg,var(--orange),rgba(232,96,28,0));border-radius:2px;}
   .idcards .fields{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;}
   .idcards .field.full{grid-column:1 / -1;}
@@ -43,7 +47,6 @@
   .idcards .foot .addr{display:flex;align-items:center;gap:11px;font-size:11px;line-height:1.32;padding-right:14px;}
   .idcards .foot .addr img{height:24px;width:auto;flex:0 0 auto;filter:brightness(2);}
   .idcards .foot .web{color:#fff;font-weight:600;}
-  .idcards .foot .web b{color:var(--orange-soft);}
 
 @include('admin.ids._print')
 </style>
@@ -88,7 +91,7 @@
                                     <img class="logo" src="{{ asset('assets2/id/logo.png') }}" alt="Konnect.US Inc." />
                                     <div class="flag"><div class="canton"></div></div>
                                 </div>
-                                <div class="eyebrow"><b>Staff Identification</b><span class="rule"></span></div>
+                                <div class="eyebrow"><span class="eb">Staff Identification</span><span class="rule"></span></div>
                                 <div class="fields">
                                     <div class="field full">
                                         <div class="lab">Role</div>
@@ -113,7 +116,7 @@
                                      header and the Contact page. The old 18502 Hillside Ave was
                                      superseded on 2026-08-17; keep all four byte-identical. --}}
                                 <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" />148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434</div>
-                                <div class="web"><b>www.</b>konnectyatra.org</div>
+                                <div class="web">www.konnectyatra.org</div>
                             </div>
                         </div>
                     </div>
