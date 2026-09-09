@@ -20,7 +20,7 @@
   .idcards .back-head .ht .o em{color:var(--orange-soft);font-style:normal;}
   .idcards .back-head .ht .t{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:#aebbd4;margin-top:3px;}
   .idcards .back-head .web{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;line-height:1.35;}
-  .idcards .back-head .web b{color:var(--orange-soft);display:block;font-size:9.5px;letter-spacing:.16em;font-weight:600;}
+  .idcards .back-head .web b{color:#fff;display:block;font-size:9.5px;letter-spacing:.16em;font-weight:600;}
   .idcards .magstripe{flex:0 0 34px;background:repeating-linear-gradient(90deg,#0c1426 0 3px,#13203a 3px 6px);}
 
   /* Two columns: what to do in an emergency, and the terms of the credential. */
@@ -76,7 +76,7 @@
 
   /* Return address sits in the navy foot, matching the front's footer bar. */
   .idcards .back-foot{flex:0 0 74px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));color:#dbe2f0;padding:0 30px;display:flex;align-items:center;gap:16px;}
-  .idcards .back-foot .rl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange-soft);font-weight:600;line-height:1.35;flex:0 0 74px;}
+  .idcards .back-foot .rl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#fff;font-weight:600;line-height:1.35;flex:0 0 74px;}
   .idcards .back-foot .ra{font-size:13px;line-height:1.35;color:#fff;font-weight:600;}
   /* Block, or the phone/web run on from the end of the street address. */
   .idcards .back-foot .ra b{display:block;margin-top:3px;color:#fff;font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;}
