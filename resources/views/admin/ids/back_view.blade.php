@@ -38,15 +38,37 @@
   .idcards .tel{margin-top:15px;display:flex;align-items:center;gap:13px;background:linear-gradient(180deg,#fff5f0,#ffece1);border:1px solid #f7cdb4;border-left:4px solid var(--orange);border-radius:12px;padding:15px 18px;}
   .idcards .tel .ico{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
   .idcards .tel .num{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;color:var(--navy);letter-spacing:.01em;line-height:1;}
-  /* Pinned to the bottom of its column so the panel reads as two anchored blocks. */
-  .idcards .stay{margin-top:auto;padding-top:18px;}
+  /* Pinned to the bottom of its column so the panel reads as two anchored blocks.
+     The row holds the hotels and the QR side by side; the QR sits outside .stay
+     because it must print even when no hotel has been entered. */
+  .idcards .stayrow{margin-top:auto;padding-top:18px;display:flex;align-items:flex-end;gap:20px;}
+  .idcards .stay{flex:1;min-width:0;}
   .idcards .stay ul{list-style:none;margin:11px 0 0;padding:0;display:flex;flex-direction:column;gap:9px;}
   .idcards .stay li{font-size:16px;font-weight:600;color:var(--navy);padding-left:18px;position:relative;line-height:1.3;}
   .idcards .stay li::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:2px;background:var(--orange);}
+  /* konnectyatra.org, identical on every card, so it is a committed SVG rather
+     than a runtime encode - nothing to install on prod and it prints crisp at any
+     scale. Version 2 / EC M (25 modules) keeps each module near .6mm at CR80 size,
+     which is what makes it scan off a printed card. margin-left:auto holds it to
+     the right edge on the cards that have no hotel block beside it. */
+  /* 146px is the largest that clears the bottom edge: the left column's stack
+     leaves 168px under the phone panel and the row adds 18px of its own padding.
+     Sized up to the limit on purpose - it sets the printed module at roughly half
+     a millimetre, which is what a phone camera needs off a card this size. No
+     caption, because the header and the footer already print the address. */
+  .idcards .qr{flex:0 0 146px;margin-left:auto;}
+  .idcards .qr img{width:146px;height:146px;display:block;border-radius:8px;background:#fff;}
 
-  .idcards .terms ul{list-style:none;margin:11px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;}
-  .idcards .terms li{font-size:12px;line-height:1.45;color:#42506a;padding-left:14px;position:relative;}
-  .idcards .terms li::before{content:"";position:absolute;left:0;top:6.5px;width:5px;height:5px;border-radius:50%;background:var(--orange);}
+  /* What the credential IS, above the conditions it sets out. */
+  .idcards .terms .tmeta{margin-top:10px;}
+  .idcards .terms .tmeta .co{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--orange);font-weight:600;}
+  .idcards .terms .tmeta .nm{font-size:15px;font-weight:800;color:var(--navy);line-height:1.15;margin-top:2px;}
+  .idcards .terms .tmeta .tr{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:1px;}
+  .idcards .terms .lead{font-size:11.5px;line-height:1.42;color:#42506a;margin:9px 0 0;}
+  .idcards .terms ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .idcards .terms li{font-size:11.5px;line-height:1.42;color:#42506a;padding-left:14px;position:relative;}
+  .idcards .terms li b{color:var(--navy);font-weight:700;}
+  .idcards .terms li::before{content:"";position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--orange);}
   /* A signature belongs on the bottom edge, not floating mid-column. */
   .idcards .sig{margin-top:auto;padding-top:20px;}
   .idcards .sig .line{height:1px;background:var(--navy);opacity:.35;margin-bottom:6px;}
@@ -57,7 +79,7 @@
   .idcards .back-foot .rl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange-soft);font-weight:600;line-height:1.35;flex:0 0 74px;}
   .idcards .back-foot .ra{font-size:13px;line-height:1.35;color:#fff;font-weight:600;}
   /* Block, or the phone/web run on from the end of the street address. */
-  .idcards .back-foot .ra b{display:block;margin-top:3px;color:#aebbd4;font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;}
+  .idcards .back-foot .ra b{display:block;margin-top:3px;color:#fff;font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;}
 
 @include('admin.ids._print')
 </style>
@@ -104,23 +126,32 @@
                                     <span class="ico"><i class="fa fa-phone"></i></span>
                                     <span class="num">{{ @$back_ids->phone ?: '+1 (718) 908-9464' }}</span>
                                 </div>
-                                @if(@$back_ids->hotel || @$back_ids->hotel1)
-                                <div class="stay">
-                                    <div class="btitle">Staying At</div>
-                                    <ul>
-                                        @if(@$back_ids->hotel)<li>{{ $back_ids->hotel }}</li>@endif
-                                        @if(@$back_ids->hotel1)<li>{{ $back_ids->hotel1 }}</li>@endif
-                                    </ul>
+                                <div class="stayrow">
+                                    @if(@$back_ids->hotel || @$back_ids->hotel1)
+                                    <div class="stay">
+                                        <div class="btitle">Staying At</div>
+                                        <ul>
+                                            @if(@$back_ids->hotel)<li>{{ $back_ids->hotel }}</li>@endif
+                                            @if(@$back_ids->hotel1)<li>{{ $back_ids->hotel1 }}</li>@endif
+                                        </ul>
+                                    </div>
+                                    @endif
+                                    <div class="qr">
+                                        <img src="{{ asset('assets2/id/qr-konnectyatra.svg') }}" alt="konnectyatra.org" />
+                                    </div>
                                 </div>
-                                @endif
                             </div>
                             <div class="bcol terms">
-                                <div class="btitle">Conditions of Use</div>
+                                <div class="btitle">Terms &amp; Conditions</div>
+                                <div class="tmeta">
+                                    <div class="co">KONNECT.US, INC.</div>
+                                    <div class="nm">Yatra ID Card</div>
+                                    <div class="tr">November 2026 Yatra Tour</div>
+                                </div>
+                                <p class="lead">This Yatra ID Card is valid only during the period in which the holder is actively participating in the November 2026 Yatra Tour.</p>
                                 <ul>
-                                    <li>Property of Konnect.US Inc. Valid only while the holder is in active service.</li>
-                                    <li>Non-transferable. Present on request to authorized personnel.</li>
-                                    <li>Misuse, alteration or duplication voids this card immediately.</li>
-                                    <li>Report a lost or stolen card to the office within 24 hours.</li>
+                                    <li>This ID Card may be presented upon request to authorized government personnel, security officials, or Konnect Yatra representatives.</li>
+                                    <li><b>Lost or Stolen Card:</b> Any lost or stolen ID Card must be reported immediately to the assigned Tour Guide.</li>
                                 </ul>
                                 <div class="sig">
                                     <div class="line"></div>
