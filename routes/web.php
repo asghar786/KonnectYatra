@@ -253,6 +253,7 @@ Route::group(['prefix' => 'admin',
 
     Route::get('/yatri-id/{id}',[PackagesController::class, 'yatri_id'])->name('yatri_id');
     Route::get('/back-view/{id?}',[PackagesController::class, 'back_view'])->name('back_view');
+    Route::get('/yatri-id-back/{id?}',[PackagesController::class, 'yatri_back_view'])->name('yatri_back_view');
     Route::view('/admin-id', 'admin.ids.admin_id')->name('admin_id');
     Route::get('/admin-back-view', [PackagesController::class, 'admin_back_view'])->name('admin_back_view');
 

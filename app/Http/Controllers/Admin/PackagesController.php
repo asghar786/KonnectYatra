@@ -1612,6 +1612,7 @@ class PackagesController extends Controller
     }
     $data = $data->where("season_id", $active_season)->where('type', 'yatri')->orderBy("yatri_no", "ASC")->get();
     $all_data['yatri_ids'] = $data;
+    $all_data['page'] = max(1, (int)$id);
     $all_data['next'] = (int)$id + 1;
     $all_data['prev'] = (int)$id - 1;
     return view('admin.ids.yatri_id', $all_data);
@@ -1619,18 +1620,36 @@ class PackagesController extends Controller
 
   public function back_view($id = 1)
   {
-    // Render one back per crew member on the same page as the front, so the
-    // front and back print-outs line up card-for-card for cutting.
     $query = YatriIds::where('type', 'Crew Member');
     if ((int)$id <= 1) {
       $query = $query->limit(8);
     } else {
       $query = $query->offset(((int)$id - 1) * 8)->limit(8);
     }
-    $data['staff_ids'] = $query->get();
-    $data['page']      = (int)$id;
-    $data['back_ids']  = YatriIdsBack::first();
-    return view('admin.ids.back_view', $data);
+    return $this->idBackSheet($query->count() > 0, url('admin/staff_ids', max(1, (int)$id)), 'No crew members found.');
+  }
+
+  public function yatri_back_view($id = 1)
+  {
+    $active_season = Session::get('season') ?: optional(Season::orderBy('id', 'DESC')->first())->id;
+    $query = YatriIds::where('season_id', $active_season)->where('type', 'yatri')->orderBy('yatri_no', 'ASC');
+    $query = $query->offset((max(1, (int)$id) - 1) * 8)->limit(8);
+    return $this->idBackSheet($query->count() > 0, url('admin/yatri-id', max(1, (int)$id)), 'No yatris found.');
+  }
+
+  // Every back is identical, so a back sheet always carries all eight slots.
+  // Printing one back per card instead left a short last page (say 3 cards)
+  // with backs on the wrong side after a duplex flip, because the flip mirrors
+  // the columns. A full sheet puts a back behind every front whichever way the
+  // printer turns the paper; the spares are simply not cut out.
+  private function idBackSheet($hasCards, $frontUrl, $emptyText)
+  {
+    return view('admin.ids.back_view', [
+      'slots'     => $hasCards ? 8 : 0,
+      'front_url' => $frontUrl,
+      'empty'     => $emptyText,
+      'back_ids'  => YatriIdsBack::first(),
+    ]);
   }
   public function foreigners_registration($id)
   {

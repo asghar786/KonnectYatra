@@ -99,16 +99,18 @@
             </ul>
             <div class="w-75 d-flex justify-content-end">
                 <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
-                <a class="btn btn-info ml-2" href="{{ url('admin/staff_ids', $page ?? 1) }}">Front View</a>
+                <a class="btn btn-info ml-2" href="{{ $front_url }}">Front View</a>
             </div>
         </div>
         <div class="main-body pt-3 idcards">
             {{-- Every back is identical. The front already carries the name, photo, CNIC,
                  ID No. and role, so repeating them here tells the holder nothing new and
                  would force the back sheet to print mirrored to survive a duplex flip.
-                 A uniform back lines up whichever way the printer turns the paper. --}}
+                 A uniform back lines up whichever way the printer turns the paper,
+                 as long as the sheet is full - hence always eight slots (see
+                 PackagesController::idBackSheet). Shared by the Crew and Yatri IDs. --}}
             <div class="id-deck" id="idDeck">
-                @forelse($staff_ids as $value)
+                @for($i = 0; $i < $slots; $i++)
                 <div class="id-slot">
                     <div class="card back">
                         <div class="back-head">
@@ -172,9 +174,10 @@
                         </div>
                     </div>
                 </div>
-                @empty
-                <p class="text-muted">No crew members found.</p>
-                @endforelse
+                @endfor
+                @if($slots === 0)
+                <p class="text-muted">{{ $empty }}</p>
+                @endif
             </div>
         </div>
     </div>

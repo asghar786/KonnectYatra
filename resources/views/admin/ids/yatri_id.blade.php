@@ -1,71 +1,41 @@
 @extends('admin.layouts.app')
 @section('content')
 <style type="text/css">
-    body {
-        background-color: #f8f9fa;
-    }
-    .ac-card{
-        background-image: url("{{ asset('assets2/images/background.png') }}");
-        background-position: center; 
-        background-repeat: no-repeat; 
-    }
-    .output {
-        justify-content: center;
-        align-content: start;
-        padding-top: 1rem;
-    }
-    .ac-card {
-        grid-template-columns: 173px 1fr 50px;
-        background-color: #fff;
-        width: 336px;
-        height: 240px;
-        margin-bottom: 1rem;
-        overflow: hidden;
-    }
-    .ac-icon {
-        width: 40px;
-        margin-top: 10px;
-    }
-    .ac-card-image {
-        width: 100px;
-        margin: 10px 0 0 15px;
-    }
-    .ac-card-1 {
-        width: 120px;
-        margin: 10px 0 0 15px;
-    }
-    .ac-card-2 {
-        width: 80px;
-        margin: 10px 0 0 15px;
-    }
-    .ac-card-info {
-        font-size: 1.15rem;
-        margin: 0;
-    }
-    .ac-card-info p {
-        margin-top: 8px;
-        line-height: 1.3;
-    }
-    .id-footer{
-        background-color: #2e3092;
-        color: white;
-        padding: 15px 15px;
-        margin-top: 4px;
-    }
-    .ac-logo {
-        width: 125px;
-        margin-left: 10px;
-    }
-    .skdf{
-        font-size: 14px;
-    }
-    .border-dark{
-        border: 1px solid;
-        width: 120px;
-        height: 72px;
-        text-align: center;
-        border-radius: 10px;
-    }
+  /* The card is laid out at 440 x 277px, which is the CR80 ratio (3.375in x
+     2.125in). On screen it shows at that size; print scales it into the shared
+     CR80 slot, so the eight fronts land exactly where the eight backs do. */
+  .idcards *{box-sizing:border-box;}
+  .id-deck{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;padding:10px 0 30px;}
+  .id-slot{width:440px;height:277px;overflow:hidden;}
+
+  /* NB: no <b>, <p> or <label> inside the card. adminassets/css/form.css forces
+     them black with !important. Style spans and divs with classes instead. */
+  .idcards .ycard{width:440px;height:277px;overflow:hidden;background:#fff;position:relative;display:flex;flex-direction:column;font-family:'Rubik',sans-serif;color:#111;box-shadow:0 10px 24px -12px rgba(46,48,146,.45);}
+  .idcards .ycard .ybanner{flex:0 0 66px;width:100%;height:66px;display:block;}
+  /* Khanda watermark behind the details, as on the original card. */
+  .idcards .ycard .ybody{flex:1;min-height:0;display:flex;gap:14px;padding:9px 12px 0;background:url("{{ asset('assets2/images/background.png') }}") center/150px no-repeat;}
+  .idcards .ycard .yphoto{flex:0 0 116px;width:116px;height:140px;object-fit:cover;background:#e6e8ef;display:block;}
+  .idcards .ycard .yinfo{flex:1;min-width:0;padding-top:12px;font-size:16px;line-height:1.35;}
+  .idcards .ycard .yinfo .k{font-weight:700;display:block;}
+  .idcards .ycard .yinfo .k .tt{margin-left:22px;}
+  .idcards .ycard .yinfo .v{display:block;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .idcards .ycard .yno{flex:0 0 96px;display:flex;flex-direction:column;align-items:center;}
+  .idcards .ycard .yno .yflag{width:52px;height:auto;display:block;}
+  .idcards .ycard .yno .ybox{margin-top:10px;width:100%;height:86px;border:1px solid #bbb;border-radius:10px;text-align:center;background:rgba(255,255,255,.85);}
+  .idcards .ycard .yno .ybox .l{display:block;color:#aaa;font-size:15px;font-weight:700;margin-top:4px;}
+  .idcards .ycard .yno .ybox .n{display:block;font-size:38px;font-weight:700;line-height:1.2;}
+  .idcards .ycard .yname{flex:0 0 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 10px;font-weight:700;font-size:15px;white-space:nowrap;}
+  .idcards .ycard .yname .f{font-size:13px;overflow:hidden;text-overflow:ellipsis;}
+  .idcards .ycard .yfoot{flex:0 0 36px;background:#2e3092;color:#fff;padding:0 10px;display:flex;flex-direction:column;justify-content:center;font-size:11px;line-height:1.35;}
+
+@include('admin.ids._print')
+  @media print{
+    /* _print scales the 880px crew card; this card is 440px wide.
+       440px * .7363636 = 324px = 3.375in at the CSS 96dpi print scale. */
+    .id-slot{border-radius:0;}
+    .id-slot .ycard{transform:scale(.7363636);transform-origin:top left;box-shadow:none;}
+    .id-pager{display:none!important;}
+  }
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -77,140 +47,58 @@
                 <li>Yatri ID</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                <button class="btn btn-success" type="button" onclick="printDiv('yatri_id')">Print</button>
-                <a class="btn btn-info ml-2" href="{{ url('admin/back-view') }}">Back View</a>
+                <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
+                <a class="btn btn-info ml-2" href="{{ url('admin/yatri-id-back', $page) }}">Back View</a>
             </div>
         </div>
-        <div class="main-body pt-3">
-            <div class="row" id="yatri_id" style="width: 100%; display: none;">
-                @if(count($yatri_ids) > 0)
-                @foreach($yatri_ids as $key => $value)
-                <div style="width: 440px; height: 280px; display: flex; justify-content: center; float: left; margin-top: 10px !important; padding-bottom: 45px !important; border-bottom: 1px dotted #000; margin-left: 10px; padding-left: 10px;">
-                    <main id="main" class="output" style="position: relative;">
-                        <img src="{{ asset("assets2/images/background.png") }}" style="margin-top: 50px;">
-                        <div class="ac-card mb-0" style="width: 400px; height: 265px; position: absolute; top: 0; right: -80%;">
-                            <img style="width: 100%; height: 72px;" src="{{ asset('assets2/images/imgage-card.png') }}">    
-                            <div class="d-flex" style="max-height: 140px;">
-                                <div class="ac-card-image" style="width: 110px; height: 120px; margin: 10px 0 0 10px;">
-                                    <img class="card-img-top" src="{{ asset('ids/'.@$value->photo) }}" alt="image" style="width: 100%; height: 100%;">
-                                </div>
-                                <div class="ac-card-1" style="width: 130px; height: 110px; margin: 10px 0 0 15px; padding-top: 15px;">
-                                    <p class="font-weight-bold mb-0 skdf" style="line-height: 1.2; font-family: Rubik;font-size: 14px;">State <span style="margin-left: 25px;">({{ @$value->trip_type }})</span></p>
-                                    <p class="mb-0 skdf" style="font-size: 14px;">{{ @$value->state }}</p>
-                                    <p class="font-weight-bold mb-0 skdf" style="line-height: 1.2; font-family: Rubik;font-size: 14px;">{{ @$value->passport_country }} Passport #</p>
-                                    <p class="mb-0 skdf" style="font-size: 14px;">{{ @$value->passport_no }}</p>
-                                </div>
-                                <div class="ac-card-2 text-center" style="width: 90px; height: 110px; margin: 10px 0 0 15px;">
-                                    <img src="{{ asset('assets2/images/ds-removebg-preview.png') }}" style="width: 50px;">
-                                    <div class="border-dark" style="margin-top: 10px; border-color: #bbb !important; border: 1px solid; width: 100%; height: 72px; text-align: center; border-radius: 10px;">
-                                        <p class="mb-0 font-weight-bold" style="color: #aaa !important; font-size: 14px;">Yatri #</p>
-                                        <p class="font-weight-bold" style="font-size: 30px; margin-top: 5px;">
-                                            {{ @$value->yatri_no }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="font-weight-bold" style="margin-left: 8px; margin-right: 8px; margin-bottom: 0px; display: flex;justify-content:space-between;">
-                                <span style="font-size: 13px;">{{ @$value->name }}</span> 
-                                <span style="font-size: 13px;">Father's Name: {{ @$value->father_name }}</span>
-                            </p>
-                            <div style="background-color: #2e3092 !important; width: 400px;">
-                                <img src="{{ asset('assets2/images/footer_img.png') }}" style="width: 100%; height: 40px;">
-                            </div>
-                        </div>
-                    </main>
-                </div>
-                @endforeach
-                @endif
-            </div>
-            <div class="row my-4">
+        <div class="main-body pt-3 idcards">
+            <div class="row my-3 id-pager">
                 <div class="offset-lg-2 col-lg-4 mb-3 px-5">
-                    <a class="btn btn-info" @if(!empty($prev) && $prev !== "0") href="{{ url('admin/yatri-id', $prev) }}" @else href="javascript:void;" @endif style="margin-left: 35px;">Prev Page</a>
+                    <a class="btn btn-info" @if($prev > 0) href="{{ url('admin/yatri-id', $prev) }}" @else href="javascript:void(0)" @endif style="margin-left: 35px;">Prev Page</a>
                 </div>
                 <div class="col-lg-4 mb-3 px-5 d-flex justify-content-end">
-                    <a class="btn btn-info" @if(!empty($next) && $next !== "0") href="{{ url('admin/yatri-id', $next) }}" @else href="javascript:void;" @endif style="margin-right: 35px;">Next Page</a>
+                    <a class="btn btn-info" @if(count($yatri_ids) === 8) href="{{ url('admin/yatri-id', $next) }}" @else href="javascript:void(0)" @endif style="margin-right: 35px;">Next Page</a>
                 </div>
-                @php
-                    $i = 0;
-                @endphp
-                @if(count($yatri_ids) > 0)
-                @foreach($yatri_ids as $key => $value)
-                <div class="@if($i == 0) offset-lg-2 @endif col-lg-4 d-flex justify-content-center mb-3">
-                    <main id="main" class="output">
-                        <div class="ac-card mb-0">
-                            <img style="width: 100%; height: 60px;" src="{{ asset('assets2/images/imgage-card.png') }}">    
-                            <div class="d-flex" style="max-height: 120px;">
-                                <div class="ac-card-image">
-                                    <img class="card-img-top" src="{{ asset('ids/'.@$value->photo) }}" alt="image" style="width: 100%; height: 100%;">
-                                </div>
-                                <div class="ac-card-1 pt-2">
-                                    <p class="font-weight-bold mb-0 skdf" style="line-height: 1.2;">State <span class="ml-4">({{ @$value->trip_type }})</span></p>
-                                    <p class="mb-0 skdf">{{ @$value->state }}</p>
-                                    <p class="font-weight-bold mb-0 skdf" style="line-height: 1.2;">{{ @$value->passport_country }} Passport #</p>
-                                    <p class="mb-0 skdf">{{ @$value->passport_no }}</p>
-                                </div>
-                                <div class="ac-card-2 text-center">
-                                    <img src="{{ asset('assets2/images/ds-removebg-preview.png') }}" style="width: 50px;">
-                                    <div class="border-dark mt-2" style="border-color: #bbb !important; width: 100%;">
-                                        <p class="mb-0 font-weight-bold" style="color: #aaa !important; font-size: 14px;">Yatri #</p>
-                                        <p class="mt-1 font-weight-bold" style="font-size: 30px;">
-                                            {{ @$value->yatri_no }}
-                                        </p>
-                                    </div>
-                                </div>
+            </div>
+            {{-- Eight to a page, the same eight the controller pages by. The back
+                 sheet (Back View) prints eight backs in the same slots. --}}
+            <div class="id-deck">
+                @forelse($yatri_ids as $value)
+                <div class="id-slot">
+                    <div class="ycard">
+                        <img class="ybanner" src="{{ asset('assets2/images/imgage-card.png') }}" alt="Konnect Yatra USA" />
+                        <div class="ybody">
+                            <img class="yphoto" src="{{ asset('ids/'.$value->photo) }}" alt="" />
+                            <div class="yinfo">
+                                <span class="k">State <span class="tt">({{ $value->trip_type }})</span></span>
+                                <span class="v">{{ $value->state }}</span>
+                                <span class="k">{{ $value->passport_country }} Passport #</span>
+                                <span class="v">{{ $value->passport_no }}</span>
                             </div>
-                            <p class="mx-2 mb-0 font-weight-bold d-flex justify-content-between">
-                                <span style="font-size: 11px;">{{ @$value->name }}</span>
-                                <span style="font-size: 10px; margin-left: 15px;"> Father's Name: {{ @$value->father_name }}</span>
-                            </p>
-                            <div class="id-footer pt-0 mt-0 px-2">
-                                <span style="font-size: 10px;">
-                                    18502 Hillside Avenue, Jamaica, NY 11432
-                                </span>
-                                <span style="font-size: 11px;" class="ml-4">
-                                    www.konnectyatra.org
-                                </span>
+                            <div class="yno">
+                                <img class="yflag" src="{{ asset('assets2/images/ds-removebg-preview.png') }}" alt="" />
+                                <div class="ybox">
+                                    <span class="l">Yatri #</span>
+                                    <span class="n">{{ $value->yatri_no }}</span>
+                                </div>
                             </div>
                         </div>
-                    </main>
+                        <div class="yname">
+                            <span>{{ $value->name }}</span>
+                            <span class="f">Father's Name: {{ $value->father_name }}</span>
+                        </div>
+                        <div class="yfoot">
+                            <span>{{ \App\Support\Business::addressLine() }}</span>
+                            <span>{{ \App\Support\Business::phone() }} · www.konnectyatra.org</span>
+                        </div>
+                    </div>
                 </div>
-                @php
-                    if ($i == 1) {
-                        $i = 0;
-                    } else {
-                        $i = 1;
-                    }
-                @endphp
-                @endforeach
-                @else
-                <div class="col-lg-12 text-center">
-                    <p>No record found.</p>
-                </div>
-                @endif
+                @empty
+                <p class="text-muted">No record found.</p>
+                @endforelse
             </div>
         </div>
     </div>
 </main>
 <div class="ttr-overlay"></div>
-@endsection
-@section('js')
-    <script type="text/javascript">
-        function printDiv(divName) {
-
-            var printContents = document.getElementById(divName).innerHTML;
-
-            var originalContents = document.body.innerHTML;
-
-            document.body.innerHTML = printContents;
-
-                // document.body.style.marginTop="-45px";
-
-            window.print();
-
-            document.body.innerHTML = originalContents;
-
-            location.reload();
-
-        }
-    </script>
 @endsection
