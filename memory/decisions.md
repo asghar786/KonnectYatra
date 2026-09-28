@@ -1261,3 +1261,35 @@ default, price-button feature + `DatabaseTransactions` fix, its test coverage, s
 removal).
 
 **Review:** see decisions.csv rows dated 2026-09-04.
+
+## 2026-09-28 — Yatri IDs print eight to a sheet, backs in the same slots
+
+**Asked:** the user wants the Yatri ID cards printed eight to one page, with the backs in exactly
+the same positions on the reverse, so the office can cut the cards out and laminate them.
+
+**Found:** `admin/yatri-id/{page}` still used the old `printDiv()`, which swapped `body.innerHTML`
+for a hidden copy of the cards. That drops the page styles, so nothing came out as a cuttable
+sheet (the Crew IDs had the same bug, fixed 2026-09-08 in c2f7046). Its "Back View" button went
+to `admin/back-view`, the **crew** backs, counted by crew members, so the yatri fronts had no
+matching back sheet. The card footer also still showed the superseded Hillside Avenue address.
+
+**Decided:**
+- The Yatri page prints from the live deck through the same `admin/ids/_print` partial as the
+  crew: Letter portrait, 2 across x 4 down, each slot true CR80 (3.375in x 2.125in). The card was
+  rebuilt at 440x277 (CR80 ratio) with the same look, and is scaled .7363636 for print.
+- New route `admin/yatri-id-back/{page}` renders the shared back sheet for the current season's
+  yatris.
+- **Every back sheet, crew and yatri, now carries all eight slots** (`idBackSheet()` in
+  `Admin\PackagesController`). The backs are identical, so a full sheet puts a back behind every
+  front however the duplex flip mirrors the columns. Printing one back per card was rejected: on a
+  short last page (e.g. 3 cards) the flip moves the backs to the wrong columns.
+- The footer reads `Business::addressLine()` / `Business::phone()`, so it tracks the admin NAP.
+
+**Office workflow:** print front page N, then Back View page N on the reverse, flip on the
+**long edge**, scale 100%. The grid is top-aligned, so a short-edge flip will not line up.
+Test on plain paper against the light before using card stock.
+
+**Verified:** printed to PDF over CDP: one page each for a full front, the 3-card last page and
+both back sheets, with slot rectangles identical front and back.
+
+**Review:** see decisions.csv row dated 2026-09-28.
