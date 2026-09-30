@@ -86,7 +86,13 @@
   /* Block, or the phone/web run on from the end of the street address. */
   .idcards .back-foot .ra .ln{display:block;margin-top:3px;color:#fff;font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;}
 
-@include('admin.ids._print')
+@if(($idSize ?? 'cr80') === 'yatri')
+  /* Yatri stock is 3.9in x 2.5in (ratio 1.56), a touch taller than CR80, so
+     the back grows to 880 x 564px; the body column is flex and takes the extra. */
+  .id-slot{height:352px;}
+  .idcards .card{height:564px;}
+@endif
+@include('admin.ids._print', ['idSize' => $idSize ?? 'cr80'])
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">

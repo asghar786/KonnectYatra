@@ -1,16 +1,17 @@
 @extends('admin.layouts.app')
 @section('content')
 <style type="text/css">
-  /* The card is laid out at 440 x 277px, which is the CR80 ratio (3.375in x
-     2.125in). On screen it shows at that size; print scales it into the shared
-     CR80 slot, so the eight fronts land exactly where the eight backs do. */
+  /* The card stock is 3.9in x 2.5in (ratio 1.56), so the card is laid out at
+     440 x 282px. On screen it shows at that size; print scales it into the
+     A4 slot set up by _print ($idSize = 'yatri'), so the eight fronts land
+     exactly where the eight backs do. */
   .idcards *{box-sizing:border-box;}
   .id-deck{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;padding:10px 0 30px;}
-  .id-slot{width:440px;height:277px;overflow:hidden;}
+  .id-slot{width:440px;height:282px;overflow:hidden;}
 
   /* NB: no <b>, <p> or <label> inside the card. adminassets/css/form.css forces
      them black with !important. Style spans and divs with classes instead. */
-  .idcards .ycard{width:440px;height:277px;overflow:hidden;background:#fff;position:relative;display:flex;flex-direction:column;font-family:'Rubik',sans-serif;color:#111;box-shadow:0 10px 24px -12px rgba(46,48,146,.45);}
+  .idcards .ycard{width:440px;height:282px;overflow:hidden;background:#fff;position:relative;display:flex;flex-direction:column;font-family:'Rubik',sans-serif;color:#111;box-shadow:0 10px 24px -12px rgba(46,48,146,.45);}
   .idcards .ycard .ybanner{flex:0 0 66px;width:100%;height:66px;display:block;}
   /* Khanda watermark behind the details, as on the original card. */
   .idcards .ycard .ybody{flex:1;min-height:0;display:flex;gap:14px;padding:9px 12px 0;background:url("{{ asset('assets2/images/background.png') }}") center/150px no-repeat;}
@@ -26,14 +27,15 @@
   .idcards .ycard .yno .ybox .n{display:block;font-size:38px;font-weight:700;line-height:1.2;}
   .idcards .ycard .yname{flex:0 0 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 10px;font-weight:700;font-size:15px;white-space:nowrap;}
   .idcards .ycard .yname .f{font-size:13px;overflow:hidden;text-overflow:ellipsis;}
-  .idcards .ycard .yfoot{flex:0 0 36px;background:#2e3092;color:#fff;padding:0 10px;display:flex;flex-direction:column;justify-content:center;font-size:11px;line-height:1.35;}
+  /* Address only, centred, one line - the phone and website were taken off on 2026-09-30. */
+  .idcards .ycard .yfoot{flex:0 0 36px;background:#2e3092;color:#fff;padding:0 8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;font-weight:500;line-height:1.2;white-space:nowrap;}
 
-@include('admin.ids._print')
+@include('admin.ids._print', ['idSize' => 'yatri'])
   @media print{
-    /* _print scales the 880px crew card; this card is 440px wide.
-       440px * .7363636 = 324px = 3.375in at the CSS 96dpi print scale. */
+    /* This card is 440px wide: 440px * .8509091 = 374.4px = 3.9in at the
+       CSS 96dpi print scale (and 282px -> 2.5in). */
     .id-slot{border-radius:0;}
-    .id-slot .ycard{transform:scale(.7363636);transform-origin:top left;box-shadow:none;}
+    .id-slot .ycard{transform:none;zoom:.8509091;box-shadow:none;}
     .id-pager{display:none!important;}
   }
 </style>
@@ -89,7 +91,6 @@
                         </div>
                         <div class="yfoot">
                             <span>{{ \App\Support\Business::addressLine() }}</span>
-                            <span>{{ \App\Support\Business::phone() }} · www.konnectyatra.org</span>
                         </div>
                     </div>
                 </div>
