@@ -1655,9 +1655,12 @@ class PackagesController extends Controller
   public function yatri_back_view($id = 1)
   {
     $active_season = Session::get('season') ?: optional(Season::orderBy('id', 'DESC')->first())->id;
-    $query = YatriIds::where('season_id', $active_season)->where('type', 'yatri')->orderBy('yatri_no', 'ASC');
-    $query = $query->offset((max(1, (int)$id) - 1) * 8)->limit(8);
-    return $this->idBackSheet($query->count() > 0, url('admin/yatri-id', max(1, (int)$id)), 'No yatris found.', 1, 'yatri');
+    $page  = max(1, (int)$id);
+    // Count the whole season and ask whether this page has anyone on it.
+    // count() on an offset query returns 0 past page 1 (the offset applies to
+    // the single COUNT row), which left pages 2+ with no backs (2026-09-30).
+    $total = YatriIds::where('season_id', $active_season)->where('type', 'yatri')->count();
+    return $this->idBackSheet($total > ($page - 1) * 8, url('admin/yatri-id', $page), 'No yatris found.', 1, 'yatri');
   }
 
   // Every back is identical, so a back sheet always carries all eight slots.
