@@ -204,6 +204,14 @@ Route::group(['prefix' => 'admin',
     Route::get('/yatri-form/pdf-docs/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportPdfWithDocs'])->name('yatri-form-pdf-docs');
     Route::get('/yatri-form/form-c/{id}',[\App\Http\Controllers\Admin\YatriPdfController::class, 'exportFormC'])->name('yatri-form-c'); // Form 'C' — Foreigners Registration
 
+    // Hotel Booking Yatris — the check-in list for each hotel of the trip,
+    // arranged from the Quick Yatri applications. {hotel} is islamabad|lahore.
+    Route::get('/hotel-checkin/{hotel?}',[\App\Http\Controllers\Admin\HotelCheckinController::class, 'show'])->name('hotel-checkin')->where('hotel', 'islamabad|lahore');
+    Route::post('/hotel-checkin/{hotel}',[\App\Http\Controllers\Admin\HotelCheckinController::class, 'save'])->name('hotel-checkin-save')->where('hotel', 'islamabad|lahore');
+    Route::post('/hotel-checkin/{hotel}/copy',[\App\Http\Controllers\Admin\HotelCheckinController::class, 'copy'])->name('hotel-checkin-copy')->where('hotel', 'islamabad|lahore');
+    Route::post('/hotel-checkin/{hotel}/reset',[\App\Http\Controllers\Admin\HotelCheckinController::class, 'reset'])->name('hotel-checkin-reset')->where('hotel', 'islamabad|lahore');
+    Route::get('/hotel-checkin/{hotel}/pdf',[\App\Http\Controllers\Admin\HotelCheckinController::class, 'pdf'])->name('hotel-checkin-pdf')->where('hotel', 'islamabad|lahore');
+
     // Quick Yatri — the Konnect.US application sheet: list, capture, print.
     // `/blank` and `/print` render the sheet in the browser (the design is
     // flex/grid, which dompdf cannot lay out); Ctrl+P -> Save as PDF downloads it.

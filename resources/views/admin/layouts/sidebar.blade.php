@@ -52,7 +52,7 @@
                 </li>
 
                 <!-- Bookings & Yatris -->
-                @php $open = $groupOpen([route('yatri-visa'), url('admin/booking-detail'), route('visa'), route('ids'), route('airline-list'), route('itenaries'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
+                @php $open = $groupOpen([route('yatri-visa'), url('admin/booking-detail'), route('visa'), url('admin/hotel-checkin'), route('ids'), route('airline-list'), route('itenaries'), route('invitation-detail'), route('undertaking'), url('admin/reports')]); @endphp
                 <li class="{{ $open ? 'show' : '' }}">
                     <a href="javascript:void(0);" class="ttr-material-button">
                         <span class="ttr-icon"><i class="fas fa-users text-success"></i></span>
@@ -62,6 +62,7 @@
                     <ul @if($open) style="display:block;" @endif>
                         <li class="{{ $isCur(route('yatri-visa')) || $isCur(url('admin/booking-detail')) ? 'show' : '' }}"><a href="{{route('yatri-visa')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user text-success"></i></span><span class="ttr-label">Yatri Bookings</span></a></li>
                         <li class="{{ $isCur(route('visa')) ? 'show' : '' }}"><a href="{{route('visa')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-user-group text-warning"></i></span><span class="ttr-label">Visa List</span></a></li>
+                        <li class="{{ $isCur(url('admin/hotel-checkin')) ? 'show' : '' }}"><a href="{{route('hotel-checkin')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-hotel text-primary"></i></span><span class="ttr-label">Hotel Booking Yatris</span></a></li>
                         <li class="{{ $isCur(route('ids')) ? 'show' : '' }}"><a href="{{route('ids')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-id-card text-info"></i></span><span class="ttr-label">Yatri IDs</span></a></li>
                         <li class="{{ $isCur(route('airline-list')) ? 'show' : '' }}"><a href="{{route('airline-list')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-bars text-success"></i></span><span class="ttr-label">Airline List</span></a></li>
                         <li class="{{ $isCur(route('itenaries')) ? 'show' : '' }}"><a href="{{route('itenaries')}}" class="ttr-material-button"><span class="ttr-icon"><i class="fas fa-plane-departure text-info"></i></span><span class="ttr-label">Itinerary Requests</span></a></li>
