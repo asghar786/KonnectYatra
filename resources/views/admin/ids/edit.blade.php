@@ -86,6 +86,10 @@
                                                         <option value="L/P" @if(@$yatri_id->trip_type == "L/P") selected @endif>Land Package</option>
                                                     </select>
                                                 </div>
+                                                <div class="col-lg-6 form-group">
+                                                    <label class="form_label_color">Title on card (optional)</label>
+                                                    <input type="text" class="form-control" value="{{@$yatri_id->role}}" name="role" maxlength="30" placeholder="e.g. Chief Organizer" />
+                                                </div>
 
                                                 @else
 

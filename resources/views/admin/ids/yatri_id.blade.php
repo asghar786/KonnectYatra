@@ -15,7 +15,11 @@
   .idcards .ycard .ybanner{flex:0 0 66px;width:100%;height:66px;display:block;}
   /* Khanda watermark behind the details, as on the original card. */
   .idcards .ycard .ybody{flex:1;min-height:0;display:flex;gap:14px;padding:9px 12px 0;background:url("{{ asset('assets2/images/background.png') }}") center/150px no-repeat;}
-  .idcards .ycard .yphoto{flex:0 0 116px;width:116px;height:140px;object-fit:cover;background:#e6e8ef;display:block;}
+  .idcards .ycard .yphoto-wrap{flex:0 0 116px;width:116px;height:140px;position:relative;overflow:hidden;}
+  .idcards .ycard .yphoto{width:116px;height:140px;object-fit:cover;background:#e6e8ef;display:block;}
+  /* A yatri with a title (role), e.g. Chief Organizer, gets it as a band across
+     the foot of the photo. Only shown when set. */
+  .idcards .ycard .yrole{position:absolute;left:0;right:0;bottom:0;background:#b22234;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:3px 2px;line-height:1.15;border-top:1.5px solid #fff;}
   .idcards .ycard .yinfo{flex:1;min-width:0;padding-top:12px;font-size:16px;line-height:1.35;}
   .idcards .ycard .yinfo .k{font-weight:700;display:block;}
   .idcards .ycard .yinfo .k .tt{margin-left:22px;}
@@ -70,7 +74,10 @@
                     <div class="ycard">
                         <img class="ybanner" src="{{ asset('assets2/images/imgage-card.png') }}" alt="Konnect Yatra USA" />
                         <div class="ybody">
-                            <img class="yphoto" src="{{ asset('ids/'.$value->photo) }}" alt="" />
+                            <div class="yphoto-wrap">
+                                <img class="yphoto" src="{{ asset('ids/'.$value->photo) }}" alt="" />
+                                @if(trim((string) $value->role) !== '')<span class="yrole">{{ $value->role }}</span>@endif
+                            </div>
                             <div class="yinfo">
                                 <span class="k">State <span class="tt">({{ $value->trip_type }})</span></span>
                                 <span class="v">{{ $value->state }}</span>

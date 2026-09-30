@@ -84,6 +84,10 @@
                                                     </select>
                                                 </div>
                                                 <div class="col-lg-6 form-group">
+                                                    <label class="form_label_color">Title on card (optional)</label>
+                                                    <input type="text" class="form-control" value="{{@$yatri_id->role}}" name="role" maxlength="30" placeholder="e.g. Chief Organizer" />
+                                                </div>
+                                                <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">Photo</label>
                                                     <input type="file" class="form-control require" name="photo" @if(empty(@$yatri_id->photo)) required="" @endif />
                                                 </div>
