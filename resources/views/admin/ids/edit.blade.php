@@ -40,7 +40,14 @@
 
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">ID Type</label>
-                                                    <input type="text" class="form-control require" value="{{@$yatri_id->type}}" name="type" required="" />
+                                                    {{-- A choice, not free text: only "Yatri" and "Crew Member" appear on
+                                                         the ID pages. A row stored with anything else opens as Yatri, and saving
+                                                         corrects it (see PackagesController::idType). --}}
+                                                    @php $isYatri = strcasecmp(trim((string) @$yatri_id->type), 'Yatri') === 0; $isCrew = strcasecmp(trim((string) @$yatri_id->type), 'Crew Member') === 0; @endphp
+                                                    <select class="form-control require" name="type" required="">
+                                                        <option value="Yatri" {{ $isYatri ? 'selected' : '' }}>Yatri</option>
+                                                        <option value="Crew Member" {{ $isCrew ? 'selected' : '' }}>Crew Member</option>
+                                                    </select>
                                                 </div>
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">Name</label>
@@ -50,7 +57,8 @@
                                                     <label class="form_label_color">Father Name</label>
                                                     <input type="text" class="form-control require" value="{{@$yatri_id->father_name}}" name="father_name" required="" />
                                                 </div>
-                                                @if($yatri_id->type == "Yatri")
+                                                {{-- Case-insensitive: the 2024 rows are stored as "yatri". --}}
+                                                @if($isYatri)
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">Yatri #</label>
                                                     <input type="number" class="form-control require" value="{{@$yatri_id->yatri_no}}" name="yatri_no" required="" />

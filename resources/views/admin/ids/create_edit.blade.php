@@ -42,12 +42,11 @@
                                             <div class="row">
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">ID Type</label>
-                                                    <input type="text" class="form-control require" value="Yatri" value="{{@$yatri_id->type}}" name="type" required="" />
-
-                                                    {{-- <select type="text" class="form-control require" name="type" required="">
-                                                        <option value="Yatri">Yatri</option>
-                                                        <option value="Crew">Crew Member</option>
-                                                    </select> --}}
+                                                    {{-- Fixed, not typed: the Yatri ID pages list only type "Yatri".
+                                                         A title typed here ("Chief Organzer") hid the person from every
+                                                         ID page - Rashad was entered three times that way (2026-09-30). --}}
+                                                    <input type="text" class="form-control" value="Yatri" readonly tabindex="-1" style="background:#f1f3f7;" />
+                                                    <input type="hidden" name="type" value="Yatri" />
                                                 </div>
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">Name</label>
@@ -108,11 +107,10 @@
                                             <div class="row">
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">ID Type</label>
-                                                    <input type="text" class="form-control require" value="Crew Member" value="{{@$yatri_id->type}}" name="type" required="" />
-                                                    {{-- <select type="text" class="form-control require" name="type" required="">
-                                                        <option value="Yatri">Yatri Id</option>
-                                                        <option value="Crew">Crew Id</option>
-                                                    </select> --}}
+                                                    {{-- Fixed, like the Yatri tab: the Crew ID pages list only "Crew Member".
+                                                         A job title belongs in Role below. --}}
+                                                    <input type="text" class="form-control" value="Crew Member" readonly tabindex="-1" style="background:#f1f3f7;" />
+                                                    <input type="hidden" name="type" value="Crew Member" />
                                                 </div>
                                                 <div class="col-lg-6 form-group">
                                                     <label class="form_label_color">Name</label>

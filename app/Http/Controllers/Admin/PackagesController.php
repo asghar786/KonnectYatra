@@ -1521,7 +1521,19 @@ class PackagesController extends Controller
         $data['photo'] = $fileName;
       }
       $data['season_id'] = $season->id;
-      // dd($data);
+      $data['type'] = $this->idType($data['type'] ?? '');
+
+      // One card per Yatri # per season. A save that seemed to vanish used to get
+      // re-entered - Rashad #20 went in three times (2026-09-30).
+      if ($data['type'] === 'Yatri' && !empty($data['yatri_no'])) {
+        $taken = YatriIds::where('season_id', $season->id)->where('type', 'Yatri')->where('yatri_no', $data['yatri_no'])->first();
+        if ($taken) {
+          if (!empty($data['photo'])) {
+            @unlink(public_path('ids/' . $data['photo']));
+          }
+          return back()->withInput()->with('error', 'Yatri #' . $data['yatri_no'] . ' already exists this season (' . $taken->name . '). Edit that one instead.');
+        }
+      }
       YatriIds::create($data);
 
       // $response = array('status'=>'1','message'=>'News is added sucessfully.','action'=>'reload');
@@ -1571,6 +1583,9 @@ class PackagesController extends Controller
         $data['photo'] = $fileName;
       }
       unset($data['_token']);
+      if (isset($data['type'])) {
+        $data['type'] = $this->idType($data['type']);
+      }
       YatriIds::where("id", $id)->update($data);
 
       // $response = array('status'=>'1','message'=>'Event is updated sucessfully.','action'=>'reload');
@@ -1582,6 +1597,14 @@ class PackagesController extends Controller
     $data['action'] = url('/admin/ids/edit', $id);
     $data['btn_text'] = "Update";
     return view('admin.ids.create_edit', $data);
+  }
+
+  // The ID pages list type "Yatri" and "Crew Member" only, so a stored type must
+  // be one of the two. Anything else (a job title typed into the box) is read
+  // as a Yatri - titles belong in `role`.
+  private function idType($type)
+  {
+    return strcasecmp(trim((string) $type), 'Crew Member') === 0 ? 'Crew Member' : 'Yatri';
   }
 
   public function delete_ids($id)
