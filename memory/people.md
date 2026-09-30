@@ -20,6 +20,9 @@ Format:
   `currentuser() === 'admin'` exactly. Two junk signups, `adminxp@gmail.com` and
   `adminexp@gmail.com`, carry `role = '1'` and are locked out by that same check; the user was
   told about them 2026-08-21 and has not asked for them to be removed.
+- **Travels with the group as Chief Organizer.** On the Gurpurab November 2026 trip he is Yatri
+  **#20** (season 8) and his Yatri ID carries the title "Chief Organizer" (`yatri_ids.role`). He
+  appears on the hotel check-in lists too (Room 9 with Parminder Singh in the office's Excel).
 - **Works in the field:** he drives to gurdwaras and updates their details in person (phones, office-bearers, photos). The admin Address Book was built for this — phone-first, GPS-ranked. Assume mobile use and one-handed taps for anything aimed at him. See [[konnectyatra-address-book]].
 - **Wants to self-serve:** where a value is his to supply (office coordinates, opening hours, social
   profile links), he expects a field in the admin rather than asking a developer — see

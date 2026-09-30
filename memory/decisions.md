@@ -1343,3 +1343,47 @@ family, Room # by Hotel, Bed Type, Staff Initial, Complaint, plus a Room Summary
 small and per-trip; site_settings avoids the prod-migration step).
 
 **Review:** see decisions.csv row dated 2026-09-30.
+
+## 2026-09-30 — Yatri IDs on A4 at 3.9in x 2.5in; every ID sheet now prints true size
+
+**Context:** the office's Yatri card stock is 3.9in x 2.5in and the paper is A4. Measuring the PDFs
+showed every ID sheet had been printing undersized all along: Crew at ~67%, Yatri at ~80%.
+
+**Decided:**
+- `_print` takes `$idSize`. `'yatri'` = A4, margin 0, 2 x 4 slots of 3.9in x 2.5in, fixed rows
+  spread evenly and centred both ways (duplex lines up on either flip edge). Crew stays Letter/CR80.
+- Yatri card re-proportioned to 440x282 (front) and 880x564 (back) to fill the stock.
+- Yatri front footer: address only, centred, a little larger (phone + website removed).
+- **True size:** override Bootstrap 4's print `body{min-width:992px}`, and size cards with `zoom`
+  instead of `transform:scale`. The transform left the full 880px box in the layout, and any
+  print past one page made Chrome shrink the whole job.
+
+**Verified:** PDFs rasterised and measured in inches: Yatri 7.9in wide, .17in sides, .35in
+top/bottom; Crew 7.05in, .71in sides; one- and two-sheet runs identical.
+
+## 2026-09-30 — ID type is fixed, not typed; one Yatri # per season; optional card title
+
+**Context:** on prod, Rashad Mahmood (Yatri #20, season 8) never got a card. The ID Type box was
+free text; "Chief Organizer", "CEO" and "Chief Organzer" were typed into it, and the ID pages list
+only "Yatri" / "Crew Member", so each save vanished and he was entered five times (rows 175–179).
+
+**Decided:**
+- Add ID: type is fixed per tab. Edit ID: type is a Yatri / Crew Member choice. Server side,
+  `PackagesController::idType()` reads anything else as Yatri.
+- A second Yatri with the same Yatri # in the same season is refused, naming the holder.
+- A title (e.g. Chief Organizer) is a separate optional "Title on card" field, stored in `role`
+  and printed as a red band across the foot of the photo.
+- Edit compares the type case-insensitively — the 2024 rows are stored as lowercase `yatri`.
+
+**Prod data fix handed over (run by the user):** row 179 → type Yatri, role Chief Organizer;
+rows 175–178 to be deleted once his card is checked.
+
+## 2026-09-30 — D/o for women, never a hard-coded S/o
+
+The Quick Yatri list and Hotel Booking Yatris printed "S/o" for everyone, so women read as sons.
+`QuickYatri::parentPrefix()` gives D/o for F, S/o for M, "Father:" when gender is blank. Gurdwara
+leads have no gender and read "Father:". Crew ID cards still print "s/o" (no gender column) —
+raise it if a female crew member is added.
+
+Also fixed the same day: Yatri Back View pages 2+ printed nothing, because `count()` on an
+offset query returns 0 past page 1.
