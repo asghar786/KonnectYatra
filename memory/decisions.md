@@ -1293,3 +1293,31 @@ Test on plain paper against the light before using card stock.
 both back sheets, with slot rectangles identical front and back.
 
 **Review:** see decisions.csv row dated 2026-09-28.
+
+## 2026-09-30 — Crew IDs: print only the ticked staff; address-only front footer
+
+**Context:** few visitors this trip, so only some of the crew travel. The Crew ID page printed
+every crew member, eight per page, with no way to leave anyone out. The front footer squeezed the
+office address in small type beside `www.konnectyatra.org`.
+
+**Decided:**
+- `admin/staff_ids` lists **all** crew on one page (no paging; the `{id}` segment is kept only so
+  old links resolve), with a tick box above each card. Clicking the card toggles it too; unticked
+  cards are greyed. Select all / Clear, plus a live "N of M selected · K sheet(s)" count.
+- Print outputs only the ticked cards. The script clones them into `#printDeck`, one `.id-deck`
+  per 8, and `_print` starts each deck on a new page (`.id-deck + .id-deck`), so every sheet has
+  the same top-aligned grid. The selection is remembered per browser (localStorage).
+- Back View gets `?cards=N` and prints `ceil(N/8)` full back sheets of 8. The Yatri backs are
+  unchanged (one sheet per page).
+- The website URL is removed from the **front**; the back already carries it three times (header,
+  return-address strip, QR). The address takes the whole bar: 18px Archivo, street / city on two
+  centred lines (~5pt printed).
+
+**Rejected:** hiding unticked cards inside the existing single grid. More than 8 would then rely
+on the browser splitting a grid across pages, which is not guaranteed to keep the back
+alignment.
+
+**Verified:** PDF over CDP: 3 ticked → 1 page with those 3; 12 → 2 pages (8 + 4); back with
+`?cards=12` → 2 pages; slot rectangles identical front and back.
+
+**Review:** see decisions.csv row dated 2026-09-30.
