@@ -1342,6 +1342,11 @@ family, Room # by Hotel, Bed Type, Staff Initial, Complaint, plus a Room Summary
 **Rejected:** Yatri Bookings as the source (user chose Quick Yatri); a new table (the list is
 small and per-trip; site_settings avoids the prod-migration step).
 
+**Follow-up (same day):** on the first real print, several names wrapped onto two lines and
+yatri #20 slipped onto page 2 alone. Names are now kept on one line, the two long headers
+(Room # by Hotel, Staff Initial) are two-line, and the column widths are budgeted against the
+page. Checked with the real 20-yatri Islamabad list and a 29-character name: all on page 1.
+
 **Review:** see decisions.csv row dated 2026-09-30.
 
 ## 2026-09-30 — Yatri IDs on A4 at 3.9in x 2.5in; every ID sheet now prints true size
