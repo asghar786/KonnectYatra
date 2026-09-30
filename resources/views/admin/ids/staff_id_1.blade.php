@@ -29,25 +29,25 @@
   .idcards .logo-row img.logo{height:62px;width:auto;}
   .idcards .flag{width:50px;height:33px;border-radius:4px;overflow:hidden;flex:0 0 auto;box-shadow:0 2px 6px rgba(0,0,0,.18);position:relative;background:repeating-linear-gradient(180deg,#c1283d 0 2.54px,#fff 2.54px 5.08px);border:1px solid rgba(0,0,0,.08);}
   .idcards .flag .canton{position:absolute;top:0;left:0;width:55%;height:53.8%;background:#16294d;background-image:radial-gradient(circle,rgba(255,255,255,.95) .9px,transparent 1.1px);background-size:6px 5.4px;background-position:2px 2px;}
-  .idcards .eyebrow{margin-top:22px;display:flex;align-items:center;gap:12px;}
+  .idcards .eyebrow{margin-top:24px;display:flex;align-items:center;gap:12px;}
   /* NB: no <b> or <p> inside the card. adminassets/css/form.css carries
      `b{color:black!important}`, which outranks any selector here - it was
      rendering the footer's "www." black on the navy bar, i.e. invisible.
      Style spans with classes instead. */
-  .idcards .eyebrow .eb{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--navy);}
+  .idcards .eyebrow .eb{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--navy);}
   .idcards .eyebrow .rule{height:2px;flex:1;background:linear-gradient(90deg,var(--orange),rgba(232,96,28,0));border-radius:2px;}
-  .idcards .fields{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px 28px;}
+  /* Sized up to fill the white panel: the details are what gets read at a checkpoint. */
+  .idcards .fields{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:22px 28px;}
   .idcards .field.full{grid-column:1 / -1;}
-  .idcards .field .lab{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--orange);font-weight:600;}
-  .idcards .field .val{margin-top:5px;font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.15;}
-  .idcards .field .val.mono{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:.01em;}
-  .idcards .foot{height:54px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));display:flex;align-items:center;justify-content:center;padding:0 26px;color:#fff;}
+  .idcards .field .lab{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);font-weight:600;}
+  .idcards .field .val{margin-top:6px;font-size:24px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.15;}
+  .idcards .field .val.mono{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:23px;letter-spacing:0;}
+  .idcards .foot{height:54px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));display:flex;align-items:center;justify-content:center;padding:0 16px;color:#fff;}
   /* The address has the whole bar to itself (the website lives on the back), so
-     it is set larger in the card's own face and split street / city, centred.
+     it is set larger in the card's own face on one centred line.
      18px here prints at about 5pt on the CR80 card. */
-  .idcards .foot .addr{display:flex;align-items:center;gap:14px;font-family:'Archivo',system-ui,sans-serif;font-size:18px;font-weight:600;line-height:1.2;letter-spacing:.01em;color:#fff;}
-  .idcards .foot .addr img{height:30px;width:auto;flex:0 0 auto;filter:brightness(2);}
-  .idcards .foot .addr .ln{display:block;}
+  .idcards .foot .addr{display:flex;align-items:center;gap:10px;font-family:'Archivo',system-ui,sans-serif;font-size:18px;font-weight:600;line-height:1.2;white-space:nowrap;color:#fff;}
+  .idcards .foot .addr img{height:26px;width:auto;flex:0 0 auto;filter:brightness(2);}
 
   /* Pick which crew to print. Screen only: the print deck is rebuilt from the
      ticked cards (see the script below), and _print hides .id-picker. */
@@ -146,7 +146,7 @@
                                 {{-- Canonical office address, matching config/schema.php, the site
                                      header and the Contact page. The old 18502 Hillside Ave was
                                      superseded on 2026-08-17; keep all four byte-identical. --}}
-                                <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" /><span><span class="ln">148-36 Guy R Brewers Blvd. Suit #202A,</span><span class="ln">Jamaica, NY 11434</span></span></div>
+                                <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" />148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434</div>
                             </div>
                         </div>
                     </div>
