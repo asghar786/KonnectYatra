@@ -1321,3 +1321,25 @@ alignment.
 `?cards=12` → 2 pages; slot rectangles identical front and back.
 
 **Review:** see decisions.csv row dated 2026-09-30.
+
+## 2026-09-30 — Hotel Booking Yatris (hotel check-in lists)
+
+**Context:** the office kept one Excel check-in sheet per hotel (Best Western Premier Islamabad,
+Royal Swiss Lahore): Yatri #, name, nationality, passport, a Room number shared by a couple or
+family, Room # by Hotel, Bed Type, Staff Initial, Complaint, plus a Room Summary tab.
+
+**Decided:**
+- Source is **Quick Yatri** (the user's choice over Yatri Bookings). Quick Yatri has no season,
+  so each list keeps its own membership; anyone can be removed and added back.
+- Stored as one JSON per hotel in `site_settings` — no migration, nothing to run on prod.
+- The unit is a room: "With above" joins a yatri to the room of the row above, room numbers
+  are derived from the order, and the arrows move by room so nobody lands in a couple's room
+  by accident.
+- PDF via dompdf, Letter landscape, one page for 20 yatris, with photos and a Room Summary.
+  Styled as an American group (US flag, red/navy band) because it is handed to 5-star hotels.
+- Dates print DD-MMM-YYYY (house format), not the Excel's "23 Nov - 30 Nov, 2026".
+
+**Rejected:** Yatri Bookings as the source (user chose Quick Yatri); a new table (the list is
+small and per-trip; site_settings avoids the prod-migration step).
+
+**Review:** see decisions.csv row dated 2026-09-30.
