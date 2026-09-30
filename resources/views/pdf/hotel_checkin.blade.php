@@ -54,6 +54,10 @@
 
 
     /* ---- The list ---- */
+    /* Names never wrap, so dompdf's auto layout has to give that column its full
+       width; the long headers go on two lines so they stop widening their columns.
+       A wrapped name made its row taller and pushed yatri 20 onto page 2. (dompdf
+       ignores widths under table-layout:fixed and makes every column equal.) */
     table.list { width: 100%; border-collapse: collapse; }
     table.list thead th { background: #16294d; color: #fff; font-size: 6.6pt; font-weight: bold; letter-spacing: .4pt; text-transform: uppercase; padding: 5pt 5pt; white-space: nowrap; text-align: left; border-right: .6pt solid #2c4170; }
     table.list thead th:last-child { border-right: 0; }
@@ -72,7 +76,8 @@
     /* A nested table, not a div: a bare div stretches to the row in dompdf. */
     table.ini { width: 15pt; border-collapse: collapse; margin: 0 auto; }
     table.ini td { width: 15pt; height: 15pt; padding: 0 !important; border: 0 !important; background: #e6ecfa !important; color: #1a3fa0; font-weight: bold; font-size: 6.6pt; text-align: center; vertical-align: middle; border-radius: 3pt; }
-    .nm { font-weight: bold; font-size: 9pt; color: #16294d; }
+    .nm { font-weight: bold; font-size: 9pt; color: #16294d; white-space: nowrap; }
+    table.list thead th.two { white-space: normal; line-height: 1.2; }
     .nat { font-weight: bold; color: #1a3fa0; text-align: center; }
     .pp { font-family: "DejaVu Sans Mono", monospace; font-size: 8.4pt; letter-spacing: .2pt; }
     .room { text-align: center; }
@@ -111,16 +116,18 @@
 <table class="list">
     <thead>
         <tr>
-            <th class="c" style="width:38pt">Yatri #</th>
-            <th class="c" style="width:26pt">Photo</th>
+            {{-- Widths are content widths; dompdf adds 5pt padding each side, so
+                 these + the name + 100pt of padding = the 736pt of the page. --}}
+            <th class="c" style="width:32pt">Yatri #</th>
+            <th class="c" style="width:24pt">Photo</th>
             <th>Yatri Name</th>
-            <th class="c" style="width:52pt">Nationality</th>
-            <th style="width:78pt">Passport No.</th>
-            <th class="c" style="width:36pt">Room</th>
-            <th class="c" style="width:78pt">Room # by Hotel</th>
-            <th class="c" style="width:52pt">Bed Type</th>
-            <th class="c" style="width:70pt">Staff Initial</th>
-            <th style="width:100pt">Complaint</th>
+            <th class="c" style="width:54pt">Nationality</th>
+            <th style="width:64pt">Passport No.</th>
+            <th class="c" style="width:26pt">Room</th>
+            <th class="c two" style="width:44pt">Room #<br>by Hotel</th>
+            <th class="c" style="width:42pt">Bed Type</th>
+            <th class="c two" style="width:50pt">Staff<br>Initial</th>
+            <th style="width:70pt">Complaint</th>
         </tr>
     </thead>
     @foreach($rooms as $no => $members)
