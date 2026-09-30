@@ -207,7 +207,7 @@
                                  cell's own text. --}}
                             <td data-sort="{{ $r->applicant_name }}">
                                 <span class="qy-name">{{ $r->applicant_name }}
-                                    @if($r->father_name)<small>S/o {{ $r->father_name }}</small>@endif
+                                    @if($r->father_name)<small>{{ $r->parentPrefix() }} {{ $r->father_name }}</small>@endif
                                 </span>
                             </td>
                             <td data-sort="{{ trim($r->cell_phone.' '.$r->email) }}">

@@ -78,7 +78,7 @@
                         @forelse($leads as $i => $lead)
                         <tr class="gl-row" data-search="{{ strtolower(trim($lead->full_name.' '.$lead->father_name.' '.$lead->phone.' '.$lead->email.' '.$lead->city.' '.$lead->state.' '.$lead->zip_code.' '.$lead->near_gurdwara)) }}">
                             <td class="tc"><span class="gl-idx">{{ $i + 1 }}</span></td>
-                            <td><span class="gl-name">{{ $lead->full_name }}@if($lead->father_name)<small>S/o {{ $lead->father_name }}</small>@endif</span></td>
+                            <td><span class="gl-name">{{ $lead->full_name }}{{-- Leads carry no gender, so no S/o or D/o guess. --}}@if($lead->father_name)<small>Father: {{ $lead->father_name }}</small>@endif</span></td>
                             <td>
                                 <a class="gl-phone" href="tel:{{ $lead->phone }}"><i class="fa fa-phone"></i> {{ $lead->phone }}</a>
                                 @if($lead->email)<a class="gl-mail" href="mailto:{{ $lead->email }}"><i class="fa fa-envelope"></i> {{ $lead->email }}</a>@endif

@@ -265,7 +265,7 @@
                                                 <span class="hc-avatar ini" aria-hidden="true">{{ $initials($y->applicant_name) }}</span>
                                             @endif
                                             <span class="hc-name">{{ $y->applicant_name ?: '—' }}
-                                                @if($y->father_name)<small>S/o {{ $y->father_name }}</small>@endif
+                                                @if($y->father_name)<small>{{ $y->parentPrefix() }} {{ $y->father_name }}</small>@endif
                                             </span>
                                         </div>
                                     </td>

@@ -420,6 +420,19 @@ class QuickYatri extends Model
             : $sector;
     }
 
+    /**
+     * What goes before the father's name in a list: "D/o" for a woman, "S/o"
+     * for a man, from the sheet's gender tick. Left blank, it reads "Father:"
+     * rather than guessing - a hard-coded "S/o" printed under women's names
+     * until 2026-09-30.
+     */
+    public function parentPrefix(): string
+    {
+        $g = strtoupper(substr(trim((string) $this->gender), 0, 1));
+
+        return $g === 'F' ? 'D/o' : ($g === 'M' ? 'S/o' : 'Father:');
+    }
+
     /** Where the applicant's photograph lives on disk, or null. */
     public function photoPath(): ?string
     {
