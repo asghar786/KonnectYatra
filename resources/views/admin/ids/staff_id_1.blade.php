@@ -41,12 +41,30 @@
   .idcards .field .lab{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--orange);font-weight:600;}
   .idcards .field .val{margin-top:5px;font-size:18px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.15;}
   .idcards .field .val.mono{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:.01em;}
-  .idcards .foot{height:54px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));display:flex;align-items:center;justify-content:space-between;padding:0 26px 0 30px;color:#dbe2f0;font-family:'IBM Plex Mono',monospace;font-size:12px;}
-  /* The footer bar spans only the right column (580px), so the full street
-     address needs two lines. Sized and leaded to sit centred rather than cramped. */
-  .idcards .foot .addr{display:flex;align-items:center;gap:11px;font-size:11px;line-height:1.32;padding-right:14px;}
-  .idcards .foot .addr img{height:24px;width:auto;flex:0 0 auto;filter:brightness(2);}
-  .idcards .foot .web{color:#fff;font-weight:600;}
+  .idcards .foot{height:54px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));display:flex;align-items:center;justify-content:center;padding:0 26px;color:#fff;}
+  /* The address has the whole bar to itself (the website lives on the back), so
+     it is set larger in the card's own face and split street / city, centred.
+     18px here prints at about 5pt on the CR80 card. */
+  .idcards .foot .addr{display:flex;align-items:center;gap:14px;font-family:'Archivo',system-ui,sans-serif;font-size:18px;font-weight:600;line-height:1.2;letter-spacing:.01em;color:#fff;}
+  .idcards .foot .addr img{height:30px;width:auto;flex:0 0 auto;filter:brightness(2);}
+  .idcards .foot .addr .ln{display:block;}
+
+  /* Pick which crew to print. Screen only: the print deck is rebuilt from the
+     ticked cards (see the script below), and _print hides .id-picker. */
+  .id-picker{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;padding:6px 0 4px;}
+  .id-picker .count{font-weight:600;color:#16294d;margin-left:6px;}
+  .id-pick{display:flex;flex-direction:column;gap:8px;}
+  .id-pick .pick-bar{display:flex;align-items:center;gap:10px;margin:0;padding:8px 12px;border:1px solid #d5dbe6;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;user-select:none;}
+  .id-pick .pick-bar input{width:18px;height:18px;margin:0;cursor:pointer;accent-color:#e8601c;}
+  .id-pick .pick-bar .pid{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6b7689;}
+  .id-pick.on .pick-bar{border-color:#e8601c;background:#fff5f0;}
+  .id-pick .id-slot{cursor:pointer;transition:opacity .15s,filter .15s;}
+  .id-pick:not(.on) .id-slot{opacity:.35;filter:grayscale(1);}
+  #printDeck{display:none;}
+  @media print{
+    #idDeck{display:none!important;}
+    #printDeck{display:block!important;}
+  }
 
 @include('admin.ids._print')
 </style>
@@ -60,11 +78,18 @@
                 <li>Crew IDs</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
-                <a class="btn btn-info ml-2" href="{{ url('admin/back-view', $page ?? 1) }}">Back View</a>
+                <button class="btn btn-success" type="button" id="printPicked" onclick="window.print()">Print selected (<span class="pick-n">0</span>)</button>
+                <a class="btn btn-info ml-2" id="backLink" href="{{ url('admin/back-view', 1) }}">Back View</a>
             </div>
         </div>
         <div class="main-body pt-3 idcards">
+            @if(count($staff_ids))
+            <div class="id-picker">
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-pick="all">Select all</button>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-pick="none">Clear</button>
+                <span class="count"><span class="pick-n">0</span> of {{ count($staff_ids) }} selected &middot; <span class="sheets">0</span> sheet(s)</span>
+            </div>
+            @endif
             @php
                 $fmtCnic = function ($c) {
                     $c = preg_replace('/\D/', '', (string) $c);
@@ -73,6 +98,12 @@
             @endphp
             <div class="id-deck" id="idDeck">
                 @forelse($staff_ids as $value)
+                <div class="id-pick on" data-id="{{ $value->id }}">
+                <label class="pick-bar">
+                    <input type="checkbox" class="pick-cb" value="{{ $value->id }}" checked>
+                    <span>{{ @$value->name }}</span>
+                    <span class="pid">KY-US-{{ str_pad(@$value->id, 4, '0', STR_PAD_LEFT) }}</span>
+                </label>
                 <div class="id-slot">
                     <div class="card front">
                         <div class="side">
@@ -115,18 +146,80 @@
                                 {{-- Canonical office address, matching config/schema.php, the site
                                      header and the Contact page. The old 18502 Hillside Ave was
                                      superseded on 2026-08-17; keep all four byte-identical. --}}
-                                <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" />148-36 Guy R Brewers Blvd. Suit #202A, Jamaica, NY 11434</div>
-                                <div class="web">www.konnectyatra.org</div>
+                                <div class="addr"><img src="{{ asset('assets2/id/globe.png') }}" alt="" /><span><span class="ln">148-36 Guy R Brewers Blvd. Suit #202A,</span><span class="ln">Jamaica, NY 11434</span></span></div>
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
                 @empty
                 <p class="text-muted">No crew members found.</p>
                 @endforelse
             </div>
+            {{-- Filled by the script with the ticked cards, eight per .id-deck, so each
+                 printed sheet is its own grid and _print breaks the page between them. --}}
+            <div id="printDeck"></div>
         </div>
     </div>
 </main>
 <div class="ttr-overlay"></div>
+@endsection
+@section('js')
+<script type="text/javascript">
+(function () {
+    var KEY = 'ky.crewIds.picked';
+    var picks = [].slice.call(document.querySelectorAll('.id-pick'));
+    if (!picks.length) return;
+    var printDeck = document.getElementById('printDeck');
+    var backBase = @json(url('admin/back-view', 1));
+
+    // Remember the last selection in this browser only; everything still works
+    // without it (private window, blocked storage) - it just starts all ticked.
+    try {
+        var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+        if (Array.isArray(saved)) {
+            picks.forEach(function (p) { p.querySelector('.pick-cb').checked = saved.indexOf(p.dataset.id) !== -1; });
+        }
+    } catch (e) {}
+
+    function sync() {
+        var chosen = picks.filter(function (p) { return p.querySelector('.pick-cb').checked; });
+        picks.forEach(function (p) { p.classList.toggle('on', chosen.indexOf(p) !== -1); });
+
+        printDeck.innerHTML = '';
+        for (var i = 0; i < chosen.length; i += 8) {
+            var deck = document.createElement('div');
+            deck.className = 'id-deck';
+            chosen.slice(i, i + 8).forEach(function (p) { deck.appendChild(p.querySelector('.id-slot').cloneNode(true)); });
+            printDeck.appendChild(deck);
+        }
+
+        var n = chosen.length, sheets = Math.ceil(n / 8);
+        [].forEach.call(document.querySelectorAll('.pick-n'), function (el) { el.textContent = n; });
+        [].forEach.call(document.querySelectorAll('.id-picker .sheets'), function (el) { el.textContent = sheets; });
+        document.getElementById('printPicked').disabled = n === 0;
+        document.getElementById('backLink').href = backBase + '?cards=' + Math.max(n, 1);
+
+        try { localStorage.setItem(KEY, JSON.stringify(chosen.map(function (p) { return p.dataset.id; }))); } catch (e) {}
+    }
+
+    picks.forEach(function (p) {
+        p.querySelector('.pick-cb').addEventListener('change', sync);
+        // Clicking the card itself toggles it too.
+        p.querySelector('.id-slot').addEventListener('click', function () {
+            var cb = p.querySelector('.pick-cb');
+            cb.checked = !cb.checked;
+            sync();
+        });
+    });
+    [].forEach.call(document.querySelectorAll('[data-pick]'), function (b) {
+        b.addEventListener('click', function () {
+            var all = b.getAttribute('data-pick') === 'all';
+            picks.forEach(function (p) { p.querySelector('.pick-cb').checked = all; });
+            sync();
+        });
+    });
+    sync();
+})();
+</script>
 @endsection

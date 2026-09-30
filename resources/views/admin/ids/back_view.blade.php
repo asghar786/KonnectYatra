@@ -108,9 +108,14 @@
                  would force the back sheet to print mirrored to survive a duplex flip.
                  A uniform back lines up whichever way the printer turns the paper,
                  as long as the sheet is full - hence always eight slots (see
-                 PackagesController::idBackSheet). Shared by the Crew and Yatri IDs. --}}
-            <div class="id-deck" id="idDeck">
-                @for($i = 0; $i < $slots; $i++)
+                 PackagesController::idBackSheet). Shared by the Crew and Yatri IDs.
+                 One deck per front sheet; _print breaks the page between decks. --}}
+            @if($sheets > 1)
+            <div class="alert alert-info id-note">{{ $sheets }} back sheets &mdash; one behind each front sheet. Every back is the same, so any page fits any front.</div>
+            @endif
+            @for($s = 0; $s < $sheets; $s++)
+            <div class="id-deck">
+                @for($i = 0; $i < 8; $i++)
                 <div class="id-slot">
                     <div class="card back">
                         <div class="back-head">
@@ -175,10 +180,11 @@
                     </div>
                 </div>
                 @endfor
-                @if($slots === 0)
-                <p class="text-muted">{{ $empty }}</p>
-                @endif
             </div>
+            @endfor
+            @if($sheets === 0)
+            <p class="text-muted">{{ $empty }}</p>
+            @endif
         </div>
     </div>
 </main>

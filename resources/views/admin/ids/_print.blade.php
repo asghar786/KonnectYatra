@@ -4,7 +4,7 @@
      Included inside each view's <style> block. --}}
 @media print{
   /* Only the deck goes on the sheet - drop the admin chrome and the toolbar. */
-  .ttr-header,.ttr-sidebar,.ttr-overlay,.db-breadcrumb{display:none!important;}
+  .ttr-header,.ttr-sidebar,.ttr-overlay,.db-breadcrumb,.id-note,.id-picker{display:none!important;}
   html,body{background:#fff!important;margin:0!important;padding:0!important;}
   /* .idcards.main-body is the page wrapper. Do NOT write plain .main-body here:
      the card's own inner column carries that class too, and zeroing its padding
@@ -20,6 +20,9 @@
   /* Eight cards to a sheet - which is exactly the 8 the controller pages by -
      laid out 2 across at true CR80 ID size (3.375in x 2.125in). */
   .id-deck{display:grid!important;grid-template-columns:repeat(2,3.375in);justify-content:center;align-content:start;gap:.2in .3in;padding:0!important;margin:0!important;}
+  /* More than eight cards come as one deck per sheet, each starting a new page,
+     so every sheet keeps the same top-aligned grid and its back still lines up. */
+  .id-deck + .id-deck{break-before:page;page-break-before:always;}
   .id-slot{width:3.375in;height:2.13in;overflow:hidden;border-radius:8px;outline:1px solid #c7d0de;page-break-inside:avoid;break-inside:avoid;}
   /* 880px design width * .3681818 = 324px = 3.375in at the CSS 96dpi print scale. */
   .id-slot .card{transform:scale(.3681818)!important;transform-origin:top left;box-shadow:none!important;}

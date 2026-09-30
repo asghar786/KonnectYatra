@@ -1618,15 +1618,15 @@ class PackagesController extends Controller
     return view('admin.ids.yatri_id', $all_data);
   }
 
-  public function back_view($id = 1)
+  // The Crew ID page prints only the cards ticked there, so it passes the count
+  // along (?cards=N) and gets one back sheet per front sheet it will print.
+  public function back_view(Request $request, $id = 1)
   {
-    $query = YatriIds::where('type', 'Crew Member');
-    if ((int)$id <= 1) {
-      $query = $query->limit(8);
-    } else {
-      $query = $query->offset(((int)$id - 1) * 8)->limit(8);
+    $cards = (int) $request->query('cards', 0);
+    if ($cards < 1) {
+      $cards = YatriIds::where('type', 'Crew Member')->count();
     }
-    return $this->idBackSheet($query->count() > 0, url('admin/staff_ids', max(1, (int)$id)), 'No crew members found.');
+    return $this->idBackSheet($cards > 0, url('admin/staff_ids', 1), 'No crew members selected.', (int) ceil($cards / 8));
   }
 
   public function yatri_back_view($id = 1)
@@ -1642,10 +1642,10 @@ class PackagesController extends Controller
   // with backs on the wrong side after a duplex flip, because the flip mirrors
   // the columns. A full sheet puts a back behind every front whichever way the
   // printer turns the paper; the spares are simply not cut out.
-  private function idBackSheet($hasCards, $frontUrl, $emptyText)
+  private function idBackSheet($hasCards, $frontUrl, $emptyText, $sheets = 1)
   {
     return view('admin.ids.back_view', [
-      'slots'     => $hasCards ? 8 : 0,
+      'sheets'    => $hasCards ? max(1, (int) $sheets) : 0,
       'front_url' => $frontUrl,
       'empty'     => $emptyText,
       'back_ids'  => YatriIdsBack::first(),
@@ -1657,20 +1657,12 @@ class PackagesController extends Controller
     // dd($data['data']);
     return view('admin.foreigners_egistration', $data);
   }
-  public function staff_ids($id)
+  // All crew on one page: the office ticks only the staff travelling this time
+  // and the page prints just those, eight to a sheet. {id} is kept so existing
+  // links still resolve; the crew list is short enough not to need paging.
+  public function staff_ids($id = 1)
   {
-    $data = new YatriIds;
-    if ($id <= 1) {
-      $data = $data->limit(8);
-    } else {
-      $offset = ((int)$id - 1) * 8;
-      $data = $data->offset($offset)->limit(8);
-    }
-    $data = $data->where('type', 'Crew Member')->get();
-    $all_data['staff_ids'] = $data;
-    $all_data['page'] = (int)$id;
-    $all_data['next'] = (int)$id + 1;
-    $all_data['prev'] = (int)$id - 1;
+    $all_data['staff_ids'] = YatriIds::where('type', 'Crew Member')->orderBy('id', 'ASC')->get();
     return view('admin.ids.staff_id_1', $all_data);
   }
   public function ids_back()
