@@ -15,6 +15,7 @@
     .qy-btn:hover{transform:translateY(-2px)}
     .qy-btn.save{background:#f54e18; color:#fff; box-shadow:0 6px 16px rgba(245,78,24,.28)}
     .qy-btn.cancel{background:#eef1f6; color:#5a6273}
+    .qy-btn.formc{background:#fff3d6; color:#a16207}
     .qy-note{color:#6b7280; font-size:13px; margin-right:auto}
     .qy-errors{background:#feeceb; border:1px solid #f6c9c4; color:#b3261e; border-radius:12px; padding:14px 18px; margin-bottom:18px; font-size:14px}
     .qy-errors ul{margin:8px 0 0; padding-left:18px}
@@ -78,6 +79,11 @@
 
                 <div class="qy-actions">
                     <span class="qy-note">Only the applicant&rsquo;s name is required — save a partly filled sheet and finish it later.</span>
+                    {{-- Reads the saved citizenship, so a change typed above
+                         shows here once the sheet has been saved. --}}
+                    @if($row->exists && $row->needsFormC())
+                        <a href="{{ route('quick-yatri-form-c', $row->id) }}" class="qy-btn formc"><i class="fa fa-id-card"></i> Download Form C</a>
+                    @endif
                     <a href="{{ route('quick-yatri') }}" class="qy-btn cancel">Cancel</a>
                     <button type="submit" class="qy-btn save"><i class="fa fa-save"></i> {{ $row->exists ? 'Update Application' : 'Save Application' }}</button>
                 </div>

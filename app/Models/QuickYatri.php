@@ -433,6 +433,17 @@ class QuickYatri extends Model
         return $g === 'F' ? 'D/o' : ($g === 'M' ? 'S/o' : 'Father:');
     }
 
+    /**
+     * Whether this yatri travels on an Indian passport, and so has to carry
+     * Pakistan's Form 'C' (Temporary Certificate of Registration). Read off
+     * the sheet's Citizenship / Nationality box, folded the same way the hotel
+     * check-in list folds it, so "INDIA", "INDIAN" and "IND" all count.
+     */
+    public function needsFormC(): bool
+    {
+        return \App\Support\HotelCheckin::nationality($this->citizenship) === 'IND';
+    }
+
     /** Where the applicant's photograph lives on disk, or null. */
     public function photoPath(): ?string
     {

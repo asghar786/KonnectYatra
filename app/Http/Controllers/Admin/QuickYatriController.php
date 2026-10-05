@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\QuickYatri;
+use App\Support\HotelCheckin;
 use App\Support\UsAirports;
 use App\Support\YatriDate;
 use Illuminate\Http\Request;
@@ -183,6 +184,52 @@ class QuickYatriController extends Controller
             'row'       => QuickYatri::findOrFail($id),
             'mode'      => 'print',
             'autoPrint' => request()->boolean('print'),
+        ]);
+    }
+
+    /**
+     * Form 'C' — Pakistan's Temporary Certificate of Registration, which a
+     * yatri travelling on an Indian passport has to carry. The same dompdf
+     * template the Yatri Bookings flow downloads (`pdf.form_c`), fed from the
+     * Quick Yatri sheet instead of a `yatri_visas` row.
+     *
+     * The list only offers the button to Indian-passport yatris, but the route
+     * itself does not refuse anyone else: the office decides who needs one.
+     */
+    public function formC($id)
+    {
+        $row = QuickYatri::findOrFail($id);
+
+        // The group's first stop, as set on Hotel Booking Yatris — that is the
+        // residential address the certificate asks for.
+        $islamabad = HotelCheckin::stored('islamabad');
+        $hotel     = ($islamabad['hotel'] ?? '') !== '' ? $islamabad['hotel'] : HotelCheckin::HOTELS['islamabad']['hotel'];
+
+        // The template reads a yatri_visas row, so hand it that shape. What
+        // the sheet does not ask (where the passport was issued, the street
+        // address in Pakistan) stays a blank line to write on.
+        $yatri = (object) [
+            'yatri_id'          => 'QY-' . $row->id,
+            'first_name'        => $row->applicant_name,
+            'middle_name'       => '',
+            'last_name'         => '',
+            'nationality'       => $row->citizenship,
+            'passport_country'  => '',
+            'passport'          => $row->passport_no,
+            'issuing_authority' => '',
+            'hotel'             => (object) ['name' => $hotel, 'address' => ''],
+            'gurdwara'          => null,
+            'gurdwara_name'     => '',
+            'city'              => '',
+            'state'             => '',
+        ];
+
+        $pdf  = \PDF::loadView('pdf.form_c', ['yatri' => $yatri])->setPaper('a4');
+        $name = preg_replace('/[^A-Za-z0-9]+/', '-', trim((string) $row->applicant_name));
+
+        return response($pdf->output(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="Form-C-' . trim($name, '-') . '.pdf"',
         ]);
     }
 

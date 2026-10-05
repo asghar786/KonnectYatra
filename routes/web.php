@@ -226,6 +226,7 @@ Route::group(['prefix' => 'admin',
     Route::get('/quick-yatri/{id}/edit',[\App\Http\Controllers\Admin\QuickYatriController::class, 'edit'])->name('quick-yatri-edit');
     Route::post('/quick-yatri/{id}/update',[\App\Http\Controllers\Admin\QuickYatriController::class, 'update'])->name('quick-yatri-update');
     Route::get('/quick-yatri/{id}/print',[\App\Http\Controllers\Admin\QuickYatriController::class, 'printOne'])->name('quick-yatri-print');
+    Route::get('/quick-yatri/{id}/form-c',[\App\Http\Controllers\Admin\QuickYatriController::class, 'formC'])->name('quick-yatri-form-c'); // Form 'C' — for yatris on an Indian passport
     Route::get('/quick-yatri/{id}/delete',[\App\Http\Controllers\Admin\QuickYatriController::class, 'destroy'])->name('quick-yatri-delete');
 
     // Newsletter subscribers

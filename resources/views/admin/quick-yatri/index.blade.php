@@ -70,6 +70,8 @@
     .qy-btn:hover{transform:translateY(-2px)}
     .qy-btn.prn{background:#eef0ff; color:#2d1b69}
     .qy-btn.prn:hover{background:#2d1b69; color:#fff; box-shadow:0 6px 14px rgba(45,27,105,.3)}
+    .qy-btn.fc{background:#fff3d6; color:#a16207}
+    .qy-btn.fc:hover{background:#a16207; color:#fff; box-shadow:0 6px 14px rgba(161,98,7,.3)}
     .qy-btn.edt{background:#eaf2ff; color:#1a73e8}
     .qy-btn.edt:hover{background:#1a73e8; color:#fff; box-shadow:0 6px 14px rgba(26,115,232,.3)}
     .qy-btn.del{background:#feeceb; color:#e23b2e}
@@ -287,6 +289,10 @@
                             <td class="tc">
                                 <div class="qy-actions">
                                     <a href="{{ route('quick-yatri-print', $r->id) }}" target="_blank" rel="noopener" class="qy-btn prn" title="Print / Save as PDF"><i class="fa fa-print"></i></a>
+                                    {{-- Only a yatri on an Indian passport carries Form 'C'. --}}
+                                    @if($r->needsFormC())
+                                        <a href="{{ route('quick-yatri-form-c', $r->id) }}" class="qy-btn fc" title="Download Form C (Indian passport)"><i class="fa fa-id-card"></i></a>
+                                    @endif
                                     <a href="{{ route('quick-yatri-edit', $r->id) }}" class="qy-btn edt" title="Edit"><i class="fa fa-pen"></i></a>
                                     <a href="{{ route('quick-yatri-delete', $r->id) }}" class="qy-btn del" title="Delete" onclick="return confirm('Delete this application? This cannot be undone.')"><i class="fa fa-trash"></i></a>
                                 </div>
