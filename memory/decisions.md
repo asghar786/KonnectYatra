@@ -1392,3 +1392,24 @@ raise it if a female crew member is added.
 
 Also fixed the same day: Yatri Back View pages 2+ printed nothing, because `count()` on an
 offset query returns 0 past page 1.
+
+## 2026-10-05 — Form C on Quick Yatri, for Indian-passport yatris only
+
+Form 'C' (Pakistan's Temporary Certificate of Registration) could only be downloaded from Yatri
+Bookings. Quick Yatri now has it too: `GET /admin/quick-yatri/{id}/form-c`
+(`QuickYatriController::formC`), offered as an amber ID-card button on the list and a
+"Download Form C" button on the edit screen.
+
+- **Shown only when `QuickYatri::needsFormC()`** — the sheet's Citizenship / Nationality folds to
+  `IND` through `HotelCheckin::nationality()` (INDIA / INDIAN / IND). The route itself refuses
+  nobody; only the button is conditional.
+- **Same template, no fork:** `pdf/form_c.blade.php` reads a `yatri_visas` row, so the controller
+  hands it a plain object in that shape. Residence = the Islamabad hotel saved on Hotel Booking
+  Yatris (default Best Western Premier).
+- **Left blank on purpose:** "issued at" (the sheet has no issuing-authority box), arrival date,
+  flight number and street address — lines to write on. Footer id reads `QY-{id}`.
+- No migration. 4 tests in `tests/Feature/QuickYatriFormCTest.php`.
+- **Pre-existing, not touched:** `QuickYatriGroupsTest::test_a_city_forms_a_group_before_any_flight_is_booked`
+  fails on the local DB with or without this change (it uses PHL, which real rows now use).
+
+**Review:** see decisions.csv row dated 2026-10-05.
