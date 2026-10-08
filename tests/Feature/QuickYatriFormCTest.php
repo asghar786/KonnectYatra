@@ -75,18 +75,25 @@ class QuickYatriFormCTest extends TestCase
         $this->assertStringStartsWith('%PDF', $response->getContent());
     }
 
-    public function test_the_certificate_carries_the_sheets_own_answers()
+    public function test_the_certificate_fills_in_only_the_name_and_the_passport_number()
     {
         // The PDF itself is compressed, so read the template it is made from.
+        // Everything a record could once override is handed in as a decoy:
+        // the form's wording is fixed (FormC-Updated.pdf, 2026-10-08).
         $html = view('pdf.form_c', ['yatri' => (object) [
-            'yatri_id' => 'QY-1', 'first_name' => 'QA FORMC SINGH', 'middle_name' => '', 'last_name' => '',
-            'nationality' => 'INDIAN', 'passport_country' => '', 'passport' => 'Z1234567',
-            'issuing_authority' => '', 'hotel' => (object) ['name' => 'QA HOTEL', 'address' => ''],
-            'gurdwara' => null, 'gurdwara_name' => '', 'city' => '', 'state' => '',
+            'first_name' => 'QA FORMC', 'middle_name' => '', 'last_name' => 'SINGH', 'passport' => 'Z1234567',
+            'nationality' => 'QA NATIONALITY', 'issuing_authority' => 'QA AUTHORITY',
+            'hotel' => (object) ['name' => 'QA HOTEL', 'address' => 'QA STREET'],
         ]])->render();
 
-        foreach (['QA FORMC SINGH', 'INDIAN', 'Z1234567', 'QA HOTEL'] as $expected) {
+        foreach ([
+            'QA FORMC SINGH', 'Z1234567', 'INDIAN', 'Indian Consulate, New York', 'November 2026',
+            'Best Western Premier Hotel', '6 Club Road, Islamabad.',
+        ] as $expected) {
             $this->assertStringContainsString($expected, $html);
+        }
+        foreach (['QA NATIONALITY', 'QA AUTHORITY', 'QA HOTEL', 'QA STREET'] as $decoy) {
+            $this->assertStringNotContainsString($decoy, $html);
         }
     }
 }

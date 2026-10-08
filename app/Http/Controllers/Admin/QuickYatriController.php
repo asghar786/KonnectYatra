@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\QuickYatri;
-use App\Support\HotelCheckin;
 use App\Support\UsAirports;
 use App\Support\YatriDate;
 use Illuminate\Http\Request;
@@ -200,28 +199,14 @@ class QuickYatriController extends Controller
     {
         $row = QuickYatri::findOrFail($id);
 
-        // The group's first stop, as set on Hotel Booking Yatris — that is the
-        // residential address the certificate asks for.
-        $islamabad = HotelCheckin::stored('islamabad');
-        $hotel     = ($islamabad['hotel'] ?? '') !== '' ? $islamabad['hotel'] : HotelCheckin::HOTELS['islamabad']['hotel'];
-
-        // The template reads a yatri_visas row, so hand it that shape. What
-        // the sheet does not ask (where the passport was issued, the street
-        // address in Pakistan) stays a blank line to write on.
+        // The template reads a yatri_visas row, so hand it that shape. Only
+        // the name and the passport number are filled in; the rest of the
+        // certificate is fixed wording in the template itself.
         $yatri = (object) [
-            'yatri_id'          => 'QY-' . $row->id,
-            'first_name'        => $row->applicant_name,
-            'middle_name'       => '',
-            'last_name'         => '',
-            'nationality'       => $row->citizenship,
-            'passport_country'  => '',
-            'passport'          => $row->passport_no,
-            'issuing_authority' => '',
-            'hotel'             => (object) ['name' => $hotel, 'address' => ''],
-            'gurdwara'          => null,
-            'gurdwara_name'     => '',
-            'city'              => '',
-            'state'             => '',
+            'first_name'  => $row->applicant_name,
+            'middle_name' => '',
+            'last_name'   => '',
+            'passport'    => $row->passport_no,
         ];
 
         $pdf  = \PDF::loadView('pdf.form_c', ['yatri' => $yatri])->setPaper('a4');
