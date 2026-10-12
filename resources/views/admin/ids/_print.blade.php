@@ -4,7 +4,8 @@
      cannot be cut. Included inside each view's <style> block.
 
      $idSize picks the stock:
-       'cr80'  (default, Crew IDs)  Letter, CR80 3.375in x 2.125in, top-aligned.
+       'cr80'  (default, Crew IDs)  US Letter or A4 (see _paper), CR80
+                                    3.375in x 2.125in, 2 x 4 centred on the sheet.
        'yatri' (Yatri IDs)          A4 or US Letter (see _paper), 3.9in x 2.5in,
                                     2 x 4 spread over the whole sheet. Centred both
                                     ways, so front and back line up whichever edge
@@ -62,11 +63,17 @@
   /* The back is designed 880px wide: 880 * .4254545 = 374.4px = 3.9in. */
   .id-slot .card{transform:none!important;zoom:.4254545;box-shadow:none!important;}
 @else
-  @page{size:Letter portrait;margin:.4in;}
-
   /* Eight cards to a sheet - which is exactly the 8 the controller pages by -
-     laid out 2 across at true CR80 ID size (3.375in x 2.125in). */
-  .id-deck{display:grid!important;grid-template-columns:repeat(2,3.375in);justify-content:center;align-content:start;gap:.2in .3in;padding:0!important;margin:0!important;}
+     laid out 2 across at true CR80 ID size (3.375in x 2.125in), .3in apart
+     across and .2in down. The block is centred on the sheet both ways, like the
+     Yatri one, so the back lands behind the front whichever edge the paper is
+     flipped on; it used to hang from the top margin, which only survived a
+     long-edge flip. The four rows are fixed, so a short sheet keeps its slots.
+     US Letter is the default: .05in + 10.9in + .05in = 11in. */
+  @page{size:Letter portrait;margin:0;}
+  .id-deck{display:grid!important;grid-template-columns:repeat(2,3.375in);grid-template-rows:repeat(4,2.13in);justify-content:center;align-content:center;gap:.2in .3in;box-sizing:content-box;height:10.9in;padding:.05in 0 0!important;margin:0!important;}
+  /* A4, picked with the Paper box (_paper): .045in + 11.6in + .045in = 11.69in. */
+  html.paper-a4 .id-deck{height:11.6in;padding:.045in 0 0!important;}
   /* More than eight cards come as one deck per sheet, each starting a new page,
      so every sheet keeps the same top-aligned grid and its back still lines up. */
   .id-deck + .id-deck{break-before:page;page-break-before:always;}

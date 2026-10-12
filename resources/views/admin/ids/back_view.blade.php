@@ -102,9 +102,7 @@
                 <li>Back View</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                @if(($idSize ?? 'cr80') === 'yatri')
-                @include('admin.ids._paper')
-                @endif
+                @include('admin.ids._paper', ['paperDefault' => ($idSize ?? 'cr80') === 'yatri' ? 'a4' : 'letter'])
                 <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
                 <a class="btn btn-info ml-2" href="{{ $front_url }}">Front View</a>
             </div>
