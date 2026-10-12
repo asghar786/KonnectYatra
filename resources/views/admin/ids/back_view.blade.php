@@ -91,6 +91,21 @@
      the back grows to 880 x 564px; the body column is flex and takes the extra. */
   .id-slot{height:352px;}
   .idcards .card{height:564px;}
+  /* Larger type on the Yatri back (terms + return address), with no signature
+     line. The terms column widens 316 -> 370px to carry it; these sizes leave
+     9px under the last bullet, so the terms text cannot grow without a cut. */
+  .idcards .back-body{grid-template-columns:1fr 370px;}
+  .idcards .terms .btitle{font-size:11.5px;}
+  .idcards .terms .tmeta .co{font-size:11.5px;}
+  .idcards .terms .tmeta .nm{font-size:20px;}
+  .idcards .terms .tmeta .tr{font-size:14.5px;}
+  .idcards .terms .lead,.idcards .terms li{font-size:15px;line-height:1.4;}
+  .idcards .terms ul{gap:8px;margin-top:10px;}
+  .idcards .terms li{padding-left:16px;}
+  .idcards .terms li::before{top:8px;width:6px;height:6px;}
+  .idcards .back-foot .rl{font-size:11.5px;flex-basis:90px;}
+  .idcards .back-foot .ra{font-size:17px;}
+  .idcards .back-foot .ra .ln{font-size:14.5px;}
 @endif
 @include('admin.ids._print', ['idSize' => $idSize ?? 'cr80'])
 </style>
@@ -171,10 +186,12 @@
                                     <li>This ID Card may be presented upon request to authorized government personnel, security officials, or Konnect Yatra representatives.</li>
                                     <li><span class="lbl">Lost or Stolen Card:</span> Any lost or stolen ID Card must be reported immediately to the assigned Tour Guide.</li>
                                 </ul>
+                                @if(($idSize ?? 'cr80') !== 'yatri')
                                 <div class="sig">
                                     <div class="line"></div>
                                     <div class="l">Authorized Signatory</div>
                                 </div>
+                                @endif
                             </div>
                         </div>
                         <div class="back-foot">
