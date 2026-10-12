@@ -59,3 +59,10 @@ Format:
   caused in August when the pending list was handed over at the end of a session instead.
 - **Run multi-column migrations in the order given.** Each `->after('...')` column has to already
   exist, so a batch that builds on itself cannot be pasted out of sequence or run in parallel.
+- **Print-size or alignment complaint: establish the paper size before changing any spacing.**
+  Ask (or read it off a ruler in the photo) whether the tray holds A4 or US Letter, and check the
+  layout's `@page` size against it, before touching gutters or margins. Why: on 2026-10-12 a
+  "widen the gap between the cards" request was answered by tuning an A4 layout for three rounds
+  while the office was printing on Letter, which scales the page to 94% and makes every measurement
+  wrong. The user's verdict: "why this small things is not fixable by your". Related: never place
+  print content nearer than about .17in to the paper edge; the printer shrinks the page to fit.
