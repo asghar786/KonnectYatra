@@ -33,12 +33,15 @@
   .idcards,.idcards *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
 
 @if($yatriStock)
-  /* A4 is 8.27in x 11.69in. Two 3.9in cards + a .1in gutter = 7.9in, leaving
-     .185in each side. Four 2.5in rows = 10in; the other 1.69in is shared out
-     evenly above, between and below them. The four rows are fixed, so a short
-     last page puts its cards in exactly the slots a full page would. */
+  /* A4 is 8.27in x 11.69in. Four 2.5in rows = 10in; the other 1.6in of the deck
+     is shared out evenly above, between and below them, .32in each. The gutter
+     between the two columns is set to that same .32in so the cards are spaced
+     alike both ways: two 3.9in cards + .32in = 8.12in, leaving only .075in each
+     side - the gutter cannot grow further without a smaller card. The four rows
+     are fixed, so a short last page puts its cards in exactly the slots a full
+     page would. */
   @page{size:A4 portrait;margin:0;}
-  .id-deck{display:grid!important;grid-template-columns:repeat(2,3.9in);grid-template-rows:repeat(4,2.5in);justify-content:center;align-content:space-evenly;column-gap:.1in;row-gap:0;box-sizing:content-box;height:11.6in;padding:.045in 0 0!important;margin:0!important;}
+  .id-deck{display:grid!important;grid-template-columns:repeat(2,3.9in);grid-template-rows:repeat(4,2.5in);justify-content:center;align-content:space-evenly;column-gap:.32in;row-gap:0;box-sizing:content-box;height:11.6in;padding:.045in 0 0!important;margin:0!important;}
   /* .045in on top + 11.6in = the sheet's 11.69in less .045in at the foot: the
      grid sits dead centre, which is what lets a short-edge flip line up too. */
   .id-deck + .id-deck{break-before:page;page-break-before:always;}
