@@ -29,7 +29,7 @@
      white text black. Style spans and divs with classes instead. */
 
   /* Two columns: what to do in an emergency, and the terms of the credential. */
-  .idcards .back-body{flex:1;display:grid;grid-template-columns:1fr 316px;min-height:0;}
+  .idcards .back-body{flex:1;display:grid;grid-template-columns:1fr 380px;min-height:0;}
   /* Both columns are flex so the trailing block in each can be pinned to the
      bottom edge with margin-top:auto, rather than leaving a ragged gap. */
   .idcards .bcol{padding:24px 26px 20px 30px;min-width:0;display:flex;flex-direction:column;}
@@ -64,48 +64,31 @@
   .idcards .qr{flex:0 0 146px;margin-left:auto;}
   .idcards .qr img{width:146px;height:146px;display:block;border-radius:8px;background:#fff;}
 
-  /* What the credential IS, above the conditions it sets out. */
+  /* What the credential IS, above the conditions it sets out. The column is
+     380px and the type is sized to fill it: on the shorter Crew card the last
+     bullet ends just above the bottom margin, so longer terms need a smaller size. */
+  .idcards .terms .btitle{font-size:11.5px;}
   .idcards .terms .tmeta{margin-top:10px;}
-  .idcards .terms .tmeta .co{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--orange);font-weight:600;}
-  .idcards .terms .tmeta .nm{font-size:15px;font-weight:800;color:var(--navy);line-height:1.15;margin-top:2px;}
-  .idcards .terms .tmeta .tr{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:1px;}
-  .idcards .terms .lead{font-size:11.5px;line-height:1.42;color:#42506a;margin:9px 0 0;}
-  .idcards .terms ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;}
-  .idcards .terms li{font-size:11.5px;line-height:1.42;color:#42506a;padding-left:14px;position:relative;}
+  .idcards .terms .tmeta .co{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.14em;color:var(--orange);font-weight:600;}
+  .idcards .terms .tmeta .nm{font-size:20px;font-weight:800;color:var(--navy);line-height:1.15;margin-top:2px;}
+  .idcards .terms .tmeta .tr{font-size:14.5px;font-weight:600;color:var(--muted);margin-top:1px;}
+  .idcards .terms .lead{font-size:15px;line-height:1.4;color:#42506a;margin:9px 0 0;}
+  .idcards .terms ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .idcards .terms li{font-size:15px;line-height:1.4;color:#42506a;padding-left:16px;position:relative;}
   .idcards .terms li .lbl{color:var(--navy);font-weight:700;}
-  .idcards .terms li::before{content:"";position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--orange);}
-  /* A signature belongs on the bottom edge, not floating mid-column. */
-  .idcards .sig{margin-top:auto;padding-top:20px;}
-  .idcards .sig .line{height:1px;background:var(--navy);opacity:.35;margin-bottom:6px;}
-  .idcards .sig .l{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
-
+  .idcards .terms li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--orange);}
   /* Return address sits in the navy foot, matching the front's footer bar. */
   .idcards .back-foot{flex:0 0 74px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));color:#dbe2f0;padding:0 30px;display:flex;align-items:center;gap:16px;}
-  .idcards .back-foot .rl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#fff;font-weight:600;line-height:1.35;flex:0 0 74px;}
-  .idcards .back-foot .ra{font-size:13px;line-height:1.35;color:#fff;font-weight:600;}
+  .idcards .back-foot .rl{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#fff;font-weight:600;line-height:1.35;flex:0 0 90px;}
+  .idcards .back-foot .ra{font-size:17px;line-height:1.35;color:#fff;font-weight:600;}
   /* Block, or the phone/web run on from the end of the street address. */
-  .idcards .back-foot .ra .ln{display:block;margin-top:3px;color:#fff;font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;}
+  .idcards .back-foot .ra .ln{display:block;margin-top:3px;color:#fff;font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:14.5px;letter-spacing:.02em;}
 
 @if(($idSize ?? 'cr80') === 'yatri')
   /* Yatri stock is 3.9in x 2.5in (ratio 1.56), a touch taller than CR80, so
      the back grows to 880 x 564px; the body column is flex and takes the extra. */
   .id-slot{height:352px;}
   .idcards .card{height:564px;}
-  /* Larger type on the Yatri back (terms + return address), with no signature
-     line. The terms column widens 316 -> 370px to carry it; these sizes leave
-     9px under the last bullet, so the terms text cannot grow without a cut. */
-  .idcards .back-body{grid-template-columns:1fr 370px;}
-  .idcards .terms .btitle{font-size:11.5px;}
-  .idcards .terms .tmeta .co{font-size:11.5px;}
-  .idcards .terms .tmeta .nm{font-size:20px;}
-  .idcards .terms .tmeta .tr{font-size:14.5px;}
-  .idcards .terms .lead,.idcards .terms li{font-size:15px;line-height:1.4;}
-  .idcards .terms ul{gap:8px;margin-top:10px;}
-  .idcards .terms li{padding-left:16px;}
-  .idcards .terms li::before{top:8px;width:6px;height:6px;}
-  .idcards .back-foot .rl{font-size:11.5px;flex-basis:90px;}
-  .idcards .back-foot .ra{font-size:17px;}
-  .idcards .back-foot .ra .ln{font-size:14.5px;}
 @endif
 @include('admin.ids._print', ['idSize' => $idSize ?? 'cr80'])
 </style>
@@ -186,12 +169,6 @@
                                     <li>This ID Card may be presented upon request to authorized government personnel, security officials, or Konnect Yatra representatives.</li>
                                     <li><span class="lbl">Lost or Stolen Card:</span> Any lost or stolen ID Card must be reported immediately to the assigned Tour Guide.</li>
                                 </ul>
-                                @if(($idSize ?? 'cr80') !== 'yatri')
-                                <div class="sig">
-                                    <div class="line"></div>
-                                    <div class="l">Authorized Signatory</div>
-                                </div>
-                                @endif
                             </div>
                         </div>
                         <div class="back-foot">
