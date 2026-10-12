@@ -14,19 +14,23 @@
   .idcards .front{display:grid;grid-template-columns:300px 1fr;}
   .idcards .side{position:relative;background:radial-gradient(120% 80% at 18% 6%,var(--navy-2),var(--navy) 46%,var(--navy-deep) 100%);padding:30px 26px 0;display:flex;flex-direction:column;align-items:center;color:#fff;overflow:hidden;}
   .idcards .side .wm{position:absolute;right:-70px;bottom:-50px;width:280px;opacity:.07;filter:brightness(2);pointer-events:none;}
-  .idcards .photo{width:206px;height:236px;border-radius:14px;object-fit:cover;border:4px solid #fff;background:#dfe3ea;box-shadow:0 14px 26px -12px rgba(0,0,0,.55);position:relative;z-index:1;}
-  .idcards .side .name{margin-top:20px;font-size:25px;font-weight:800;letter-spacing:-.01em;text-align:center;z-index:1;}
+  .idcards .photo{width:224px;height:256px;border-radius:14px;object-fit:cover;border:4px solid #fff;background:#dfe3ea;box-shadow:0 14px 26px -12px rgba(0,0,0,.55);position:relative;z-index:1;}
+  /* The photo and the crew pill are fixed; name / father / CNIC float between them.
+     Equal auto margins above the name and above the pill split whatever height a
+     short name leaves, so the block sits centred instead of leaving one empty
+     band over the pill - and a long name that wraps simply takes the slack. */
+  .idcards .side .name{margin-top:auto;padding-top:14px;font-size:31px;font-weight:800;letter-spacing:-.01em;line-height:1.1;text-align:center;z-index:1;}
   /* Name reads "<name> s/o <father>" down the panel — one line each, because at
-     25px a combined string wraps awkwardly on longer names ("Mohammad Kabir Ali"). */
-  .idcards .side .sof{margin-top:7px;font-size:15px;font-weight:600;line-height:1.25;color:#c9d5ea;text-align:center;z-index:1;}
+     this size a combined string wraps awkwardly on longer names ("Mohammad Kabir Ali"). */
+  .idcards .side .sof{margin-top:9px;font-size:19px;font-weight:600;line-height:1.25;color:#c9d5ea;text-align:center;z-index:1;}
   .idcards .side .sof i{font-style:normal;color:#8f9fc0;font-weight:500;}
-  .idcards .side .sub{margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:#aebbd4;text-align:center;z-index:1;}
-  .idcards .crew{margin-top:auto;margin-bottom:26px;z-index:1;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(180deg,var(--orange-soft),var(--orange));color:#fff;padding:11px 20px;border-radius:999px;font-weight:800;letter-spacing:.16em;font-size:13px;text-transform:uppercase;box-shadow:0 10px 22px -10px rgba(232,96,28,.8);}
-  .idcards .crew .dot{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.9;}
+  .idcards .side .sub{margin-top:9px;font-family:'IBM Plex Mono',monospace;font-size:14px;letter-spacing:.1em;color:#aebbd4;text-align:center;z-index:1;}
+  .idcards .crew{margin-top:auto;margin-bottom:26px;z-index:1;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(180deg,var(--orange-soft),var(--orange));color:#fff;padding:12px 24px;border-radius:999px;font-weight:800;letter-spacing:.16em;font-size:16px;text-transform:uppercase;box-shadow:0 10px 22px -10px rgba(232,96,28,.8);}
+  .idcards .crew .dot{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.9;}
   .idcards .main{display:flex;flex-direction:column;}
-  .idcards .main-body{flex:1;padding:30px 34px 18px;position:relative;}
+  .idcards .main-body{flex:1;padding:30px 34px 22px;position:relative;display:flex;flex-direction:column;min-height:0;}
   .idcards .logo-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-  .idcards .logo-row img.logo{height:62px;width:auto;}
+  .idcards .logo-row img.logo{height:68px;width:auto;}
   .idcards .flag{width:50px;height:33px;border-radius:4px;overflow:hidden;flex:0 0 auto;box-shadow:0 2px 6px rgba(0,0,0,.18);position:relative;background:repeating-linear-gradient(180deg,#c1283d 0 2.54px,#fff 2.54px 5.08px);border:1px solid rgba(0,0,0,.08);}
   .idcards .flag .canton{position:absolute;top:0;left:0;width:55%;height:53.8%;background:#16294d;background-image:radial-gradient(circle,rgba(255,255,255,.95) .9px,transparent 1.1px);background-size:6px 5.4px;background-position:2px 2px;}
   .idcards .eyebrow{margin-top:24px;display:flex;align-items:center;gap:12px;}
@@ -34,14 +38,19 @@
      `b{color:black!important}`, which outranks any selector here - it was
      rendering the footer's "www." black on the navy bar, i.e. invisible.
      Style spans with classes instead. */
-  .idcards .eyebrow .eb{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--navy);}
+  .idcards .eyebrow .eb{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--navy);white-space:nowrap;}
   .idcards .eyebrow .rule{height:2px;flex:1;background:linear-gradient(90deg,var(--orange),rgba(232,96,28,0));border-radius:2px;}
-  /* Sized up to fill the white panel: the details are what gets read at a checkpoint. */
-  .idcards .fields{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:22px 28px;}
+  /* Sized up to fill the white panel: the details are what gets read at a checkpoint.
+     The grid takes the rest of the panel and spreads its three rows down it, so
+     the last field sits on the bottom margin rather than above a blank band.
+     Columns are 3:2 because the CNIC is 15 characters and the ID No. 10 - an
+     even split capped the mono size at 26px. A role or father's name that
+     wraps to two lines still fits; the rows just close up. */
+  .idcards .fields{margin-top:22px;flex:1;min-height:0;display:grid;grid-template-columns:3fr 2fr;gap:14px 24px;align-content:space-between;}
   .idcards .field.full{grid-column:1 / -1;}
-  .idcards .field .lab{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);font-weight:600;}
-  .idcards .field .val{margin-top:6px;font-size:24px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.15;}
-  .idcards .field .val.mono{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:23px;letter-spacing:0;}
+  .idcards .field .lab{font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);font-weight:600;line-height:1.2;}
+  .idcards .field .val{margin-top:6px;font-size:34px;font-weight:700;color:var(--navy);letter-spacing:-.005em;line-height:1.15;}
+  .idcards .field .val.mono{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;letter-spacing:0;white-space:nowrap;}
   .idcards .foot{height:54px;background:linear-gradient(180deg,var(--navy-2),var(--navy-deep));display:flex;align-items:center;justify-content:center;padding:0 16px;color:#fff;}
   /* The address has the whole bar to itself (the website lives on the back), so
      it is set larger in the card's own face on one centred line.
