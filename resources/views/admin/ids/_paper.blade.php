@@ -3,8 +3,9 @@
      (or the reverse) is scaled by the printer, which changes the card size and
      breaks front/back alignment. The choice is kept in this browser and shared
      by every ID page - it describes the printer, not the card - so both faces
-     always use the same geometry. Until one is made, $paperDefault applies:
-     'a4' for Yatri sheets, 'letter' for Crew, as each was first laid out.
+     always use the same geometry. Until one is made, US Letter applies: the
+     office prints in New York, and the A4-only Yatri sheet was coming out at
+     94% on its Letter paper.
      Sits inside .db-breadcrumb, which _print hides on paper. --}}
 <label class="mb-0 mr-2 d-flex align-items-center" style="font-weight:600;gap:6px;">Paper
     <select id="idPaper" class="form-control form-control-sm" style="width:auto;">
@@ -15,7 +16,7 @@
 <script type="text/javascript">
 (function () {
     var KEY = 'ky.ids.paper';
-    var DEFAULT = @json($paperDefault ?? 'a4');
+    var DEFAULT = 'letter';
     var sel = document.getElementById('idPaper');
     // A later @page rule wins over the default one in _print.
     var page = document.createElement('style');

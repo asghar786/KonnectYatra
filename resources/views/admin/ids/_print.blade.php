@@ -42,7 +42,7 @@
      did on 2026-10-12. Both layouts below are centred both ways (so either flip
      edge lines up) and keep clear of the edge.
 
-     A4 (8.27in x 11.69in) is the default: two 3.9in cards leave only .47in of
+     A4 (8.27in x 11.69in), the base rule here: two 3.9in cards leave only .47in of
      width, so the gutter is .13in with .17in each side - it cannot be wider on
      this paper. Rows: 1.6in spare, .32in above, between and below.
      The four rows are fixed, so a short last page puts its cards in exactly the
@@ -55,9 +55,13 @@
   /* US Letter (8.5in x 11in), picked with the Paper box beside Print (_paper
      sets html.paper-letter and the matching @page size). An A4 layout sent to
      Letter paper is 6% too tall, so the printer scales it to 94% - the wrong
-     card size and no alignment. Letter is wider: .2in gutter, .25in each side.
+     card size and no alignment - the cut sheets of 2026-10-12 measured exactly
+     that: 3.67in cards, .54in outer margins, a .09in gutter. Letter is the
+     default paper (the office prints in New York). It is wider than A4: .3in
+     gutter, .2in each side, so a cut down the middle of the sheet leaves .15in
+     inside each card and .2in outside.
      Rows: .05in + 10.9in + .05in = 11in, .18in above, between and below. */
-  html.paper-letter .id-deck{column-gap:.2in;height:10.9in;padding:.05in 0 0!important;}
+  html.paper-letter .id-deck{column-gap:.3in;height:10.9in;padding:.05in 0 0!important;}
   .id-deck + .id-deck{break-before:page;page-break-before:always;}
   .id-slot{width:3.9in;height:2.5in;overflow:hidden;border-radius:0;outline:1px solid #c7d0de;page-break-inside:avoid;break-inside:avoid;}
   /* The back is designed 880px wide: 880 * .4254545 = 374.4px = 3.9in. */

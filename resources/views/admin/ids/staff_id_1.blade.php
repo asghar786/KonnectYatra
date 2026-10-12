@@ -87,7 +87,7 @@
                 <li>Crew IDs</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                @include('admin.ids._paper', ['paperDefault' => 'letter'])
+                @include('admin.ids._paper')
                 <button class="btn btn-success" type="button" id="printPicked" onclick="window.print()">Print selected (<span class="pick-n">0</span>)</button>
                 <a class="btn btn-info ml-2" id="backLink" href="{{ url('admin/back-view', 1) }}">Back View</a>
             </div>

@@ -53,7 +53,7 @@
                 <li>Yatri ID</li>
             </ul>
             <div class="w-75 d-flex justify-content-end">
-                @include('admin.ids._paper', ['paperDefault' => 'a4'])
+                @include('admin.ids._paper')
                 <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
                 <a class="btn btn-info ml-2" href="{{ url('admin/yatri-id-back', $page) }}">Back View</a>
             </div>
