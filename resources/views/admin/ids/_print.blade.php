@@ -68,16 +68,19 @@
   .id-slot .card{transform:none!important;zoom:.4254545;box-shadow:none!important;}
 @else
   /* Eight cards to a sheet - which is exactly the 8 the controller pages by -
-     laid out 2 across at true CR80 ID size (3.375in x 2.125in), .3in apart
-     across and .2in down. The block is centred on the sheet both ways, like the
-     Yatri one, so the back lands behind the front whichever edge the paper is
-     flipped on; it used to hang from the top margin, which only survived a
-     long-edge flip. The four rows are fixed, so a short sheet keeps its slots.
+     at true CR80 ID size (3.375in x 2.125in), on the SAME 2 x 4 grid as the
+     Yatri sheet above: the tracks are the Yatri 3.9in x 2.5in cells and each
+     smaller Crew card sits in the middle of its cell. So a Crew card and a Yatri
+     card share one centre point in every slot, and the sheet is spread over the
+     paper the same way instead of bunched in the middle (it was a tight block,
+     .2in between rows, until 2026-10-13). Still centred both ways, so the back
+     lands behind the front whichever edge the paper is flipped on, and the four
+     rows are fixed, so a short sheet keeps its slots.
      US Letter is the default: .05in + 10.9in + .05in = 11in. */
   @page{size:Letter portrait;margin:0;}
-  .id-deck{display:grid!important;grid-template-columns:repeat(2,3.375in);grid-template-rows:repeat(4,2.13in);justify-content:center;align-content:center;gap:.2in .3in;box-sizing:content-box;height:10.9in;padding:.05in 0 0!important;margin:0!important;}
+  .id-deck{display:grid!important;grid-template-columns:repeat(2,3.9in);grid-template-rows:repeat(4,2.5in);justify-content:center;align-content:space-evenly;justify-items:center;align-items:center;column-gap:.3in;row-gap:0;box-sizing:content-box;height:10.9in;padding:.05in 0 0!important;margin:0!important;}
   /* A4, picked with the Paper box (_paper): .045in + 11.6in + .045in = 11.69in. */
-  html.paper-a4 .id-deck{height:11.6in;padding:.045in 0 0!important;}
+  html.paper-a4 .id-deck{column-gap:.13in;height:11.6in;padding:.045in 0 0!important;}
   /* More than eight cards come as one deck per sheet, each starting a new page,
      so every sheet keeps the same top-aligned grid and its back still lines up. */
   .id-deck + .id-deck{break-before:page;page-break-before:always;}

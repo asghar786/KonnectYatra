@@ -1473,3 +1473,25 @@ admin page. Any drift left after this is the printer's own paper feed.
 a print made with the new layout.
 
 **Review:** see decisions.csv row dated 2026-10-12.
+
+---
+
+## 2026-10-13 — Crew ID sheets use the Yatri slot grid
+
+**Asked:** "align the crew ids like yatries ids".
+
+**Decision.** The Crew print sheet (`ids/_print`, `cr80` branch) now uses the same 2 x 4 grid as
+the Yatri sheet: 3.9in x 2.5in cells, spread evenly over the paper, with each CR80 card
+(3.375in x 2.13in) centred in its cell. It used to be a tight block in the middle of the sheet
+(.2in between rows). Every Crew card now shares its centre point with the Yatri card in the same
+slot, on Letter and on A4. The Crew back goes through the same rule, so front and back still match.
+
+**Reading taken.** "Align" was read as position on the sheet, not card size: Crew cards stay CR80.
+Not confirmed by the user.
+
+**Verified.** Two-sheet test PDFs (8 + 3 cards) from headless Chrome for both stocks on both
+papers: Crew cards 3.375in x 2.125in, centres within .005in of the Yatri ones (Letter columns
+2.15 / 6.35in, rows 1.48 / 4.16 / 6.84 / 9.52in), short sheet keeps its slots. Measured on a
+standalone copy of the print rules, not the logged-in page or the office printer.
+
+**Review:** see decisions.csv row dated 2026-10-13.
