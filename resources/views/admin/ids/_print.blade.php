@@ -44,7 +44,11 @@
   /* More than eight cards come as one deck per sheet, each starting a new page,
      so every sheet keeps the same top-aligned grid and its back still lines up. */
   .id-deck + .id-deck{break-before:page;page-break-before:always;}
-  .id-slot{width:3.375in;height:2.13in;overflow:hidden;border-radius:8px;outline:1px solid #c7d0de;page-break-inside:avoid;break-inside:avoid;}
+  /* Cut line: a grey dotted outline round every card, front and back (the user
+     asked for it on 2026-10-16 - the old 1px #c7d0de line barely showed on paper).
+     An outline is drawn just outside the card and takes no layout space, so the
+     card size and slot positions are unchanged. It follows the 8px corner. */
+  .id-slot{width:3.375in;height:2.13in;overflow:hidden;border-radius:8px;outline:1.5px dotted #777;outline-offset:0;page-break-inside:avoid;break-inside:avoid;}
   /* 880px design width * .3681818 = 324px = 3.375in at the CSS 96dpi print scale. */
   .id-slot .card{transform:none!important;zoom:.3681818;box-shadow:none!important;}
 }
