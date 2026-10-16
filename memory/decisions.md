@@ -1495,3 +1495,49 @@ papers: Crew cards 3.375in x 2.125in, centres within .005in of the Yatri ones (L
 standalone copy of the print rules, not the logged-in page or the office printer.
 
 **Review:** see decisions.csv row dated 2026-10-13.
+
+---
+
+## 2026-10-16 — Duplex "Print Front + Back" for the ID sheets
+
+**Asked:** "I have printer which can print front and back at the same time ... make the PDF of
+Yatris IDs and CREW IDs on 2 pages, front side will be front and 2nd page will be backside with
+proper adjustment", then "how many IDs will be on the front, there will be same number and correct
+positions on the back side as well".
+
+**Decision.** Both front pages (Crew, Yatri) got a **Print Front + Back** button (`ids/_duplex`)
+next to **Front only**. One print job gives fronts on page 1 and backs on page 2 (fronts, backs, ...
+for more sheets), for a long-edge flip. Each back sheet carries exactly as many backs as its front
+sheet has cards, each in the **mirrored slot** (same row, other column), because a long-edge flip
+swaps the columns. A **Back shift** box (mm, up to 3, kept per browser) corrects a printer's side-2
+offset; it moves each card, not the sheet, since moving the sheet past the paper edge made Chrome
+shrink the whole job, fronts included. The separate Back View page still prints 8 backs per sheet.
+
+**Also fixed.** The Paper picker never changed the printed page size (its `@page` rule lost to the
+view's own), so the Yatri sheet printed on an A4 page with Letter picked and the printer scaled it to
+94%. That is what produced the 3.67in Yatri cards in the user's photos.
+
+**Verified.** PDFs from the real pages: 15 crew → 4 pages, sheet 2 has 7 fronts and exactly 7 backs
+in the mirrored slots; every back at the same x/y as its front on Letter and A4.
+
+**Review:** see decisions.csv row dated 2026-10-16 (duplex).
+
+---
+
+## 2026-10-16 — Yatri IDs printed at the Crew card size (CR80)
+
+**Asked:** "The crew ID size is correct so adjust the size of Card IDs of Yatris like Crew Cards
+Size" / "match the height and width of Yatris same like CREW cards size".
+
+**Decision.** The Yatri card is now CR80, 3.375in x 2.125in, like the Crew card (laid out 440 x 277px,
+printed at zoom .7364; it was a 3.9in x 2.5in stock). Its back is the Crew-size back. With nothing
+left on the larger stock, its branch was removed: Crew and Yatri sheets share one print layout, so
+they cannot drift apart. Only width and height were asked for. Yatri cards keep square corners
+while Crew cards have slightly rounded ones; that was offered, not changed.
+
+**Verified.** 300-dpi measurement of PDFs from the real pages on Letter: both sheets identical, with
+columns 0.447-3.847in and 4.653-8.053in, a 0.807in column gap, and row tops 0.407 / 3.083 / 5.760 / 8.450in.
+Deployed 15:07 UTC. The user's next photo still showed the old Yatri width; it was printed from a page
+loaded before the deploy, not a code fault. **Open:** a print made after reloading has not been reported yet.
+
+**Review:** see decisions.csv row dated 2026-10-16 (Yatri CR80).

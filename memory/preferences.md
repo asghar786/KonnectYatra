@@ -66,3 +66,10 @@ Format:
   while the office was printing on Letter, which scales the page to 94% and makes every measurement
   wrong. The user's verdict: "why this small things is not fixable by your". Related: never place
   print content nearer than about .17in to the paper edge; the printer shrinks the page to fit.
+- **A printout that looks like the old layout: check it came from the deployed code first.** Before
+  touching CSS, confirm the deploy run finished (public repo, so
+  `curl -s "https://api.github.com/repos/asghar786/KonnectYatra/actions/runs?per_page=5"`) and that
+  the page was reloaded (Ctrl+F5) after it. Then answer with measured numbers (card edges, gaps)
+  from a PDF of the current page, side by side for the sheets being compared. Why: on 2026-10-16
+  the user photographed a Yatri sheet still at the old 3.67in width and asked to "recheck and
+  confirm"; the code was right, the page had been printed before the reload.
