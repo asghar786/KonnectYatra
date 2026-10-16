@@ -1662,7 +1662,7 @@ class PackagesController extends Controller
     // count() on an offset query returns 0 past page 1 (the offset applies to
     // the single COUNT row), which left pages 2+ with no backs (2026-09-30).
     $total = YatriIds::where('season_id', $active_season)->where('type', 'yatri')->count();
-    return $this->idBackSheet($total > ($page - 1) * 8, url('admin/yatri-id', $page), 'No yatris found.', 1, 'yatri');
+    return $this->idBackSheet($total > ($page - 1) * 8, url('admin/yatri-id', $page), 'No yatris found.');
   }
 
   // Every back is identical, so a back sheet always carries all eight slots.
@@ -1670,11 +1670,10 @@ class PackagesController extends Controller
   // with backs on the wrong side after a duplex flip, because the flip mirrors
   // the columns. A full sheet puts a back behind every front whichever way the
   // printer turns the paper; the spares are simply not cut out.
-  // $idSize: 'cr80' for Crew (Letter), 'yatri' for the 3.9in x 2.5in Yatri stock on A4.
-  private function idBackSheet($hasCards, $frontUrl, $emptyText, $sheets = 1, $idSize = 'cr80')
+  // Crew and Yatri backs are the same CR80 card (see _print).
+  private function idBackSheet($hasCards, $frontUrl, $emptyText, $sheets = 1)
   {
     return view('admin.ids.back_view', [
-      'idSize'    => $idSize,
       'sheets'    => $hasCards ? max(1, (int) $sheets) : 0,
       'front_url' => $frontUrl,
       'empty'     => $emptyText,

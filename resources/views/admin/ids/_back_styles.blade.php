@@ -1,21 +1,17 @@
 {{-- Styles for the ID back card (_back_card). Shared by the Back View sheet and by
      the Crew and Yatri front pages, which carry a back sheet of their own for the
      duplex Front + Back print. Included inside each view's <style> block, BEFORE
-     _print. $idSize: 'cr80' (Crew) or 'yatri' (the taller 3.9in x 2.5in stock).
-     Load the Archivo + IBM Plex Mono fonts on the page as well. --}}
-@php $backYatri = ($idSize ?? 'cr80') === 'yatri'; @endphp
+     _print. Load the Archivo + IBM Plex Mono fonts on the page as well. --}}
   .idcards{--navy:#16294d;--navy-deep:#0f1d39;--navy-2:#1d3461;--orange:#e8601c;--orange-soft:#f2843f;--ink:#1b2436;--paper:#fff;--line:#e4e8f0;--muted:#6b7689;}
   /* Screen preview only, scaled down. In @media screen because a two-class
      selector would otherwise outrank _print's plain .id-slot sizes on paper. */
   @media screen{
-    .id-slot.bslot{width:550px;height:{{ $backYatri ? 352 : 347 }}px;overflow:hidden;}
+    .id-slot.bslot{width:550px;height:347px;overflow:hidden;}
     .id-slot.bslot .card{transform:scale(.625);transform-origin:top left;}
   }
 
-  .idcards .card.back{width:880px;height:{{ $backYatri ? 564 : 555 }}px;border-radius:22px;overflow:hidden;background:var(--paper);position:relative;font-family:'Archivo',system-ui,sans-serif;color:var(--ink);
+  .idcards .card.back{width:880px;height:555px;border-radius:22px;overflow:hidden;background:var(--paper);position:relative;font-family:'Archivo',system-ui,sans-serif;color:var(--ink);
     box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 24px 48px -18px rgba(22,41,77,.45),0 6px 16px -8px rgba(22,41,77,.3);}
-  /* Yatri stock is 3.9in x 2.5in (ratio 1.56), a touch taller than CR80, so the
-     back grows to 880 x 564px; the body column is flex and takes the extra. */
   .idcards .back{display:flex;flex-direction:column;}
 
   /* Header mirrors the front's navy panel so the two faces read as one card. */

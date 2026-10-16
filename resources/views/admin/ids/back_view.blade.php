@@ -4,8 +4,8 @@
 <style type="text/css">
   .idcards *{box-sizing:border-box;}
   .id-deck{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;padding:10px 0 30px;}
-@include('admin.ids._back_styles', ['idSize' => $idSize ?? 'cr80'])
-@include('admin.ids._print', ['idSize' => $idSize ?? 'cr80'])
+@include('admin.ids._back_styles')
+@include('admin.ids._print')
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
