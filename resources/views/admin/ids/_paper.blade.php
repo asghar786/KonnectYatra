@@ -18,9 +18,12 @@
     var KEY = 'ky.ids.paper';
     var DEFAULT = 'letter';
     var sel = document.getElementById('idPaper');
-    // A later @page rule wins over the default one in _print.
+    // A later @page rule wins over the default one in _print - so this one goes
+    // at the end of <body>, AFTER the view's own <style>. In <head> it came first
+    // and lost: the Yatri sheet printed on an A4 page with Letter picked, and an
+    // A4 Crew run spilled onto 8 pages (measured on PDFs, 2026-10-16).
     var page = document.createElement('style');
-    document.head.appendChild(page);
+    document.body.appendChild(page);
     function apply(v) {
         var letter = (v === 'letter' || v === 'a4' ? v : DEFAULT) === 'letter';
         document.documentElement.classList.toggle('paper-letter', letter);

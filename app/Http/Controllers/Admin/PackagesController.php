@@ -1638,6 +1638,8 @@ class PackagesController extends Controller
     $all_data['page'] = max(1, (int)$id);
     $all_data['next'] = (int)$id + 1;
     $all_data['prev'] = (int)$id - 1;
+    // For the back sheet that "Print Front + Back" prints behind the fronts.
+    $all_data['back_ids'] = YatriIdsBack::first();
     return view('admin.ids.yatri_id', $all_data);
   }
 
@@ -1691,6 +1693,7 @@ class PackagesController extends Controller
   public function staff_ids($id = 1)
   {
     $all_data['staff_ids'] = YatriIds::where('type', 'Crew Member')->orderBy('id', 'ASC')->get();
+    $all_data['back_ids']  = YatriIdsBack::first();
     return view('admin.ids.staff_id_1', $all_data);
   }
   public function ids_back()

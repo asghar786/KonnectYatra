@@ -1,5 +1,6 @@
 @extends('admin.layouts.app')
 @section('content')
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style type="text/css">
   /* The card stock is 3.9in x 2.5in (ratio 1.56), so the card is laid out at
      440 x 282px. On screen it shows at that size; print scales it into the
@@ -34,6 +35,7 @@
   /* Address only, centred, one line - the phone and website were taken off on 2026-09-30. */
   .idcards .ycard .yfoot{flex:0 0 36px;background:#2e3092;color:#fff;padding:0 8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:12.5px;font-weight:500;line-height:1.2;white-space:nowrap;}
 
+@include('admin.ids._back_styles', ['idSize' => 'yatri'])
 @include('admin.ids._print', ['idSize' => 'yatri'])
   @media print{
     /* This card is 440px wide: 440px * .8509091 = 374.4px = 3.9in at the
@@ -54,7 +56,7 @@
             </ul>
             <div class="w-75 d-flex justify-content-end">
                 @include('admin.ids._paper')
-                <button class="btn btn-success" type="button" onclick="window.print()">Print</button>
+                @include('admin.ids._duplex')
                 <a class="btn btn-info ml-2" href="{{ url('admin/yatri-id-back', $page) }}">Back View</a>
             </div>
         </div>
@@ -68,7 +70,7 @@
                 </div>
             </div>
             {{-- Eight to a page, the same eight the controller pages by. The back
-                 sheet (Back View) prints eight backs in the same slots. --}}
+                 sheet below (and Back View) prints eight backs in the same slots. --}}
             <div class="id-deck">
                 @forelse($yatri_ids as $value)
                 <div class="id-slot">
@@ -106,6 +108,17 @@
                 <p class="text-muted">No record found.</p>
                 @endforelse
             </div>
+            {{-- The back sheet for "Print Front + Back" (_duplex): hidden on screen and
+                 in a front-only print, printed as page 2 behind the fronts. One back
+                 per front, each in its front's mirrored slot (long-edge flip), so a
+                 short page of 5 gets 5 backs, exactly behind those 5 cards. --}}
+            @if(count($yatri_ids))
+            <div class="id-deck back-deck">
+                @foreach($yatri_ids as $behind => $unused)
+                @include('admin.ids._back_card', ['behind' => $behind])
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
 </main>

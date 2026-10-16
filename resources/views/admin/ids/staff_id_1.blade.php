@@ -75,6 +75,7 @@
     #printDeck{display:block!important;}
   }
 
+@include('admin.ids._back_styles')
 @include('admin.ids._print')
 </style>
 <main class="ttr-wrapper">
@@ -88,7 +89,7 @@
             </ul>
             <div class="w-75 d-flex justify-content-end">
                 @include('admin.ids._paper')
-                <button class="btn btn-success" type="button" id="printPicked" onclick="window.print()">Print selected (<span class="pick-n">0</span>)</button>
+                @include('admin.ids._duplex', ['withCount' => true])
                 <a class="btn btn-info ml-2" id="backLink" href="{{ url('admin/back-view', 1) }}">Back View</a>
             </div>
         </div>
@@ -167,8 +168,14 @@
                 @endforelse
             </div>
             {{-- Filled by the script with the ticked cards, eight per .id-deck, so each
-                 printed sheet is its own grid and _print breaks the page between them. --}}
+                 printed sheet is its own grid and _print breaks the page between them.
+                 Each front sheet is followed by a back sheet with one back per front,
+                 which only "Print Front + Back" shows (_duplex): fronts, backs, ...
+                 The template holds a single back; the script places each copy. --}}
             <div id="printDeck"></div>
+            <template id="backCardTpl">
+                @include('admin.ids._back_card')
+            </template>
         </div>
     </div>
 </main>
@@ -182,6 +189,7 @@
     if (!picks.length) return;
     var printDeck = document.getElementById('printDeck');
     var backBase = @json(url('admin/back-view', 1));
+    var backTpl = document.getElementById('backCardTpl');
 
     // Remember the last selection in this browser only; everything still works
     // without it (private window, blocked storage) - it just starts all ticked.
@@ -202,12 +210,26 @@
             deck.className = 'id-deck';
             chosen.slice(i, i + 8).forEach(function (p) { deck.appendChild(p.querySelector('.id-slot').cloneNode(true)); });
             printDeck.appendChild(deck);
+
+            // Its back sheet: as many backs as fronts, each in the mirrored slot
+            // (same row, other column) - where that front lands after a
+            // long-edge duplex flip.
+            var backs = document.createElement('div');
+            backs.className = 'id-deck back-deck';
+            for (var j = 0; j < deck.children.length; j++) {
+                var slot = backTpl.content.querySelector('.id-slot').cloneNode(true);
+                slot.style.gridRow = String(Math.floor(j / 2) + 1);
+                slot.style.gridColumn = String(2 - j % 2);
+                backs.appendChild(slot);
+            }
+            printDeck.appendChild(backs);
         }
 
         var n = chosen.length, sheets = Math.ceil(n / 8);
         [].forEach.call(document.querySelectorAll('.pick-n'), function (el) { el.textContent = n; });
         [].forEach.call(document.querySelectorAll('.id-picker .sheets'), function (el) { el.textContent = sheets; });
-        document.getElementById('printPicked').disabled = n === 0;
+        document.getElementById('printDuplex').disabled = n === 0;
+        document.getElementById('printFront').disabled = n === 0;
         document.getElementById('backLink').href = backBase + '?cards=' + Math.max(n, 1);
 
         try { localStorage.setItem(KEY, JSON.stringify(chosen.map(function (p) { return p.dataset.id; }))); } catch (e) {}
