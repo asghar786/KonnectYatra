@@ -98,6 +98,21 @@ class QuickYatriSheetTest extends TestCase
         }
     }
 
+    public function test_the_travel_dates_get_their_own_writing_line_on_the_blank_sheet()
+    {
+        $this->asAdmin();
+
+        $body = $this->get(route('quick-yatri-blank'))->getContent();
+
+        // Each date sits in a .qy-tripdate wrapper that grows into the band's
+        // spare width. Before 2026-10-19 the wrapper sized to its content and
+        // an empty date printed against a 0-wide line — nowhere to write.
+        // Measured in headless Chrome: Dep 80pt / Ret 83pt on the blank sheet.
+        $this->assertStringContainsString('<span class="qy-tripdate"><span style="font-weight:600">Dep:</span><span class="qy-rule"></span></span>', $body);
+        $this->assertStringContainsString('<span class="qy-tripdate"><span style="font-weight:600">Ret:</span><span class="qy-rule"></span></span>', $body);
+        $this->assertMatchesRegularExpression('/\.qy-tripdate\{[^}]*flex:1 1 0/', $body);
+    }
+
     public function test_store_saves_the_selected_departure_airport()
     {
         $this->asAdmin();

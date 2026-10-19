@@ -269,8 +269,8 @@
                  Group Manifest groups an applicant by. --}}
             <div class="qy-tripband" style="border:1px solid #111; padding:5pt 10pt; display:flex; align-items:center; flex-wrap:wrap; gap:8pt 10pt; font-size:10.5pt">
                 <span style="font-weight:600; white-space:nowrap">Travelling from</span>{!! $airport() !!}
-                <span style="display:flex; align-items:flex-end; gap:5pt; white-space:nowrap"><span style="font-weight:600">Dep:</span>{!! $dat('departure_date', 'ky-date-any', true) !!}</span>
-                <span style="display:flex; align-items:flex-end; gap:5pt; white-space:nowrap"><span style="font-weight:600">Ret:</span>{!! $dat('return_date', 'ky-date-any', true) !!}</span>
+                <span class="qy-tripdate"><span style="font-weight:600">Dep:</span>{!! $dat('departure_date', 'ky-date-any', true) !!}</span>
+                <span class="qy-tripdate"><span style="font-weight:600">Ret:</span>{!! $dat('return_date', 'ky-date-any', true) !!}</span>
             </div>
         </div>
     </div>

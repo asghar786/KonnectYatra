@@ -76,6 +76,13 @@
        the whole row, which broke it onto three lines. Held to a fixed basis
        instead: 70pt prints DD-MMM-YYYY (~75px at this size) with room over. */
     .qy-tripband .qy-in.qy-rule{width:70pt; flex:0 0 70pt}
+    /* Each date's label + writing line. Until 2026-10-19 this wrapper sized to
+       its content, so an EMPTY date (the blank sheet, or a saved one whose
+       flight is not booked yet) printed "Dep:" against a 0-wide line, with
+       nowhere to write. flex-grow splits the band's spare width between the two
+       dates instead; basis 0 keeps them out of the wrap calculation, the same
+       trap as the min-width:0 above. */
+    .qy-tripdate{display:flex; align-items:flex-end; gap:5pt; white-space:nowrap; flex:1 1 0}
     .qy-in:focus{background:#eef4ff}
     .qy-grid td{vertical-align:middle}
     /* Label columns size to their text, as in the approved render — without this
