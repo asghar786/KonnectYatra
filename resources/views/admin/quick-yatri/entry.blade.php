@@ -35,7 +35,11 @@
     .qy-modal-head p{margin:5px 0 0; font-size:12.5px; color:#8b93a3; line-height:1.45}
     .qy-modal-x{border:none; background:#f2f4f8; color:#5a6273; width:30px; height:30px; border-radius:9px; cursor:pointer; font-size:15px; line-height:1; flex:none}
     .qy-modal-x:hover{background:#e6e9f0}
-    .qy-modal-body{padding:18px 22px; overflow:auto}
+    /* The form is the box's only child, so it must be a flex column too or
+       the body never scrolls — a tall dialog was clipped instead (same fix as
+       index.blade.php, 2026-10-19). */
+    .qy-modal-box > form{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+    .qy-modal-body{padding:18px 22px; overflow-y:auto; flex:1 1 auto; min-height:0; overscroll-behavior:contain}
     .qy-modal-foot{display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:14px 22px 18px; border-top:1px solid #f0f2f6; flex-wrap:wrap}
     .qy-money{position:relative; flex:none; width:132px}
     .qy-money span{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9aa0ac; font-size:13.5px}

@@ -106,7 +106,13 @@
     .qy-modal-head p{margin:5px 0 0; font-size:12.5px; color:#8b93a3; line-height:1.45}
     .qy-modal-x{border:none; background:#f2f4f8; color:#5a6273; width:30px; height:30px; border-radius:9px; cursor:pointer; font-size:15px; line-height:1; flex:none}
     .qy-modal-x:hover{background:#e6e9f0}
-    .qy-modal-body{padding:18px 22px; overflow:auto}
+    /* The box is a capped flex column, but its only child is the <form>, so
+       the form has to be a flex column too — otherwise the body is never
+       height-limited, never scrolls, and a tall dialog is simply clipped with
+       the Save button out of reach (hit 2026-10-19 when the cancellation
+       terms field made the price dialog taller than the screen). */
+    .qy-modal-box > form{display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+    .qy-modal-body{padding:18px 22px; overflow-y:auto; flex:1 1 auto; min-height:0; overscroll-behavior:contain}
     .qy-modal-foot{display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:14px 22px 18px; border-top:1px solid #f0f2f6; flex-wrap:wrap}
     .qy-fld{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px dashed #eef0f4}
     .qy-fld:last-of-type{border-bottom:none}
@@ -321,7 +327,7 @@
             <div class="qy-modal-head">
                 <div>
                     <h5 id="qyPricesTitle">Update prices</h5>
-                    <p>The standard price of each row of the sheet&rsquo;s grid &mdash; new applications are priced from these, and the printed blank form shows them straight away. The sheet&rsquo;s first printed condition is edited here too.</p>
+                    <p>The standard price of each row of the sheet&rsquo;s grid &mdash; new applications are priced from these, and the printed blank form shows them straight away. The sheet&rsquo;s printed conditions are edited here too.</p>
                 </div>
                 <button type="button" class="qy-modal-x" data-qy-close aria-label="Close">&times;</button>
             </div>
