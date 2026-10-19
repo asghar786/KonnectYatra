@@ -58,10 +58,11 @@ class QuickYatriController extends Controller
         // The sheet's first printed condition, pre-filled into the same dialog
         // as the effective sentence (not the raw setting) so a date can be
         // edited in place instead of retyped.
-        $validityNote = QuickYatri::validityNote();
+        $validityNote     = QuickYatri::validityNote();
+        $cancellationNote = QuickYatri::cancellationNote();
 
         return view('admin.quick-yatri.index', compact(
-            'rows', 'airportGroups', 'prices', 'wheelchairFee', 'standardCount', 'validityNote'
+            'rows', 'airportGroups', 'prices', 'wheelchairFee', 'standardCount', 'validityNote', 'cancellationNote'
         ));
     }
 
@@ -338,6 +339,7 @@ class QuickYatriController extends Controller
             'round_trip_land'      => $rules,
             'wheelchair_full_trip' => $rules,
             'validity_note'        => ['nullable', 'string', 'max:' . QuickYatri::VALIDITY_NOTE_MAX],
+            'cancellation_note'    => ['nullable', 'string', 'max:' . QuickYatri::CANCELLATION_NOTE_MAX],
             // The Pakistan-side contact number the Group Manifest report
             // prints on every group's header, alongside Rashad's US number.
             'pakistan_contact'     => ['nullable', 'string', 'max:30'],
@@ -350,9 +352,14 @@ class QuickYatriController extends Controller
         // A blank field clears the setting, which restores the model default
         // rather than printing an empty bullet. Guarded on the key being present
         // so a caller posting prices alone can never wipe the sentence.
-        $noteWas = QuickYatri::validityNote();
+        $notesWere = [QuickYatri::validityNote(), QuickYatri::cancellationNote()];
         if ($request->has('validity_note')) {
             QuickYatri::putValidityNote($data['validity_note'] ?? null);
+        }
+
+        // The cancellation condition, same footer, same rules.
+        if ($request->has('cancellation_note')) {
+            QuickYatri::putCancellationNote($data['cancellation_note'] ?? null);
         }
 
         if ($request->has('pakistan_contact')) {
@@ -374,9 +381,9 @@ class QuickYatriController extends Controller
             }
         }
 
-        $message = QuickYatri::validityNote() === $noteWas
+        $message = [QuickYatri::validityNote(), QuickYatri::cancellationNote()] === $notesWere
             ? 'Prices updated.'
-            : 'Prices and the sheet\'s first condition updated.';
+            : 'Prices and the sheet\'s conditions updated.';
         if ($repriced) {
             $message .= ' ' . $repriced . ' saved ' . ($repriced === 1 ? 'application was' : 'applications were') . ' re-priced.';
         }

@@ -66,6 +66,7 @@ class QuickYatriPricingTest extends TestCase
             // The sheet's first printed condition rides in the same dialog, so
             // it is the same kind of live setting and needs the same put-back.
             QuickYatri::VALIDITY_NOTE_KEY,
+            QuickYatri::CANCELLATION_NOTE_KEY,
         ]);
     }
 
@@ -522,5 +523,68 @@ class QuickYatriPricingTest extends TestCase
 
         $this->assertSame($mine, QuickYatri::validityNote());
         $this->assertSame(3200.0, QuickYatri::amountFor('round_trip_5star'));
+    }
+
+    /* ---- the cancellation terms, the third bullet, same dialog ---- */
+
+    public function test_the_price_dialog_carries_the_cancellation_terms()
+    {
+        $this->asAdmin();
+        SiteSetting::put(QuickYatri::CANCELLATION_NOTE_KEY, '');
+
+        $body = $this->get(route('quick-yatri'))->getContent();
+
+        $this->assertStringContainsString('name="cancellation_note"', $body);
+        $this->assertStringContainsString(e(QuickYatri::CANCELLATION_NOTE) . '</textarea>', $body);
+        $this->assertStringContainsString('maxlength="' . QuickYatri::CANCELLATION_NOTE_MAX . '"', $body);
+    }
+
+    public function test_the_cancellation_terms_can_be_rewritten_and_print_on_the_sheet()
+    {
+        $this->asAdmin();
+
+        $new = 'CANCELLATION: Trip cancelation charges $750 within 30 days of departure.';
+
+        $this->post(route('quick-yatri-prices'), ['cancellation_note' => $new])
+            ->assertRedirect(route('quick-yatri'));
+
+        $this->assertSame($new, QuickYatri::cancellationNote());
+
+        $sheet = $this->get(route('quick-yatri-blank'))->getContent();
+        $this->assertStringContainsString('<li>' . e($new) . '</li>', $sheet);
+        // The old hard-coded wording is gone from the sheet, not printed beside it.
+        $this->assertStringNotContainsString('applicable airline cancellations charges', $sheet);
+    }
+
+    public function test_blank_cancellation_terms_fall_back_and_an_absent_field_keeps_them()
+    {
+        $this->asAdmin();
+
+        $mine = 'CANCELLATION: $600 after the visa is filed.';
+        $this->post(route('quick-yatri-prices'), ['cancellation_note' => $mine]);
+
+        // Prices alone, or the validity note alone, never touch it.
+        $this->post(route('quick-yatri-prices'), ['round_trip_5star' => 3200, 'validity_note' => 'Valid through 01-DEC-2026.']);
+        $this->assertSame($mine, QuickYatri::cancellationNote());
+
+        // Cleared means "back to the standard wording", never an empty bullet.
+        $this->post(route('quick-yatri-prices'), ['cancellation_note' => '']);
+        $this->assertSame(QuickYatri::CANCELLATION_NOTE, QuickYatri::cancellationNote());
+    }
+
+    public function test_cancellation_terms_longer_than_the_page_allows_are_rejected()
+    {
+        $this->asAdmin();
+
+        $kept = 'CANCELLATION: the wording that must survive a rejected edit.';
+        $this->post(route('quick-yatri-prices'), ['cancellation_note' => $kept]);
+
+        // Measured: two lines is all page 1 has left once the validity note
+        // is at its own cap. A third line is a third printed page.
+        $this->post(route('quick-yatri-prices'), [
+            'cancellation_note' => str_repeat('a', QuickYatri::CANCELLATION_NOTE_MAX + 1),
+        ])->assertSessionHasErrors('cancellation_note');
+
+        $this->assertSame($kept, QuickYatri::cancellationNote());
     }
 }

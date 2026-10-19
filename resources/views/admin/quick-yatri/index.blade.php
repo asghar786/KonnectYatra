@@ -119,6 +119,7 @@
     .qy-text{width:100%; padding:10px 12px; border:1px solid #e2e6ee; border-radius:10px; font-size:13.5px; color:#2c3446; outline:none}
     .qy-text:focus{border-color:#f54e18; box-shadow:0 0 0 3px rgba(245,78,24,.12)}
     .qy-area{min-height:84px; resize:vertical; line-height:1.5; font-family:inherit}
+    .qy-area-short{min-height:56px}
     .qy-note-hint{margin:8px 0 0; font-size:12px; color:#9aa0ac; line-height:1.5}
     .qy-note-hint b{color:#5a6273; font-variant-numeric:tabular-nums}
     .qy-note-hint.over b{color:#c0392b}
@@ -356,6 +357,14 @@
                           placeholder="{{ \App\Models\QuickYatri::VALIDITY_NOTE }}">{{ $validityNote }}</textarea>
                 <p class="qy-note-hint" id="qyNoteHint">Bullet one in the box at the foot of page&nbsp;1 &mdash; the date the application is good until, and the late fee after it. <b><span id="qyNoteCount">0</span>/{{ \App\Models\QuickYatri::VALIDITY_NOTE_MAX }}</b> characters: page&nbsp;1 is a fixed page, and a longer sentence would push the sheet onto a third printed one. Leave it empty to go back to the standard wording.</p>
 
+                {{-- The third bullet in the same box, here for the same reason
+                     as the sentence above: the office sets the terms. --}}
+                <span class="qy-lbl">Cancellation terms printed on the sheet</span>
+                <textarea class="qy-text qy-area qy-area-short" name="cancellation_note" id="qyCancelNote"
+                          maxlength="{{ \App\Models\QuickYatri::CANCELLATION_NOTE_MAX }}"
+                          placeholder="{{ \App\Models\QuickYatri::CANCELLATION_NOTE }}">{{ $cancellationNote }}</textarea>
+                <p class="qy-note-hint" id="qyCancelHint">Bullet three in the same box. <b><span id="qyCancelCount">0</span>/{{ \App\Models\QuickYatri::CANCELLATION_NOTE_MAX }}</b> characters &mdash; two printed lines, for the same reason as above. Leave it empty to go back to &ldquo;{{ \App\Models\QuickYatri::CANCELLATION_NOTE }}&rdquo;</p>
+
                 {{-- Also not a price, and here for the same reason as the
                      sentence above: it is office contact detail that should
                      never need a developer to change. --}}
@@ -504,21 +513,26 @@
     (function () {
         // The sentence prints into a page with no spare height, so the budget
         // is shown while it is being typed rather than only enforced on save.
-        var box  = document.getElementById('qyValidityNote');
-        var out  = document.getElementById('qyNoteCount');
-        var hint = document.getElementById('qyNoteHint');
-        if (!box || !out) return;
-        var max = parseInt(box.getAttribute('maxlength'), 10) || 0;
+        // Both footer conditions — the validity note and the cancellation
+        // terms — share the budget, so both get the same live counter.
+        [['qyValidityNote', 'qyNoteCount', 'qyNoteHint'],
+         ['qyCancelNote', 'qyCancelCount', 'qyCancelHint']].forEach(function (ids) {
+            var box  = document.getElementById(ids[0]);
+            var out  = document.getElementById(ids[1]);
+            var hint = document.getElementById(ids[2]);
+            if (!box || !out) return;
+            var max = parseInt(box.getAttribute('maxlength'), 10) || 0;
 
-        function count() {
-            out.textContent = box.value.length;
-            // Empty is not "nothing printed" — it is the standard wording
-            // coming back, which the hint says, so only the ceiling warns.
-            if (hint) hint.classList.toggle('over', max > 0 && box.value.length >= max);
-        }
+            function count() {
+                out.textContent = box.value.length;
+                // Empty is not "nothing printed" — it is the standard wording
+                // coming back, which the hint says, so only the ceiling warns.
+                if (hint) hint.classList.toggle('over', max > 0 && box.value.length >= max);
+            }
 
-        box.addEventListener('input', count);
-        count();
+            box.addEventListener('input', count);
+            count();
+        });
     })();
     (function () {
         // Search and column sorting share the table, so they share one place:

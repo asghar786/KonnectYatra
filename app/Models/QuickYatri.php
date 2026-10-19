@@ -154,6 +154,41 @@ class QuickYatri extends Model
     }
 
     /**
+     * The cancellation condition printed in the same footer box — the third
+     * bullet. Edited from the same dialog as the validity note, for the same
+     * reason: the office sets the charge, and it changes with the season's
+     * terms, not with a deploy. Read it through `cancellationNote()`.
+     */
+    const CANCELLATION_NOTE = 'CANCELLATION: Trip cancelation charges $500 before departure.';
+
+    const CANCELLATION_NOTE_KEY = 'qy_cancellation_note';
+
+    /**
+     * MEASURED, not chosen — it shares one height budget with
+     * VALIDITY_NOTE_MAX. Page 1's footer panel holds **seven** lines across
+     * the two bullets (3.8px to spare on the blank sheet; an eighth spills
+     * 12.6px onto a third printed page). The validity note takes five at its
+     * cap, so this one gets two: 100 characters held two lines in ALL CAPS,
+     * in prose, and in 17-character words; caps tipped into a third at 110.
+     * Raising this needs the measurement redone, not an estimate.
+     */
+    const CANCELLATION_NOTE_MAX = 100;
+
+    /** The condition as it stands today — the office's, or the constant's. */
+    public static function cancellationNote(): string
+    {
+        $stored = trim((string) SiteSetting::get(self::CANCELLATION_NOTE_KEY));
+
+        return $stored !== '' ? $stored : self::CANCELLATION_NOTE;
+    }
+
+    /** Save it. Blank clears the setting, back to the constant above. */
+    public static function putCancellationNote(?string $text): void
+    {
+        SiteSetting::put(self::CANCELLATION_NOTE_KEY, trim((string) $text));
+    }
+
+    /**
      * The office's own contact details, printed on the sheet's footer and on
      * every Group Manifest header. Constants rather than two copies of the
      * same strings in two Blade files — the manifest was about to become the

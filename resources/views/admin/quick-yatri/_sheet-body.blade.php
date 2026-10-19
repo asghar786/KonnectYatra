@@ -503,7 +503,10 @@
                      $qyPanelSide note above. --}}
                 <li>{{ \App\Models\QuickYatri::validityNote() }}</li>
                 <li>You must follow all group rules and regulations.</li>
-                <li>Cancellation: applicable airline cancellations charges plus a $100 service fee apply.</li>
+                {{-- Edited in the same dialog as the first bullet, capped at
+                     QuickYatri::CANCELLATION_NOTE_MAX for the same height
+                     budget. --}}
+                <li>{{ \App\Models\QuickYatri::cancellationNote() }}</li>
                 <li>Contact: <strong style="color:#1a3fa0">{{ \App\Models\QuickYatri::CONTACT_NAME }}</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">{{ \App\Models\QuickYatri::CONTACT_PHONE }}</strong> &nbsp;|&nbsp; <strong style="color:#1a3fa0">{{ \App\Models\QuickYatri::CONTACT_EMAIL }}</strong></li>
                 <li>Minimum deposit of <strong>$500</strong> accepted.</li>
             </ul>
