@@ -1541,3 +1541,17 @@ Deployed 15:07 UTC. The user's next photo still showed the old Yatri width; it w
 loaded before the deploy, not a code fault. **Open:** a print made after reloading has not been reported yet.
 
 **Review:** see decisions.csv row dated 2026-10-16 (Yatri CR80).
+
+## 2026-10-19 — Quick Yatri cancellation terms: $500 before departure, edited in the admin
+
+The page-1 footer's third bullet used to be fixed in code: "applicable airline cancellations charges
+plus a $100 service fee apply." The office replaced it with **"CANCELLATION: Trip cancelation charges
+$500 before departure."** and asked for a way to set it themselves. It now sits under the validity
+note in Quick Yatri → Update prices (`qy_cancellation_note`). Blank goes back to the $500 wording.
+
+Limited to 100 characters (two printed lines). The two editable bullets share page 1's fixed height,
+and the validity note already gets five lines. The public apply forms and `packages.blade.php` still
+print the old airline + $100 wording. They were not part of the request; check whether the $500 terms
+should apply there too.
+
+**Review:** see decisions.csv row dated 2026-10-19.
