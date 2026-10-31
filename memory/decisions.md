@@ -1555,3 +1555,29 @@ print the old airline + $100 wording. They were not part of the request; check w
 should apply there too.
 
 **Review:** see decisions.csv row dated 2026-10-19.
+
+## 2026-10-31 — New KONNECT.US, INC. logo everywhere
+
+**Asked:** "Plz use the new logo and find it D:\Clients\konnectYATRA\logo.png".
+
+**Decision.** The new logo (blue K with an orange plane, "KONNECT.US, INC.", flag-coloured "US",
+tagline "Explore and Discover the Globe") replaces the old globe logo everywhere. The old one was
+4 identical copies of a colour file plus 2 copies of a white file, so the new files went in under the
+same names and no view changed:
+
+- Colour: `public/assets/images2/newlogo11.png`, `public/adminassets/images2/newlogo11.png`,
+  `public/assets2/konnect-logo.png`, `public/assets2/id/logo.png`
+- White: `public/assets/images2/newwhitelogo.png`, `public/adminassets/images2/newwhitelogo.png`
+
+The source (2172x724, 559 KB) was trimmed and resized to 1200px wide (192 KB). Only a colour file
+was supplied, so the white version was generated: blue pixels become white except around the
+flag-coloured "US", whose stars stay blue. The admin/user top-bar `<img>` attributes went from
+200x27 / 130x50 (squashed) to 200x49 / 130x32. The new mark is wider (about 4.1:1, was 3.3:1). By
+measurement it still fits the ID card logo row (280px of 512px) and the hotel check-in header cell.
+
+**Not changed:** favicon `icon2-logo.jpeg`, and the admin sidebar logo's odd 160x10 attributes.
+**Not verified:** the live pages were not opened after deploy; only the images were checked.
+
+Commit `3ae9a5e`, pushed 2026-10-31.
+
+**Review:** see decisions.csv row dated 2026-10-31.
