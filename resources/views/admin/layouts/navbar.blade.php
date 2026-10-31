@@ -78,8 +78,8 @@
 			<div class="ttr-logo-box">
 				<div>
 					<a href="#" class="ttr-logo">
-						<img class="ttr-logo-mobile" alt="" src="{{asset('adminassets/images2/newwhitelogo.png')}}" width="130" height="50">
-						<img class="ttr-logo-desktop" alt="" src="{{asset('adminassets/images2/newwhitelogo.png')}}" width="200" height="27">
+						<img class="ttr-logo-mobile" alt="" src="{{asset('adminassets/images2/newwhitelogo.png')}}" width="130" height="32">
+						<img class="ttr-logo-desktop" alt="" src="{{asset('adminassets/images2/newwhitelogo.png')}}" width="200" height="49">
 					</a>
 				</div>
 			</div>
