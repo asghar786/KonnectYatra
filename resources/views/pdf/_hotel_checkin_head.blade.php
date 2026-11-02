@@ -21,7 +21,7 @@
         <div class="from">Group from the USA</div>
         {{ count($list['rows']) }} yatris &middot; {{ count($rooms) }} rooms<br>
         {{-- Single only when used: the side cell is 150pt and the line would wrap. --}}
-        @if($count['single']){{ $count['single'] }} Single &middot; @endif{{ $count['double'] }} Double &middot; {{ $count['twin'] }} Twin &middot; {{ $count['triple'] }} Triple
+        {{ $count['triple'] }} Triple &middot; {{ $count['double'] }} Double &middot; {{ $count['twin'] }} Twin @if($count['single'])&middot; {{ $count['single'] }} Single @endif
     </td>
 </tr></table>
 <table class="band">

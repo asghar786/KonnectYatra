@@ -42,10 +42,10 @@ class HotelCheckin
 
     /** Stored key => label, in the order the office's dropdown offers them. */
     const BEDS = [
-        'single' => 'Single Room',
+        'triple' => 'Triple',
         'double' => 'Double Bed',
         'twin'   => 'Twin Bed',
-        'triple' => 'Triple',
+        'single' => 'Single Room',
     ];
 
     public static function has(string $key): bool

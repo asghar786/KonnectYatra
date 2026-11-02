@@ -223,10 +223,10 @@
                     <div class="hc-stats" id="hcStats">
                         <span class="hc-stat"><span class="n" data-stat="yatris">0</span> yatris</span>
                         <span class="hc-stat"><span class="n" data-stat="rooms">0</span> rooms</span>
-                        <span class="hc-stat"><span class="n" data-stat="single">0</span> single</span>
+                        <span class="hc-stat"><span class="n" data-stat="triple">0</span> triple</span>
                         <span class="hc-stat"><span class="n" data-stat="double">0</span> double</span>
                         <span class="hc-stat"><span class="n" data-stat="twin">0</span> twin</span>
-                        <span class="hc-stat"><span class="n" data-stat="triple">0</span> triple</span>
+                        <span class="hc-stat"><span class="n" data-stat="single">0</span> single</span>
                         <span class="hc-stat warn" data-warn><span class="n" data-stat="nobed">0</span> rooms without a bed type</span>
                     </div>
 
