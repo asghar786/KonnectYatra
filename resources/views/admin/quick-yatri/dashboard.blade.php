@@ -34,6 +34,7 @@
     .qd-ico.list{background:#eaf2ff; color:#1a73e8}
     .qd-ico.grp{background:#eef0ff; color:#2d1b69}
     .qd-ico.dl{background:#e7f8ec; color:#157f3d}
+    .qd-ico.xls{background:#fff4e0; color:#b26a00}
     .qd-card h6{margin:0 0 4px; font-size:14.5px; font-weight:700; color:#1f2a44}
     .qd-card p{margin:0; font-size:12.5px; color:#8a91a0; line-height:1.5}
 
@@ -113,6 +114,13 @@
                     <span>
                         <h6>Group Manifest</h6>
                         <p>Everyone travelling together, split by departure city, with flight sectors &mdash; ready to print.</p>
+                    </span>
+                </a>
+                <a href="{{ route('quick-yatri-list') }}" class="qd-card">
+                    <span class="qd-ico xls"><i class="fa fa-file-excel"></i></span>
+                    <span>
+                        <h6>Yatri List</h6>
+                        <p>Drag yatris into order, tick who goes on it, and download the travelling list as PDF or Excel.</p>
                     </span>
                 </a>
                 <a href="{{ route('quick-yatri-create') }}" class="qd-card">

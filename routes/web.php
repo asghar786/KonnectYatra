@@ -218,6 +218,8 @@ Route::group(['prefix' => 'admin',
     Route::get('/quick-yatri',[\App\Http\Controllers\Admin\QuickYatriController::class, 'index'])->name('quick-yatri');
     Route::get('/quick-yatri/dashboard',[\App\Http\Controllers\Admin\QuickYatriController::class, 'dashboard'])->name('quick-yatri-dashboard');
     Route::get('/quick-yatri/groups',[\App\Http\Controllers\Admin\QuickYatriController::class, 'groups'])->name('quick-yatri-groups');
+    Route::get('/quick-yatri/yatri-list',[\App\Http\Controllers\Admin\QuickYatriController::class, 'yatriList'])->name('quick-yatri-list');
+    Route::post('/quick-yatri/yatri-list',[\App\Http\Controllers\Admin\QuickYatriController::class, 'saveYatriList'])->name('quick-yatri-list-save');
     Route::get('/quick-yatri/blank',[\App\Http\Controllers\Admin\QuickYatriController::class, 'blank'])->name('quick-yatri-blank');
     Route::post('/quick-yatri/prices',[\App\Http\Controllers\Admin\QuickYatriController::class, 'updatePrices'])->name('quick-yatri-prices');
     Route::post('/quick-yatri/{id}/price',[\App\Http\Controllers\Admin\QuickYatriController::class, 'updateRowPrice'])->name('quick-yatri-row-price');

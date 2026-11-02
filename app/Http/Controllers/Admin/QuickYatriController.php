@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\QuickYatri;
 use App\Support\UsAirports;
 use App\Support\YatriDate;
+use App\Support\YatriList;
+use App\Support\YatriListXlsx;
 use Illuminate\Http\Request;
 
 /**
@@ -247,6 +249,72 @@ class QuickYatriController extends Controller
         $pakistanContact = QuickYatri::pakistanContact();
 
         return view('admin.quick-yatri.groups', compact('groups', 'missing', 'missingShown', 'pakistanContact'));
+    }
+
+    /**
+     * The travelling list (App\Support\YatriList): every application in an
+     * order the office drags into shape, each with a tick saying whether it
+     * goes on the PDF / Excel list.
+     */
+    public function yatriList()
+    {
+        return view('admin.quick-yatri.yatri-list', ['list' => YatriList::load()]);
+    }
+
+    /**
+     * One form carries the title and the whole list in its on-screen order.
+     * The download buttons save first, so a file always holds what the screen
+     * shows — the same arrangement as the hotel check-in lists.
+     */
+    public function saveYatriList(Request $request)
+    {
+        $request->validate([
+            'title'     => 'nullable|string|max:' . YatriList::TITLE_MAX,
+            'rows'      => 'array',
+            'rows.*.id' => 'required|integer',
+            'then'      => 'nullable|in:pdf,xlsx',
+        ]);
+
+        $rows = [];
+        $seen = [];
+        foreach ((array) $request->input('rows', []) as $r) {
+            $id = (int) ($r['id'] ?? 0);
+            if ($id && !isset($seen[$id])) {
+                $seen[$id] = true;
+                $rows[] = ['id' => $id, 'on' => !empty($r['on'])];
+            }
+        }
+
+        // A title equal to the default is not stored, so a later change of the
+        // default (next season's Gurpurab) reaches an untouched list.
+        $title = trim((string) $request->input('title'));
+        YatriList::put([
+            'title' => strcasecmp($title, YatriList::DEFAULT_TITLE) === 0 ? '' : $title,
+            'rows'  => $rows,
+        ]);
+
+        $list   = YatriList::load();
+        $yatris = YatriList::ticked($list);
+
+        if ($request->input('then') && !$yatris) {
+            return redirect()->route('quick-yatri-list')->with('error', 'Tick at least one yatri to download the list.');
+        }
+
+        if ($request->input('then') === 'pdf') {
+            $pdf = \PDF::loadView('pdf.yatri_list', ['title' => $list['title'], 'yatris' => $yatris])->setPaper('letter', 'portrait');
+
+            return $pdf->download('Yatri List.pdf');
+        }
+
+        if ($request->input('then') === 'xlsx') {
+            $path = YatriListXlsx::build($list['title'], $yatris, public_path('assets2/id/logo.png'));
+
+            return response()->download($path, 'Yatri List.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
+        }
+
+        return redirect()->route('quick-yatri-list')->with('success', 'Yatri list saved.');
     }
 
     /**
