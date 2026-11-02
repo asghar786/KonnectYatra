@@ -1581,3 +1581,32 @@ measurement it still fits the ID card logo row (280px of 512px) and the hotel ch
 Commit `3ae9a5e`, pushed 2026-10-31.
 
 **Review:** see decisions.csv row dated 2026-10-31.
+
+## 2026-11-02 — Quick Yatri "Yatri List": drag order, tick boxes, PDF + Excel
+
+**Asked:** the Quick Yatri applications as a list like the office's Excel sheet ("LIST OF YATRIS
+TRAVELING TO PAKISTAN TO ATTEND GURPURAB 2026"), with rows that drag up and down and a tick box per
+yatri: anyone left unticked must not be in the PDF / Excel file.
+
+**Decision.** New page `/admin/quick-yatri/yatri-list` (card on the Quick Yatri dashboard), built
+like the Hotel Booking Yatris page:
+
+- Logo, editable title, then Yatri # / Yatri Name / Nationality ("American", "Indian") / Passport #.
+- Drag by the grip (mouse or touch) or the arrows. Unticked rows stay visible but greyed out and
+  leave the files; Yatri # counts ticked rows only.
+- Order, ticks and title saved in `site_settings` (`qy_yatri_list`), so no migration. Applications
+  added later join at the foot, ticked, with a NEW badge.
+- Download PDF (dompdf, Letter) and Download Excel save first, so a file always matches the screen.
+
+**Alternative considered:** PhpSpreadsheet for the Excel file. Rejected for now: one fixed sheet
+doesn't justify a new package, and the deploy's `composer install` stops the whole deploy if the
+server lacks an extension it needs. The .xlsx is written directly instead and was checked in real
+Excel (opens with no repair, logo / filter / frozen header present). Switch if the export ever needs
+formulas or several tabs.
+
+**Found on the way:** every file download under /admin returned a 500, because the
+`PreventBackHistory` middleware used `->header()`, which download responses don't have. Fixed.
+
+Commit `0de3115`, pushed 2026-11-02.
+
+**Review:** see decisions.csv row dated 2026-11-02.
