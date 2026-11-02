@@ -223,6 +223,7 @@
                     <div class="hc-stats" id="hcStats">
                         <span class="hc-stat"><span class="n" data-stat="yatris">0</span> yatris</span>
                         <span class="hc-stat"><span class="n" data-stat="rooms">0</span> rooms</span>
+                        <span class="hc-stat"><span class="n" data-stat="single">0</span> single</span>
                         <span class="hc-stat"><span class="n" data-stat="double">0</span> double</span>
                         <span class="hc-stat"><span class="n" data-stat="twin">0</span> twin</span>
                         <span class="hc-stat"><span class="n" data-stat="triple">0</span> triple</span>
@@ -377,7 +378,7 @@
             ['id', 'join', 'bed', 'hotel_room'].forEach(function (n) { f(row, n).name = 'rows[' + i + '][' + n + ']'; });
         });
 
-        var stats = { yatris: list.length, rooms: rooms.length, double: 0, twin: 0, triple: 0, nobed: 0 };
+        var stats = { yatris: list.length, rooms: rooms.length, single: 0, double: 0, twin: 0, triple: 0, nobed: 0 };
         rooms.forEach(function (r, idx) {
             var shared = r.members.length > 1;
             r.members.forEach(function (m, k) {

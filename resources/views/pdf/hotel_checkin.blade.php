@@ -12,7 +12,7 @@
         $row['sn'] = $i + 1;
         $rooms[$row['room']][] = $row;
     }
-    $count = ['double' => 0, 'twin' => 0, 'triple' => 0];
+    $count = ['single' => 0, 'double' => 0, 'twin' => 0, 'triple' => 0];
     foreach ($rooms as $members) {
         if (isset($count[$members[0]['bed']])) $count[$members[0]['bed']]++;
     }

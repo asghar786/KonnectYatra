@@ -42,6 +42,7 @@ class HotelCheckin
 
     /** Stored key => label, in the order the office's dropdown offers them. */
     const BEDS = [
+        'single' => 'Single Room',
         'double' => 'Double Bed',
         'twin'   => 'Twin Bed',
         'triple' => 'Triple',
@@ -201,7 +202,7 @@ class HotelCheckin
     /** "Double Bed" on screen; the printed sheet uses the short word. */
     public static function bedShort(string $bed): string
     {
-        return ['double' => 'Double', 'twin' => 'Twin', 'triple' => 'Triple'][$bed] ?? '';
+        return ['single' => 'Single', 'double' => 'Double', 'twin' => 'Twin', 'triple' => 'Triple'][$bed] ?? '';
     }
 
     /**

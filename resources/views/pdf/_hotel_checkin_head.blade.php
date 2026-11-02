@@ -20,7 +20,8 @@
         @if(is_file($flag))<img src="{{ $flag }}" alt="United States flag"><br>@endif
         <div class="from">Group from the USA</div>
         {{ count($list['rows']) }} yatris &middot; {{ count($rooms) }} rooms<br>
-        {{ $count['double'] }} Double &middot; {{ $count['twin'] }} Twin &middot; {{ $count['triple'] }} Triple
+        {{-- Single only when used: the side cell is 150pt and the line would wrap. --}}
+        @if($count['single']){{ $count['single'] }} Single &middot; @endif{{ $count['double'] }} Double &middot; {{ $count['twin'] }} Twin &middot; {{ $count['triple'] }} Triple
     </td>
 </tr></table>
 <table class="band">
