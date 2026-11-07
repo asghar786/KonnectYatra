@@ -1610,3 +1610,30 @@ formulas or several tabs.
 Commit `0de3115`, pushed 2026-11-02.
 
 **Review:** see decisions.csv row dated 2026-11-02.
+
+## 2026-11-07 — Admin follows the Active season; IDs page gets a Season box
+
+**Problem:** `/admin/ids` showed one Yatri card (SONIK SHER SINGH, #20). Season 9 "Special Yatra
+Group in March" had been added and made Active before its bookings opened. The IDs list showed the
+session season (Dashboard picker), else the newest season; Create ID saved into the Active season.
+So Sonik's card went into March, the 19 Gurpurab 19 November 2026 cards (season 8) looked gone,
+and every admin list opened on the March season.
+
+**Decision:**
+
+- `Season::current()`: the Active season, else the newest. All 13 admin fallbacks that used "newest
+  season" now use it (Dashboard, Charges, Packages controller).
+- The IDs page has a Season box (same session value as the Dashboard picker) with a card count, and
+  Create ID saves into the season shown. The create form names that season.
+- Data fixes on live, run by the user in the cPanel Terminal: Gurpurab set Active again; Sonik moved
+  to season 8. His Yatri #20 doesn't clash with Rashad Mahmood's #20, which is a Crew Member card.
+  No bookings (`yatri_visas`) had landed in season 9.
+
+**Not done:** a Season dropdown on the ID Edit form to move a card between seasons from the admin.
+It was offered and is still open; moving a card needs a Terminal snippet until then.
+
+Also on the way: the local DB was replaced with a live dump (local `.env` mail set to `log` first).
+
+Commits `6279ef1`, `6373bdf`, pushed 2026-11-07.
+
+**Review:** see decisions.csv row dated 2026-11-07.
