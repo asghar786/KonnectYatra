@@ -43,6 +43,10 @@
     .id-card-actions form{margin:0;flex:1}
     .id-card-actions form .btn{width:100%}
     .id-empty{padding:40px;text-align:center;color:#999;font-size:16px}
+    .id-season-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;padding:12px 16px;background:#fff7f3;border:1px solid #fbd5c6;border-radius:10px}
+    .id-season-label{font-weight:700;color:#f54e18}
+    .id-season-bar select{width:auto;max-width:100%;min-width:260px;font-weight:600}
+    .id-season-count{color:#555;font-size:14px}
 </style>
 <main class="ttr-wrapper">
     <div class="container-fluid">
@@ -69,6 +73,17 @@
             <a href="{{ url('admin/staff_ids', 1) }}" class="btn btn-primary ml-2">
                 View Crew IDs <i class="fa fa-eye"></i>
             </a>
+            {{-- Yatri IDs are kept per season. This box picks which season the
+                 Yatri tab (and View IDs / Create ID) works on; same choice as the Dashboard. --}}
+            <form method="GET" action="{{ url('admin/ids') }}" class="id-season-bar">
+                <span class="id-season-label">Season</span>
+                <select name="season" class="form-control" onchange="this.form.submit()">
+                    @foreach($seasons as $s)
+                    <option value="{{ $s->id }}" @if(optional($current_season)->id == $s->id) selected @endif>{{ $s->name }}{{ $s->status ? ' (Active)' : '' }}</option>
+                    @endforeach
+                </select>
+                <span class="id-season-count">{{ count($yatri) }} Yatri {{ count($yatri) == 1 ? 'ID' : 'IDs' }} in this season</span>
+            </form>
             <div class="row mt-4">
                 <div class="col-lg-12">
                     <div class="tabs">

@@ -26,6 +26,12 @@
             </ul>
         </div>
         <div class="main-body">
+            @if(!empty($current_season))
+            <div class="alert alert-warning mb-0" style="margin-top:6px;">
+                New Yatri IDs are saved into season <strong>{{ $current_season->name }}</strong>.
+                To use another season, change it on the <a href="{{ url('admin/ids') }}">IDs page</a> first.
+            </div>
+            @endif
             <div class="row mt-4">
                 <div class="col-lg-12">
                     <div class="tabs">

@@ -1484,22 +1484,27 @@ class PackagesController extends Controller
     }
   }
 
-  public function ids()
+  // The Yatri ID pages show one season - the one picked in the season box
+  // (shared with the Dashboard), else the newest. Creating a card saves into that
+  // same season, so a new card always lands on the list you are looking at. It
+  // used to save into the Active season instead, which hid cards whenever the two
+  // differed (season 9 "Special Yatra Group in March", 2026-11-07).
+  private function idSeason(Request $request = null)
   {
-    $active_season = Session::get('season');
-    if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
-      if(!empty($active_season)) {
-        $data['yatri'] = YatriIds::where("season_id", $active_season->id)->where("type", 'yatri')->get();
-        $data['crew'] = YatriIds::where("type", 'Crew Member')->get();
-      } else {
-        $data['yatri'] = [];
-        $data['crew'] = YatriIds::where("type", 'Crew Member')->get();
-      }
-    } else {
-      $data['yatri'] = YatriIds::where("season_id", $active_season)->where("type", 'yatri')->get();
-      $data['crew'] = YatriIds::where("type", 'Crew Member')->get();
+    if ($request && $request->filled('season') && Season::where('id', $request->season)->exists()) {
+      Session::put('season', (int) $request->season);
     }
+    $season = Season::find(Session::get('season'));
+    return $season ?: Season::orderBy('id', 'DESC')->first();
+  }
+
+  public function ids(Request $request)
+  {
+    $season = $this->idSeason($request);
+    $data['yatri'] = $season ? YatriIds::where("season_id", $season->id)->where("type", 'yatri')->orderBy('yatri_no')->get() : collect();
+    $data['crew'] = YatriIds::where("type", 'Crew Member')->get();
+    $data['seasons'] = Season::orderBy('id', 'DESC')->get();
+    $data['current_season'] = $season;
     return view('admin.ids.ids',$data);
   }
 
@@ -1508,10 +1513,7 @@ class PackagesController extends Controller
     if($request->isMethod('post')){
       $data = $request->all();
 
-      $season = Season::where("status", '1')->first();
-      if (empty($season)) {
-        $season = Season::orderBy("id", "DESC")->first();
-      }
+      $season = $this->idSeason();
 
       if ($request->file('photo')) {   
         $file = $request->file('photo');
@@ -1543,6 +1545,7 @@ class PackagesController extends Controller
 
     $data['action'] = url('/admin/ids/create');
     $data['btn_text'] = "Create";
+    $data['current_season'] = $this->idSeason();
     return view('admin.ids.create_edit', $data);
   }
 
