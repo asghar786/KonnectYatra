@@ -25,7 +25,7 @@ class DashboardController extends Controller
     	}
     	$active_season = Session::get('season');
         if (empty($active_season)) {
-            $season = Season::orderBy('id', 'DESC')->first();
+            $season = Season::current();
             Session::put('season', $season->id);
             $active_season = $season->id;
         }

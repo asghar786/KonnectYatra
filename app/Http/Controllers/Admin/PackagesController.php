@@ -143,7 +143,7 @@ class PackagesController extends Controller
   {
     $active_season = Session::get('season');
     if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
+      $active_season = Season::current();
       if(!empty($active_season)) {
         $data['yatri'] = YatriVisa::where("season_id", $active_season->id)->get();
       } else {
@@ -159,7 +159,7 @@ class PackagesController extends Controller
   {
     $active_season = Session::get('season');
     if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
+      $active_season = Season::current();
       if(!empty($active_season)) {
         $data['visa'] = YatriVisa::with("package", "gurdwara", "hotel", "bus")->where("season_id", $active_season->id)->get();
       } else {
@@ -181,7 +181,7 @@ class PackagesController extends Controller
   {
     $active_season = Session::get('season');
     if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
+      $active_season = Season::current();
       if(!empty($active_season)) {
         $data['detail'] = YatriVisa::with("package", "gurdwara", "hotel", "bus")->where("season_id", $active_season->id)->get();
       } else {
@@ -649,7 +649,7 @@ class PackagesController extends Controller
   {
     $active_season = Session::get('season');
     if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
+      $active_season = Season::current();
       if(!empty($active_season)) {
         $yatries = YatriVisa::with("package")->withCount("comments")->where("season_id", $active_season->id)->get();
       } else {
@@ -678,7 +678,7 @@ class PackagesController extends Controller
   {
     $active_season = Session::get('season');
     if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
+      $active_season = Season::current();
       if (!empty($active_season)) {
         $active_season = $active_season->id;
       }
@@ -765,7 +765,7 @@ class PackagesController extends Controller
     // currently viewing, falling back the same way the list itself does.
     $season = Session::get('season')
       ?: optional(Season::where('status', '1')->first())->id
-      ?: optional(Season::orderBy('id', 'DESC')->first())->id;
+      ?: optional(Season::current())->id;
     $data['season_id'] = $season;
 
     // `marital_status` and `photo` are NOT NULL with no default, and a paper
@@ -1495,7 +1495,7 @@ class PackagesController extends Controller
       Session::put('season', (int) $request->season);
     }
     $season = Season::find(Session::get('season'));
-    return $season ?: Season::orderBy('id', 'DESC')->first();
+    return $season ?: Season::current();
   }
 
   public function ids(Request $request)
@@ -1624,7 +1624,7 @@ class PackagesController extends Controller
   {
     $active_season = Session::get('season');
     if (empty($active_season)) {
-      $active_season = Season::orderBy('id', 'DESC')->first();
+      $active_season = Season::current();
       if (!empty($active_season)) {
         $active_season = $active_season->id;
       }
@@ -1659,7 +1659,7 @@ class PackagesController extends Controller
 
   public function yatri_back_view($id = 1)
   {
-    $active_season = Session::get('season') ?: optional(Season::orderBy('id', 'DESC')->first())->id;
+    $active_season = Session::get('season') ?: optional(Season::current())->id;
     $page  = max(1, (int)$id);
     // Count the whole season and ask whether this page has anyone on it.
     // count() on an offset query returns 0 past page 1 (the offset applies to

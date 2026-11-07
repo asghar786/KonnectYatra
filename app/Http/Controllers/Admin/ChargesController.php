@@ -15,7 +15,7 @@ class ChargesController extends Controller
     {
     	$active_season = Session::get('season');
 	    if (empty($active_season)) {
-	      	$active_season = Season::orderBy('id', 'DESC')->first();
+	      	$active_season = Season::current();
 	      	if (!empty($active_season)) {
 	      		$data['total_yatri'] = YatriVisa::where("season_id", $active_season->id)->count();
 	      	} else {
@@ -42,7 +42,7 @@ class ChargesController extends Controller
     	if ($request->isMethod("POST")) {
     		$active_season = Session::get('season');
 		    if (empty($active_season)) {
-		    	$active_season = Season::orderBy('id', 'DESC')->first();
+		    	$active_season = Season::current();
 		      	if (!empty($active_season)) {
 		      		$active_season = $active_season->id;
 		      	}
@@ -91,7 +91,7 @@ class ChargesController extends Controller
 
     	$active_season = Session::get('season');
 	    if (empty($active_season)) {
-	      	$active_season = Season::orderBy('id', 'DESC')->first();
+	      	$active_season = Season::current();
 	      	if (!empty($active_season)) {
 	      		$total_charges = Charge::where("season_id", $active_season->id)->sum("amount");
 	      		$total_yatri = YatriVisa::where("season_id", $active_season->id)->count();
